@@ -1,0 +1,11 @@
+{
+    "autoload": {
+        "psr-4": {
+          "June\\": "src/"
+        }
+    },
+    "require": {
+        "phpunit/phpunit": "~4.6",
+        "mockery/mockery": "0.9.*"
+    }
+}
