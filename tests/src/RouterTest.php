@@ -13,6 +13,11 @@ class RouterTest extends PHPUnit_Framework_TestCase
         $this->app = new Router();
     }
 
+    public function tearDown()
+    {
+        Mockery::close();
+    }
+
     public function testMethods()
     {
         $this->assertEquals(0, $this->app->count());
@@ -34,10 +39,11 @@ class RouterTest extends PHPUnit_Framework_TestCase
 
         $this->app->options('/', $handler);
         $this->assertEquals(5, $this->app->count());
+
 //        $this->assertAttributeContains(['/', $handler], 'methodGetRoutes', $this->app);
     }
 
-    public function testDispatchWithSimple()
+    public function testDispatch()
     {
         $getMock = Mockery::mock(Request::class);
         $getMock->shouldReceive('getMethod')->andReturn('GET');
@@ -53,6 +59,7 @@ class RouterTest extends PHPUnit_Framework_TestCase
             $getCalled++;
             return 'get';
         });
+
         $this->app->post('/', function () use (&$postCalled) {
             $postCalled++;
             return 'post';

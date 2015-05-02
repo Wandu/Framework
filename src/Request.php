@@ -46,8 +46,9 @@ class Request
 
     public function getMethod()
     {
-//        $args = $this->pattern->getArgs();
-//        return $this->data['method'];
+        if (isset($this->data['method'])) {
+            return $this->data['method'];
+        }
     }
 
     // getBody, getHeaders, getQueries, getParameters, getHeader, getQuery, getParameter
