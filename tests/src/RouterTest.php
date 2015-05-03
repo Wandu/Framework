@@ -4,9 +4,11 @@ namespace June;
 use Mockery;
 use PHPUnit_Framework_TestCase;
 use Psr\Http\Message\RequestInterface;
+use ArrayObject;
 
 class RouterTest extends PHPUnit_Framework_TestCase
 {
+    /** @var Router */
     public $app;
 
     public function setUp()
@@ -73,5 +75,24 @@ class RouterTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('post', $this->app->dispatch($postMock));
         $this->assertEquals(1, $getCalled);
         $this->assertEquals(1, $postCalled);
+    }
+
+    public function testController()
+    {
+        $controllerMock = Mockery::mock(ControllerInterface::class);
+
+        $containerMock = Mockery::mock(ArrayObject::class);
+        $containerMock->shouldReceive('offsetSet')->with('admin', $controllerMock);
+        $containerMock->shouldReceive('offsetGet')->with('admin')->andReturn($controllerMock);
+
+        $router = new Router;
+
+        $this->assertSame($router, $router->setController('admin', $controllerMock));
+        $this->assertSame($controllerMock, $router->getController('admin'));
+
+        $router = new Router($containerMock);
+
+        $this->assertSame($router, $router->setController('admin', $controllerMock));
+        $this->assertSame($controllerMock, $router->getController('admin'));
     }
 }

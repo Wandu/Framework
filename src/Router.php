@@ -4,15 +4,25 @@ namespace June;
 use June\Route;
 use June\Middleware;
 use Psr\Http\Message\RequestInterface;
+use ArrayAccess;
+use ArrayObject;
 
 class Router
 {
-    protected $routes;
+    /** @var array */
+    protected $routes = [];
 
-    public function __construct()
+    /** @var ArrayAccess */
+    protected $controllers = [];
+
+    /**
+     * @param ArrayAccess $controllers
+     */
+    public function __construct(ArrayAccess $controllers = null)
     {
-        $this->routes = array();
+        $this->controllers = isset($controllers) ? $controllers : new ArrayObject();
     }
+
 
     public function count()
     {
@@ -82,5 +92,21 @@ class Router
                 return call_user_func($route['controller']['handler']);
             }
         }
+    }
+
+    /**
+     * @param string $name
+     * @param ControllerInterface $controller
+     * @return $this
+     */
+    public function setController($name, ControllerInterface $controller)
+    {
+        $this->controllers[$name] = $controller;
+        return $this;
+    }
+
+    public function getController($name)
+    {
+        return $this->controllers[$name];
     }
 }
