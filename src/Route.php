@@ -3,7 +3,7 @@ namespace June;
 
 use June\Request\Pattern;
 
-class Request
+class Route
 {
     protected $data;
 

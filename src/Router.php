@@ -1,8 +1,9 @@
 <?php
 namespace June;
 
-use June\Request;
+use June\Route;
 use June\Middleware;
+use Psr\Http\Message\RequestInterface;
 
 class Router
 {
@@ -73,10 +74,11 @@ class Router
         ];
     }
 
-    public function dispatch(Request $request)
+    public function dispatch(RequestInterface $request)
     {
         foreach ($this->routes as $route) {
-            if (strtolower($request->getMethod()) === strtolower($route['method']) && strtolower($request->getPath()) == strtolower($route['controller']['path'])) {
+            if (strtolower($request->getMethod()) === strtolower($route['method']) &&
+                strtolower($request->getUri()) == strtolower($route['controller']['path'])) {
                 return call_user_func($route['controller']['handler']);
             }
         }

@@ -3,6 +3,7 @@ namespace June;
 
 use Mockery;
 use PHPUnit_Framework_TestCase;
+use Psr\Http\Message\RequestInterface;
 
 class RouterTest extends PHPUnit_Framework_TestCase
 {
@@ -45,13 +46,13 @@ class RouterTest extends PHPUnit_Framework_TestCase
 
     public function testDispatch()
     {
-        $getMock = Mockery::mock(Request::class);
+        $getMock = Mockery::mock(RequestInterface::class);
         $getMock->shouldReceive('getMethod')->andReturn('GET');
-        $getMock->shouldReceive('getPath')->andReturn('/');
+        $getMock->shouldReceive('getUri')->andReturn('/');
 
-        $postMock = Mockery::mock(Request::class);
+        $postMock = Mockery::mock(RequestInterface::class);
         $postMock->shouldReceive('getMethod')->andReturn('POST');
-        $postMock->shouldReceive('getPath')->andReturn('/');
+        $postMock->shouldReceive('getUri')->andReturn('/');
 
         $getCalled = 0;
         $postCalled = 0;

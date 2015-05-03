@@ -3,33 +3,33 @@ namespace June;
 
 use PHPUnit_Framework_TestCase;
 
-class RequestTest extends PHPUnit_Framework_TestCase
+class RouteTest extends PHPUnit_Framework_TestCase
 {
     protected $request;
 
     public function setUp()
     {
-        $this->request[0] = new Request([
+        $this->request[0] = new Route([
             'method'=> 'GET',
             'path'=>'/'
         ]);
-        $this->request[1] = new Request([
+        $this->request[1] = new Route([
             'method'=> 'GET',
             'path'=> '/test/'
         ]);
-        $this->request[2] = new Request([
+        $this->request[2] = new Route([
             'method'=> 'GET',
             'path'=> '/test?value=1&asdf=3'
         ]);
-        $this->request[3] = new Request([
+        $this->request[3] = new Route([
             'method'=> 'GET',
             'path'=> '/test;param;param?value=1&asdf=4'
         ]);
-        $this->request[4] = new Request([
+        $this->request[4] = new Route([
             'method' => 'POST',
             'path' => '/test/{id}'
         ]);
-        $this->request[5] = new Request([
+        $this->request[5] = new Route([
             'method' => 'POST',
             'path' => '/test/{page}/{num}'
         ]);
