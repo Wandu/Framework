@@ -62,4 +62,18 @@ class RouteTest extends PHPUnit_Framework_TestCase
         $this->assertEquals("test\/(?<id>[^\/\#]+)", $this->request[4]->getPattern());
         $this->assertEquals("test\/(?<page>[^\/\#]+)\/(?<num>[^\/\#]+)", $this->request[5]->getPattern());
     }
+
+    public function testMiddleWare()
+    {
+        //$route = new Route;
+//        $route->get(
+//            function (RequestInterface, Closure) {},
+//            function (RequestInterface, Closure) {},
+//            function (RequestInterface) {
+//                return ResponseInterface
+//            }
+//        );
+    }
+
+
 }
