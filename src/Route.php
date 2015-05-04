@@ -2,53 +2,74 @@
 namespace June;
 
 use June\Request\Pattern;
+use Phly\Http\Request;
+use Psr\Http\Message\RequestInterface;
 
 class Route
 {
-    protected $data;
+    protected $method;
+
+    protected $path;
+
+    protected $handler;
+
+    protected $args;
 
     protected $pattern;
 
-    public function __construct(Array $attribute)
+    protected $patternParser;
+
+    public function __construct($method, $path, callable $handler)
     {
-        $this->data = $attribute;
-        $this->pattern = new Pattern($this->data['path']);
+        $this->method = $method;
+        $this->path = $path;
+        $this->patternParser = new Pattern($this->path);
+        $this->handler = $handler;
     }
 
-    public function getPath()
+    public function isExecutable($method, $path)
     {
-        return $this->data['path'];
-    }
-
-    public function getUri()
-    {
-        if (!isset($this->data['uri'])) {
-            $this->data['uri'] = $this->pattern->parseUri();
+        if (strtolower($method) === strtolower($this->getMethod()) &&
+            strtolower($path) === strtolower($this->getPath())) {
+            return true;
         }
-        return $this->data['uri'];
+        return false;
     }
 
-    public function getArgs()
+    public function execute(RequestInterface $request)
     {
-        if (!isset($this->data['args'])) {
-            $this->data['args'] = $this->pattern->getArgs();
-        }
-        return $this->data['args'];
-    }
-
-    public function getPattern()
-    {
-        if (!isset($this->data['pattern'])) {
-            $this->data['pattern'] = $this->pattern->getPattern();
-        }
-        return $this->data['pattern'];
+        return call_user_func($this->getHandler(), $request);
     }
 
     public function getMethod()
     {
-        if (isset($this->data['method'])) {
-            return $this->data['method'];
+        return $this->method;
+    }
+
+    public function getPath()
+    {
+        return $this->path;
+    }
+
+    public function getHandler()
+    {
+        return $this->handler;
+    }
+
+    public function getArgs()
+    {
+        if (!isset($this->args)) {
+            $this->args = $this->patternParser->getArgs();
         }
+        return $this->args;
+    }
+
+    public function getPattern()
+    {
+        if (!isset($this->pattern)) {
+            $this->pattern = $this->patternParser->getPattern();
+        }
+        return $this->pattern;
     }
 
     // getBody, getHeaders, getQueries, getParameters, getHeader, getQuery, getParameter
