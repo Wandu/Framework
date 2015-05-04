@@ -50,11 +50,11 @@ class RouterTest extends PHPUnit_Framework_TestCase
     {
         $getMock = Mockery::mock(RequestInterface::class);
         $getMock->shouldReceive('getMethod')->andReturn('GET');
-        $getMock->shouldReceive('getUri')->andReturn('/');
+        $getMock->shouldReceive('getUri->getPath')->andReturn('/');
 
         $postMock = Mockery::mock(RequestInterface::class);
         $postMock->shouldReceive('getMethod')->andReturn('POST');
-        $postMock->shouldReceive('getUri')->andReturn('/');
+        $postMock->shouldReceive('getUri->getPath')->andReturn('/');
 
         $getCalled = 0;
         $postCalled = 0;

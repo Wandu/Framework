@@ -23,6 +23,10 @@ class Router
         $this->controllers = isset($controllers) ? $controllers : new ArrayObject();
     }
 
+    public function createRoute($method, $path, $handler)
+    {
+        $this->routes[] = new Route($method, $path, $handler);
+    }
 
     public function count()
     {
@@ -31,65 +35,34 @@ class Router
 
     public function get($path, callable $handler)
     {
-        $this->routes[] = [
-            'method' => 'GET',
-            'controller' => [
-                'path' => $path,
-                'handler' => $handler
-            ]
-        ];
+        $this->createRoute('GET', $path, $handler);
     }
 
     public function post($path, callable $handler)
     {
-        $this->routes[] = [
-            'method' => 'POST',
-            'controller' => [
-                'path' => $path,
-                'handler' => $handler
-            ]
-        ];
+        $this->createRoute('POST', $path, $handler);
     }
 
     public function put($path, callable $handler)
     {
-        $this->routes[] = [
-            'method' => 'PUT',
-            'controller' => [
-                'path' => $path,
-                'handler' => $handler
-            ]
-        ];
+        $this->createRoute('PUT', $path, $handler);
     }
 
     public function delete($path, callable $handler)
     {
-        $this->routes[] = [
-            'method' => 'DELETE',
-            'controller' => [
-                'path' => $path,
-                'handler' => $handler
-            ]
-        ];
+        $this->createRoute('DELETE', $path, $handler);
     }
 
     public function options($path, callable $handler)
     {
-        $this->routes[] = [
-            'method' => 'OPTIONS',
-            'controller' => [
-                'path' => $path,
-                'handler' => $handler
-            ]
-        ];
+        $this->createRoute('OPTIONS', $path, $handler);
     }
 
     public function dispatch(RequestInterface $request)
     {
         foreach ($this->routes as $route) {
-            if (strtolower($request->getMethod()) === strtolower($route['method']) &&
-                strtolower($request->getUri()) == strtolower($route['controller']['path'])) {
-                return call_user_func($route['controller']['handler']);
+            if ($route->isExecutable($request->getMethod(), $request->getUri()->getPath())) {
+                return $route->execute($request);
             }
         }
     }
