@@ -1,8 +1,6 @@
 <?php
 namespace June;
 
-use June\Route;
-use June\Middleware;
 use Psr\Http\Message\RequestInterface;
 use ArrayAccess;
 use ArrayObject;
@@ -23,41 +21,73 @@ class Router
         $this->controllers = isset($controllers) ? $controllers : new ArrayObject();
     }
 
+    /**
+     * @param string $method
+     * @param string $path
+     * @param $handler
+     */
     public function createRoute($method, $path, $handler)
     {
         $this->routes[] = new Route($method, $path, $handler);
     }
 
+    /**
+     * @return int
+     */
     public function count()
     {
         return count($this->routes);
     }
 
+    /**
+     * @param string $path
+     * @param callable $handler
+     */
     public function get($path, callable $handler)
     {
         $this->createRoute('GET', $path, $handler);
     }
 
+    /**
+     * @param string $path
+     * @param callable $handler
+     */
     public function post($path, callable $handler)
     {
         $this->createRoute('POST', $path, $handler);
     }
 
+    /**
+     * @param string $path
+     * @param callable $handler
+     */
     public function put($path, callable $handler)
     {
         $this->createRoute('PUT', $path, $handler);
     }
 
+    /**
+     * @param string $path
+     * @param callable $handler
+     */
     public function delete($path, callable $handler)
     {
         $this->createRoute('DELETE', $path, $handler);
     }
 
+    /**
+     * @param string $path
+     * @param callable $handler
+     */
     public function options($path, callable $handler)
     {
         $this->createRoute('OPTIONS', $path, $handler);
     }
 
+    /**
+     * @param RequestInterface $request
+     * @return mixed
+     */
     public function dispatch(RequestInterface $request)
     {
         foreach ($this->routes as $route) {
@@ -78,6 +108,10 @@ class Router
         return $this;
     }
 
+    /**
+     * @param string $name
+     * @return ControllerInterface
+     */
     public function getController($name)
     {
         return $this->controllers[$name];

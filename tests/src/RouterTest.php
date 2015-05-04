@@ -77,7 +77,7 @@ class RouterTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(1, $postCalled);
     }
 
-    public function testController()
+    public function testBindingController()
     {
         $controllerMock = Mockery::mock(ControllerInterface::class);
 

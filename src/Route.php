@@ -71,6 +71,4 @@ class Route
         }
         return $this->pattern;
     }
-
-    // getBody, getHeaders, getQueries, getParameters, getHeader, getQuery, getParameter
 }
