@@ -3,11 +3,21 @@ namespace June\Request;
 
 class Pattern
 {
+    /** @var string */
     protected $path;
+
+    /** @var array */
     protected $args;
+
+    /** @var string */
     protected $pattern;
+
+    /** @var string */
     protected $uri;
 
+    /**
+     * @param $path
+     */
     public function __construct($path)
     {
         $this->path = $path;
@@ -16,6 +26,9 @@ class Pattern
         $this->uri = null;
     }
 
+    /**
+     * @return string
+     */
     public function parseUri()
     {
         $uri = null;
@@ -58,7 +71,6 @@ class Pattern
         $pattern = str_replace('/', '\\/', $pattern);
 
         $pattern = preg_replace_callback('#{([a-zA-Z0-9_]+)}#', function ($matches) use (&$args) {
-//            print_r($matches);
             $args[] = $matches[1];
             return "(?<{$matches[1]}>[^\\/\\#]+)";
         }, $pattern);
@@ -66,6 +78,9 @@ class Pattern
         $this->pattern = $pattern;
     }
 
+    /**
+     * @return array
+     */
     public function getArgs()
     {
         if (!isset($this->args) || empty($this->args)) {
@@ -74,6 +89,9 @@ class Pattern
         return $this->args;
     }
 
+    /**
+     * @return string
+     */
     public function getPattern()
     {
         if (!isset($this->pattern) || is_null($this->pattern)) {
