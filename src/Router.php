@@ -22,16 +22,6 @@ class Router
     }
 
     /**
-     * @param string $method
-     * @param string $path
-     * @param $handler
-     */
-    public function createRoute($method, $path, $handler)
-    {
-        $this->routes[] = new Route($method, $path, $handler);
-    }
-
-    /**
      * @return int
      */
     public function count()
@@ -82,6 +72,16 @@ class Router
     public function options($path, callable $handler)
     {
         $this->createRoute('OPTIONS', $path, $handler);
+    }
+
+    /**
+     * @param string $method
+     * @param string $path
+     * @param $handler
+     */
+    public function createRoute($method, $path, $handler)
+    {
+        $this->routes[] = new Route($method, $path, $handler);
     }
 
     /**
