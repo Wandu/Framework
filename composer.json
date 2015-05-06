@@ -1,4 +1,8 @@
 {
+    "name": "jicjjang/june",
+    "description": "june",
+    "keywords": ["http", "router", "june"],
+    "license": "MIT",
     "autoload": {
         "psr-4": {
           "June\\": "src/"
