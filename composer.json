@@ -1,0 +1,29 @@
+{
+    "name": "wandu/di",
+    "description": "Dependency injection container.",
+    "keywords": ["dependency injection", "di"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Changwan Jun",
+            "email": "im@wani.kr"
+        }
+    ],
+    "require": {
+        "php": ">=5.5.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "4.5.*",
+        "mockery/mockery": "0.9.*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Wandu\\DI\\": "src/"
+        }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.0-dev"
+        }
+    }
+}
