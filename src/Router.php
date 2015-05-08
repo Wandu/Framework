@@ -20,7 +20,6 @@ class Router
     {
         $this->controllers = isset($controllers) ? $controllers : new ArrayObject();
     }
-
     /**
      * @return int
      */
@@ -29,64 +28,47 @@ class Router
         return count($this->routes);
     }
 
-    /**
-     * @param string $path
-     * @param callable $handler
-     */
-    public function get($path, callable $handler)
+    public function get()
     {
-        $this->createRoute('GET', $path, $handler);
+        $this->mapWithCreateRoute('GET', func_get_args());
     }
 
-    /**
-     * @param string $path
-     * @param callable $handler
-     */
-    public function post($path, callable $handler)
+    public function post()
     {
-        $this->createRoute('POST', $path, $handler);
+        $this->mapWithCreateRoute('POST', func_get_args());
     }
 
-    /**
-     * @param string $path
-     * @param callable $handler
-     */
-    public function put($path, callable $handler)
+    public function put()
     {
-        $this->createRoute('PUT', $path, $handler);
+        $this->mapWithCreateRoute('PUT', func_get_args());
     }
 
-    /**
-     * @param string $path
-     * @param callable $handler
-     */
-    public function delete($path, callable $handler)
+    public function delete()
     {
-        $this->createRoute('DELETE', $path, $handler);
+        $this->mapWithCreateRoute('DELETE', func_get_args());
     }
 
-    /**
-     * @param string $path
-     * @param callable $handler
-     */
-    public function options($path, callable $handler)
+    public function options()
     {
-        $this->createRoute('OPTIONS', $path, $handler);
+        $this->mapWithCreateRoute('OPTIONS', func_get_args());
     }
 
     /**
      * @param string $method
-     * @param string $path
-     * @param $handler
+     * @param mixed $args
      */
-    public function createRoute($method, $path, $handler)
+    public function mapWithCreateRoute($method, $args)
     {
-        $this->routes[] = new Route($method, $path, $handler);
+        $path = array_shift($args);
+        $handler = array_pop($args);
+        $route = new Route($method, $path, $handler, $args);
+
+        $this->routes[] = $route;
     }
 
     /**
      * @param RequestInterface $request
-     * @return mixed
+     * @return array $returnValue
      */
     public function dispatch(RequestInterface $request)
     {

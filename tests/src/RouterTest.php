@@ -21,13 +21,14 @@ class RouterTest extends PHPUnit_Framework_TestCase
         Mockery::close();
     }
 
-    public function testMethods()
+    public function testMethodsWithMap()
     {
         $this->assertEquals(0, $this->app->count());
 
         $handler = function () {
             return "!!!";
         };
+
         $this->app->get('/', $handler);
         $this->assertEquals(1, $this->app->count());
 
@@ -42,8 +43,6 @@ class RouterTest extends PHPUnit_Framework_TestCase
 
         $this->app->options('/', $handler);
         $this->assertEquals(5, $this->app->count());
-
-//        $this->assertAttributeContains(['/', $handler], 'methodGetRoutes', $this->app);
     }
 
     public function testDispatch()
@@ -58,21 +57,33 @@ class RouterTest extends PHPUnit_Framework_TestCase
 
         $getCalled = 0;
         $postCalled = 0;
-        $this->app->get('/', function () use (&$getCalled) {
-            $getCalled++;
-            return 'get';
-        });
+        $this->app->get(
+            '/',
+            function (RequestInterface $req, \Closure $next) {
+                return $next($req) . ' getMiddleware';
+            },
+            function (RequestInterface $req) use (&$getCalled) {
+                $getCalled++;
+                return 'get';
+            }
+        );
 
-        $this->app->post('/', function () use (&$postCalled) {
-            $postCalled++;
-            return 'post';
-        });
+        $this->app->post(
+            '/',
+            function (RequestInterface $req, \Closure $next) {
+                return $next($req) . ' postMiddleware';
+            },
+            function (RequestInterface $req) use (&$postCalled) {
+                $postCalled++;
+                return 'post';
+            }
+        );
 
-        $this->assertEquals('get', $this->app->dispatch($getMock));
+        $this->assertEquals('get getMiddleware', $this->app->dispatch($getMock));
         $this->assertEquals(1, $getCalled);
         $this->assertEquals(0, $postCalled);
 
-        $this->assertEquals('post', $this->app->dispatch($postMock));
+        $this->assertEquals('post postMiddleware', $this->app->dispatch($postMock));
         $this->assertEquals(1, $getCalled);
         $this->assertEquals(1, $postCalled);
     }
