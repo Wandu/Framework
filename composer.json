@@ -10,7 +10,8 @@
         }
     ],
     "require": {
-        "php": ">=5.5.0"
+        "php": ">=5.5.0",
+        "wandu/standard": "dev-master"
     },
     "require-dev": {
         "phpunit/phpunit": "4.5.*",

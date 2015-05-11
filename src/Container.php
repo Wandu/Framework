@@ -1,10 +1,11 @@
 <?php
 namespace Wandu\DI;
 
-use ArrayAccess;
 use Closure;
+use Wandu\Standard\DI\ContainerInterface;
+use Wandu\Standard\DI\ServiceProviderInterface;
 
-class Container implements ArrayAccess
+class Container implements ContainerInterface
 {
     /** @var array */
     private $keys = [];
@@ -73,52 +74,51 @@ class Container implements ArrayAccess
     }
 
     /**
-     * @param string $name
-     * @param callable $handler
+     * {@inheritdoc}
      */
     public function singleton($name, Closure $handler)
     {
         $this->offsetUnset($name);
         $this->keys[$name] = 'singleton';
         $this->closures[$name] = $handler;
+        return $this;
     }
 
     /**
-     * @param string $name
-     * @param callable $handler
+     * {@inheritdoc}
      */
     public function factory($name, Closure $handler)
     {
         $this->offsetUnset($name);
         $this->keys[$name] = 'factory';
         $this->closures[$name] = $handler;
+        return $this;
     }
 
     /**
-     * @param string $name
-     * @param mixed $value
+     * {@inheritdoc}
      */
     public function instance($name, $value)
     {
         $this->offsetUnset($name);
         $this->keys[$name] = 'instance';
         $this->instances[$name] = $value;
+        return $this;
     }
 
     /**
-     * @param string $name
-     * @param string $origin
+     * {@inheritdoc}
      */
     public function alias($name, $origin)
     {
         $this->offsetUnset($name);
         $this->keys[$name] = 'alias';
         $this->aliases[$name] = $origin;
+        return $this;
     }
 
     /**
-     * @param string $name
-     * @param callable $handler
+     * {@inheritdoc}
      */
     public function extend($name, Closure $handler)
     {
@@ -127,18 +127,18 @@ class Container implements ArrayAccess
         }
         if (isset($this->aliases[$name])) {
             $this->extend($this->aliases[$name], $handler);
-            return;
+            return $this;
         }
         if (isset($this->instances[$name])) {
             $this->instances[$name] = call_user_func($handler, $this->instances[$name]);
         }
         if (isset($this->closures[$name])) {
             $closure = $this->closures[$name];
-            $self = $this;
-            $this->closures[$name] = function () use ($self, $closure, $handler) {
-                return call_user_func($handler, call_user_func($closure, $self));
+            $this->closures[$name] = function () use ($closure, $handler) {
+                return call_user_func($handler, call_user_func($closure, $this));
             };
         }
+        return $this;
     }
 
     /**
