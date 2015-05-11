@@ -142,8 +142,7 @@ class Container implements ContainerInterface
     }
 
     /**
-     * @param ServiceProviderInterface $provider
-     * @return $this
+     * {@inheritdoc}
      */
     public function register(ServiceProviderInterface $provider)
     {
