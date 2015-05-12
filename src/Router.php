@@ -1,9 +1,12 @@
 <?php
 namespace June;
 
+use FastRoute\Dispatcher;
+use FastRoute\RouteCollector;
 use Psr\Http\Message\RequestInterface;
 use ArrayAccess;
 use ArrayObject;
+use RuntimeException;
 
 class Router
 {
@@ -63,19 +66,33 @@ class Router
         $handler = array_pop($args);
         $route = new Route($method, $path, $handler, $args);
 
-        $this->routes[] = $route;
+        $this->routes[$method.$path] = $route;
     }
 
     /**
      * @param RequestInterface $request
-     * @return array $returnValue
+     * @return mixed
      */
     public function dispatch(RequestInterface $request)
     {
-        foreach ($this->routes as $route) {
-            if ($route->isExecutable($request->getMethod(), $request->getUri()->getPath())) {
-                return $route->execute($request);
+        $dispatcher = \FastRoute\simpleDispatcher(function (RouteCollector $result) {
+            foreach ($this->routes as $name => $route) {
+                $result->addRoute($route->getMethod(), $route->getPath(), $name);
             }
+        });
+
+        $routeInfo = $dispatcher->dispatch($request->getMethod(), $request->getUri()->getPath());
+
+        switch ($routeInfo[0]) {
+            case Dispatcher::NOT_FOUND:
+                throw new RuntimeException("not found.");
+                break;
+            case Dispatcher::METHOD_NOT_ALLOWED:
+                throw new RuntimeException("please check your method.");
+                break;
+            case Dispatcher::FOUND:
+                $handler = $routeInfo[1];
+                return $this->routes[$handler]->execute($request);
         }
     }
 
