@@ -3,9 +3,7 @@ namespace June;
 
 use PHPUnit_Framework_TestCase;
 use Psr\Http\Message\RequestInterface;
-//use Mockery\MockInterface;
 use Mockery;
-use SebastianBergmann\Comparator\ObjectComparatorTest;
 
 class RouteTest extends PHPUnit_Framework_TestCase
 {
