@@ -77,18 +77,25 @@ class Router
     }
 
     /**
+     * @param string $path
+     * @param callable|string ...$handlers
+     */
+    public function any($path/*, ...$handlers*/)
+    {
+        $this->mapWithCreateRoute('*', func_get_args());
+    }
+
+    /**
      * @param string $method
      * @param array $handlers
      */
     public function mapWithCreateRoute($method, $handlers)
     {
         $path = array_shift($handlers);
-        $handlers = new HandlerCollection($handlers);
-
         $this->routes[$method.$path] = [
             'method' => $method,
             'path' => $path,
-            'handler' => $handlers,
+            'handler' => new HandlerCollection($handlers),
         ];
     }
 
@@ -98,24 +105,47 @@ class Router
      */
     public function dispatch(RequestInterface $request)
     {
-        $dispatcher = \FastRoute\simpleDispatcher(function (RouteCollector $result) {
+        $dispathcer = $this->createDispatcher();
+        $handlerAsString = $this->runDispatcher($dispathcer, $request->getMethod(), $request->getUri()->getPath());
+        return $this->routes[$handlerAsString]['handler']->execute($request);
+    }
+
+    /**
+     * @return Dispatcher
+     */
+    protected function createDispatcher()
+    {
+        return \FastRoute\simpleDispatcher(function (RouteCollector $result) {
             foreach ($this->routes as $name => $route) {
                 $result->addRoute($route['method'], $route['path'], $name);
             }
         });
+    }
 
-        $routeInfo = $dispatcher->dispatch($request->getMethod(), $request->getUri()->getPath());
-
-        switch ($routeInfo[0]) {
-            case Dispatcher::NOT_FOUND:
-                throw new RuntimeException("not found.");
-                break;
-            case Dispatcher::METHOD_NOT_ALLOWED:
-                throw new RuntimeException("please check your method.");
-                break;
-            case Dispatcher::FOUND:
-                $handler = $routeInfo[1];
-                return $this->routes[$handler]['handler']->execute($request);
+    /**
+     * @param Dispatcher $dispatcher
+     * @param string $method
+     * @param string $path
+     * @return string
+     */
+    protected function runDispatcher(Dispatcher $dispatcher, $method, $path)
+    {
+        try {
+            $routeInfo = $dispatcher->dispatch($method, $path);
+            switch ($routeInfo[0]) {
+                case Dispatcher::NOT_FOUND:
+                    throw new HandlerNotFoundExecption();
+                case Dispatcher::METHOD_NOT_ALLOWED:
+                    throw new MethodNotAllowedException();
+                case Dispatcher::FOUND:
+                    return $routeInfo[1];
+            }
+        } catch (RuntimeException $e) {
+            if (in_array('*', $routeInfo[1])) {
+                return $this->runDispatcher($dispatcher, '*', $path);
+            } else {
+                throw $e;
+            }
         }
     }
 

@@ -106,4 +106,19 @@ class RouterTest extends PHPUnit_Framework_TestCase
         $this->assertSame($router, $router->setController('admin', $controllerMock));
         $this->assertSame($controllerMock, $router->getController('admin'));
     }
+
+
+    public function testAnyMethod()
+    {
+        $anyMock = Mockery::mock(RequestInterface::class);
+        $anyMock->shouldReceive('getMethod')->andReturn('GET');
+        $anyMock->shouldReceive('getUri->getPath')->andReturn('/');
+
+        $this->app->any('/', function () {
+            return 'any';
+        });
+
+        $this->assertEquals('any', $this->app->dispatch($anyMock));
+    }
+
 }
