@@ -12,11 +12,15 @@ class HandlerCollection
     /** @var int */
     protected $nextCount = 0;
 
+    /** @var ArrayObject */
+    protected $controllers;
+
     /**
      * @param array $handlers
      */
-    public function __construct(array $handlers = [])
+    public function __construct(ArrayAccess $controllers, array $handlers = [])
     {
+        $this->controllers = $controllers;
         $this->handlers = $handlers;
     }
 
@@ -24,7 +28,7 @@ class HandlerCollection
      * @param RequestInterface $request
      * @return mixed
      */
-    public function execute(RequestInterface $request, ArrayAccess $controllers)
+    public function execute(RequestInterface $request)
     {
         $this->nextCount = 0;
         return $this->next($request, count($this->handlers));
@@ -37,12 +41,23 @@ class HandlerCollection
      */
     public function next(RequestInterface $request, $condition = null)
     {
-        $condition = is_null($condition) ? count($this->handlers) > $this->nextCount : $condition;
+        $this->handlers[$this->nextCount] = $this->stringToCallable($this->handlers[$this->nextCount]);
+        $handler = $this->handlers[$this->nextCount];
+        $condition = $condition ? $condition : count($this->handlers) > $this->nextCount;
+
         if ($condition) {
-            // callable ? none callable? 
-            return call_user_func($this->handlers[$this->nextCount++], $request, function (RequestInterface $request) {
+            return call_user_func($handler, $request, function (RequestInterface $request) {
+                $this->nextCount++;
                 return $this->next($request);
             });
         }
+    }
+
+    public function stringToCallable($handler)
+    {
+        if (!is_callable($handler)) {
+            $handler = [$this->controllers[$handler[0]], $handler[1]];
+        }
+        return $handler;
     }
 }

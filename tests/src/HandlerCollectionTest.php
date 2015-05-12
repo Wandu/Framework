@@ -4,6 +4,7 @@ namespace June;
 use PHPUnit_Framework_TestCase;
 use Psr\Http\Message\RequestInterface;
 use Mockery;
+use ArrayObject;
 
 class HandlerCollectionTest extends PHPUnit_Framework_TestCase
 {
@@ -11,21 +12,21 @@ class HandlerCollectionTest extends PHPUnit_Framework_TestCase
     {
         $executeMock = Mockery::mock(RequestInterface::class);
 
-        $route = new HandlerCollection([
+        $handlers = new HandlerCollection(new ArrayObject(), [
             function (RequestInterface $req) {
                 return 'hi';
             }
         ]);
 
-        $this->assertEquals('hi', $route->execute($executeMock));
-        $this->assertEquals('hi', $route->execute($executeMock));
+        $this->assertEquals('hi', $handlers->execute($executeMock));
+        $this->assertEquals('hi', $handlers->execute($executeMock));
     }
 
-    public function testExceuteWithMiddlewareAndNext()
+    public function testExecuteWithMiddlewareAndNext()
     {
         $executeMock = Mockery::mock(RequestInterface::class);
 
-        $route = new HandlerCollection([
+        $handlers = new HandlerCollection(new ArrayObject(), [
                 function (RequestInterface $req, \Closure $next) {
                     return $next($req) . ' world';
                 },
@@ -34,15 +35,15 @@ class HandlerCollectionTest extends PHPUnit_Framework_TestCase
                 }
             ]);
 
-        $this->assertEquals('hello world', $route->execute($executeMock));
-        $this->assertEquals('hello world', $route->execute($executeMock));
+        $this->assertEquals('hello world', $handlers->execute($executeMock));
+        $this->assertEquals('hello world', $handlers->execute($executeMock));
     }
 
     public function testExecuteWithMiddleware()
     {
         $executeMock = Mockery::mock(RequestInterface::class);
 
-        $route = new HandlerCollection([
+        $handlers = new HandlerCollection(new ArrayObject(), [
                 function (RequestInterface $req, \Closure $next) {
                     return 'world';
                 },
@@ -51,15 +52,15 @@ class HandlerCollectionTest extends PHPUnit_Framework_TestCase
                 }
             ]);
 
-        $this->assertEquals('world', $route->execute($executeMock));
-        $this->assertEquals('world', $route->execute($executeMock));
+        $this->assertEquals('world', $handlers->execute($executeMock));
+        $this->assertEquals('world', $handlers->execute($executeMock));
     }
 
     public function testExecuteWithMiddlewares()
     {
         $executeMock = Mockery::mock(RequestInterface::class);
 
-        $route = new HandlerCollection([
+        $handlers = new HandlerCollection(new ArrayObject(), [
             function (RequestInterface $req, \Closure $next) {
                 return $next($req) . ' the world';
             },
@@ -74,7 +75,7 @@ class HandlerCollectionTest extends PHPUnit_Framework_TestCase
             },
         ]);
 
-        $this->assertEquals('hello world and the world', $route->execute($executeMock));
-        $this->assertEquals('hello world and the world', $route->execute($executeMock));
+        $this->assertEquals('hello world and the world', $handlers->execute($executeMock));
+        $this->assertEquals('hello world and the world', $handlers->execute($executeMock));
     }
 }
