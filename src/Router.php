@@ -107,7 +107,7 @@ class Router
     {
         $dispathcer = $this->createDispatcher();
         $handlerAsString = $this->runDispatcher($dispathcer, $request->getMethod(), $request->getUri()->getPath());
-        return $this->routes[$handlerAsString]['handler']->execute($request);
+        return $this->routes[$handlerAsString]['handler']->execute($request, $this->controllers);
     }
 
     /**

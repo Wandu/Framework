@@ -1,6 +1,7 @@
 <?php
 namespace June;
 
+use ArrayAccess;
 use Psr\Http\Message\RequestInterface;
 
 class HandlerCollection
@@ -23,7 +24,7 @@ class HandlerCollection
      * @param RequestInterface $request
      * @return mixed
      */
-    public function execute(RequestInterface $request)
+    public function execute(RequestInterface $request, ArrayAccess $controllers)
     {
         $this->nextCount = 0;
         return $this->next($request, count($this->handlers));
@@ -38,6 +39,7 @@ class HandlerCollection
     {
         $condition = is_null($condition) ? count($this->handlers) > $this->nextCount : $condition;
         if ($condition) {
+            // callable ? none callable? 
             return call_user_func($this->handlers[$this->nextCount++], $request, function (RequestInterface $request) {
                 return $this->next($request);
             });

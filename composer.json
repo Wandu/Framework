@@ -5,7 +5,12 @@
     "license": "MIT",
     "autoload": {
         "psr-4": {
-          "June\\": "src/"
+            "June\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "June\\": "tests/src/"
         }
     },
     "require": {

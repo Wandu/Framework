@@ -1,6 +1,7 @@
 <?php
 namespace June;
 
+use June\Stubs\AdminController;
 use Mockery;
 use PHPUnit_Framework_TestCase;
 use Psr\Http\Message\RequestInterface;
@@ -119,6 +120,20 @@ class RouterTest extends PHPUnit_Framework_TestCase
         });
 
         $this->assertEquals('any', $this->app->dispatch($anyMock));
+    }
+
+    public function testExecuteWithController()
+    {
+        $app = new Router();
+        $app->setController('admin', new AdminController());
+
+        $getMock = Mockery::mock(RequestInterface::class);
+        $getMock->shouldReceive('getMethod')->andReturn('GET');
+        $getMock->shouldReceive('getUri->getPath')->andReturn('/');
+
+        $app->get('/', ["admin", "middleware"], ['admin', 'action']);
+
+        $this->assertEquals('Hello World!!!', $app->dispatch($getMock));
     }
 
 }
