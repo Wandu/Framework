@@ -31,42 +31,65 @@ class Router
         return count($this->routes);
     }
 
-    public function get()
+    /**
+     * @param string $path
+     * @param callable|string ...$handlers
+     */
+    public function get($path/*, ...$handlers*/)
     {
         $this->mapWithCreateRoute('GET', func_get_args());
     }
 
-    public function post()
+    /**
+     * @param string $path
+     * @param callable|string ...$handlers
+     */
+    public function post($path/*, ...$handlers*/)
     {
         $this->mapWithCreateRoute('POST', func_get_args());
     }
 
-    public function put()
+    /**
+     * @param string $path
+     * @param callable|string ...$handlers
+     */
+    public function put($path/*, ...$handlers*/)
     {
         $this->mapWithCreateRoute('PUT', func_get_args());
     }
 
-    public function delete()
+    /**
+     * @param string $path
+     * @param callable|string ...$handlers
+     */
+    public function delete($path/*, ...$handlers*/)
     {
         $this->mapWithCreateRoute('DELETE', func_get_args());
     }
 
-    public function options()
+    /**
+     * @param string $path
+     * @param callable|string ...$handlers
+     */
+    public function options($path/*, ...$handlers*/)
     {
         $this->mapWithCreateRoute('OPTIONS', func_get_args());
     }
 
     /**
      * @param string $method
-     * @param mixed $args
+     * @param array $handlers
      */
-    public function mapWithCreateRoute($method, $args)
+    public function mapWithCreateRoute($method, $handlers)
     {
-        $path = array_shift($args);
-        $handler = array_pop($args);
-        $route = new Route($method, $path, $handler, $args);
+        $path = array_shift($handlers);
+        $handlers = new HandlerCollection($handlers);
 
-        $this->routes[$method.$path] = $route;
+        $this->routes[$method.$path] = [
+            'method' => $method,
+            'path' => $path,
+            'handler' => $handlers,
+        ];
     }
 
     /**
@@ -77,7 +100,7 @@ class Router
     {
         $dispatcher = \FastRoute\simpleDispatcher(function (RouteCollector $result) {
             foreach ($this->routes as $name => $route) {
-                $result->addRoute($route->getMethod(), $route->getPath(), $name);
+                $result->addRoute($route['method'], $route['path'], $name);
             }
         });
 
@@ -92,7 +115,7 @@ class Router
                 break;
             case Dispatcher::FOUND:
                 $handler = $routeInfo[1];
-                return $this->routes[$handler]->execute($request);
+                return $this->routes[$handler]['handler']->execute($request);
         }
     }
 
