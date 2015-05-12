@@ -120,6 +120,7 @@ class RouterTest extends PHPUnit_Framework_TestCase
         });
 
         $this->assertEquals('any', $this->app->dispatch($anyMock));
+        $this->assertEquals('any', $this->app->dispatch($anyMock));
     }
 
     public function testExecuteWithController()
@@ -131,9 +132,10 @@ class RouterTest extends PHPUnit_Framework_TestCase
         $getMock->shouldReceive('getMethod')->andReturn('GET');
         $getMock->shouldReceive('getUri->getPath')->andReturn('/');
 
+//        $app->get('/', "middleware@admin", ['admin', 'action']);
         $app->get('/', ["admin", "middleware"], ['admin', 'action']);
 
+//        $this->assertEquals('Hello World!!!', $app->dispatch($getMock));
         $this->assertEquals('Hello World!!!', $app->dispatch($getMock));
     }
-
 }

@@ -95,7 +95,7 @@ class Router
         $this->routes[$method.$path] = [
             'method' => $method,
             'path' => $path,
-            'handler' => new HandlerCollection($handlers),
+            'handler' => new HandlerCollection($this->controllers, $handlers),
         ];
     }
 
@@ -105,9 +105,9 @@ class Router
      */
     public function dispatch(RequestInterface $request)
     {
-        $dispathcer = $this->createDispatcher();
-        $handlerAsString = $this->runDispatcher($dispathcer, $request->getMethod(), $request->getUri()->getPath());
-        return $this->routes[$handlerAsString]['handler']->execute($request, $this->controllers);
+        $dispatcher = $this->createDispatcher();
+        $handlerAsString = $this->runDispatcher($dispatcher, $request->getMethod(), $request->getUri()->getPath());
+        return $this->routes[$handlerAsString]['handler']->execute($request);
     }
 
     /**
