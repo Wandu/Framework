@@ -52,48 +52,27 @@ class Route
     }
 
     /**
-     * @param string $method
-     * @param string $path
-     * @return bool
-     */
-    public function isExecutable($method, $path)
-    {
-        if (strtolower($method) === strtolower($this->getMethod()) &&
-            strtolower($path) === strtolower($this->getPath())) {
-            return true;
-        }
-        return false;
-    }
-
-    /**
      * @param RequestInterface $request
      * @return mixed
      */
     public function execute(RequestInterface $request)
     {
-        $this->nextCount = 0;
-        if (count($this->middleware) > 0) {
-            return call_user_func($this->middleware[$this->nextCount++], $request, function (RequestInterface $request) {
-                return $this->next($request);
-            });
-        } else {
-            return call_user_func($this->handler, $request);
-        }
+        return $this->next($request, count($this->middleware));
     }
 
     /**
      * @param RequestInterface $request
      * @return mixed
      */
-    public function next(RequestInterface $request)
+    public function next(RequestInterface $request, $condition = null)
     {
-        if (count($this->middleware) <= $this->nextCount) {
-            return call_user_func($this->handler, $request);
-        } else {
+        $condition = is_null($condition) ? count($this->middleware) > $this->nextCount : $condition;
+        if ($condition) {
             return call_user_func($this->middleware[$this->nextCount++], $request, function (RequestInterface $request) {
                 return $this->next($request);
             });
         }
+        return call_user_func($this->handler, $request);
     }
 
     /**
