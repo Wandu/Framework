@@ -1,16 +1,16 @@
 {
     "name": "jicjjang/june",
     "description": "june",
-    "keywords": ["http", "router", "june"],
+    "keywords": ["http", "router", "jicjjang", "june"],
     "license": "MIT",
     "autoload": {
         "psr-4": {
-            "June\\": "src/"
+            "Jicjjang\\June\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "June\\": "tests/"
+            "Jicjjang\\June\\": "tests/"
         }
     },
     "require": {

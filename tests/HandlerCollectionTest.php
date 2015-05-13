@@ -1,5 +1,5 @@
 <?php
-namespace June;
+namespace Jicjjang\June;
 
 use PHPUnit_Framework_TestCase;
 use Psr\Http\Message\RequestInterface;

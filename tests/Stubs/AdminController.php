@@ -1,8 +1,8 @@
 <?php
-namespace June\Stubs;
+namespace Jicjjang\June\Stubs;
 
 use Closure;
-use June\ControllerInterface;
+use Jicjjang\June\ControllerInterface;
 use Psr\Http\Message\RequestInterface;
 
 class AdminController implements ControllerInterface

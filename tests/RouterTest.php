@@ -1,7 +1,7 @@
 <?php
-namespace June;
+namespace Jicjjang\June;
 
-use June\Stubs\AdminController;
+use Jicjjang\June\stubs\AdminController;
 use Mockery;
 use PHPUnit_Framework_TestCase;
 use Psr\Http\Message\RequestInterface;

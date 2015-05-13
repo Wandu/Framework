@@ -1,5 +1,5 @@
 <?php
-namespace June;
+namespace Jicjjang\June;
 
 use Exception;
 use RuntimeException;

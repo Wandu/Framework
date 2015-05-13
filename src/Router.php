@@ -1,5 +1,5 @@
 <?php
-namespace June;
+namespace Jicjjang\June;
 
 use FastRoute\Dispatcher;
 use FastRoute\RouteCollector;

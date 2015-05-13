@@ -1,5 +1,5 @@
 <?php
-namespace June;
+namespace Jicjjang\June;
 
 use ArrayAccess;
 use Psr\Http\Message\RequestInterface;
@@ -12,7 +12,7 @@ class HandlerCollection
     /** @var int */
     protected $nextCount = 0;
 
-    /** @var ArrayObject */
+    /** @var ArrayAccess */
     protected $controllers;
 
     /**

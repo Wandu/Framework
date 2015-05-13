@@ -2,8 +2,8 @@
 
 require dirname(__DIR__) . '/vendor/autoload.php';
 
-use June\Router;
-use June\Stubs\AdminController;
+use Jicjjang\June\Router;
+use Jicjjang\June\Stubs\AdminController;
 use Psr\Http\Message\RequestInterface;
 
 $bench = new Ubench();
