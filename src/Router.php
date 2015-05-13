@@ -130,18 +130,18 @@ class Router
      */
     protected function runDispatcher(Dispatcher $dispatcher, $method, $path)
     {
+        $routeInfo = $dispatcher->dispatch($method, $path);
         try {
-            $routeInfo = $dispatcher->dispatch($method, $path);
             switch ($routeInfo[0]) {
                 case Dispatcher::NOT_FOUND:
-                    throw new HandlerNotFoundExecption();
+                    throw new HandlerNotFoundException();
                 case Dispatcher::METHOD_NOT_ALLOWED:
                     throw new MethodNotAllowedException();
                 case Dispatcher::FOUND:
                     return $routeInfo[1];
             }
         } catch (RuntimeException $e) {
-            if (in_array('*', $routeInfo[1])) {
+            if (isset($routeInfo[1]) && in_array('*', $routeInfo[1])) {
                 return $this->runDispatcher($dispatcher, '*', $path);
             } else {
                 throw $e;
