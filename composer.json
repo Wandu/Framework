@@ -10,7 +10,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "June\\": "tests/src/"
+            "June\\": "tests/"
         }
     },
     "require": {
@@ -19,6 +19,7 @@
         "nikic/fast-route": "0.4.*"
     },
     "require-dev": {
+        "devster/ubench": "1.1.*-dev",
         "phpunit/phpunit": "~4.6",
         "mockery/mockery": "0.9.*",
         "nikic/fast-route": "0.4.*"
