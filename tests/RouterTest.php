@@ -4,7 +4,6 @@ namespace Jicjjang\June;
 use Jicjjang\June\stubs\AdminController;
 use Mockery;
 use PHPUnit_Framework_TestCase;
-use Psr\Http\Message\RequestInterface;
 use ArrayObject;
 
 class RouterTest extends PHPUnit_Framework_TestCase
@@ -51,10 +50,14 @@ class RouterTest extends PHPUnit_Framework_TestCase
         $getMock = Mockery::mock(RequestInterface::class);
         $getMock->shouldReceive('getMethod')->andReturn('GET');
         $getMock->shouldReceive('getUri->getPath')->andReturn('/');
+        $getMock->shouldReceive('setArguments')->with([
+        ]);
 
         $postMock = Mockery::mock(RequestInterface::class);
         $postMock->shouldReceive('getMethod')->andReturn('POST');
         $postMock->shouldReceive('getUri->getPath')->andReturn('/');
+        $postMock->shouldReceive('setArguments')->with([
+        ]);
 
         $getCalled = 0;
         $postCalled = 0;
@@ -89,6 +92,30 @@ class RouterTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(1, $postCalled);
     }
 
+    public function testDispatchWithArguments()
+    {
+        $getMock = Mockery::mock(RequestInterface::class);
+        $getMock->shouldReceive('getMethod')->andReturn('GET');
+        $getMock->shouldReceive('getUri->getPath')->andReturn('/jicjjang/hello');
+        $getMock->shouldReceive('setArguments')->with([
+            'name' => 'jicjjang',
+            'message' => 'hello'
+        ]);
+
+        $this->app->get(
+            '/{name}/{message}',
+            function (RequestInterface $req, \Closure $next) {
+                // $req->getArgument('name') === 'jicjjang';
+                return $next($req) . ' getMiddleware';
+            },
+            function (RequestInterface $req) {
+                return 'get';
+            }
+        );
+
+        $this->assertEquals('get getMiddleware', $this->app->dispatch($getMock));
+    }
+
     public function testBindingController()
     {
         $controllerMock = Mockery::mock(ControllerInterface::class);
@@ -114,6 +141,8 @@ class RouterTest extends PHPUnit_Framework_TestCase
         $anyMock = Mockery::mock(RequestInterface::class);
         $anyMock->shouldReceive('getMethod')->andReturn('GET');
         $anyMock->shouldReceive('getUri->getPath')->andReturn('/');
+        $anyMock->shouldReceive('setArguments')->with([
+        ]);
 
         $this->app->any('/', function () {
             return 'any';
@@ -131,6 +160,8 @@ class RouterTest extends PHPUnit_Framework_TestCase
         $getMock = Mockery::mock(RequestInterface::class);
         $getMock->shouldReceive('getMethod')->andReturn('GET');
         $getMock->shouldReceive('getUri->getPath')->andReturn('/');
+        $getMock->shouldReceive('setArguments')->with([
+        ]);
 
 //        $app->get('/', "middleware@admin", ['admin', 'action']);
         $app->get('/', ["admin", "middleware"], ['admin', 'action']);
