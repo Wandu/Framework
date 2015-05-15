@@ -2,6 +2,7 @@
 namespace Jicjjang\June;
 
 use Jicjjang\June\stubs\AdminController;
+use Psr\Http\Message\ServerRequestInterface;
 use Mockery;
 use PHPUnit_Framework_TestCase;
 use ArrayObject;
@@ -47,13 +48,13 @@ class RouterTest extends PHPUnit_Framework_TestCase
 
     public function testDispatch()
     {
-        $getMock = Mockery::mock(RequestInterface::class);
+        $getMock = Mockery::mock(ServerRequestInterface::class);
         $getMock->shouldReceive('getMethod')->andReturn('GET');
         $getMock->shouldReceive('getUri->getPath')->andReturn('/');
         $getMock->shouldReceive('setArguments')->with([
         ]);
 
-        $postMock = Mockery::mock(RequestInterface::class);
+        $postMock = Mockery::mock(ServerRequestInterface::class);
         $postMock->shouldReceive('getMethod')->andReturn('POST');
         $postMock->shouldReceive('getUri->getPath')->andReturn('/');
         $postMock->shouldReceive('setArguments')->with([
@@ -63,10 +64,10 @@ class RouterTest extends PHPUnit_Framework_TestCase
         $postCalled = 0;
         $this->app->get(
             '/',
-            function (RequestInterface $req, \Closure $next) {
+            function (ServerRequestInterface $req, \Closure $next) {
                 return $next($req) . ' getMiddleware';
             },
-            function (RequestInterface $req) use (&$getCalled) {
+            function (ServerRequestInterface $req) use (&$getCalled) {
                 $getCalled++;
                 return 'get';
             }
@@ -74,10 +75,10 @@ class RouterTest extends PHPUnit_Framework_TestCase
 
         $this->app->post(
             '/',
-            function (RequestInterface $req, \Closure $next) {
+            function (ServerRequestInterface $req, \Closure $next) {
                 return $next($req) . ' postMiddleware';
             },
-            function (RequestInterface $req) use (&$postCalled) {
+            function (ServerRequestInterface $req) use (&$postCalled) {
                 $postCalled++;
                 return 'post';
             }
@@ -94,21 +95,17 @@ class RouterTest extends PHPUnit_Framework_TestCase
 
     public function testDispatchWithArguments()
     {
-        $getMock = Mockery::mock(RequestInterface::class);
+        $getMock = Mockery::mock(ServerRequestInterface::class);
         $getMock->shouldReceive('getMethod')->andReturn('GET');
         $getMock->shouldReceive('getUri->getPath')->andReturn('/jicjjang/hello');
-        $getMock->shouldReceive('setArguments')->with([
-            'name' => 'jicjjang',
-            'message' => 'hello'
-        ]);
+        $getMock->shouldReceive('withAttribute');
 
         $this->app->get(
             '/{name}/{message}',
-            function (RequestInterface $req, \Closure $next) {
-                // $req->getArgument('name') === 'jicjjang';
+            function (ServerRequestInterface $req, \Closure $next) {
                 return $next($req) . ' getMiddleware';
             },
-            function (RequestInterface $req) {
+            function (ServerRequestInterface $req) {
                 return 'get';
             }
         );
@@ -138,7 +135,7 @@ class RouterTest extends PHPUnit_Framework_TestCase
 
     public function testAnyMethod()
     {
-        $anyMock = Mockery::mock(RequestInterface::class);
+        $anyMock = Mockery::mock(ServerRequestInterface::class);
         $anyMock->shouldReceive('getMethod')->andReturn('GET');
         $anyMock->shouldReceive('getUri->getPath')->andReturn('/');
         $anyMock->shouldReceive('setArguments')->with([
@@ -157,7 +154,7 @@ class RouterTest extends PHPUnit_Framework_TestCase
         $app = new Router();
         $app->setController('admin', new AdminController());
 
-        $getMock = Mockery::mock(RequestInterface::class);
+        $getMock = Mockery::mock(ServerRequestInterface::class);
         $getMock->shouldReceive('getMethod')->andReturn('GET');
         $getMock->shouldReceive('getUri->getPath')->andReturn('/');
         $getMock->shouldReceive('setArguments')->with([

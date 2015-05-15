@@ -3,6 +3,7 @@ namespace Jicjjang\June;
 
 use FastRoute\Dispatcher;
 use FastRoute\RouteCollector;
+use Psr\Http\Message\ServerRequestInterface;
 use ArrayAccess;
 use ArrayObject;
 use RuntimeException;
@@ -99,14 +100,16 @@ class Router
     }
 
     /**
-     * @param RequestInterface $request
+     * @param ServerRequestInterface $request
      * @return mixed
      */
-    public function dispatch(RequestInterface $request)
+    public function dispatch(ServerRequestInterface $request)
     {
         $dispatcher = $this->createDispatcher();
         $routeInfo = $this->runDispatcher($dispatcher, $request->getMethod(), $request->getUri()->getPath());
-        $request->setArguments($routeInfo[2]);
+        foreach ($routeInfo[2] as $key => $value) {
+            $request->withAttribute($key, $value);
+        }
         return $this->routes[$routeInfo[1]]['handler']->execute($request);
     }
 
