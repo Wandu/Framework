@@ -3,25 +3,25 @@ namespace Jicjjang\June\Stubs;
 
 use Closure;
 use Jicjjang\June\ControllerInterface;
-use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ServerRequestInterface;
 
 class AdminController implements ControllerInterface
 {
     /**
-     * @param RequestInterface $request
+     * @param ServerRequestInterface $request
      * @param callable $next
      * @return mixed
      */
-    public function middleware(RequestInterface $request, Closure $next)
+    public function middleware(ServerRequestInterface $request, Closure $next)
     {
         return $next($request);
     }
 
     /**
-     * @param RequestInterface $request
+     * @param ServerRequestInterface $request
      * @return string
      */
-    public function action(RequestInterface $request)
+    public function action(ServerRequestInterface $request)
     {
         return "Hello World!!!";
     }
