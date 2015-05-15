@@ -2,7 +2,7 @@
 namespace Jicjjang\June;
 
 use ArrayAccess;
-use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ServerRequestInterface;
 
 class HandlerCollection
 {
@@ -25,28 +25,28 @@ class HandlerCollection
     }
 
     /**
-     * @param RequestInterface $request
+     * @param ServerRequestInterface $request
      * @return mixed
      */
-    public function execute(RequestInterface $request)
+    public function execute(ServerRequestInterface $request)
     {
         $this->nextCount = 0;
         return $this->next($request, count($this->handlers));
     }
 
     /**
-     * @param RequestInterface $request
+     * @param ServerRequestInterface $request
      * @param mixed $condition
      * @return mixed
      */
-    public function next(RequestInterface $request, $condition = null)
+    public function next(ServerRequestInterface $request, $condition = null)
     {
         $this->handlers[$this->nextCount] = $this->stringToCallable($this->handlers[$this->nextCount]);
         $handler = $this->handlers[$this->nextCount];
         $condition = $condition ? $condition : count($this->handlers) > $this->nextCount;
 
         if ($condition) {
-            return call_user_func($handler, $request, function (RequestInterface $request) {
+            return call_user_func($handler, $request, function (ServerRequestInterface $request) {
                 $this->nextCount++;
                 return $this->next($request);
             });

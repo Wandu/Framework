@@ -2,7 +2,7 @@
 namespace Jicjjang\June;
 
 use PHPUnit_Framework_TestCase;
-use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use Mockery;
 use ArrayObject;
 
@@ -10,10 +10,10 @@ class HandlerCollectionTest extends PHPUnit_Framework_TestCase
 {
     public function testExecuteWithHandler()
     {
-        $executeMock = Mockery::mock(RequestInterface::class);
+        $executeMock = Mockery::mock(ServerRequestInterface::class);
 
         $handlers = new HandlerCollection(new ArrayObject(), [
-            function (RequestInterface $req) {
+            function (ServerRequestInterface $req) {
                 return 'hi';
             }
         ]);
@@ -24,13 +24,13 @@ class HandlerCollectionTest extends PHPUnit_Framework_TestCase
 
     public function testExecuteWithMiddlewareAndNext()
     {
-        $executeMock = Mockery::mock(RequestInterface::class);
+        $executeMock = Mockery::mock(ServerRequestInterface::class);
 
         $handlers = new HandlerCollection(new ArrayObject(), [
-                function (RequestInterface $req, \Closure $next) {
+                function (ServerRequestInterface $req, \Closure $next) {
                     return $next($req) . ' world';
                 },
-                function (RequestInterface $req) {
+                function (ServerRequestInterface $req) {
                     return 'hello';
                 }
             ]);
@@ -41,13 +41,13 @@ class HandlerCollectionTest extends PHPUnit_Framework_TestCase
 
     public function testExecuteWithMiddleware()
     {
-        $executeMock = Mockery::mock(RequestInterface::class);
+        $executeMock = Mockery::mock(ServerRequestInterface::class);
 
         $handlers = new HandlerCollection(new ArrayObject(), [
-                function (RequestInterface $req, \Closure $next) {
+                function (ServerRequestInterface $req, \Closure $next) {
                     return 'world';
                 },
-                function (RequestInterface $req) {
+                function (ServerRequestInterface $req) {
                     return 'hello';
                 }
             ]);
@@ -58,19 +58,19 @@ class HandlerCollectionTest extends PHPUnit_Framework_TestCase
 
     public function testExecuteWithMiddlewares()
     {
-        $executeMock = Mockery::mock(RequestInterface::class);
+        $executeMock = Mockery::mock(ServerRequestInterface::class);
 
         $handlers = new HandlerCollection(new ArrayObject(), [
-            function (RequestInterface $req, \Closure $next) {
+            function (ServerRequestInterface $req, \Closure $next) {
                 return $next($req) . ' the world';
             },
-            function (RequestInterface $req, \Closure $next) {
+            function (ServerRequestInterface $req, \Closure $next) {
                 return $next($req) . ' and';
             },
-            function (RequestInterface $req, \Closure $next) {
+            function (ServerRequestInterface $req, \Closure $next) {
                 return $next($req) . ' world';
             },
-            function (RequestInterface $req) {
+            function (ServerRequestInterface $req) {
                 return 'hello';
             },
         ]);
