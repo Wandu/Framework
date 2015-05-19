@@ -159,4 +159,22 @@ class RouterTest extends PHPUnit_Framework_TestCase
 
         $this->assertEquals('Hello World!!!', $router->dispatch($getMock));
     }
+
+    public function testGroup()
+    {
+        $mockRequest = Mockery::mock(ServerRequestInterface::class);
+        $mockRequest->shouldReceive('getMethod')->andReturn('GET');
+        $mockRequest->shouldReceive('getUri->getPath')->andReturn('/hello/world');
+
+        $router = new Router();
+
+        $router->group('/hello', function () use ($router) {
+            $router->get('/world', function () { return 'world!'; });
+            $router->get('/another', function () { return 'another!!'; });
+        });
+
+        $this->assertEquals(2, count($router));
+
+        $this->assertEquals('world!', $router->dispatch($mockRequest));
+    }
 }

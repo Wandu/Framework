@@ -7,6 +7,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use ArrayAccess;
 use ArrayObject;
 use Countable;
+use Closure;
 use RuntimeException;
 
 class Router implements Countable
@@ -16,6 +17,9 @@ class Router implements Countable
 
     /** @var ArrayAccess */
     protected $controllers = [];
+
+    /** @var string */
+    protected $prefix = '';
 
     /**
      * @param ArrayAccess $controllers
@@ -39,7 +43,7 @@ class Router implements Countable
      */
     public function get($path/*, ...$handlers*/)
     {
-        $this->mapWithCreateRoute('GET', func_get_args());
+        return $this->mapWithCreateRoute('GET', func_get_args());
     }
 
     /**
@@ -48,7 +52,7 @@ class Router implements Countable
      */
     public function post($path/*, ...$handlers*/)
     {
-        $this->mapWithCreateRoute('POST', func_get_args());
+        return $this->mapWithCreateRoute('POST', func_get_args());
     }
 
     /**
@@ -57,7 +61,7 @@ class Router implements Countable
      */
     public function put($path/*, ...$handlers*/)
     {
-        $this->mapWithCreateRoute('PUT', func_get_args());
+        return $this->mapWithCreateRoute('PUT', func_get_args());
     }
 
     /**
@@ -66,7 +70,7 @@ class Router implements Countable
      */
     public function delete($path/*, ...$handlers*/)
     {
-        $this->mapWithCreateRoute('DELETE', func_get_args());
+        return $this->mapWithCreateRoute('DELETE', func_get_args());
     }
 
     /**
@@ -75,7 +79,7 @@ class Router implements Countable
      */
     public function options($path/*, ...$handlers*/)
     {
-        $this->mapWithCreateRoute('OPTIONS', func_get_args());
+        return $this->mapWithCreateRoute('OPTIONS', func_get_args());
     }
 
     /**
@@ -84,7 +88,19 @@ class Router implements Countable
      */
     public function any($path/*, ...$handlers*/)
     {
-        $this->mapWithCreateRoute('*', func_get_args());
+        return $this->mapWithCreateRoute('*', func_get_args());
+    }
+
+    /**
+     * @param string $path
+     * @param callable $handler
+     */
+    public function group($path, Closure $handler)
+    {
+        $beforePrefix = $this->prefix;
+        $this->prefix = $path;
+        call_user_func($handler, $this);
+        $this->prefix = $beforePrefix;
     }
 
     /**
@@ -96,7 +112,7 @@ class Router implements Countable
         $path = array_shift($handlers);
         $this->routes[$method.$path] = [
             'method' => $method,
-            'path' => $path,
+            'path' => $this->prefix . $path,
             'handler' => new HandlerCollection($this->controllers, $handlers),
         ];
     }
