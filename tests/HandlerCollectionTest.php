@@ -1,8 +1,8 @@
 <?php
-namespace Jicjjang\June;
+namespace Wandu\Router;
 
 use ArrayAccess;
-use Jicjjang\June\Stubs\AdminController;
+use Wandu\Router\Stubs\AdminController;
 use PHPUnit_Framework_TestCase;
 use Psr\Http\Message\ServerRequestInterface;
 use Mockery;

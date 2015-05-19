@@ -1,5 +1,5 @@
 <?php
-namespace Jicjjang\June;
+namespace Wandu\Router;
 
 use ArrayAccess;
 use Psr\Http\Message\ServerRequestInterface;

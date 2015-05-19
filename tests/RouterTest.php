@@ -1,7 +1,7 @@
 <?php
-namespace Jicjjang\June;
+namespace Wandu\Router;
 
-use Jicjjang\June\stubs\AdminController;
+use Wandu\Router\stubs\AdminController;
 use Psr\Http\Message\ServerRequestInterface;
 use Mockery;
 use PHPUnit_Framework_TestCase;

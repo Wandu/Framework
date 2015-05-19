@@ -1,11 +1,10 @@
 <?php
-namespace Jicjjang\June\Stubs;
+namespace Wandu\Router\Stubs;
 
 use Closure;
-use Jicjjang\June\ControllerInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
-class AdminController implements ControllerInterface
+class AdminController
 {
     /**
      * @param ServerRequestInterface $request

@@ -1,5 +1,5 @@
 <?php
-namespace Jicjjang\June;
+namespace Wandu\Router;
 
 use FastRoute\Dispatcher;
 use FastRoute\RouteCollector;
@@ -172,10 +172,10 @@ class Router implements Countable
 
     /**
      * @param string $name
-     * @param ControllerInterface $controller
+     * @param $controller
      * @return $this
      */
-    public function setController($name, ControllerInterface $controller)
+    public function setController($name, $controller)
     {
         $this->controllers[$name] = $controller;
         return $this;

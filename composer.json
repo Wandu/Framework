@@ -1,16 +1,16 @@
 {
-    "name": "jicjjang/june",
-    "description": "june",
-    "keywords": ["http", "router", "jicjjang", "june"],
+    "name": "wandu/router",
+    "description": "FastRouter with PSR-7 Wrapper Library.",
+    "keywords": ["wandu", "http", "router", "fast-router"],
     "license": "MIT",
     "autoload": {
         "psr-4": {
-            "Jicjjang\\June\\": "src/"
+            "Wandu\\Router\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Jicjjang\\June\\": "tests/"
+            "Wandu\\Router\\": "tests/"
         }
     },
     "require": {
@@ -19,10 +19,8 @@
         "nikic/fast-route": "0.4.*"
     },
     "require-dev": {
-        "devster/ubench": "1.1.*-dev",
         "phpunit/phpunit": "~4.6",
-        "mockery/mockery": "0.9.*",
-        "nikic/fast-route": "0.4.*"
+        "mockery/mockery": "0.9.*"
     },
     "extra": {
         "branch-alias": {
