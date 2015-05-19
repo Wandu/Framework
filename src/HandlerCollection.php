@@ -32,29 +32,30 @@ class HandlerCollection
     public function execute(ServerRequestInterface $request)
     {
         $this->nextCount = 0;
-        return $this->next($request, count($this->handlers));
+        return $this->next($request);
     }
 
     /**
      * @param ServerRequestInterface $request
-     * @param mixed $condition
      * @return mixed
      */
-    public function next(ServerRequestInterface $request, $condition = null)
+    public function next(ServerRequestInterface $request)
     {
-        $this->handlers[$this->nextCount] = $this->stringToCallable($this->handlers[$this->nextCount]);
-        $handler = $this->handlers[$this->nextCount];
-        $condition = $condition ? $condition : count($this->handlers) > $this->nextCount;
-
-        if ($condition) {
-            return call_user_func($handler, $request, function (ServerRequestInterface $request) {
-                $this->nextCount++;
-                return $this->next($request);
-            });
+        if (!isset($this->handlers[$this->nextCount])) {
+            return;
         }
+        $handler = $this->filterHandler($this->handlers[$this->nextCount]);
+        return call_user_func($handler, $request, function (ServerRequestInterface $request) {
+            $this->nextCount++;
+            return $this->next($request);
+        });
     }
 
-    public function stringToCallable($handler)
+    /**
+     * @param string|callable $handler
+     * @return callable
+     */
+    protected function filterHandler($handler)
     {
         if (!is_callable($handler)) {
             list($methodName, $className) = explode('@', $handler);
