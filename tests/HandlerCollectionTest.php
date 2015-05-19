@@ -1,6 +1,8 @@
 <?php
 namespace Jicjjang\June;
 
+use ArrayAccess;
+use Jicjjang\June\Stubs\AdminController;
 use PHPUnit_Framework_TestCase;
 use Psr\Http\Message\ServerRequestInterface;
 use Mockery;
@@ -77,5 +79,20 @@ class HandlerCollectionTest extends PHPUnit_Framework_TestCase
 
         $this->assertEquals('hello world and the world', $handlers->execute($executeMock));
         $this->assertEquals('hello world and the world', $handlers->execute($executeMock));
+    }
+
+    public function testControllers()
+    {
+        $mockServerRequest = Mockery::mock(ServerRequestInterface::class);
+
+        $mockControllers = Mockery::mock(ArrayAccess::class);
+        $mockControllers->shouldReceive('offsetGet')->with('Admin')->andReturn(new AdminController());
+
+        $handlers = new HandlerCollection($mockControllers, [
+            'auth@Admin',
+            'index@Admin'
+        ]);
+
+        $this->assertEquals('hello world...', $handlers->execute($mockServerRequest));
     }
 }

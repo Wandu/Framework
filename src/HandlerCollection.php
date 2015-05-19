@@ -16,6 +16,7 @@ class HandlerCollection
     protected $controllers;
 
     /**
+     * @param ArrayAccess $controllers
      * @param array $handlers
      */
     public function __construct(ArrayAccess $controllers, array $handlers = [])
@@ -56,7 +57,8 @@ class HandlerCollection
     public function stringToCallable($handler)
     {
         if (!is_callable($handler)) {
-            $handler = [$this->controllers[$handler[0]], $handler[1]];
+            list($methodName, $className) = explode('@', $handler);
+            $handler = [$this->controllers[$className], $methodName];
         }
         return $handler;
     }
