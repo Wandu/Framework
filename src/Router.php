@@ -6,9 +6,10 @@ use FastRoute\RouteCollector;
 use Psr\Http\Message\ServerRequestInterface;
 use ArrayAccess;
 use ArrayObject;
+use Countable;
 use RuntimeException;
 
-class Router
+class Router implements Countable
 {
     /** @var array */
     protected $routes = [];
@@ -23,6 +24,7 @@ class Router
     {
         $this->controllers = isset($controllers) ? $controllers : new ArrayObject();
     }
+
     /**
      * @return int
      */
@@ -108,7 +110,7 @@ class Router
         $dispatcher = $this->createDispatcher();
         $routeInfo = $this->runDispatcher($dispatcher, $request->getMethod(), $request->getUri()->getPath());
         foreach ($routeInfo[2] as $key => $value) {
-            $request->withAttribute($key, $value);
+            $request = $request->withAttribute($key, $value);
         }
         return $this->routes[$routeInfo[1]]['handler']->execute($request);
     }

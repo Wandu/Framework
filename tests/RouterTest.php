@@ -9,14 +9,6 @@ use ArrayObject;
 
 class RouterTest extends PHPUnit_Framework_TestCase
 {
-    /** @var Router */
-    public $app;
-
-    public function setUp()
-    {
-        $this->app = new Router();
-    }
-
     public function tearDown()
     {
         Mockery::close();
@@ -24,30 +16,29 @@ class RouterTest extends PHPUnit_Framework_TestCase
 
     public function testMethodsWithMap()
     {
-        $this->assertEquals(0, $this->app->count());
+        $router = new Router;
+
+        $this->assertEquals(0, $router->count());
+        $this->assertEquals(0, count($router));
 
         $handler = function () {
             return "!!!";
         };
 
-        $this->app->get('/', $handler);
-        $this->assertEquals(1, $this->app->count());
+        $router->get('/', $handler);
+        $router->post('/', $handler);
+        $router->put('/', $handler);
+        $router->delete('/', $handler);
+        $router->options('/', $handler);
 
-        $this->app->post('/', $handler);
-        $this->assertEquals(2, $this->app->count());
-
-        $this->app->put('/', $handler);
-        $this->assertEquals(3, $this->app->count());
-
-        $this->app->delete('/', $handler);
-        $this->assertEquals(4, $this->app->count());
-
-        $this->app->options('/', $handler);
-        $this->assertEquals(5, $this->app->count());
+        $this->assertEquals(5, $router->count());
+        $this->assertEquals(5, count($router));
     }
 
     public function testDispatch()
     {
+        $router = new Router;
+
         $getMock = Mockery::mock(ServerRequestInterface::class);
         $getMock->shouldReceive('getMethod')->andReturn('GET');
         $getMock->shouldReceive('getUri->getPath')->andReturn('/');
@@ -62,7 +53,7 @@ class RouterTest extends PHPUnit_Framework_TestCase
 
         $getCalled = 0;
         $postCalled = 0;
-        $this->app->get(
+        $router->get(
             '/',
             function (ServerRequestInterface $req, \Closure $next) {
                 return $next($req) . ' getMiddleware';
@@ -73,7 +64,7 @@ class RouterTest extends PHPUnit_Framework_TestCase
             }
         );
 
-        $this->app->post(
+        $router->post(
             '/',
             function (ServerRequestInterface $req, \Closure $next) {
                 return $next($req) . ' postMiddleware';
@@ -84,23 +75,25 @@ class RouterTest extends PHPUnit_Framework_TestCase
             }
         );
 
-        $this->assertEquals('get getMiddleware', $this->app->dispatch($getMock));
+        $this->assertEquals('get getMiddleware', $router->dispatch($getMock));
         $this->assertEquals(1, $getCalled);
         $this->assertEquals(0, $postCalled);
 
-        $this->assertEquals('post postMiddleware', $this->app->dispatch($postMock));
+        $this->assertEquals('post postMiddleware', $router->dispatch($postMock));
         $this->assertEquals(1, $getCalled);
         $this->assertEquals(1, $postCalled);
     }
 
     public function testDispatchWithArguments()
     {
+        $router = new Router;
+
         $getMock = Mockery::mock(ServerRequestInterface::class);
         $getMock->shouldReceive('getMethod')->andReturn('GET');
         $getMock->shouldReceive('getUri->getPath')->andReturn('/jicjjang/hello');
-        $getMock->shouldReceive('withAttribute');
+        $getMock->shouldReceive('withAttribute')->andReturn($getMock);
 
-        $this->app->get(
+        $router->get(
             '/{name}/{message}',
             function (ServerRequestInterface $req, \Closure $next) {
                 return $next($req) . ' getMiddleware';
@@ -110,7 +103,7 @@ class RouterTest extends PHPUnit_Framework_TestCase
             }
         );
 
-        $this->assertEquals('get getMiddleware', $this->app->dispatch($getMock));
+        $this->assertEquals('get getMiddleware', $router->dispatch($getMock));
     }
 
     public function testBindingController()
@@ -132,27 +125,29 @@ class RouterTest extends PHPUnit_Framework_TestCase
         $this->assertSame($controllerMock, $router->getController('admin'));
     }
 
-
     public function testAnyMethod()
     {
+        $router = new Router;
+
         $anyMock = Mockery::mock(ServerRequestInterface::class);
         $anyMock->shouldReceive('getMethod')->andReturn('GET');
         $anyMock->shouldReceive('getUri->getPath')->andReturn('/');
         $anyMock->shouldReceive('setArguments')->with([
         ]);
 
-        $this->app->any('/', function () {
+        $router->any('/', function () {
             return 'any';
         });
 
-        $this->assertEquals('any', $this->app->dispatch($anyMock));
-        $this->assertEquals('any', $this->app->dispatch($anyMock));
+        $this->assertEquals('any', $router->dispatch($anyMock));
+        $this->assertEquals('any', $router->dispatch($anyMock));
     }
 
     public function testExecuteWithController()
     {
-        $app = new Router();
-        $app->setController('admin', new AdminController());
+        $router = new Router();
+
+        $router->setController('admin', new AdminController());
 
         $getMock = Mockery::mock(ServerRequestInterface::class);
         $getMock->shouldReceive('getMethod')->andReturn('GET');
@@ -160,10 +155,8 @@ class RouterTest extends PHPUnit_Framework_TestCase
         $getMock->shouldReceive('setArguments')->with([
         ]);
 
-//        $app->get('/', "middleware@admin", ['admin', 'action']);
-        $app->get('/', ["admin", "middleware"], ['admin', 'action']);
+        $router->get('/', "middleware@admin", "action@admin");
 
-//        $this->assertEquals('Hello World!!!', $app->dispatch($getMock));
-        $this->assertEquals('Hello World!!!', $app->dispatch($getMock));
+        $this->assertEquals('Hello World!!!', $router->dispatch($getMock));
     }
 }
