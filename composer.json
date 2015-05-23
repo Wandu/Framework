@@ -1,7 +1,7 @@
 {
     "name": "wandu/router",
     "description": "FastRouter with PSR-7 Wrapper Library.",
-    "keywords": ["wandu", "http", "router", "fast-router"],
+    "keywords": ["wandu", "http", "router", "psr-7", "psr7", "fast-router", "fast"],
     "license": "MIT",
     "autoload": {
         "psr-4": {

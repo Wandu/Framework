@@ -43,7 +43,9 @@ class Router implements Countable
      */
     public function get($path/*, ...$handlers*/)
     {
-        return $this->mapWithCreateRoute('GET', func_get_args());
+        $handlers = func_get_args();
+        array_shift($handlers);
+        $this->createRoute('GET', $path, $handlers);
     }
 
     /**
@@ -52,7 +54,9 @@ class Router implements Countable
      */
     public function post($path/*, ...$handlers*/)
     {
-        return $this->mapWithCreateRoute('POST', func_get_args());
+        $handlers = func_get_args();
+        array_shift($handlers);
+        $this->createRoute('POST', $path, $handlers);
     }
 
     /**
@@ -61,7 +65,9 @@ class Router implements Countable
      */
     public function put($path/*, ...$handlers*/)
     {
-        return $this->mapWithCreateRoute('PUT', func_get_args());
+        $handlers = func_get_args();
+        array_shift($handlers);
+        $this->createRoute('PUT', $path, $handlers);
     }
 
     /**
@@ -70,7 +76,9 @@ class Router implements Countable
      */
     public function delete($path/*, ...$handlers*/)
     {
-        return $this->mapWithCreateRoute('DELETE', func_get_args());
+        $handlers = func_get_args();
+        array_shift($handlers);
+        $this->createRoute('DELETE', $path, $handlers);
     }
 
     /**
@@ -79,7 +87,9 @@ class Router implements Countable
      */
     public function options($path/*, ...$handlers*/)
     {
-        return $this->mapWithCreateRoute('OPTIONS', func_get_args());
+        $handlers = func_get_args();
+        array_shift($handlers);
+        $this->createRoute('OPTIONS', $path, $handlers);
     }
 
     /**
@@ -88,7 +98,9 @@ class Router implements Countable
      */
     public function any($path/*, ...$handlers*/)
     {
-        return $this->mapWithCreateRoute('*', func_get_args());
+        $handlers = func_get_args();
+        array_shift($handlers);
+        $this->createRoute('*', $path, $handlers);
     }
 
     /**
@@ -104,15 +116,20 @@ class Router implements Countable
     }
 
     /**
-     * @param string $method
+     * @param $method
+     * @param $path
      * @param array $handlers
      */
-    public function mapWithCreateRoute($method, $handlers)
+    public function createRoute($method, $path, array $handlers)
     {
-        $path = array_shift($handlers);
+        if ($path === '/' && $this->prefix !== '') {
+            $path = $this->prefix;
+        } else {
+            $path = $this->prefix . $path;
+        }
         $this->routes[$method.$path] = [
             'method' => $method,
-            'path' => $this->prefix . $path,
+            'path' => $path,
             'handler' => new HandlerCollection($this->controllers, $handlers),
         ];
     }

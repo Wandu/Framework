@@ -162,19 +162,39 @@ class RouterTest extends PHPUnit_Framework_TestCase
 
     public function testGroup()
     {
+        $router = new Router();
+
+        $router->get('/', function () { return '/!'; });
+        $router->group('/hello', function () use ($router) {
+            $router->get('/', function () { return '/hello!'; });
+            $router->get('/world', function () { return '/hello/world!'; });
+            $router->get('/another', function () { return '/hello/another!'; });
+        });
+
+        $this->assertEquals(4, count($router));
+
         $mockRequest = Mockery::mock(ServerRequestInterface::class);
         $mockRequest->shouldReceive('getMethod')->andReturn('GET');
         $mockRequest->shouldReceive('getUri->getPath')->andReturn('/hello/world');
 
-        $router = new Router();
+        $this->assertEquals('/hello/world!', $router->dispatch($mockRequest));
 
-        $router->group('/hello', function () use ($router) {
-            $router->get('/world', function () { return 'world!'; });
-            $router->get('/another', function () { return 'another!!'; });
-        });
+        $mockRequest = Mockery::mock(ServerRequestInterface::class);
+        $mockRequest->shouldReceive('getMethod')->andReturn('GET');
+        $mockRequest->shouldReceive('getUri->getPath')->andReturn('/hello/world');
 
-        $this->assertEquals(2, count($router));
+        $this->assertEquals('/hello/world!', $router->dispatch($mockRequest));
 
-        $this->assertEquals('world!', $router->dispatch($mockRequest));
+        $mockRequest = Mockery::mock(ServerRequestInterface::class);
+        $mockRequest->shouldReceive('getMethod')->andReturn('GET');
+        $mockRequest->shouldReceive('getUri->getPath')->andReturn('/hello');
+
+        $this->assertEquals('/hello!', $router->dispatch($mockRequest));
+
+        $mockRequest = Mockery::mock(ServerRequestInterface::class);
+        $mockRequest->shouldReceive('getMethod')->andReturn('GET');
+        $mockRequest->shouldReceive('getUri->getPath')->andReturn('/');
+
+        $this->assertEquals('/!', $router->dispatch($mockRequest));
     }
 }
