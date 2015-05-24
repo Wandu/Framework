@@ -18,8 +18,8 @@ class Router implements Countable
     /** @var ArrayAccess */
     protected $controllers = [];
 
-    /** @var string */
-    protected $prefix = '';
+    /** @var array */
+    protected $config = [];
 
     /**
      * @param ArrayAccess $controllers
@@ -104,15 +104,18 @@ class Router implements Countable
     }
 
     /**
-     * @param string $path
+     * @param string|array $path
      * @param callable $handler
      */
-    public function group($path, Closure $handler)
+    public function group($config, Closure $handler)
     {
-        $beforePrefix = $this->prefix;
-        $this->prefix = $path;
+        if (!is_array($config)) {
+            $config = ['prefix' => $config];
+        }
+        $beforeConfig = $this->config;
+        $this->config = $config;
         call_user_func($handler, $this);
-        $this->prefix = $beforePrefix;
+        $this->config = $beforeConfig;
     }
 
     /**
@@ -122,10 +125,11 @@ class Router implements Countable
      */
     public function createRoute($method, $path, array $handlers)
     {
-        if ($path === '/' && $this->prefix !== '') {
-            $path = $this->prefix;
-        } else {
-            $path = $this->prefix . $path;
+        if (isset($this->config['prefix'])) {
+            $path = $this->config['prefix'] . ($path === '/' ? '' : $path);
+        }
+        if (isset($this->config['middleware'])) {
+            $handlers = array_merge($this->config['middleware'], $handlers);
         }
         $this->routes[$method.$path] = [
             'method' => $method,
