@@ -179,19 +179,19 @@ class ContainerTest extends PHPUnit_Framework_TestCase
                 return 'singleton text change';
             });
         } catch (CannotChangeException $exception) {
-            $this->assertEquals('You cannot change the data.', $exception->getMessage());
+            $this->assertEquals('You cannot change the data; singleton', $exception->getMessage());
         }
         try {
             $container->factory('factory', function () {
                 return 'factory text change';
             });
         } catch (CannotChangeException $exception) {
-            $this->assertEquals('You cannot change the data.', $exception->getMessage());
+            $this->assertEquals('You cannot change the data; factory', $exception->getMessage());
         }
         try {
             $container->alias('alias', 'factory');
         } catch (CannotChangeException $exception) {
-            $this->assertEquals('You cannot change the data.', $exception->getMessage());
+            $this->assertEquals('You cannot change the data; alias', $exception->getMessage());
         }
     }
 
