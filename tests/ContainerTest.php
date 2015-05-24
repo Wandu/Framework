@@ -116,7 +116,7 @@ class ContainerTest extends PHPUnit_Framework_TestCase
             });
             $this->fail();
         } catch (NullReferenceException $e) {
-            $this->assertEquals('You cannot access null reference container.', $e->getMessage());
+            $this->assertEquals('You cannot access null reference container; unknown', $e->getMessage());
         }
     }
 
@@ -172,7 +172,7 @@ class ContainerTest extends PHPUnit_Framework_TestCase
             $container->instance('instance', 'instance text change');
             $this->fail();
         } catch (CannotChangeException $exception) {
-            $this->assertEquals('You cannot change the data.', $exception->getMessage());
+            $this->assertEquals('You cannot change the data; instance', $exception->getMessage());
         }
         try {
             $container->singleton('singleton', function () {

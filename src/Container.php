@@ -68,7 +68,7 @@ class Container implements ContainerInterface
     public function offsetUnset($name)
     {
         if (isset($this->frozen[$name])) {
-            throw new CannotChangeException();
+            throw new CannotChangeException($name);
         }
         unset($this->keys[$name], $this->closures[$name], $this->instances[$name]);
     }
@@ -123,7 +123,7 @@ class Container implements ContainerInterface
     public function extend($name, Closure $handler)
     {
         if (!isset($this->keys[$name])) {
-            throw new NullReferenceException();
+            throw new NullReferenceException($name);
         }
         if (isset($this->aliases[$name])) {
             $this->extend($this->aliases[$name], $handler);
