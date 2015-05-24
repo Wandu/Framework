@@ -38,7 +38,7 @@ class Container implements ContainerInterface
     public function offsetGet($name)
     {
         if (!isset($this->keys[$name])) {
-            throw new NullReferenceException();
+            throw new NullReferenceException($name);
         }
         $this->frozen[$name] = true;
         if ($this->keys[$name] === 'alias') {

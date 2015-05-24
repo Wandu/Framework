@@ -34,7 +34,7 @@ class ContainerTest extends PHPUnit_Framework_TestCase
             $container['none'];
             $this->fail();
         } catch (NullReferenceException $exception) {
-            $this->assertEquals('You cannot access null reference container.', $exception->getMessage());
+            $this->assertEquals('You cannot access null reference container; none', $exception->getMessage());
         }
     }
 
