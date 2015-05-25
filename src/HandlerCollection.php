@@ -2,9 +2,10 @@
 namespace Wandu\Router;
 
 use ArrayAccess;
+use Countable;
 use Psr\Http\Message\ServerRequestInterface;
 
-class HandlerCollection
+class HandlerCollection implements Countable
 {
     /** @var array */
     protected $handlers;
@@ -23,6 +24,14 @@ class HandlerCollection
     {
         $this->controllers = $controllers;
         $this->handlers = $handlers;
+    }
+
+    /**
+     * @return int
+     */
+    public function count()
+    {
+        return count($this->handlers);
     }
 
     /**
