@@ -145,7 +145,7 @@ class Router implements Countable
         $this->routes[$method.$path] = [
             'method' => $method,
             'path' => $path,
-            'handler' => new HandlerCollection($this->controllers, $handlers),
+            'handler' => new HandlerCollection($handlers),
         ];
     }
 
@@ -167,7 +167,7 @@ class Router implements Countable
         foreach ($routeInfo[2] as $key => $value) {
             $request = $request->withAttribute($key, $value);
         }
-        return $this->routes[$routeInfo[1]]['handler']->execute($request);
+        return $this->routes[$routeInfo[1]]['handler']->execute($request, $this->controllers);
     }
 
     /**
