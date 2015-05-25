@@ -19,14 +19,16 @@ class Router implements Countable
     protected $controllers = [];
 
     /** @var array */
-    protected $config = [];
+    protected $config;
 
     /**
      * @param ArrayAccess $controllers
+     * @param array $config
      */
-    public function __construct(ArrayAccess $controllers = null)
+    public function __construct(ArrayAccess $controllers = null, array $config = [])
     {
         $this->controllers = isset($controllers) ? $controllers : new ArrayObject();
+        $this->config = $config;
     }
 
     /**
