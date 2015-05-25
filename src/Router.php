@@ -28,7 +28,10 @@ class Router implements Countable
     public function __construct(ArrayAccess $controllers = null, array $config = [])
     {
         $this->controllers = isset($controllers) ? $controllers : new ArrayObject();
-        $this->config = $config;
+        $this->config = $config + [
+                'prefix' => '/',
+                'middleware' => []
+            ];
     }
 
     /**
@@ -114,8 +117,15 @@ class Router implements Countable
         if (!is_array($config)) {
             $config = ['prefix' => $config];
         }
+        $config += [
+            'prefix' => '/',
+            'middleware' => []
+        ];
         $beforeConfig = $this->config;
-        $this->config = $config;
+        $this->config = [
+            'prefix' => $this->joinPath($beforeConfig['prefix'], $config['prefix']),
+            'middleware' => array_merge($beforeConfig['middleware'], $config['middleware']),
+        ];
         call_user_func($handler, $this);
         $this->config = $beforeConfig;
     }
@@ -127,17 +137,23 @@ class Router implements Countable
      */
     public function createRoute($method, $path, array $handlers)
     {
-        if (isset($this->config['prefix'])) {
-            $path = $this->config['prefix'] . ($path === '/' ? '' : $path);
-        }
-        if (isset($this->config['middleware'])) {
-            $handlers = array_merge($this->config['middleware'], $handlers);
-        }
+        $prefix = $this->config['prefix'] === '/' ? '' : $this->config['prefix'];
+        $path = $path === '/' ? '' : $path;
+        $path = $prefix . $path ?: '/';
+        $handlers = array_merge($this->config['middleware'], $handlers);
+
         $this->routes[$method.$path] = [
             'method' => $method,
             'path' => $path,
             'handler' => new HandlerCollection($this->controllers, $handlers),
         ];
+    }
+
+    protected function joinPath($path, $pathToJoin)
+    {
+        $path = $path === '/' ? '' : $path;
+        $pathToJoin = $pathToJoin === '/' ? '' : $pathToJoin;
+        return $path . $pathToJoin ?: '/';
     }
 
     /**
@@ -211,5 +227,21 @@ class Router implements Countable
     public function getController($name)
     {
         return $this->controllers[$name];
+    }
+
+    /**
+     * @param array $routes
+     */
+    public function setRoutes(array $routes)
+    {
+        $this->routes = $routes;
+    }
+
+    /**
+     * @return array
+     */
+    public function getRoutes()
+    {
+        return $this->routes;
     }
 }

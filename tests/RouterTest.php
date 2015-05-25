@@ -216,4 +216,30 @@ class RouterTest extends PHPUnit_Framework_TestCase
 
         $this->assertEquals('[m]/hello!', $router->dispatch($mockRequest));
     }
+
+    public function testMultipleGroup()
+    {
+        $router = new Router();
+
+        $router->get('/', 'index@Main');
+        $router->group([
+            'prefix' => '/admin',
+            'middleware' => ['auth@Admin']
+        ], function () use ($router) {
+            $router->group([
+                'prefix' => '/member',
+                'middleware' => ['member@Admin']
+            ], function () use ($router) {
+                $router->get('/', 'index@AdminMember');
+            });
+        });
+
+        $routes = $router->getRoutes();
+
+        $this->assertTrue(isset($routes['GET/']));
+        $this->assertTrue(isset($routes['GET/admin/member']));
+
+        $this->assertEquals(1, count($routes['GET/']['handler']));
+        $this->assertEquals(3, count($routes['GET/admin/member']['handler']));
+    }
 }
