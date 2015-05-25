@@ -13,7 +13,7 @@
          verbose="true"
         >
     <testsuites>
-        <testsuite name="Wandu Template Test Suite">
+        <testsuite name="Wandu DI Test Suite">
             <directory suffix="Test.php">./tests</directory>
         </testsuite>
     </testsuites>
