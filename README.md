@@ -5,7 +5,10 @@ Wandu DI
 [![Latest Unstable Version](https://poser.pugx.org/wandu/di/v/unstable.svg)](https://packagist.org/packages/wandu/di)
 [![Total Downloads](https://poser.pugx.org/wandu/di/downloads.svg)](https://packagist.org/packages/wandu/di)
 [![License](https://poser.pugx.org/wandu/di/license.svg)](https://packagist.org/packages/wandu/di)
+
 [![Build Status](https://img.shields.io/travis/Wandu/DI/master.svg)](https://travis-ci.org/Wandu/DI)
+[![Code Coverage](https://scrutinizer-ci.com/g/Wandu/DI/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/Wandu/DI/?branch=master)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/Wandu/DI/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/Wandu/DI/?branch=master)
 
 Dependency Injection Container.
 
