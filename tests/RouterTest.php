@@ -116,12 +116,12 @@ class RouterTest extends PHPUnit_Framework_TestCase
 
         $router = new Router;
 
-        $this->assertSame($router, $router->setController('admin', $controllerMock));
+        $router->setController('admin', $controllerMock);
         $this->assertSame($controllerMock, $router->getController('admin'));
 
         $router = new Router($containerMock);
 
-        $this->assertSame($router, $router->setController('admin', $controllerMock));
+        $router->setController('admin', $controllerMock);
         $this->assertSame($controllerMock, $router->getController('admin'));
     }
 

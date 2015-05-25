@@ -212,17 +212,15 @@ class Router implements Countable
     /**
      * @param string $name
      * @param $controller
-     * @return $this
      */
     public function setController($name, $controller)
     {
         $this->controllers[$name] = $controller;
-        return $this;
     }
 
     /**
      * @param string $name
-     * @return ControllerInterface
+     * @return object
      */
     public function getController($name)
     {
