@@ -11,18 +11,16 @@ class HandlerCollection implements Countable
     protected $handlers;
 
     /** @var int */
-    protected $nextCount = 0;
+    protected $nextCount;
 
     /** @var ArrayAccess */
     protected $controllers;
-
     /**
      * @param ArrayAccess $controllers
      * @param array $handlers
      */
-    public function __construct(ArrayAccess $controllers, array $handlers = [])
+    public function __construct(array $handlers = [])
     {
-        $this->controllers = $controllers;
         $this->handlers = $handlers;
     }
 
@@ -38,9 +36,10 @@ class HandlerCollection implements Countable
      * @param ServerRequestInterface $request
      * @return mixed
      */
-    public function execute(ServerRequestInterface $request)
+    public function execute(ServerRequestInterface $request, ArrayAccess $controllers)
     {
         $this->nextCount = 0;
+        $this->controllers = $controllers;
         return $this->next($request);
     }
 
