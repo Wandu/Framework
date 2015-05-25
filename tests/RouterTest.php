@@ -215,6 +215,5 @@ class RouterTest extends PHPUnit_Framework_TestCase
         $mockRequest->shouldReceive('getUri->getPath')->andReturn('/hello');
 
         $this->assertEquals('[m]/hello!', $router->dispatch($mockRequest));
-
     }
 }
