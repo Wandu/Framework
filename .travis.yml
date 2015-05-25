@@ -7,7 +7,11 @@ php:
   - hhvm
 
 before_script:
-- "composer install"
+  - "composer install"
 
 script:
-- phpunit --coverage-text --coverage-clover=coverage.clover
+  - phpunit --coverage-text --coverage-clover=coverage.clover
+
+after_script:
+  - wget https://scrutinizer-ci.com/ocular.phar
+  - php ocular.phar code-coverage:upload --format=php-clover coverage.clover --access-token="630d2c3a5740809a24244c0774b6e9dc73aad4b42fa6ac4499062918215dd567"
