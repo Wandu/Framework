@@ -163,7 +163,12 @@ class Router implements Countable
     public function dispatch(ServerRequestInterface $request)
     {
         $dispatcher = $this->createDispatcher();
-        $routeInfo = $this->runDispatcher($dispatcher, $request->getMethod(), $request->getUri()->getPath());
+        $method = $request->getMethod();
+        $parsedBody = $request->getParsedBody();
+        if (isset($parsedBody['_method'])) {
+            $method = strtoupper($parsedBody['_method']);
+        }
+        $routeInfo = $this->runDispatcher($dispatcher, $method, $request->getUri()->getPath());
         foreach ($routeInfo[2] as $key => $value) {
             $request = $request->withAttribute($key, $value);
         }
@@ -186,7 +191,7 @@ class Router implements Countable
      * @param Dispatcher $dispatcher
      * @param string $method
      * @param string $path
-     * @return string
+     * @return array
      */
     protected function runDispatcher(Dispatcher $dispatcher, $method, $path)
     {
