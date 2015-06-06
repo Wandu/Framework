@@ -29,7 +29,7 @@ class Router implements Countable
     {
         $this->controllers = isset($controllers) ? $controllers : new ArrayObject();
         $this->config = $config + [
-                'prefix' => '/',
+                'prefix' => '',
                 'middleware' => []
             ];
     }
@@ -118,7 +118,7 @@ class Router implements Countable
             $config = ['prefix' => $config];
         }
         $config += [
-            'prefix' => '/',
+            'prefix' => '',
             'middleware' => []
         ];
         $beforeConfig = $this->config;
@@ -137,9 +137,7 @@ class Router implements Countable
      */
     public function createRoute($method, $path, array $handlers)
     {
-        $prefix = $this->config['prefix'] === '/' ? '' : $this->config['prefix'];
-        $path = $path === '/' ? '' : $path;
-        $path = $prefix . $path ?: '/';
+        $path = $this->config['prefix'] . $path ?: '/';
         $handlers = array_merge($this->config['middleware'], $handlers);
 
         $this->routes[$method.$path] = [
@@ -151,8 +149,6 @@ class Router implements Countable
 
     protected function joinPath($path, $pathToJoin)
     {
-        $path = $path === '/' ? '' : $path;
-        $pathToJoin = $pathToJoin === '/' ? '' : $pathToJoin;
         return $path . $pathToJoin ?: '/';
     }
 

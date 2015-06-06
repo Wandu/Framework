@@ -25,11 +25,11 @@ class RouterTest extends PHPUnit_Framework_TestCase
             return "!!!";
         };
 
-        $router->get('/', $handler);
-        $router->post('/', $handler);
-        $router->put('/', $handler);
-        $router->delete('/', $handler);
-        $router->options('/', $handler);
+        $router->get('', $handler);
+        $router->post('', $handler);
+        $router->put('', $handler);
+        $router->delete('', $handler);
+        $router->options('', $handler);
 
         $this->assertEquals(5, $router->count());
         $this->assertEquals(5, count($router));
@@ -56,7 +56,7 @@ class RouterTest extends PHPUnit_Framework_TestCase
         $getCalled = 0;
         $postCalled = 0;
         $router->get(
-            '/',
+            '',
             function (ServerRequestInterface $req, \Closure $next) {
                 return $next($req) . ' getMiddleware';
             },
@@ -67,7 +67,7 @@ class RouterTest extends PHPUnit_Framework_TestCase
         );
 
         $router->post(
-            '/',
+            '',
             function (ServerRequestInterface $req, \Closure $next) {
                 return $next($req) . ' postMiddleware';
             },
@@ -139,7 +139,7 @@ class RouterTest extends PHPUnit_Framework_TestCase
         $anyMock->shouldReceive('setArguments')->with([
         ]);
 
-        $router->any('/', function () {
+        $router->any('', function () {
             return 'any';
         });
 
@@ -169,9 +169,9 @@ class RouterTest extends PHPUnit_Framework_TestCase
     {
         $router = new Router();
 
-        $router->get('/', function () { return '/!'; });
+        $router->get('', function () { return '/!'; });
         $router->group('/hello', function () use ($router) {
-            $router->get('/', function () { return '/hello!'; });
+            $router->get('', function () { return '/hello!'; });
             $router->get('/world', function () { return '/hello/world!'; });
             $router->get('/another', function () { return '/hello/another!'; });
         });
@@ -211,12 +211,12 @@ class RouterTest extends PHPUnit_Framework_TestCase
     {
         $router = new Router();
 
-        $router->get('/', function () { return '/!'; });
+        $router->get('', function () { return '/!'; });
         $router->group([
             'prefix' => '/hello',
             'middleware' => [function ($request, $next) { return '[m]' . $next($request); }]
         ], function () use ($router) {
-            $router->get('/', function () { return '/hello!'; });
+            $router->get('', function () { return '/hello!'; });
         });
 
         $mockRequest = Mockery::mock(ServerRequestInterface::class);
@@ -231,7 +231,7 @@ class RouterTest extends PHPUnit_Framework_TestCase
     {
         $router = new Router();
 
-        $router->get('/', 'index@Main');
+        $router->get('', 'index@Main');
         $router->group([
             'prefix' => '/admin',
             'middleware' => ['auth@Admin']
@@ -241,6 +241,7 @@ class RouterTest extends PHPUnit_Framework_TestCase
                 'middleware' => ['member@Admin']
             ], function () use ($router) {
                 $router->get('/', 'index@AdminMember');
+                $router->get('', 'index@AdminMember');
             });
         });
 
@@ -248,6 +249,7 @@ class RouterTest extends PHPUnit_Framework_TestCase
 
         $this->assertTrue(isset($routes['GET/']));
         $this->assertTrue(isset($routes['GET/admin/member']));
+        $this->assertTrue(isset($routes['GET/admin/member/']));
 
         $this->assertEquals(1, count($routes['GET/']['handler']));
         $this->assertEquals(3, count($routes['GET/admin/member']['handler']));
@@ -257,7 +259,7 @@ class RouterTest extends PHPUnit_Framework_TestCase
     {
         $router = new Router();
 
-        $router->put('/', function () {
+        $router->put('', function () {
             return 'call put!';
         });
 
@@ -269,5 +271,38 @@ class RouterTest extends PHPUnit_Framework_TestCase
         ]);
 
         $this->assertEquals('call put!', $router->dispatch($mockRequest));
+    }
+
+    public function testGroupSlashSensitive()
+    {
+        $router = new Router();
+
+        $router->get('', function () { return '/!'; });
+        $router->group('/hello', function () use ($router) {
+            $router->get('', function () { return '/hello!'; });
+            $router->get('/', function () { return '/hello/!'; });
+            $router->get('///abc', function () { return '/hello///abc!'; });
+        });
+
+        $mockRequest = Mockery::mock(ServerRequestInterface::class);
+        $mockRequest->shouldReceive('getParsedBody')->andReturn([]);
+        $mockRequest->shouldReceive('getMethod')->andReturn('GET');
+        $mockRequest->shouldReceive('getUri->getPath')->andReturn('/hello');
+
+        $this->assertEquals('/hello!', $router->dispatch($mockRequest));
+
+        $mockRequest = Mockery::mock(ServerRequestInterface::class);
+        $mockRequest->shouldReceive('getParsedBody')->andReturn([]);
+        $mockRequest->shouldReceive('getMethod')->andReturn('GET');
+        $mockRequest->shouldReceive('getUri->getPath')->andReturn('/hello/');
+
+        $this->assertEquals('/hello/!', $router->dispatch($mockRequest));
+
+        $mockRequest = Mockery::mock(ServerRequestInterface::class);
+        $mockRequest->shouldReceive('getParsedBody')->andReturn([]);
+        $mockRequest->shouldReceive('getMethod')->andReturn('GET');
+        $mockRequest->shouldReceive('getUri->getPath')->andReturn('/hello///abc');
+
+        $this->assertEquals('/hello///abc!', $router->dispatch($mockRequest));
     }
 }
