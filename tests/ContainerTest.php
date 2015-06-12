@@ -4,7 +4,6 @@ namespace Wandu\DI;
 use Mockery;
 use PHPUnit_Framework_TestCase;
 use stdClass;
-use Wandu\Standard\DI\ServiceProviderInterface;
 
 class ContainerTest extends PHPUnit_Framework_TestCase
 {

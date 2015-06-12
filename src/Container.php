@@ -2,8 +2,6 @@
 namespace Wandu\DI;
 
 use Closure;
-use Wandu\Standard\DI\ContainerInterface;
-use Wandu\Standard\DI\ServiceProviderInterface;
 
 class Container implements ContainerInterface
 {
