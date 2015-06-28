@@ -48,12 +48,30 @@ class ContainerTest extends PHPUnit_Framework_TestCase
         $this->assertNotSame($container['factory'], $container['factory']);
     }
 
+    public function testFactoryByClassName()
+    {
+        $container = new Container();
+        $container->factory('singleton', stdClass::class);
+
+        $this->assertEquals($container['singleton'], $container['singleton']);
+        $this->assertNotSame($container['singleton'], $container['singleton']);
+    }
+
     public function testSingleton()
     {
         $container = new Container();
         $container->singleton('singleton', function () {
             return new stdClass();
         });
+
+        $this->assertEquals($container['singleton'], $container['singleton']);
+        $this->assertSame($container['singleton'], $container['singleton']);
+    }
+
+    public function testSingletonByClassName()
+    {
+        $container = new Container();
+        $container->singleton('singleton', stdClass::class);
 
         $this->assertEquals($container['singleton'], $container['singleton']);
         $this->assertSame($container['singleton'], $container['singleton']);
