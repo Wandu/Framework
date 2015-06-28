@@ -4,47 +4,56 @@ namespace Wandu\DI;
 use Closure;
 use ReflectionClass;
 
-class AutoResolver
+class AutoResolver extends Container
 {
+    /** @var array */
     protected $dependencies = [];
 
-    protected $keys = [];
-
-    protected $alias = [];
-
-    public function singleton($class)
+    /**
+     * @param string $name it must be class or interface name
+     * @param string $class it must be class name.
+     */
+    public function bind($name, $class = null)
     {
-        $this->keys[$class] = 'singleton';
-        $this->dependencies[$class] = $this->analyzeConstructor($class);
-    }
-
-    protected function analyzeClass($class)
-    {
-
-    }
-
-    protected function analyzeConstructor($class)
-    {
-        $refl = new Reflectionclass($class);
-        $constructor = $refl->getConstructor();
-        if (!isset($constructor)) {
-            return [];
+        if (!isset($class)) {
+            $class = $name;
         }
-        $dependencies = [];
-        $params = $refl->getConstructor()->getParameters();
-        foreach ($params as $param) {
-            $type = null;
-            if ($paramRefl = $param->getClass()) {
-                $type = $paramRefl->getName();
-            } elseif ($param->isArray()) {
-                $type = 'array';
-            } elseif ($param->isCallable()) {
-                $type = 'callable';
-            } else {
-                $type = null;
+        $this->keys[$name] = 'resolver';
+        $this->dependencies[$name] = $class;
+    }
+
+    /**
+     * @param string $class
+     * @param string $method
+     * @return object
+     */
+    public function resolve($class, $method = null)
+    {
+        return $this->offsetGet($class);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function offsetGet($name)
+    {
+        if ($this->keys[$name] !== 'resolver') {
+            return parent::offsetGet($name);
+        }
+        $class = $this->dependencies[$name];
+        $refl = new ReflectionClass($class);
+        $constructorRefl = $refl->getConstructor();
+        $depends = [];
+        if ($constructorRefl) {
+            $params = $constructorRefl->getParameters();
+            foreach ($params as $param) {
+                if ($paramRefl = $param->getClass()) {
+                    $depends[] = $this->offsetGet($paramRefl->getName());
+                } else {
+                    throw new CannotResolveException('Auto resolver can resolve the class that use params with type hint;' . $class);
+                }
             }
-            $dependencies[] = $type;
         }
-        return $dependencies;
+        return $refl->newInstanceArgs($depends);
     }
 }
