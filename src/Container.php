@@ -7,22 +7,19 @@ use InvalidArgumentException;
 class Container implements ContainerInterface
 {
     /** @var array */
-    private $keys = [];
+    protected $keys = [];
 
     /** @var array */
-    private $closures = [];
+    protected $closures = [];
 
     /** @var array */
-    private $classes = [];
-
-    /** @var array */
-    private $instances = [];
+    protected $instances = [];
 
     /** @var array ref. Pimple */
-    private $frozen = [];
+    protected $frozen = [];
 
     /** @var array */
-    private $aliases = [];
+    protected $aliases = [];
 
     /**
      * @param string $name
@@ -43,20 +40,14 @@ class Container implements ContainerInterface
             throw new NullReferenceException($name);
         }
         $this->frozen[$name] = true;
-        switch ($this->keys[$name]) {
-            case 'alias':
-                return $this->offsetGet($this->aliases[$name]);
-            case 'factory.closure':
-                return call_user_func($this->closures[$name], $this);
-            case 'factory.class':
-                return new $this->classes[$name];
+        if ($this->keys[$name] === 'alias') {
+            return $this->offsetGet($this->aliases[$name]);
+        }
+        if ($this->keys[$name] === 'factory') {
+            return call_user_func($this->closures[$name], $this);
         }
         if (!isset($this->instances[$name])) {
-            if ($this->keys[$name] === 'singleton.closure') {
-                $this->instances[$name] = call_user_func($this->closures[$name], $this);
-            } else {
-                $this->instances[$name] = new $this->classes[$name];
-            }
+            $this->instances[$name] = call_user_func($this->closures[$name], $this);
         }
         return $this->instances[$name];
     }
@@ -84,36 +75,22 @@ class Container implements ContainerInterface
     /**
      * {@inheritdoc}
      */
-    public function singleton($name, $handler)
+    public function singleton($name, Closure $handler)
     {
         $this->offsetUnset($name);
-        if ($handler instanceof Closure) {
-            $this->keys[$name] = 'singleton.closure';
-            $this->closures[$name] = $handler;
-        } elseif (class_exists($handler)) {
-            $this->keys[$name] = 'singleton.class';
-            $this->classes[$name] = $handler;
-        } else {
-            throw new InvalidArgumentException('"$handler" must be the closure or class name.');
-        }
+        $this->keys[$name] = 'singleton';
+        $this->closures[$name] = $handler;
         return $this;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function factory($name, $handler)
+    public function factory($name, Closure $handler)
     {
         $this->offsetUnset($name);
-        if ($handler instanceof Closure) {
-            $this->keys[$name] = 'factory.closure';
-            $this->closures[$name] = $handler;
-        } elseif (class_exists($handler)) {
-            $this->keys[$name] = 'factory.class';
-            $this->classes[$name] = $handler;
-        } else {
-            throw new InvalidArgumentException('"$handler" must be the closure or class name.');
-        }
+        $this->keys[$name] = 'factory';
+        $this->closures[$name] = $handler;
         return $this;
     }
 
