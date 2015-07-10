@@ -8,10 +8,22 @@ interface ContainerInterface extends ArrayAccess
 {
     /**
      * @param string $name
+     * @return mixed
+     */
+    public function get($name);
+
+    /**
+     * @param string $name
+     * @return bool
+     */
+    public function has($name);
+
+    /**
+     * @param string $name
      * @param callable $handler
      * @return self
      */
-    public function singleton($name, Closure $handler);
+    public function closure($name, Closure $handler);
 
     /**
      * @param string $name

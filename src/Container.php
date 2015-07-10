@@ -46,7 +46,7 @@ class Container implements ContainerInterface
      */
     public function offsetExists($name)
     {
-        return isset($this->keys[$name]);
+        return $this->has($name);
     }
 
     /**
@@ -71,6 +71,14 @@ class Container implements ContainerInterface
     public function offsetUnset($name)
     {
         $this->destroy($name);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function has($name)
+    {
+        return isset($this->keys[$name]);
     }
 
     /**
@@ -149,7 +157,7 @@ class Container implements ContainerInterface
     /**
      * {@inheritdoc}
      */
-    public function singleton($name, Closure $handler)
+    public function closure($name, Closure $handler)
     {
         $this->offsetUnset($name);
         $this->keys[$name] = 'singleton';
