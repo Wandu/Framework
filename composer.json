@@ -21,6 +21,11 @@
             "Wandu\\DI\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Wandu\\DI\\": "tests/"
+        }
+    },
     "extra": {
         "branch-alias": {
             "dev-master": "1.1-dev"

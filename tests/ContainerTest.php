@@ -5,6 +5,10 @@ use ArrayObject;
 use Mockery;
 use PHPUnit_Framework_TestCase;
 use stdClass;
+use Wandu\DI\Stub\DepBar;
+use Wandu\DI\Stub\DepFoo;
+use Wandu\DI\Stub\DepInterface;
+use Wandu\DI\Stub\NonDepInterface;
 
 class ContainerTest extends PHPUnit_Framework_TestCase
 {
@@ -20,84 +24,92 @@ class ContainerTest extends PHPUnit_Framework_TestCase
         $this->container = new Container($configs);
     }
 
+    public function testHas()
+    {
+        $this->container->instance(DepInterface::class, new DepFoo);
+
+        $this->assertFalse($this->container->has(NonDepInterface::class));
+        $this->assertTrue($this->container->has(DepInterface::class));
+
+        // has map to offsetExists
+        $this->assertFalse(isset($this->container[NonDepInterface::class]));
+        $this->assertTrue(isset($this->container[DepInterface::class]));
+    }
+
     public function testInstance()
     {
-        $this->container->instance('exist', 'value!');
-        $this->assertFalse(isset($this->container['unknown']));
-        $this->assertTrue(isset($this->container['exist']));
+        $this->container->instance('foo', $foo = new DepFoo());
+
+        // instance map to offsetSet
+        $this->container['bar'] = $bar = new DepBar();
+
+        $this->assertSame($foo, $this->container->get('foo'));
+        $this->assertSame($bar, $this->container->get('bar'));
+
+        // get map to offsetGet
+        $this->assertSame($foo, $this->container['foo']);
+        $this->assertSame($bar, $this->container['bar']);
     }
 
-    public function testOffsetSet()
+    public function testGetUnknown()
     {
-        $this->container['foo'] = ['number' => 1, 'string' => 'text!!'];
-        $this->container->instance('bar', ['number' => 2, 'string' => 'text??']);
-
-        $this->assertEquals(['number' => 1, 'string' => 'text!!'], $this->container['foo']);
-        $this->assertEquals(['number' => 2, 'string' => 'text??'], $this->container['bar']);
-    }
-
-    public function testUnknownCall()
-    {
-        $container = new Container();
         try {
-            $container['none'];
+            $this->container->get('Unknown');
             $this->fail();
         } catch (NullReferenceException $exception) {
-            $this->assertEquals('You cannot access null reference container; none', $exception->getMessage());
+            $this->assertEquals('You cannot access null reference container; Unknown', $exception->getMessage());
         }
     }
 
-    public function testSingleton()
+    public function testClosure()
     {
-        $container = new Container();
-        $container->singleton('singleton', function () {
-            return new stdClass();
+        $this->container->closure(DepInterface::class, function () {
+            return new DepFoo;
         });
 
-        $this->assertEquals($container['singleton'], $container['singleton']);
-        $this->assertSame($container['singleton'], $container['singleton']);
+        $this->assertEquals($this->container[DepInterface::class], $this->container[DepInterface::class]);
+        $this->assertSame($this->container[DepInterface::class], $this->container[DepInterface::class]);
     }
 
     public function testAlias()
     {
-        $container = new Container();
-        $container->instance('instance1', 'Test String 1!');
-        $container->instance('instance2', 'Test String 2!');
+        $this->container->instance(DepInterface::class, $foo = new DepFoo);
 
-        $container->alias('myalias', 'instance1');
-        $container->alias('otheralias', 'myalias');
+        $this->container->alias('myalias', DepInterface::class);
+        $this->container->alias('otheralias', 'myalias');
 
-        $this->assertEquals('Test String 1!', $container['myalias']);
-        $this->assertEquals('Test String 1!', $container['otheralias']);
+        $this->assertSame($foo, $this->container[DepInterface::class]);
+        $this->assertSame($foo, $this->container['myalias']);
+        $this->assertSame($foo, $this->container['otheralias']);
     }
 
     public function testExtend()
     {
-        $container = new Container();
-        $container->instance('instance', new stdClass());
-        $container->singleton('singleton', function () {
+        $this->container = new Container();
+        $this->container->instance('instance', new stdClass());
+        $this->container->singleton('singleton', function () {
             return new stdClass();
         });
-        $container->extend('instance', function ($item) {
+        $this->container->extend('instance', function ($item) {
             $item->contents = 'added1!!';
             return $item;
         });
-        $container->extend('singleton', function ($item) {
+        $this->container->extend('singleton', function ($item) {
             $item->contents = 'added2!!';
             return $item;
         });
 
-        $this->assertEquals('added1!!', $container['instance']->contents);
-        $this->assertEquals('added2!!', $container['singleton']->contents);
+        $this->assertEquals('added1!!', $this->container['instance']->contents);
+        $this->assertEquals('added2!!', $this->container['singleton']->contents);
 
-        $this->assertEquals($container['singleton'], $container['singleton']);
-        $this->assertSame($container['singleton'], $container['singleton']);
+        $this->assertEquals($this->container['singleton'], $this->container['singleton']);
+        $this->assertSame($this->container['singleton'], $this->container['singleton']);
 
-        $this->assertEquals($container['instance'], $container['instance']);
-        $this->assertSame($container['instance'], $container['instance']);
+        $this->assertEquals($this->container['instance'], $this->container['instance']);
+        $this->assertSame($this->container['instance'], $this->container['instance']);
 
         try {
-            $container->extend('unknown', function ($item) {
+            $this->container->extend('unknown', function ($item) {
                 return $item .' extended..';
             });
             $this->fail();
@@ -108,30 +120,30 @@ class ContainerTest extends PHPUnit_Framework_TestCase
 
     public function testAliasExtend()
     {
-        $container = new Container();
-        $container->instance('instance1', 'Test String 1!');
-        $container->instance('instance2', 'Test String 2!');
+        $this->container = new Container();
+        $this->container->instance('instance1', 'Test String 1!');
+        $this->container->instance('instance2', 'Test String 2!');
 
-        $container->alias('myalias', 'instance1');
-        $container->alias('otheralias', 'myalias');
+        $this->container->alias('myalias', 'instance1');
+        $this->container->alias('otheralias', 'myalias');
 
-        $container->extend('otheralias', function ($item) {
+        $this->container->extend('otheralias', function ($item) {
             return $item .' extended..';
         });
 
-        $this->assertEquals('Test String 1! extended..', $container['instance1']);
+        $this->assertEquals('Test String 1! extended..', $this->container['instance1']);
     }
 
 
     public function testDependency()
     {
-        $container = new Container();
-        $container['mammal'] = 'mammal!';
-        $container->singleton('person', function ($c) {
+        $this->container = new Container();
+        $this->container['mammal'] = 'mammal!';
+        $this->container->singleton('person', function ($c) {
             return 'person is ' .$c['mammal'];
         });
 
-        $this->assertEquals('person is mammal!', $container['person']);
+        $this->assertEquals('person is mammal!', $this->container['person']);
     }
 
     /**
@@ -139,32 +151,32 @@ class ContainerTest extends PHPUnit_Framework_TestCase
      */
     public function testFrozon()
     {
-        $container = new Container();
-        $container->instance('instance', 'instance text');
-        $container->singleton('singleton', function () {
+        $this->container = new Container();
+        $this->container->instance('instance', 'instance text');
+        $this->container->singleton('singleton', function () {
             return 'singleton text';
         });
-        $container->alias('alias', 'singleton');
+        $this->container->alias('alias', 'singleton');
 
-        $this->assertEquals('instance text', $container['instance']);
-        $this->assertEquals('singleton text', $container['singleton']);
-        $this->assertEquals('singleton text', $container['alias']);
+        $this->assertEquals('instance text', $this->container['instance']);
+        $this->assertEquals('singleton text', $this->container['singleton']);
+        $this->assertEquals('singleton text', $this->container['alias']);
 
         try {
-            $container->instance('instance', 'instance text change');
+            $this->container->instance('instance', 'instance text change');
             $this->fail();
         } catch (CannotChangeException $exception) {
             $this->assertEquals('You cannot change the data; instance', $exception->getMessage());
         }
         try {
-            $container->singleton('singleton', function () {
+            $this->container->singleton('singleton', function () {
                 return 'singleton text change';
             });
         } catch (CannotChangeException $exception) {
             $this->assertEquals('You cannot change the data; singleton', $exception->getMessage());
         }
         try {
-            $container->alias('alias', 'factory');
+            $this->container->alias('alias', 'factory');
         } catch (CannotChangeException $exception) {
             $this->assertEquals('You cannot change the data; alias', $exception->getMessage());
         }
@@ -172,12 +184,12 @@ class ContainerTest extends PHPUnit_Framework_TestCase
 
     public function testRegister()
     {
-        $container = new Container();
+        $this->container = new Container();
 
         $mockProvider = Mockery::mock(ServiceProviderInterface::class);
-        $mockProvider->shouldReceive('register')->with($container);
+        $mockProvider->shouldReceive('register')->with($this->container);
 
-        $this->assertSame($container, $container->register($mockProvider));
+        $this->assertSame($this->container, $this->container->register($mockProvider));
     }
 
 
@@ -210,13 +222,3 @@ class ContainerTest extends PHPUnit_Framework_TestCase
 }
 
 
-interface StubAutoNeededInterface {}
-class StubAutoNeeded implements StubAutoNeededInterface {}
-
-class StubAuto
-{
-    public function __construct(StubAutoNeededInterface $need)
-    {
-
-    }
-}
