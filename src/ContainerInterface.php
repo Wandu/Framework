@@ -15,13 +15,6 @@ interface ContainerInterface extends ArrayAccess
 
     /**
      * @param string $name
-     * @param callable $handler
-     * @return self
-     */
-    public function factory($name, Closure $handler);
-
-    /**
-     * @param string $name
      * @param mixed $value
      * @return self
      */

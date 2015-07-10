@@ -1,11 +1,16 @@
 <?php
 namespace Wandu\DI;
 
+use ArrayAccess;
+use ArrayObject;
 use Closure;
 use InvalidArgumentException;
 
 class Container implements ContainerInterface
 {
+    /** @var ArrayAccess */
+    protected $configs;
+
     /** @var array */
     protected $keys = [];
 
@@ -22,8 +27,18 @@ class Container implements ContainerInterface
     protected $aliases = [];
 
     /**
-     * @param string $name
-     * @return bool
+     * @param ArrayAccess $configs
+     */
+    public function __construct(ArrayAccess $configs = null)
+    {
+        if (!isset($configs)) {
+            $configs = new ArrayObject();
+        }
+        $this->configs = $configs;
+    }
+
+    /**
+     * {@inheritdoc}
      */
     public function offsetExists($name)
     {
@@ -31,10 +46,45 @@ class Container implements ContainerInterface
     }
 
     /**
+     * {@inheritdoc}
+     */
+    public function offsetGet($name)
+    {
+        return $this->get($name);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function offsetSet($name, $value)
+    {
+        $this->instance($name, $value);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function offsetUnset($name)
+    {
+        $this->destroy($name);
+    }
+
+    /**
+     * @param string $name
+     */
+    public function destroy($name)
+    {
+        if (isset($this->frozen[$name])) {
+            throw new CannotChangeException($name);
+        }
+        unset($this->keys[$name], $this->closures[$name], $this->instances[$name]);
+    }
+
+    /**
      * @param string $name
      * @return mixed|null
      */
-    public function offsetGet($name)
+    public function get($name)
     {
         if (!isset($this->keys[$name])) {
             throw new NullReferenceException($name);
@@ -43,33 +93,10 @@ class Container implements ContainerInterface
         if ($this->keys[$name] === 'alias') {
             return $this->offsetGet($this->aliases[$name]);
         }
-        if ($this->keys[$name] === 'factory') {
-            return call_user_func($this->closures[$name], $this);
-        }
         if (!isset($this->instances[$name])) {
             $this->instances[$name] = call_user_func($this->closures[$name], $this);
         }
         return $this->instances[$name];
-    }
-
-    /**
-     * @param string $name
-     * @param mixed $value
-     */
-    public function offsetSet($name, $value)
-    {
-        $this->instance($name, $value);
-    }
-
-    /**
-     * @param string $name
-     */
-    public function offsetUnset($name)
-    {
-        if (isset($this->frozen[$name])) {
-            throw new CannotChangeException($name);
-        }
-        unset($this->keys[$name], $this->closures[$name], $this->instances[$name]);
     }
 
     /**
@@ -79,17 +106,6 @@ class Container implements ContainerInterface
     {
         $this->offsetUnset($name);
         $this->keys[$name] = 'singleton';
-        $this->closures[$name] = $handler;
-        return $this;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function factory($name, Closure $handler)
-    {
-        $this->offsetUnset($name);
-        $this->keys[$name] = 'factory';
         $this->closures[$name] = $handler;
         return $this;
     }
