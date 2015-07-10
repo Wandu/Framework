@@ -179,4 +179,44 @@ class ContainerTest extends PHPUnit_Framework_TestCase
 
         $this->assertSame($container, $container->register($mockProvider));
     }
+
+
+    public function testAutoResolveConstructor()
+    {
+        $resolver = new AutoResolver();
+
+        $resolver->bind(StubAutoNeededInterface::class, StubAutoNeeded::class);
+        $resolver->bind(StubAuto::class);
+
+        $this->assertInstanceOf(StubAuto::class, $resolver->resolve(StubAuto::class));
+
+        $this->assertEquals($resolver->resolve(StubAuto::class), $resolver->resolve(StubAuto::class));
+        $this->assertNotSame($resolver->resolve(StubAuto::class), $resolver->resolve(StubAuto::class));
+    }
+
+    public function testAutoResolveWithMethod()
+    {
+        $resolver = new AutoResolver();
+
+        $resolver->bind(StubAutoNeededInterface::class, StubAutoNeeded::class);
+        $resolver->bind(StubAuto::class);
+
+        $this->assertInstanceOf(StubAuto::class, $resolver->resolve(StubAuto::class));
+
+        $this->assertEquals($resolver->resolve(StubAuto::class), $resolver->resolve(StubAuto::class));
+        $this->assertNotSame($resolver->resolve(StubAuto::class), $resolver->resolve(StubAuto::class));
+
+    }
+}
+
+
+interface StubAutoNeededInterface {}
+class StubAutoNeeded implements StubAutoNeededInterface {}
+
+class StubAuto
+{
+    public function __construct(StubAutoNeededInterface $need)
+    {
+
+    }
 }

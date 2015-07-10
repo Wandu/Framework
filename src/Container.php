@@ -5,6 +5,7 @@ use ArrayAccess;
 use ArrayObject;
 use Closure;
 use InvalidArgumentException;
+use ReflectionClass;
 
 class Container implements ContainerInterface
 {
@@ -25,6 +26,9 @@ class Container implements ContainerInterface
 
     /** @var array */
     protected $aliases = [];
+
+    /** @var array */
+    protected $dependencies = [];
 
     /**
      * @param ArrayAccess $configs
@@ -70,6 +74,29 @@ class Container implements ContainerInterface
     }
 
     /**
+     * @param string $name it must be class or interface name
+     * @param string $class it must be class name.
+     */
+    public function bind($name, $class = null)
+    {
+        if (!isset($class)) {
+            $class = $name;
+        }
+        $this->keys[$name] = 'resolver';
+        $this->dependencies[$name] = $class;
+    }
+
+    /**
+     * @param string $class
+     * @param string $method
+     * @return object
+     */
+    public function resolve($class, $method = null)
+    {
+        return $this->offsetGet($class);
+    }
+
+    /**
      * @param string $name
      */
     public function destroy($name)
@@ -89,15 +116,35 @@ class Container implements ContainerInterface
         if (!isset($this->keys[$name])) {
             throw new NullReferenceException($name);
         }
-        $this->frozen[$name] = true;
-        if ($this->keys[$name] === 'alias') {
-            return $this->offsetGet($this->aliases[$name]);
+        if ($this->keys[$name] !== 'resolver') {
+            $this->frozen[$name] = true;
+            if ($this->keys[$name] === 'alias') {
+                return $this->offsetGet($this->aliases[$name]);
+            }
+            if (!isset($this->instances[$name])) {
+                $this->instances[$name] = call_user_func($this->closures[$name], $this);
+            }
+            return $this->instances[$name];
         }
-        if (!isset($this->instances[$name])) {
-            $this->instances[$name] = call_user_func($this->closures[$name], $this);
+
+        $class = $this->dependencies[$name];
+        $refl = new ReflectionClass($class);
+        $constructorRefl = $refl->getConstructor();
+        $depends = [];
+        if ($constructorRefl) {
+            $params = $constructorRefl->getParameters();
+            foreach ($params as $param) {
+                if ($paramRefl = $param->getClass()) {
+                    $depends[] = $this->offsetGet($paramRefl->getName());
+                } else {
+                    throw new CannotResolveException('Auto resolver can resolve the class that use params with type hint;' . $class);
+                }
+            }
         }
-        return $this->instances[$name];
+        return $refl->newInstanceArgs($depends);
     }
+
+
 
     /**
      * {@inheritdoc}
