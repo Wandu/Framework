@@ -4,6 +4,7 @@ namespace Wandu\DI;
 use ArrayObject;
 use Mockery;
 use PHPUnit_Framework_TestCase;
+use Wandu\DI\Stub\Invoker;
 use Wandu\DI\Stub\StubClient;
 use Wandu\DI\Stub\StubClientWithConfig;
 use Wandu\DI\Stub\DepBar;
@@ -230,13 +231,37 @@ class ContainerTest extends PHPUnit_Framework_TestCase
             return new DepFoo();
         });
 
+        function stub(DepInterface $dep)
+        {
+            return 'call function';
+        }
+
         // closure
-        $this->assertEquals('hello world :D', $this->container->call(function (DepInterface $dep) {
-            return 'hello world :D';
+        $this->assertEquals('call closure', $this->container->call(function (DepInterface $dep) {
+            return 'call closure';
         }));
+
+        // function
+        $this->assertEquals('call function', $this->container->call(__NAMESPACE__ . '\\stub'));
 
         // static method
         $this->assertInstanceOf(StubClient::class, $this->container->call(StubClient::class . '::create'));
+
+        // array of static
+        $this->assertInstanceOf(StubClient::class, $this->container->call([StubClient::class, 'create']));
+
+        // array of method
+        $this->assertEquals(
+            'call with dependency',
+            $this->container->call([new StubClient(new DepFoo), 'callWithDependency'])
+        );
+
+        // invoker
+        $this->assertEquals(
+            'invoke with',
+            $this->container->call(new Invoker())
+        );
+
     }
 
     public function testAutoResolveBind()

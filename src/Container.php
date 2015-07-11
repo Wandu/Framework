@@ -228,7 +228,17 @@ class Container implements ContainerInterface
 
         if ($callee instanceof Closure) {
             $reflectionFunction = new ReflectionFunction($callee);
+        } elseif (method_exists($callee, '__invoke')) {
+            $reflectionObject = new \ReflectionObject($callee);
+            $reflectionFunction = $reflectionObject->getMethod('__invoke');
         } elseif (is_array($callee)) {
+            if (is_object($callee[0])) {
+                $reflectionObject = new \ReflectionObject($callee[0]);
+                $reflectionFunction = $reflectionObject->getMethod($callee[1]);
+            } else {
+                $reflectionClass = new ReflectionClass($callee[0]);
+                $reflectionFunction = $reflectionClass->getMethod($callee[1]);
+            }
         } else {
             if (false !== $p = strpos($callee, '::')) {
                 $reflectionClass = new ReflectionClass(substr($callee, 0, $p));

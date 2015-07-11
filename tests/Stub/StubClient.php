@@ -17,7 +17,6 @@ class StubClient
 
     /**
      * @param DepInterface $dependency
-     * @param array $config
      */
     public function __construct(DepInterface $dependency)
     {
@@ -30,5 +29,10 @@ class StubClient
     public function getDependency()
     {
         return $this->dependency;
+    }
+
+    public function callWithDependency(DepInterface $dep)
+    {
+        return 'call with dependency';
     }
 }
