@@ -59,11 +59,18 @@ interface ContainerInterface extends ArrayAccess
      * @return self
      */
     public function bind($name, $class = null);
-//
-//    /**
-//     * @param string $class
-//     * @param string $method
-//     * @return object
-//     */
-//    public function resolve($class, $method = null);
+
+    /**
+     * @param string $class
+     * @param mixed ...$parameters
+     * @return object
+     */
+    public function resolve($class);
+
+    /**
+     * @param callable $callee
+     * @param mixed ...$parameters
+     * @return mixed
+     */
+    public function call(callable $callee);
 }

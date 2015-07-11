@@ -6,6 +6,8 @@ use ArrayObject;
 use Closure;
 use InvalidArgumentException;
 use ReflectionClass;
+use ReflectionFunction;
+use ReflectionFunctionAbstract;
 
 class Container implements ContainerInterface
 {
@@ -79,34 +81,6 @@ class Container implements ContainerInterface
     public function has($name)
     {
         return isset($this->keys[$name]);
-    }
-
-    /**
-     * @param string|callable $class
-     * @param mixed ...$parameters
-     * @return object
-     */
-    public function resolve($class)
-    {
-        $parameters = func_get_args();
-        array_shift($parameters); // remove first argument
-
-        $reflectionClass = new ReflectionClass($class);
-        $reflectionMethod = $reflectionClass->getConstructor();
-        $depends = [];
-        if ($reflectionMethod) {
-            $params = $reflectionMethod->getParameters();
-            foreach ($params as $param) {
-                if ($paramRefl = $param->getClass()) {
-                    $depends[] = $this->offsetGet($paramRefl->getName());
-                } elseif (count($parameters)) {
-                    $depends[] = array_shift($parameters);
-                } else {
-                    throw new CannotResolveException($class);
-                }
-            }
-        }
-        return $reflectionClass->newInstanceArgs($depends);
     }
 
     /**
@@ -227,5 +201,54 @@ class Container implements ContainerInterface
     {
         $provider->register($this, $this->configs);
         return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function resolve($class)
+    {
+        $parameters = func_get_args();
+        array_shift($parameters); // remove first argument
+
+        $reflectionClass = new ReflectionClass($class);
+        $reflectionMethod = $reflectionClass->getConstructor();
+        if ($reflectionMethod) {
+            $parameters = $this->getParameters($reflectionMethod, $parameters);
+        }
+        return $reflectionClass->newInstanceArgs($parameters);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function call(callable $callee)
+    {
+        $parameters = func_get_args();
+        array_shift($parameters); // remove first argument
+
+        $reflectionFunction = new ReflectionFunction($callee);
+        return call_user_func_array($callee, $this->getParameters($reflectionFunction, $parameters));
+    }
+
+    /**
+     * @param ReflectionFunctionAbstract $reflectionFunction
+     * @param array $parameters
+     * @return array
+     */
+    protected function getParameters(ReflectionFunctionAbstract $reflectionFunction, array $parameters)
+    {
+        $depends = [];
+        foreach ($reflectionFunction->getParameters() as $param) {
+            if ($paramRefl = $param->getClass()) {
+                $depends[] = $this->get($paramRefl->getName());
+            } elseif (count($parameters)) {
+                $depends[] = array_shift($parameters);
+            } else {
+                throw new CannotResolveException();
+            }
+        }
+        $depends = array_merge($depends, $parameters);
+        return $depends;
     }
 }

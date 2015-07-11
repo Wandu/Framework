@@ -224,6 +224,17 @@ class ContainerTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(['config' => 'config string!'], $resolved->getConfig());
     }
 
+    public function testCall()
+    {
+        $this->container->closure(DepInterface::class, function () {
+            return new DepFoo();
+        });
+
+        $this->assertEquals('hello world :D', $this->container->call(function (DepInterface $dep) {
+            return 'hello world :D';
+        }));
+    }
+
     public function testAutoResolveBind()
     {
         $this->container->bind(DepInterface::class, DepFoo::class);
