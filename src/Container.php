@@ -4,7 +4,6 @@ namespace Wandu\DI;
 use ArrayAccess;
 use ArrayObject;
 use Closure;
-use InvalidArgumentException;
 use ReflectionClass;
 use ReflectionFunction;
 use ReflectionFunctionAbstract;
@@ -227,7 +226,17 @@ class Container implements ContainerInterface
         $parameters = func_get_args();
         array_shift($parameters); // remove first argument
 
-        $reflectionFunction = new ReflectionFunction($callee);
+        if ($callee instanceof Closure) {
+            $reflectionFunction = new ReflectionFunction($callee);
+        } elseif (is_array($callee)) {
+        } else {
+            if (false !== $p = strpos($callee, '::')) {
+                $reflectionClass = new ReflectionClass(substr($callee, 0, $p));
+                $reflectionFunction = $reflectionClass->getMethod(substr($callee, $p + 2));
+            } else {
+                $reflectionFunction = new ReflectionFunction($callee);
+            }
+        }
         return call_user_func_array($callee, $this->getParameters($reflectionFunction, $parameters));
     }
 

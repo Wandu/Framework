@@ -230,9 +230,13 @@ class ContainerTest extends PHPUnit_Framework_TestCase
             return new DepFoo();
         });
 
+        // closure
         $this->assertEquals('hello world :D', $this->container->call(function (DepInterface $dep) {
             return 'hello world :D';
         }));
+
+        // static method
+        $this->assertInstanceOf(StubClient::class, $this->container->call(StubClient::class . '::create'));
     }
 
     public function testAutoResolveBind()

@@ -3,6 +3,15 @@ namespace Wandu\DI\Stub;
 
 class StubClient
 {
+    /**
+     * @param DepInterface $depInterface
+     * @return static
+     */
+    public static function create(DepInterface $depInterface)
+    {
+        return new static($depInterface);
+    }
+
     /** @var DepInterface */
     protected $dependency;
 
