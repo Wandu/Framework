@@ -211,4 +211,26 @@ class ContainerTest extends PHPUnit_Framework_TestCase
 
         $this->assertInstanceOf(StubClient::class, $this->container->resolve(StubClient::class));
     }
+
+    public function testResolveWithArguments()
+    {
+        $this->container->closure(DepInterface::class, function () {
+            return new DepFoo();
+        });
+
+        $resolved = $resolved = $this->container->resolve(StubClientWithConfig::class, ['config' => 'config string!']);
+
+        $this->assertInstanceOf(StubClientWithConfig::class, $resolved);
+        $this->assertEquals(['config' => 'config string!'], $resolved->getConfig());
+    }
+
+    public function testAutoResolveBind()
+    {
+        $this->container->bind(DepInterface::class, DepFoo::class);
+        $this->container->bind(StubClient::class);
+
+        $this->assertInstanceOf(StubClient::class, $this->container->get(StubClient::class));
+
+        $this->assertSame($this->container->get(StubClient::class), $this->container->get(StubClient::class));
+    }
 }

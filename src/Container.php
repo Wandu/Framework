@@ -82,13 +82,31 @@ class Container implements ContainerInterface
     }
 
     /**
-     * @param string $class
-     * @param string $method
+     * @param string|callable $class
+     * @param mixed ...$parameters
      * @return object
      */
-    public function resolve($class, $method = null)
+    public function resolve($class)
     {
-        return $this->get($class);
+        $parameters = func_get_args();
+        array_shift($parameters); // remove first argument
+
+        $reflectionClass = new ReflectionClass($class);
+        $reflectionMethod = $reflectionClass->getConstructor();
+        $depends = [];
+        if ($reflectionMethod) {
+            $params = $reflectionMethod->getParameters();
+            foreach ($params as $param) {
+                if ($paramRefl = $param->getClass()) {
+                    $depends[] = $this->offsetGet($paramRefl->getName());
+                } elseif (count($parameters)) {
+                    $depends[] = array_shift($parameters);
+                } else {
+                    throw new CannotResolveException($class);
+                }
+            }
+        }
+        return $reflectionClass->newInstanceArgs($depends);
     }
 
     /**
@@ -126,21 +144,7 @@ class Container implements ContainerInterface
             if ($this->keys[$name] === 'closure') {
                 $this->instances[$name] = call_user_func($this->closures[$name], $this, $this->configs);
             } elseif ($this->keys[$name] === 'bind') {
-                $class = $this->dependencies[$name];
-                $refl = new ReflectionClass($class);
-                $constructorRefl = $refl->getConstructor();
-                $depends = [];
-                if ($constructorRefl) {
-                    $params = $constructorRefl->getParameters();
-                    foreach ($params as $param) {
-                        if ($paramRefl = $param->getClass()) {
-                            $depends[] = $this->offsetGet($paramRefl->getName());
-                        } else {
-                            throw new CannotResolveException('Auto resolver can resolve the class that use params with type hint;' . $class);
-                        }
-                    }
-                }
-                $this->instances[$name] = $refl->newInstanceArgs($depends);
+                $this->instances[$name] = $this->resolve($this->dependencies[$name]);
             }
         }
         return $this->instances[$name];

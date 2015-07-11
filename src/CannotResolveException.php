@@ -12,9 +12,9 @@ class CannotResolveException extends RuntimeException
         Exception $previous = null
     ) {
         if (!isset($message)) {
-            $message = 'You cannot change the data.';
+            $message = 'Auto resolver can resolve the class that use params with type hint.';
         } else {
-            $message = 'You cannot change the data; ' . $message;
+            $message = 'Auto resolver can resolve the class that use params with type hint; ' . $message;
         }
         parent::__construct($message, $code, $previous);
     }
