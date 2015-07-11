@@ -21,14 +21,14 @@ class Container implements ContainerInterface
     /** @var array */
     protected $instances = [];
 
-    /** @var array ref. Pimple */
-    protected $frozen = [];
-
     /** @var array */
     protected $aliases = [];
 
     /** @var array */
     protected $dependencies = [];
+
+    /** @var array ref. Pimple */
+    protected $frozen = [];
 
     /**
      * @param ArrayAccess $configs
@@ -82,26 +82,13 @@ class Container implements ContainerInterface
     }
 
     /**
-     * @param string $name it must be class or interface name
-     * @param string $class it must be class name.
-     */
-    public function bind($name, $class = null)
-    {
-        if (!isset($class)) {
-            $class = $name;
-        }
-        $this->keys[$name] = 'resolver';
-        $this->dependencies[$name] = $class;
-    }
-
-    /**
      * @param string $class
      * @param string $method
      * @return object
      */
     public function resolve($class, $method = null)
     {
-        return $this->offsetGet($class);
+        return $this->get($class);
     }
 
     /**
@@ -112,7 +99,13 @@ class Container implements ContainerInterface
         if (isset($this->frozen[$name])) {
             throw new CannotChangeException($name);
         }
-        unset($this->keys[$name], $this->closures[$name], $this->instances[$name]);
+        unset(
+            $this->keys[$name],
+            $this->closures[$name],
+            $this->instances[$name],
+            $this->aliases[$name],
+            $this->dependencies[$name]
+        );
     }
 
     /**
@@ -124,45 +117,33 @@ class Container implements ContainerInterface
         if (!isset($this->keys[$name])) {
             throw new NullReferenceException($name);
         }
-        if ($this->keys[$name] !== 'resolver') {
-            $this->frozen[$name] = true;
-            if ($this->keys[$name] === 'alias') {
-                return $this->offsetGet($this->aliases[$name]);
-            }
-            if (!isset($this->instances[$name])) {
-                $this->instances[$name] = call_user_func($this->closures[$name], $this);
-            }
-            return $this->instances[$name];
+        $this->frozen[$name] = true;
+        $key = $this->keys[$name];
+        if ($key === 'alias') {
+            return $this->get($this->aliases[$name]);
         }
-
-        $class = $this->dependencies[$name];
-        $refl = new ReflectionClass($class);
-        $constructorRefl = $refl->getConstructor();
-        $depends = [];
-        if ($constructorRefl) {
-            $params = $constructorRefl->getParameters();
-            foreach ($params as $param) {
-                if ($paramRefl = $param->getClass()) {
-                    $depends[] = $this->offsetGet($paramRefl->getName());
-                } else {
-                    throw new CannotResolveException('Auto resolver can resolve the class that use params with type hint;' . $class);
+        if (!isset($this->instances[$name])) {
+            if ($this->keys[$name] === 'closure') {
+                $this->instances[$name] = call_user_func($this->closures[$name], $this, $this->configs);
+            } elseif ($this->keys[$name] === 'bind') {
+                $class = $this->dependencies[$name];
+                $refl = new ReflectionClass($class);
+                $constructorRefl = $refl->getConstructor();
+                $depends = [];
+                if ($constructorRefl) {
+                    $params = $constructorRefl->getParameters();
+                    foreach ($params as $param) {
+                        if ($paramRefl = $param->getClass()) {
+                            $depends[] = $this->offsetGet($paramRefl->getName());
+                        } else {
+                            throw new CannotResolveException('Auto resolver can resolve the class that use params with type hint;' . $class);
+                        }
+                    }
                 }
+                $this->instances[$name] = $refl->newInstanceArgs($depends);
             }
         }
-        return $refl->newInstanceArgs($depends);
-    }
-
-
-
-    /**
-     * {@inheritdoc}
-     */
-    public function closure($name, Closure $handler)
-    {
-        $this->offsetUnset($name);
-        $this->keys[$name] = 'singleton';
-        $this->closures[$name] = $handler;
-        return $this;
+        return $this->instances[$name];
     }
 
     /**
@@ -170,7 +151,7 @@ class Container implements ContainerInterface
      */
     public function instance($name, $value)
     {
-        $this->offsetUnset($name);
+        $this->destroy($name);
         $this->keys[$name] = 'instance';
         $this->instances[$name] = $value;
         return $this;
@@ -179,9 +160,33 @@ class Container implements ContainerInterface
     /**
      * {@inheritdoc}
      */
+    public function closure($name, Closure $handler)
+    {
+        $this->destroy($name);
+        $this->keys[$name] = 'closure';
+        $this->closures[$name] = $handler;
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function bind($name, $class = null)
+    {
+        if (!isset($class)) {
+            $class = $name;
+        }
+        $this->keys[$name] = 'bind';
+        $this->dependencies[$name] = $class;
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function alias($name, $origin)
     {
-        $this->offsetUnset($name);
+        $this->destroy($name);
         $this->keys[$name] = 'alias';
         $this->aliases[$name] = $origin;
         return $this;
@@ -216,7 +221,7 @@ class Container implements ContainerInterface
      */
     public function register(ServiceProviderInterface $provider)
     {
-        $provider->register($this);
+        $provider->register($this, $this->configs);
         return $this;
     }
 }

@@ -52,4 +52,18 @@ interface ContainerInterface extends ArrayAccess
      * @return self
      */
     public function register(ServiceProviderInterface $provider);
+
+    /**
+     * @param string $name
+     * @param string $class
+     * @return self
+     */
+    public function bind($name, $class = null);
+
+    /**
+     * @param string $class
+     * @param string $method
+     * @return object
+     */
+    public function resolve($class, $method = null);
 }

@@ -4,7 +4,8 @@ namespace Wandu\DI;
 use ArrayObject;
 use Mockery;
 use PHPUnit_Framework_TestCase;
-use stdClass;
+use Wandu\DI\Stub\StubClient;
+use Wandu\DI\Stub\StubClientWithConfig;
 use Wandu\DI\Stub\DepBar;
 use Wandu\DI\Stub\DepFoo;
 use Wandu\DI\Stub\DepInterface;
@@ -15,13 +16,19 @@ class ContainerTest extends PHPUnit_Framework_TestCase
     /** @var ContainerInterface */
     protected $container;
 
+    /** @var ArrayObject */
+    protected $configs;
+
     public function setUp()
     {
         parent::setUp();
-        $configs = new ArrayObject([
-            'database' => []
+        $this->configs = new ArrayObject([
+            'database' => [
+                'username' => 'username string',
+                'password' => 'password string',
+            ]
         ]);
-        $this->container = new Container($configs);
+        $this->container = new Container($this->configs);
     }
 
     public function testHas()
@@ -71,6 +78,20 @@ class ContainerTest extends PHPUnit_Framework_TestCase
         $this->assertSame($this->container[DepInterface::class], $this->container[DepInterface::class]);
     }
 
+    public function testClosureParameters()
+    {
+        $this->container[DepInterface::class] = $foo = new DepFoo();
+        $this->container->closure(StubClientWithConfig::class, function ($app, $config) {
+            return new StubClientWithConfig($app[DepInterface::class], $config['database']);
+        });
+
+        $this->assertSame($foo, $this->container[StubClientWithConfig::class]->getDependency());
+        $this->assertEquals([
+            'username' => 'username string',
+            'password' => 'password string',
+        ], $this->container[StubClientWithConfig::class]->getConfig());
+    }
+
     public function testAlias()
     {
         $this->container->instance(DepInterface::class, $foo = new DepFoo);
@@ -85,140 +106,109 @@ class ContainerTest extends PHPUnit_Framework_TestCase
 
     public function testExtend()
     {
-        $this->container = new Container();
-        $this->container->instance('instance', new stdClass());
-        $this->container->singleton('singleton', function () {
-            return new stdClass();
+        $this->container->instance('instance', new DepFoo());
+        $this->container->closure('closure', function () {
+            return new DepBar();
         });
         $this->container->extend('instance', function ($item) {
-            $item->contents = 'added1!!';
+            $item->contents = 'instance contents';
             return $item;
         });
-        $this->container->extend('singleton', function ($item) {
-            $item->contents = 'added2!!';
+        $this->container->extend('closure', function ($item) {
+            $item->contents = 'closure contents';
             return $item;
         });
 
-        $this->assertEquals('added1!!', $this->container['instance']->contents);
-        $this->assertEquals('added2!!', $this->container['singleton']->contents);
+        $this->assertEquals('instance contents', $this->container['instance']->contents);
+        $this->assertEquals('closure contents', $this->container['closure']->contents);
 
-        $this->assertEquals($this->container['singleton'], $this->container['singleton']);
-        $this->assertSame($this->container['singleton'], $this->container['singleton']);
-
-        $this->assertEquals($this->container['instance'], $this->container['instance']);
+        $this->assertSame($this->container['closure'], $this->container['closure']);
         $this->assertSame($this->container['instance'], $this->container['instance']);
 
         try {
-            $this->container->extend('unknown', function ($item) {
+            $this->container->extend('Unknown', function ($item) {
                 return $item .' extended..';
             });
             $this->fail();
         } catch (NullReferenceException $e) {
-            $this->assertEquals('You cannot access null reference container; unknown', $e->getMessage());
+            $this->assertEquals('You cannot access null reference container; Unknown', $e->getMessage());
         }
     }
 
     public function testAliasExtend()
     {
         $this->container = new Container();
-        $this->container->instance('instance1', 'Test String 1!');
-        $this->container->instance('instance2', 'Test String 2!');
+        $this->container->instance('instance1', new DepFoo);
+        $this->container->instance('instance2', new DepBar);
 
         $this->container->alias('myalias', 'instance1');
         $this->container->alias('otheralias', 'myalias');
 
         $this->container->extend('otheralias', function ($item) {
-            return $item .' extended..';
+            $item->contents = 'alias contents';
+            return $item;
         });
 
-        $this->assertEquals('Test String 1! extended..', $this->container['instance1']);
+        $this->assertEquals('alias contents', $this->container['instance1']->contents);
     }
 
-
-    public function testDependency()
-    {
-        $this->container = new Container();
-        $this->container['mammal'] = 'mammal!';
-        $this->container->singleton('person', function ($c) {
-            return 'person is ' .$c['mammal'];
-        });
-
-        $this->assertEquals('person is mammal!', $this->container['person']);
-    }
-
-    /**
-     * ref. pimple
-     */
     public function testFrozon()
     {
-        $this->container = new Container();
-        $this->container->instance('instance', 'instance text');
-        $this->container->singleton('singleton', function () {
-            return 'singleton text';
+        $this->container->instance('instance', 'instance string');
+        $this->container->closure('closure', function () {
+            return 'closure string';
         });
-        $this->container->alias('alias', 'singleton');
+        $this->container->alias('alias', 'closure');
 
-        $this->assertEquals('instance text', $this->container['instance']);
-        $this->assertEquals('singleton text', $this->container['singleton']);
-        $this->assertEquals('singleton text', $this->container['alias']);
+        // all change
+        $this->container->instance('instance', 'instance string changed');
+        $this->container->closure('closure', function () {
+            return 'closure string changed';
+        });
+        $this->container->alias('alias', 'instance');
 
+        // call, that frozen all values.
+        $this->container->get('instance');
+        $this->container->get('closure');
+        $this->container->get('alias');
+
+        // now cannot change
         try {
-            $this->container->instance('instance', 'instance text change');
+            $this->container->instance('instance', 'instance string changed 2');
             $this->fail();
         } catch (CannotChangeException $exception) {
             $this->assertEquals('You cannot change the data; instance', $exception->getMessage());
         }
         try {
-            $this->container->singleton('singleton', function () {
-                return 'singleton text change';
+            $this->container->closure('closure', function () {
+                return 'closure string change 2';
             });
+            $this->fail();
         } catch (CannotChangeException $exception) {
-            $this->assertEquals('You cannot change the data; singleton', $exception->getMessage());
+            $this->assertEquals('You cannot change the data; closure', $exception->getMessage());
         }
         try {
-            $this->container->alias('alias', 'factory');
+            $this->container->alias('alias', 'closure');
+            $this->fail();
         } catch (CannotChangeException $exception) {
             $this->assertEquals('You cannot change the data; alias', $exception->getMessage());
         }
     }
 
-    public function testRegister()
+    public function testRegisterServiceProvider()
     {
-        $this->container = new Container();
-
         $mockProvider = Mockery::mock(ServiceProviderInterface::class);
-        $mockProvider->shouldReceive('register')->with($this->container);
+        $mockProvider->shouldReceive('register')->with($this->container, $this->configs);
 
         $this->assertSame($this->container, $this->container->register($mockProvider));
     }
 
-
-    public function testAutoResolveConstructor()
+    public function testResolve()
     {
-        $resolver = new AutoResolver();
+        $this->container->closure(DepInterface::class, function () {
+            return new DepFoo();
+        });
 
-        $resolver->bind(StubAutoNeededInterface::class, StubAutoNeeded::class);
-        $resolver->bind(StubAuto::class);
-
-        $this->assertInstanceOf(StubAuto::class, $resolver->resolve(StubAuto::class));
-
-        $this->assertEquals($resolver->resolve(StubAuto::class), $resolver->resolve(StubAuto::class));
-        $this->assertNotSame($resolver->resolve(StubAuto::class), $resolver->resolve(StubAuto::class));
-    }
-
-    public function testAutoResolveWithMethod()
-    {
-        $resolver = new AutoResolver();
-
-        $resolver->bind(StubAutoNeededInterface::class, StubAutoNeeded::class);
-        $resolver->bind(StubAuto::class);
-
-        $this->assertInstanceOf(StubAuto::class, $resolver->resolve(StubAuto::class));
-
-        $this->assertEquals($resolver->resolve(StubAuto::class), $resolver->resolve(StubAuto::class));
-        $this->assertNotSame($resolver->resolve(StubAuto::class), $resolver->resolve(StubAuto::class));
-
+        $this->assertInstanceOf(StubClient::class, $this->container->resolve(StubClient::class));
     }
 }
-
-
