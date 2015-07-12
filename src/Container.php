@@ -5,8 +5,8 @@ use ArrayAccess;
 use ArrayObject;
 use Closure;
 use ReflectionClass;
-use ReflectionFunction;
 use ReflectionFunctionAbstract;
+use Wandu\DI\Reflection\ReflectionCallable;
 
 class Container implements ContainerInterface
 {
@@ -83,7 +83,7 @@ class Container implements ContainerInterface
     }
 
     /**
-     * @param string $name
+     * {@inheritdoc}
      */
     public function destroy($name)
     {
@@ -100,8 +100,7 @@ class Container implements ContainerInterface
     }
 
     /**
-     * @param string $name
-     * @return mixed|null
+     * {@inheritdoc}
      */
     public function get($name)
     {
@@ -153,6 +152,7 @@ class Container implements ContainerInterface
         if (!isset($class)) {
             $class = $name;
         }
+        $this->destroy($name);
         $this->keys[$name] = 'bind';
         $this->dependencies[$name] = $class;
         return $this;
@@ -226,28 +226,11 @@ class Container implements ContainerInterface
         $parameters = func_get_args();
         array_shift($parameters); // remove first argument
 
-        if ($callee instanceof Closure) {
-            $reflectionFunction = new ReflectionFunction($callee);
-        } elseif (method_exists($callee, '__invoke')) {
-            $reflectionObject = new \ReflectionObject($callee);
-            $reflectionFunction = $reflectionObject->getMethod('__invoke');
-        } elseif (is_array($callee)) {
-            if (is_object($callee[0])) {
-                $reflectionObject = new \ReflectionObject($callee[0]);
-                $reflectionFunction = $reflectionObject->getMethod($callee[1]);
-            } else {
-                $reflectionClass = new ReflectionClass($callee[0]);
-                $reflectionFunction = $reflectionClass->getMethod($callee[1]);
-            }
-        } else {
-            if (false !== $p = strpos($callee, '::')) {
-                $reflectionClass = new ReflectionClass(substr($callee, 0, $p));
-                $reflectionFunction = $reflectionClass->getMethod(substr($callee, $p + 2));
-            } else {
-                $reflectionFunction = new ReflectionFunction($callee);
-            }
-        }
-        return call_user_func_array($callee, $this->getParameters($reflectionFunction, $parameters));
+        $reflectionCallable = new ReflectionCallable($callee);
+        return call_user_func_array(
+            $callee,
+            $this->getParameters($reflectionCallable->getMethod(), $parameters)
+        );
     }
 
     /**
@@ -257,17 +240,17 @@ class Container implements ContainerInterface
      */
     protected function getParameters(ReflectionFunctionAbstract $reflectionFunction, array $parameters)
     {
-        $depends = [];
+        $parametersToReturn = [];
         foreach ($reflectionFunction->getParameters() as $param) {
-            if ($paramRefl = $param->getClass()) {
-                $depends[] = $this->get($paramRefl->getName());
+            if ($paramClassReflection = $param->getClass()) {
+                $parametersToReturn[] = $this->get($paramClassReflection->getName());
             } elseif (count($parameters)) {
-                $depends[] = array_shift($parameters);
+                $parametersToReturn[] = array_shift($parameters);
             } else {
                 throw new CannotResolveException();
             }
         }
-        $depends = array_merge($depends, $parameters);
-        return $depends;
+        $parametersToReturn = array_merge($parametersToReturn, $parameters);
+        return $parametersToReturn;
     }
 }

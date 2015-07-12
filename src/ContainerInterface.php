@@ -14,6 +14,11 @@ interface ContainerInterface extends ArrayAccess
 
     /**
      * @param string $name
+     */
+    public function destroy($name);
+
+    /**
+     * @param string $name
      * @return bool
      */
     public function has($name);
