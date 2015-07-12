@@ -70,7 +70,7 @@ interface ContainerInterface extends ArrayAccess
      * @param mixed ...$parameters
      * @return object
      */
-    public function resolve($class);
+    public function create($class);
 
     /**
      * @param callable $callee

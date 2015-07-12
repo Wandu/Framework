@@ -116,7 +116,7 @@ class Container implements ContainerInterface
             if ($this->keys[$name] === 'closure') {
                 $this->instances[$name] = call_user_func($this->closures[$name], $this, $this->configs);
             } elseif ($this->keys[$name] === 'bind') {
-                $this->instances[$name] = $this->resolve($this->dependencies[$name]);
+                $this->instances[$name] = $this->create($this->dependencies[$name]);
             }
         }
         return $this->instances[$name];
@@ -205,7 +205,7 @@ class Container implements ContainerInterface
     /**
      * {@inheritdoc}
      */
-    public function resolve($class)
+    public function create($class)
     {
         $parameters = func_get_args();
         array_shift($parameters); // remove first argument

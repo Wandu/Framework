@@ -210,7 +210,7 @@ class ContainerTest extends PHPUnit_Framework_TestCase
             return new DepFoo();
         });
 
-        $this->assertInstanceOf(StubClient::class, $this->container->resolve(StubClient::class));
+        $this->assertInstanceOf(StubClient::class, $this->container->create(StubClient::class));
     }
 
     public function testResolveWithArguments()
@@ -219,12 +219,15 @@ class ContainerTest extends PHPUnit_Framework_TestCase
             return new DepFoo();
         });
 
-        $resolved = $resolved = $this->container->resolve(StubClientWithConfig::class, ['config' => 'config string!']);
+        $created = $created = $this->container->create(StubClientWithConfig::class, ['config' => 'config string!']);
 
-        $this->assertInstanceOf(StubClientWithConfig::class, $resolved);
-        $this->assertEquals(['config' => 'config string!'], $resolved->getConfig());
+        $this->assertInstanceOf(StubClientWithConfig::class, $created);
+        $this->assertEquals(['config' => 'config string!'], $created->getConfig());
     }
 
+    /**
+     * test 6 types of callable
+     */
     public function testCall()
     {
         $this->container->closure(DepInterface::class, function () {
