@@ -4,147 +4,77 @@ namespace Wandu\Router;
 use FastRoute\Dispatcher;
 use FastRoute\RouteCollector;
 use Psr\Http\Message\ServerRequestInterface;
-use ArrayAccess;
-use ArrayObject;
-use Countable;
 use Closure;
 use RuntimeException;
 
-class Router implements Countable
+class Router
 {
+    use RouterHelperTrait;
+
     /** @var array */
     protected $routes = [];
 
-    /** @var ArrayAccess */
-    protected $controllers = [];
+    /** @var MapperInterface */
+    protected $mapper;
 
     /** @var array */
-    protected $config;
+    protected $attributes = [
+        'prefix' => '',
+        'middleware' => [],
+    ];
 
     /**
-     * @param ArrayAccess $controllers
-     * @param array $config
+     * @param MapperInterface $mapper
      */
-    public function __construct(ArrayAccess $controllers = null, array $config = [])
+    public function __construct(MapperInterface $mapper)
     {
-        $this->controllers = isset($controllers) ? $controllers : new ArrayObject();
-        $this->config = $config + [
-                'prefix' => '',
-                'middleware' => []
-            ];
+        $this->mapper = $mapper;
     }
 
     /**
-     * @return int
-     */
-    public function count()
-    {
-        return count($this->routes);
-    }
-
-    /**
-     * @param string $path
-     * @param callable|string ...$handlers
-     */
-    public function get($path/*, ...$handlers*/)
-    {
-        $handlers = func_get_args();
-        array_shift($handlers);
-        $this->createRoute('GET', $path, $handlers);
-    }
-
-    /**
-     * @param string $path
-     * @param callable|string ...$handlers
-     */
-    public function post($path/*, ...$handlers*/)
-    {
-        $handlers = func_get_args();
-        array_shift($handlers);
-        $this->createRoute('POST', $path, $handlers);
-    }
-
-    /**
-     * @param string $path
-     * @param callable|string ...$handlers
-     */
-    public function put($path/*, ...$handlers*/)
-    {
-        $handlers = func_get_args();
-        array_shift($handlers);
-        $this->createRoute('PUT', $path, $handlers);
-    }
-
-    /**
-     * @param string $path
-     * @param callable|string ...$handlers
-     */
-    public function delete($path/*, ...$handlers*/)
-    {
-        $handlers = func_get_args();
-        array_shift($handlers);
-        $this->createRoute('DELETE', $path, $handlers);
-    }
-
-    /**
-     * @param string $path
-     * @param callable|string ...$handlers
-     */
-    public function options($path/*, ...$handlers*/)
-    {
-        $handlers = func_get_args();
-        array_shift($handlers);
-        $this->createRoute('OPTIONS', $path, $handlers);
-    }
-
-    /**
-     * @param string $path
-     * @param callable|string ...$handlers
-     */
-    public function any($path/*, ...$handlers*/)
-    {
-        $handlers = func_get_args();
-        array_shift($handlers);
-        $this->createRoute('*', $path, $handlers);
-    }
-
-    /**
-     * @param string|array $path
+     * @param string|array $attributes
      * @param callable $handler
      */
-    public function group($config, Closure $handler)
+    public function group($attributes, Closure $handler)
     {
-        if (!is_array($config)) {
-            $config = ['prefix' => $config];
+        if (!is_array($attributes)) {
+            $attributes = ['prefix' => $attributes];
         }
-        $config += [
+        $attributes += [
             'prefix' => '',
             'middleware' => []
         ];
-        $beforeConfig = $this->config;
-        $this->config = [
-            'prefix' => $this->joinPath($beforeConfig['prefix'], $config['prefix']),
-            'middleware' => array_merge($beforeConfig['middleware'], $config['middleware']),
+        $beforeAttributes = $this->attributes;
+        $this->attributes = [
+            'prefix' => $this->joinPath($beforeAttributes['prefix'], $attributes['prefix']),
+            'middleware' => array_merge($beforeAttributes['middleware'], $attributes['middleware']),
         ];
         call_user_func($handler, $this);
-        $this->config = $beforeConfig;
+        $this->attributes = $beforeAttributes;
     }
 
     /**
-     * @param $method
-     * @param $path
-     * @param array $handlers
+     * @param string|string[] $methods
+     * @param string $path
+     * @param callable|string $handler
+     * @param array $middlewares
      */
-    public function createRoute($method, $path, array $handlers)
+    public function createRoute($methods, $path, $handler, array $middlewares = [])
     {
-        $path = $this->config['prefix'] . $path ?: '/';
-        $handlers = array_merge($this->config['middleware'], $handlers);
+        if (!is_array($methods)) {
+            $methods = [$methods];
+        }
 
-        $this->routes[$method.$path] = [
-            'method' => $method,
-            'path' => $path,
-            'handler' => new HandlerCollection($handlers),
-        ];
+        $path = $this->attributes['prefix'] . $path ?: '/';
+        $middlewares = array_merge($this->attributes['middleware'], $middlewares);
+
+        foreach ($methods as $method) {
+            $this->routes[$method.$path] = [
+                'method' => $method,
+                'path' => $path,
+                'handler' => new Route($handler, $middlewares),
+            ];
+        }
     }
 
     protected function joinPath($path, $pathToJoin)
@@ -168,7 +98,7 @@ class Router implements Countable
         foreach ($routeInfo[2] as $key => $value) {
             $request = $request->withAttribute($key, $value);
         }
-        return $this->routes[$routeInfo[1]]['handler']->execute($request, $this->controllers);
+        return $this->routes[$routeInfo[1]]['handler']->execute($request, $this->mapper);
     }
 
     /**
@@ -176,6 +106,7 @@ class Router implements Countable
      */
     protected function createDispatcher()
     {
+
         return \FastRoute\simpleDispatcher(function (RouteCollector $result) {
             foreach ($this->routes as $name => $route) {
                 $result->addRoute($route['method'], $route['path'], $name);
@@ -208,24 +139,6 @@ class Router implements Countable
                 throw $e;
             }
         }
-    }
-
-    /**
-     * @param string $name
-     * @param $controller
-     */
-    public function setController($name, $controller)
-    {
-        $this->controllers[$name] = $controller;
-    }
-
-    /**
-     * @param string $name
-     * @return object
-     */
-    public function getController($name)
-    {
-        return $this->controllers[$name];
     }
 
     /**
