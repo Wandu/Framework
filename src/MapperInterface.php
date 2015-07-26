@@ -1,7 +1,7 @@
 <?php
 namespace Wandu\Router;
 
-interface HandlerMapperInterface
+interface MapperInterface
 {
     /**
      * @param string $name

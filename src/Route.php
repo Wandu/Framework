@@ -14,7 +14,7 @@ class Route
     /** @var int */
     protected $nextCount;
 
-    /** @var HandlerMapperInterface */
+    /** @var MapperInterface */
     protected $handlerMapper;
 
     /**
@@ -29,10 +29,10 @@ class Route
 
     /**
      * @param ServerRequestInterface $request
-     * @param HandlerMapperInterface $handlerMapper
+     * @param MapperInterface $handlerMapper
      * @return mixed
      */
-    public function execute(ServerRequestInterface $request, HandlerMapperInterface $handlerMapper = null)
+    public function execute(ServerRequestInterface $request, MapperInterface $handlerMapper = null)
     {
         $this->nextCount = 0;
         $this->handlerMapper = $handlerMapper;

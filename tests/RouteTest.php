@@ -28,7 +28,7 @@ class RouteTest extends PHPUnit_Framework_TestCase
         $mockRequest = Mockery::mock(ServerRequestInterface::class);
         $mockRequest->shouldReceive('getAttribute')->andReturn('hello string~');
 
-        $mockAccessor = Mockery::mock(HandlerMapperInterface::class);
+        $mockAccessor = Mockery::mock(MapperInterface::class);
         $mockAccessor
             ->shouldReceive('mapHandler')
             ->with('hello@Admin')
@@ -101,7 +101,7 @@ class RouteTest extends PHPUnit_Framework_TestCase
         $mockRequest = Mockery::mock(ServerRequestInterface::class);
         $mockRequest->shouldReceive('getAttribute')->andReturn('hello string~');
 
-        $mockAccessor = Mockery::mock(HandlerMapperInterface::class);
+        $mockAccessor = Mockery::mock(MapperInterface::class);
         $mockAccessor
             ->shouldReceive('mapMiddleware')
             ->with('Middleware')
