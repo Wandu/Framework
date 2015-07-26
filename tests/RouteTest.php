@@ -95,4 +95,23 @@ class RouteTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('hello world and the world', $handlers->execute($mockRequest));
         $this->assertEquals('hello world and the world', $handlers->execute($mockRequest));
     }
+
+    public function testExecuteWithStringMiddleware()
+    {
+        $mockRequest = Mockery::mock(ServerRequestInterface::class);
+        $mockRequest->shouldReceive('getAttribute')->andReturn('hello string~');
+
+        $mockAccessor = Mockery::mock(HandlerMapperInterface::class);
+        $mockAccessor
+            ->shouldReceive('mapMiddleware')
+            ->with('Middleware')
+            ->andReturn(function (ServerRequestInterface $request) {
+                return $request->getAttribute('hello');
+            });
+
+        $handlers = new Route('hello@Admin', ['Middleware']);
+
+        $this->assertEquals('hello string~', $handlers->execute($mockRequest, $mockAccessor));
+        $this->assertEquals('hello string~', $handlers->execute($mockRequest, $mockAccessor));
+    }
 }
