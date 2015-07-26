@@ -1,7 +1,6 @@
 <?php
 namespace Wandu\Router;
 
-use ArrayAccess;
 use Psr\Http\Message\ServerRequestInterface;
 
 class Route
