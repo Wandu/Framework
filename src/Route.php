@@ -15,7 +15,7 @@ class Route
     protected $nextCount;
 
     /** @var MapperInterface */
-    protected $handlerMapper;
+    protected $mapper;
 
     /**
      * @param string|callable $handler
@@ -29,13 +29,13 @@ class Route
 
     /**
      * @param ServerRequestInterface $request
-     * @param MapperInterface $handlerMapper
+     * @param MapperInterface $mapper
      * @return mixed
      */
-    public function execute(ServerRequestInterface $request, MapperInterface $handlerMapper = null)
+    public function execute(ServerRequestInterface $request, MapperInterface $mapper = null)
     {
         $this->nextCount = 0;
-        $this->handlerMapper = $handlerMapper;
+        $this->mapper = $mapper;
         return $this->next($request);
     }
 
@@ -62,7 +62,7 @@ class Route
     protected function filterHandler($handler)
     {
         if (!is_callable($handler)) {
-            $handler = $this->handlerMapper->mapHandler($handler);
+            $handler = $this->mapper->mapHandler($handler);
         }
         return $handler;
     }
@@ -74,7 +74,7 @@ class Route
     protected function filterMiddleware($handler)
     {
         if (!is_callable($handler)) {
-            $handler = $this->handlerMapper->mapMiddleware($handler);
+            $handler = $this->mapper->mapMiddleware($handler);
         }
         return $handler;
     }
