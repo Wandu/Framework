@@ -1,5 +1,5 @@
 <?php
-namespace Wandu\Router;
+namespace Wandu\Router\Exception;
 
 use Exception;
 use RuntimeException;

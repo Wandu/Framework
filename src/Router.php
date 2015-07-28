@@ -6,6 +6,8 @@ use FastRoute\RouteCollector;
 use Psr\Http\Message\ServerRequestInterface;
 use Closure;
 use RuntimeException;
+use Wandu\Router\Exception\HandlerNotFoundException;
+use Wandu\Router\Exception\MethodNotAllowedException;
 
 class Router
 {
@@ -123,21 +125,13 @@ class Router
     protected function runDispatcher(Dispatcher $dispatcher, $method, $path)
     {
         $routeInfo = $dispatcher->dispatch($method, $path);
-        try {
-            switch ($routeInfo[0]) {
-                case Dispatcher::NOT_FOUND:
-                    throw new HandlerNotFoundException();
-                case Dispatcher::METHOD_NOT_ALLOWED:
-                    throw new MethodNotAllowedException();
-                case Dispatcher::FOUND:
-                    return $routeInfo;
-            }
-        } catch (RuntimeException $e) {
-            if (isset($routeInfo[1]) && in_array('*', $routeInfo[1])) {
-                return $this->runDispatcher($dispatcher, '*', $path);
-            } else {
-                throw $e;
-            }
+        switch ($routeInfo[0]) {
+            case Dispatcher::NOT_FOUND:
+                throw new HandlerNotFoundException();
+            case Dispatcher::METHOD_NOT_ALLOWED:
+                throw new MethodNotAllowedException();
+            case Dispatcher::FOUND:
+                return $routeInfo;
         }
     }
 
