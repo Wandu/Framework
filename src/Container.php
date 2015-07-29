@@ -6,7 +6,7 @@ use ArrayObject;
 use Closure;
 use ReflectionClass;
 use ReflectionFunctionAbstract;
-use Wandu\DI\Reflection\ReflectionCallable;
+use Wandu\Reflection\ReflectionCallable;
 
 class Container implements ContainerInterface
 {
@@ -226,10 +226,9 @@ class Container implements ContainerInterface
         $parameters = func_get_args();
         array_shift($parameters); // remove first argument
 
-        $reflectionCallable = new ReflectionCallable($callee);
         return call_user_func_array(
             $callee,
-            $this->getParameters($reflectionCallable->getMethod(), $parameters)
+            $this->getParameters(new ReflectionCallable($callee), $parameters)
         );
     }
 
