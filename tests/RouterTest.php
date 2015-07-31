@@ -1,6 +1,7 @@
 <?php
 namespace Wandu\Router;
 
+use Wandu\Router\MapperInterface;
 use Wandu\Router\stubs\AdminController;
 use Psr\Http\Message\ServerRequestInterface;
 use Mockery;
@@ -27,7 +28,7 @@ class RouterTest extends PHPUnit_Framework_TestCase
         $mockMapper
             ->shouldReceive('mapMiddleware')
             ->with('AuthMiddleware')
-            ->andReturn([new AuthMiddleware, 'handle']);
+            ->andReturn(new AuthMiddleware);
 
         $this->router = new Router($mockMapper);
     }
@@ -71,24 +72,24 @@ class RouterTest extends PHPUnit_Framework_TestCase
 
         $this->router->get(
             '',
-            [function (ServerRequestInterface $req, \Closure $next) {
-                return $next($req) . ' getMiddleware';
-            }],
             function (ServerRequestInterface $req) use (&$getCalledCount) {
                 $getCalledCount++;
                 return 'get';
-            }
+            },
+            [function (ServerRequestInterface $req, callable $next) {
+                return $next($req) . ' getMiddleware';
+            }]
         );
 
         $this->router->post(
             '',
-            [function (ServerRequestInterface $req, \Closure $next) {
-                return $next($req) . ' postMiddleware';
-            }],
             function (ServerRequestInterface $req) use (&$postCalledCount) {
                 $postCalledCount++;
                 return 'post';
-            }
+            },
+            [function (ServerRequestInterface $req, callable $next) {
+                return $next($req) . ' postMiddleware';
+            }]
         );
 
         $this->assertEquals('get getMiddleware', $this->router->dispatch($mockGetRequest));
@@ -113,12 +114,12 @@ class RouterTest extends PHPUnit_Framework_TestCase
 
         $this->router->get(
             '/{name}/{message}',
-            [function (ServerRequestInterface $req, \Closure $next) {
-                return $next($req) . ' getMiddleware';
-            }],
             function (ServerRequestInterface $req) {
                 return 'get';
-            }
+            },
+            [function (ServerRequestInterface $req, callable $next) {
+                return $next($req) . ' getMiddleware';
+            }]
         );
 
         $this->assertEquals('get getMiddleware', $this->router->dispatch($getMock));
@@ -150,7 +151,7 @@ class RouterTest extends PHPUnit_Framework_TestCase
         $getMock->shouldReceive('setArguments')->with([
         ]);
 
-        $this->router->get('/', ["AuthMiddleware"], "action@AdminController");
+        $this->router->get('/', "action@AdminController", ["AuthMiddleware"]);
 
         $this->assertEquals('action@AdminController string middleware~', $this->router->dispatch($getMock));
     }
@@ -235,9 +236,9 @@ class RouterTest extends PHPUnit_Framework_TestCase
 
         $routes = $this->router->getRoutes();
 
-        $this->assertTrue(isset($routes['GET/']));
-        $this->assertTrue(isset($routes['GET/admin/member']));
-        $this->assertTrue(isset($routes['GET/admin/member/']));
+        $this->assertTrue(isset($routes['GET,HEAD/']));
+        $this->assertTrue(isset($routes['GET,HEAD/admin/member']));
+        $this->assertTrue(isset($routes['GET,HEAD/admin/member/']));
     }
 
     public function testVirtualMethod()

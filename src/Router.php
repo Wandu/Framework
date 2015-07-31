@@ -1,23 +1,27 @@
 <?php
 namespace Wandu\Router;
 
+use FastRoute\DataGenerator\GroupCountBased;
 use FastRoute\Dispatcher;
 use FastRoute\RouteCollector;
 use Psr\Http\Message\ServerRequestInterface;
 use Closure;
-use RuntimeException;
 use Wandu\Router\Exception\HandlerNotFoundException;
 use Wandu\Router\Exception\MethodNotAllowedException;
+use Wandu\Router\MapperInterface;
 
 class Router
 {
-    use RouterHelperTrait;
+    use RouterMethodsTrait;
 
-    /** @var array */
+    /** @var Route[] */
     protected $routes = [];
 
     /** @var MapperInterface */
     protected $mapper;
+
+    /** @var FastRoute */
+    protected $fastRoute;
 
     /** @var array */
     protected $attributes = [
@@ -31,6 +35,7 @@ class Router
     public function __construct(MapperInterface $mapper)
     {
         $this->mapper = $mapper;
+        $this->fastRoute = new FastRoute();
     }
 
     /**
@@ -60,6 +65,7 @@ class Router
      * @param string $path
      * @param callable|string $handler
      * @param array $middlewares
+     * @return Route
      */
     public function createRoute($methods, $path, $handler, array $middlewares = [])
     {
@@ -70,13 +76,9 @@ class Router
         $path = $this->attributes['prefix'] . $path ?: '/';
         $middlewares = array_merge($this->attributes['middleware'], $middlewares);
 
-        foreach ($methods as $method) {
-            $this->routes[$method.$path] = [
-                'method' => $method,
-                'path' => $path,
-                'handler' => new Route($handler, $middlewares),
-            ];
-        }
+        $handleKey =  implode(',', $methods) . $path;
+        $this->fastRoute->addRoute($methods, $path, $handleKey);
+        return $this->routes[$handleKey] = new Route($handler, $middlewares);
     }
 
     protected function joinPath($path, $pathToJoin)
@@ -90,7 +92,7 @@ class Router
      */
     public function dispatch(ServerRequestInterface $request)
     {
-        $dispatcher = $this->createDispatcher();
+        $dispatcher = $this->fastRoute->getDispatcher();
         $method = $request->getMethod();
         $parsedBody = $request->getParsedBody();
         if (isset($parsedBody['_method'])) {
@@ -100,20 +102,7 @@ class Router
         foreach ($routeInfo[2] as $key => $value) {
             $request = $request->withAttribute($key, $value);
         }
-        return $this->routes[$routeInfo[1]]['handler']->execute($request, $this->mapper);
-    }
-
-    /**
-     * @return Dispatcher
-     */
-    protected function createDispatcher()
-    {
-
-        return \FastRoute\simpleDispatcher(function (RouteCollector $result) {
-            foreach ($this->routes as $name => $route) {
-                $result->addRoute($route['method'], $route['path'], $name);
-            }
-        });
+        return $this->routes[$routeInfo[1]]->execute($request, $this->mapper);
     }
 
     /**
