@@ -2,7 +2,6 @@
 namespace Wandu\Router;
 
 use Psr\Http\Message\ServerRequestInterface;
-use Wandu\Router\MapperInterface;
 
 class Route
 {

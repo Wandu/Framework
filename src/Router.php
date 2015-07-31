@@ -1,14 +1,11 @@
 <?php
 namespace Wandu\Router;
 
-use FastRoute\DataGenerator\GroupCountBased;
 use FastRoute\Dispatcher;
-use FastRoute\RouteCollector;
 use Psr\Http\Message\ServerRequestInterface;
 use Closure;
 use Wandu\Router\Exception\HandlerNotFoundException;
 use Wandu\Router\Exception\MethodNotAllowedException;
-use Wandu\Router\MapperInterface;
 
 class Router
 {

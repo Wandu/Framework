@@ -37,7 +37,7 @@ class WanduMapper implements MapperInterface
 
     /**
      * @param string $name
-     * @return \Wandu\Router\Middleware\MiddlewareInterface
+     * @return MiddlewareInterface
      */
     public function mapMiddleware($name)
     {
