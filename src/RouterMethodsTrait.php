@@ -5,70 +5,86 @@ trait RouterMethodsTrait
 {
     /**
      * @param string $path
-     * @param array|string|callable $middlewares
      * @param string|callable $handler
+     * @param array $middlewares
+     * @return Route
      */
-    public function get($path, $middlewares, $handler = null)
+    public function get($path, $handler, array $middlewares = [])
     {
-        $this->normalizedRoute(['GET'], $path, $middlewares, $handler);
+        return $this->createRoute(['GET', 'HEAD'], $path, $handler, $middlewares);
     }
 
     /**
      * @param string $path
-     * @param array|string|callable $middlewares
      * @param string|callable $handler
+     * @param array $middlewares
+     * @return Route
      */
-    public function post($path, $middlewares, $handler = null)
+    public function post($path, $handler, array $middlewares = [])
     {
-        $this->normalizedRoute(['POST'], $path, $middlewares, $handler);
+        return $this->createRoute(['POST'], $path, $handler, $middlewares);
     }
 
     /**
      * @param string $path
-     * @param array|string|callable $middlewares
      * @param string|callable $handler
+     * @param array $middlewares
+     * @return Route
      */
-    public function put($path, $middlewares, $handler = null)
+    public function put($path, $handler, array $middlewares = [])
     {
-        $this->normalizedRoute(['PUT'], $path, $middlewares, $handler);
+        return $this->createRoute(['PUT'], $path, $handler, $middlewares);
     }
 
     /**
      * @param string $path
-     * @param array|string|callable $middlewares
      * @param string|callable $handler
+     * @param array $middlewares
+     * @return Route
      */
-    public function delete($path, $middlewares, $handler = null)
+    public function delete($path, $handler, array $middlewares = [])
     {
-        $this->normalizedRoute(['DELETE'], $path, $middlewares, $handler);
+        return $this->createRoute(['DELETE'], $path, $handler, $middlewares);
     }
 
     /**
      * @param string $path
-     * @param array|string|callable $middlewares
      * @param string|callable $handler
+     * @param array $middlewares
+     * @return Route
      */
-    public function options($path, $middlewares, $handler = null)
+    public function options($path, $handler, array $middlewares = [])
     {
-        $this->normalizedRoute(['OPTIONS'], $path, $middlewares, $handler);
+        return $this->createRoute(['OPTIONS'], $path, $handler, $middlewares);
     }
 
     /**
      * @param string $path
-     * @param array|string|callable $middlewares
      * @param string|callable $handler
+     * @param array $middlewares
+     * @return Route
      */
-    public function any($path, $middlewares, $handler = null)
+    public function patch($path, $handler, array $middlewares = [])
     {
-        $this->normalizedRoute(['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], $path, $middlewares, $handler);
+        return $this->createRoute(['PATCH'], $path, $handler, $middlewares);
     }
 
-    protected function normalizedRoute($methods, $path, $middlewares, $handler = null)
+    /**
+     * @param string $path
+     * @param string|callable $handler
+     * @param array $middlewares
+     * @return Route
+     */
+    public function any($path, $handler, array $middlewares = [])
     {
-        if (isset($handler)) {
-            $this->createRoute($methods, $path, $handler, $middlewares);
-            return;
-        }
-        $this->createRoute($methods, $path, $middlewares);
+        return $this->createRoute([
+            'GET',
+            'HEAD',
+            'POST',
+            'PUT',
+            'DELETE',
+            'OPTIONS',
+            'PATCH'
+        ], $path, $handler, $middlewares);
     }
 }
