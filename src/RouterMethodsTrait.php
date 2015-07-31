@@ -1,7 +1,7 @@
 <?php
 namespace Wandu\Router;
 
-trait RouterHelperTrait
+trait RouterMethodsTrait
 {
     /**
      * @param string $path
