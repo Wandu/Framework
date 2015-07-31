@@ -11,5 +11,5 @@ interface MiddlewareInterface
      * @param callable $next
      * @return mixed
      */
-    public function handle(ServerRequestInterface $request, Closure $next);
+    public function handle(ServerRequestInterface $request, callable $next);
 }

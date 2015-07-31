@@ -2,8 +2,9 @@
 namespace Wandu\Router\Stubs;
 
 use Psr\Http\Message\ServerRequestInterface;
+use Wandu\Router\Middleware\ControllerInterface;
 
-class AdminController
+class AdminController implements ControllerInterface
 {
     /**
      * @param ServerRequestInterface $request
@@ -21,5 +22,14 @@ class AdminController
     public function action(ServerRequestInterface $request)
     {
         return "action@AdminController string";
+    }
+
+    /**
+     * @param ServerRequestInterface $request
+     * @return string
+     */
+    public function hello(ServerRequestInterface $request)
+    {
+        return "hello@AdminController string";
     }
 }

@@ -2,6 +2,7 @@
 namespace Wandu\Router;
 
 use Psr\Http\Message\ServerRequestInterface;
+use Wandu\Router\MapperInterface;
 
 class Route
 {
@@ -49,10 +50,8 @@ class Route
             return call_user_func($this->filterHandler($this->handler), $request);
         }
         $handler = $this->filterMiddleware($this->middlewares[$this->nextCount]);
-        return call_user_func($handler, $request, function (ServerRequestInterface $request) {
-            $this->nextCount++;
-            return $this->next($request);
-        });
+        $this->nextCount++;
+        return call_user_func($handler, $request, [$this, 'next']);
     }
 
     /**
@@ -74,7 +73,7 @@ class Route
     protected function filterMiddleware($handler)
     {
         if (!is_callable($handler)) {
-            $handler = $this->mapper->mapMiddleware($handler);
+            $handler = [$this->mapper->mapMiddleware($handler), 'handle'];
         }
         return $handler;
     }

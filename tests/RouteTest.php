@@ -2,11 +2,13 @@
 namespace Wandu\Router;
 
 use ArrayAccess;
+use Wandu\Router\MapperInterface;
 use Wandu\Router\Stubs\AdminController;
 use PHPUnit_Framework_TestCase;
 use Psr\Http\Message\ServerRequestInterface;
 use Mockery;
 use ArrayObject;
+use Wandu\Router\Stubs\AuthMiddleware;
 
 class RouteTest extends PHPUnit_Framework_TestCase
 {
@@ -49,7 +51,7 @@ class RouteTest extends PHPUnit_Framework_TestCase
         $handlers = new Route(function () {
             return 'hello';
         }, [
-            function (ServerRequestInterface $req, \Closure $next) {
+            function (ServerRequestInterface $req, callable $next) {
                 return $next($req) . ' world';
             }
         ]);
@@ -81,13 +83,13 @@ class RouteTest extends PHPUnit_Framework_TestCase
         $handlers = new Route(function () {
             return 'hello';
         }, [
-            function (ServerRequestInterface $req, \Closure $next) {
+            function (ServerRequestInterface $req, callable $next) {
                 return $next($req) . ' the world';
             },
-            function (ServerRequestInterface $req, \Closure $next) {
+            function (ServerRequestInterface $req, callable $next) {
                 return $next($req) . ' and';
             },
-            function (ServerRequestInterface $req, \Closure $next) {
+            function (ServerRequestInterface $req, callable $next) {
                 return $next($req) . ' world';
             },
         ]);
@@ -101,17 +103,17 @@ class RouteTest extends PHPUnit_Framework_TestCase
         $mockRequest = Mockery::mock(ServerRequestInterface::class);
         $mockRequest->shouldReceive('getAttribute')->andReturn('hello string~');
 
-        $mockAccessor = Mockery::mock(MapperInterface::class);
-        $mockAccessor
-            ->shouldReceive('mapMiddleware')
+        $mockMapper = Mockery::mock(MapperInterface::class);
+        $mockMapper->shouldReceive('mapMiddleware')
             ->with('Middleware')
-            ->andReturn(function (ServerRequestInterface $request) {
-                return $request->getAttribute('hello');
-            });
+            ->andReturn(new AuthMiddleware);
+        $mockMapper->shouldReceive('mapHandler')
+            ->with('hello@Admin')
+            ->andReturn([new AdminController, 'hello']);
 
         $handlers = new Route('hello@Admin', ['Middleware']);
 
-        $this->assertEquals('hello string~', $handlers->execute($mockRequest, $mockAccessor));
-        $this->assertEquals('hello string~', $handlers->execute($mockRequest, $mockAccessor));
+        $this->assertEquals('hello@AdminController string middleware~', $handlers->execute($mockRequest, $mockMapper));
+        $this->assertEquals('hello@AdminController string middleware~', $handlers->execute($mockRequest, $mockMapper));
     }
 }
