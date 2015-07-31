@@ -29,6 +29,7 @@
         }
     },
     "suggest": {
-        "wandu/http": "PSR-7 implementation"
+        "wandu/http": "PSR-7 implementation",
+        "wandu/di": "For Using WanduMapper"
     }
 }

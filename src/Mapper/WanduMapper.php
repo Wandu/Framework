@@ -1,7 +1,7 @@
 <?php
 namespace Wandu\Router\Mapper;
 
-use ArrayAccess;
+use Wandu\DI\ContainerInterface;
 use Wandu\Router\MapperInterface;
 use Wandu\Router\Middleware\MiddlewareInterface;
 
@@ -14,11 +14,11 @@ class WanduMapper implements MapperInterface
     protected $prefixMiddleware;
 
     /**
-     * @param ArrayAccess $container
+     * @param ContainerInterface $container
      * @param string $prefixHandler
      * @param string $prefixMiddleware
      */
-    public function __construct(ArrayAccess $container, $prefixHandler, $prefixMiddleware)
+    public function __construct(ContainerInterface $container, $prefixHandler, $prefixMiddleware)
     {
         $this->container = $container;
         $this->prefixHandler = $prefixHandler;
@@ -32,7 +32,7 @@ class WanduMapper implements MapperInterface
     public function mapHandler($name)
     {
         list($method, $class) = explode('@', $name);
-        return [$this->container->offsetGet($this->joinNamespace($this->prefixHandler, $class)), $method];
+        return [$this->container->create($this->joinNamespace($this->prefixHandler, $class)), $method];
     }
 
     /**
@@ -41,7 +41,7 @@ class WanduMapper implements MapperInterface
      */
     public function mapMiddleware($name)
     {
-        return $this->container->offsetGet($this->joinNamespace($this->prefixMiddleware, $name));
+        return $this->container->create($this->joinNamespace($this->prefixMiddleware, $name));
     }
 
     /**

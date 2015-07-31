@@ -1,7 +1,7 @@
 <?php
 namespace Wandu\Router\Mapper;
 
-use ArrayAccess;
+use Wandu\DI\ContainerInterface;
 use Wandu\Router\Middleware\MiddlewareInterface;
 use Wandu\Router\Stubs\AdminController;
 use PHPUnit_Framework_TestCase;
@@ -17,8 +17,8 @@ class WanduMapperTest extends PHPUnit_Framework_TestCase
 
     public function testMapHandler()
     {
-        $mockContainer = Mockery::mock(ArrayAccess::class);
-        $mockContainer->shouldReceive('offsetGet')
+        $mockContainer = Mockery::mock(ContainerInterface::class);
+        $mockContainer->shouldReceive('create')
             ->with('Wandu\\Router\\Stubs\\AdminController')
             ->andReturn($controller = new AdminController);
 
@@ -32,8 +32,8 @@ class WanduMapperTest extends PHPUnit_Framework_TestCase
 
     public function testMapMiddleware()
     {
-        $mockContainer = Mockery::mock(ArrayAccess::class);
-        $mockContainer->shouldReceive('offsetGet')
+        $mockContainer = Mockery::mock(ContainerInterface::class);
+        $mockContainer->shouldReceive('create')
             ->with('Wandu\\Router\\Stubs\\AuthMiddleware')
             ->andReturn($controller = new AuthMiddleware);
 

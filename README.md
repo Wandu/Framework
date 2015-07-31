@@ -18,12 +18,13 @@ Based on [Jicjjang/June](https://github.com/jicjjang/June). :D
 
 ```php
 use Wandu\Router\Router;
+use Wandu\Http\Factory\ServerRequestFactory;
 
-$request = new Your\Own\Psr7\Request; // this must be implemented Psr\Http\Message\ServerRequestInterface.
-// recommend to use Wandu\Http
-// $request = Wandu\Http\Factory\ServerRequestFactory::fromGlobals($_SERVER, $_GET, $_POST, $_COOKIE, $_FILES);
+// psr-7 server request request
+$request = ServerRequestFactory::fromGlobals();
 
 $router = new Router();
+
 $router->get('/', function () {
     return "Hello World :D";
 });
@@ -33,3 +34,13 @@ $contents = $router->dispatch($request);
 echo $contents; // "Hello World :D"
 ```
 
+## Documents
+
+### Constructor
+
+
+
+### Get
+
+```php
+```
