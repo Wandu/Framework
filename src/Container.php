@@ -2,7 +2,6 @@
 namespace Wandu\DI;
 
 use ArrayAccess;
-use ArrayObject;
 use Closure;
 use ReflectionClass;
 use ReflectionFunctionAbstract;
@@ -10,9 +9,6 @@ use Wandu\Reflection\ReflectionCallable;
 
 class Container implements ContainerInterface
 {
-    /** @var ArrayAccess */
-    protected $configs;
-
     /** @var array */
     protected $keys = [];
 
@@ -34,12 +30,12 @@ class Container implements ContainerInterface
     /**
      * @param ArrayAccess $configs
      */
-    public function __construct(ArrayAccess $configs = null)
+    public function __construct(ArrayAccess $configs)
     {
-        if (!isset($configs)) {
-            $configs = new ArrayObject();
-        }
-        $this->configs = $configs;
+        $this->instance('container', $this)->freeze('container');
+        $this->instance('config', $configs)->freeze('config');
+        $this->alias(ContainerInterface::class, 'container')
+            ->freeze(ContainerInterface::class);
     }
 
     /**
@@ -107,14 +103,14 @@ class Container implements ContainerInterface
         if (!isset($this->keys[$name])) {
             throw new NullReferenceException($name);
         }
-        $this->frozen[$name] = true;
+        $this->freeze($name);
         $key = $this->keys[$name];
         if ($key === 'alias') {
             return $this->get($this->aliases[$name]);
         }
         if (!isset($this->instances[$name])) {
             if ($this->keys[$name] === 'closure') {
-                $this->instances[$name] = call_user_func($this->closures[$name], $this, $this->configs);
+                $this->instances[$name] = call_user_func($this->closures[$name], $this, $this->get('config'));
             } elseif ($this->keys[$name] === 'bind') {
                 $this->instances[$name] = $this->create($this->dependencies[$name]);
             }
@@ -198,7 +194,16 @@ class Container implements ContainerInterface
      */
     public function register(ServiceProviderInterface $provider)
     {
-        $provider->register($this, $this->configs);
+        $provider->register($this, $this->get('config'));
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function freeze($name)
+    {
+        $this->frozen[$name] = true;
         return $this;
     }
 
@@ -213,7 +218,11 @@ class Container implements ContainerInterface
         $reflectionClass = new ReflectionClass($class);
         $reflectionMethod = $reflectionClass->getConstructor();
         if ($reflectionMethod) {
-            $parameters = $this->getParameters($reflectionMethod, $parameters);
+            try {
+                $parameters = $this->getParameters($reflectionMethod, $parameters);
+            } catch (CannotResolveException $e) {
+                throw new CannotResolveException($class);
+            }
         }
         return $reflectionClass->newInstanceArgs($parameters);
     }

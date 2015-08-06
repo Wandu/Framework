@@ -66,6 +66,12 @@ interface ContainerInterface extends ArrayAccess
     public function bind($name, $class = null);
 
     /**
+     * @param $name
+     * @return self
+     */
+    public function freeze($name);
+
+    /**
      * @param string $class
      * @param mixed ...$parameters
      * @return object

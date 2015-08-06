@@ -138,7 +138,7 @@ class ContainerTest extends PHPUnit_Framework_TestCase
 
     public function testAliasExtend()
     {
-        $this->container = new Container();
+        $this->container = new Container(new ArrayObject());
         $this->container->instance('instance1', new DepFoo);
         $this->container->instance('instance2', new DepBar);
 
@@ -194,6 +194,26 @@ class ContainerTest extends PHPUnit_Framework_TestCase
         } catch (CannotChangeException $exception) {
             $this->assertEquals('You cannot change the data; alias', $exception->getMessage());
         }
+
+        // also cannot remove
+        try {
+            $this->container->offsetUnset('instance');
+            $this->fail();
+        } catch (CannotChangeException $exception) {
+            $this->assertEquals('You cannot change the data; instance', $exception->getMessage());
+        }
+        try {
+            $this->container->offsetUnset('closure');
+            $this->fail();
+        } catch (CannotChangeException $exception) {
+            $this->assertEquals('You cannot change the data; closure', $exception->getMessage());
+        }
+        try {
+            $this->container->offsetUnset('alias');
+            $this->fail();
+        } catch (CannotChangeException $exception) {
+            $this->assertEquals('You cannot change the data; alias', $exception->getMessage());
+        }
     }
 
     public function testRegisterServiceProvider()
@@ -211,6 +231,12 @@ class ContainerTest extends PHPUnit_Framework_TestCase
         });
 
         $this->assertInstanceOf(StubClient::class, $this->container->create(StubClient::class));
+        try {
+            $this->container->create(StubClientWithConfig::class);
+            $this->fail();
+        } catch (CannotResolveException $e) {
+            $this->assertEquals('Auto resolver can resolve the class that use params with type hint; Wandu\DI\Stub\StubClientWithConfig', $e->getMessage());
+        }
     }
 
     public function testResolveWithArguments()
