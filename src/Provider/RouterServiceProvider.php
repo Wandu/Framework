@@ -17,10 +17,14 @@ class RouterServiceProvider implements ServiceProviderInterface
      */
     public function register(ContainerInterface $app, ArrayAccess $config = null)
     {
-        $app->closure(MapperInterface::class, function (ContainerInterface $app) use ($config) {
+        $app->closure(MapperInterface::class, function (ContainerInterface $app, ArrayAccess $config) {
             return new WanduMapper($app, $config['router.namespace.handler'], $config['router.namespace.middleware']);
         });
-        $app->bind(Router::class);
+        $app->closure(Router::class, function (ContainerInterface $app, ArrayAccess $config) {
+            return new Router($app[MapperInterface::class], [
+                'middleware' => $config['router.middlewares']
+            ]);
+        });
         $app->alias('wandu.router', Router::class);
     }
 }

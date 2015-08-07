@@ -21,18 +21,20 @@ class Router
     protected $fastRoute;
 
     /** @var array */
-    protected $attributes = [
-        'prefix' => '',
-        'middleware' => [],
-    ];
+    protected $attributes;
 
     /**
      * @param MapperInterface $mapper
+     * @param array $attributes
      */
-    public function __construct(MapperInterface $mapper)
+    public function __construct(MapperInterface $mapper, array $attributes = [])
     {
         $this->mapper = $mapper;
         $this->fastRoute = new FastRoute();
+        $this->attributes = $attributes + [
+                'prefix' => '',
+                'middleware' => [],
+            ];
     }
 
     /**
