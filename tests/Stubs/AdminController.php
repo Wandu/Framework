@@ -2,7 +2,7 @@
 namespace Wandu\Router\Stubs;
 
 use Psr\Http\Message\ServerRequestInterface;
-use Wandu\Router\Middleware\ControllerInterface;
+use Wandu\Router\Controller\ControllerInterface;
 
 class AdminController implements ControllerInterface
 {

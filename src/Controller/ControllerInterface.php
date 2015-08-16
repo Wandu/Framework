@@ -1,5 +1,5 @@
 <?php
-namespace Wandu\Router\Middleware;
+namespace Wandu\Router\Controller;
 
 interface ControllerInterface
 {
