@@ -6,8 +6,8 @@ use ArrayAccess;
 interface ServiceProviderInterface
 {
     /**
-     * @param ContainerInterface $app
-     * @param ArrayAccess $config
+     * @param \Wandu\DI\ContainerInterface $app
+     * @param \ArrayAccess $config
      * @return self
      */
     public function register(ContainerInterface $app, ArrayAccess $config = null);
