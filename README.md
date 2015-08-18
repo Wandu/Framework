@@ -61,10 +61,10 @@ The Wandu-DI provides 4 type of default methods.
 1. `closure` (same `singleton` of 1.x)
 2. `instance`
 3. `bind`
-4. `alias`
-5. `wire` **new v2.2**
+4. `wire` **new** on v2.2
+5. `alias`
 
-### Closure
+### 1. Closure
 
 Closure는 클로저를 통해 Container에 내용을 등록할 수 있도록 도와줍니다.
 
@@ -79,7 +79,7 @@ $container->closure('product', function (ContainerInterface $app, ArrayAccess $c
 $container['product'] instanceof Product; // true
 ```
 
-### Instance
+### 2. Instance
 
 Closure와 비슷하지만, Closure없이 직접 값을 바인딩 할 수 있습니다. `instance` 메서드는 `offsetSet`에 연결되어있습니다.
 
@@ -95,7 +95,7 @@ $container->instance('product', new Product);
 $container['product'] instanceof Product; // true
 ```
 
-### Bind
+### 3. Bind
 
 2.x에서 추가된 Bind입니다. Auto Resolve를 위한 메서드입니다. 생성자 전체가 타입힌트가 지정되어 있는 객체일 때 사용가능
 합니다. 기준이 되는 Interface와 실제로 구현된 Class 한쌍을 매개변수로 사용하지만, Interface는 생략가능합니다.
@@ -117,28 +117,10 @@ $container->bind(Product::class);
 
 $container[Product::class] instanceof Product; // true
 ```
+### 4. Wire
 
-### Alias
-
-다른 이름을 통해 해당 Container값에 접근할 때 사용합니다.
-
-#### Example.
-
-```php
-<?php
-// alias with closure
-$container->closure('product', function (ContainerInterface $app) {
-    return new Product();
-});
-$container->alias('alias-product', 'product');
-
-$container['product'] === $container['alias-product']; // true
-```
-
-### Wire
-
-이전 동작은 Bind와 동일하고, 객체 생성후, 객체내에 `@Autowired`가 마킹된 Property가 있을 경우 해당 객체에 해당하는
-값을 집어넣어줍니다.
+2.2d에서 추가된 메서드입니다. 동작은 Bind와 거의 유사합니다. Bind와 동일하게 객체를 생성합니다. 그리고 객체내에
+`@Autowired`가 마킹된 Property가 있을 경우 해당 객체에 해당하는 값을 주입해줍니다.
 
 #### Example.
 
@@ -175,6 +157,24 @@ $container->wire(Product::class);
 $container[Product::class] instanceof Product; // true
 $container[Product::class]->getProperty1() instanceof RequireInterface; // true
 $container[Product::class]->getProperty2() instanceof RequireInterface; // true
+```
+
+
+### 5. Alias
+
+다른 이름을 통해 해당 Container값에 접근할 때 사용합니다.
+
+#### Example.
+
+```php
+<?php
+// alias with closure
+$container->closure('product', function (ContainerInterface $app) {
+    return new Product();
+});
+$container->alias('alias-product', 'product');
+
+$container['product'] === $container['alias-product']; // true
 ```
 
 ## Auto Resolving
