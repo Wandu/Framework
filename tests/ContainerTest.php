@@ -4,6 +4,7 @@ namespace Wandu\DI;
 use ArrayObject;
 use Mockery;
 use PHPUnit_Framework_TestCase;
+use Wandu\DI\Stub\AutoWiredClient;
 use Wandu\DI\Stub\Invoker;
 use Wandu\DI\Stub\StubClient;
 use Wandu\DI\Stub\StubClientWithConfig;
@@ -301,5 +302,15 @@ class ContainerTest extends PHPUnit_Framework_TestCase
         $this->assertInstanceOf(StubClient::class, $this->container->get(StubClient::class));
 
         $this->assertSame($this->container->get(StubClient::class), $this->container->get(StubClient::class));
+    }
+
+    public function testBindClassNameAlsoAllow()
+    {
+        $this->container->bind(DepInterface::class, DepFoo::class);
+
+        $this->assertInstanceOf(DepInterface::class, $this->container->get(DepInterface::class));
+        $this->assertInstanceOf(DepInterface::class, $this->container->get(DepFoo::class));
+
+        $this->assertSame($this->container->get(DepInterface::class), $this->container->get(DepFoo::class));
     }
 }

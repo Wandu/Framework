@@ -22,7 +22,7 @@ class Container implements ContainerInterface
     protected $aliases = [];
 
     /** @var array */
-    protected $dependencies = [];
+    protected $bind = [];
 
     /** @var array ref. Pimple */
     protected $frozen = [];
@@ -91,7 +91,7 @@ class Container implements ContainerInterface
             $this->closures[$name],
             $this->instances[$name],
             $this->aliases[$name],
-            $this->dependencies[$name]
+            $this->bind[$name]
         );
     }
 
@@ -112,7 +112,7 @@ class Container implements ContainerInterface
             if ($this->keys[$name] === 'closure') {
                 $this->instances[$name] = call_user_func($this->closures[$name], $this, $this->get('config'));
             } elseif ($this->keys[$name] === 'bind') {
-                $this->instances[$name] = $this->create($this->dependencies[$name]);
+                $this->instances[$name] = $this->create($this->bind[$name]);
             }
         }
         return $this->instances[$name];
@@ -150,7 +150,10 @@ class Container implements ContainerInterface
         }
         $this->destroy($name);
         $this->keys[$name] = 'bind';
-        $this->dependencies[$name] = $class;
+        $this->bind[$name] = $class;
+        if ($name !== $class) {
+            $this->alias($class, $name);
+        }
         return $this;
     }
 
