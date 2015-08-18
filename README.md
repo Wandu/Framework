@@ -54,7 +54,7 @@ $container['client'] === $container[Client::class]; // true
 
 ### Methods
 
-Wandu-DI는 4가지 메서드를 이용하여 Container에 등록할 수 있습니다.
+Wandu-DI는 5가지 메서드를 이용하여 Container에 등록할 수 있습니다.
 
 The Wandu-DI provides 4 type of default methods.
 
@@ -62,6 +62,7 @@ The Wandu-DI provides 4 type of default methods.
 2. `instance`
 3. `bind`
 4. `alias`
+5. `wire` **new v2.2**
 
 ### Closure
 
@@ -134,6 +135,48 @@ $container->alias('alias-product', 'product');
 $container['product'] === $container['alias-product']; // true
 ```
 
+### Wire
+
+이전 동작은 Bind와 동일하고, 객체 생성후, 객체내에 `@Autowired`가 마킹된 Property가 있을 경우 해당 객체에 해당하는
+값을 집어넣어줍니다.
+
+#### Example.
+
+```php
+class Product
+{
+    /**
+     * @Autowired 전체 경로로 사용가능합니다.
+     * @var \Your\OwnNamespace\RequireInterface
+     */
+    private $property1;
+
+    /**
+     * @Autowired 상대 경로도 사용가능합니다. (단, use RequireInterface as Req로 선언된 경우 Req는 사용 불가능합니다.)
+     * @var RequireInterface
+     */
+    private $property2;
+
+    public function getProperty1()
+    {
+        return $this->property1;
+    }
+
+    public function getProperty2()
+    {
+        return $this->property2;
+    }
+}
+
+$container->bind(RequireInterface::class, RequirePackage::class);
+
+$container->wire(Product::class);
+
+$container[Product::class] instanceof Product; // true
+$container[Product::class]->getProperty1() instanceof RequireInterface; // true
+$container[Product::class]->getProperty2() instanceof RequireInterface; // true
+```
+
 ## Auto Resolving
 
 Wandu-DI는 Auto Resolving을 지원합니다. 이를 위한 두가지의 매서드가 있습니다.
@@ -197,6 +240,10 @@ $container->create(Client::class, "other string", "the other string"); // return
 지원합니다.
 
 위의 `create` 메서드가 생성자를 호출한다면, `call`메서드는 모든 `callable`한 녀석을 컨테이너를 통해서 호출합니다.
+
+## Auto-Wired
+
+..작성중..
 
 ## Other Methods
 
