@@ -24,9 +24,6 @@ class Container implements ContainerInterface
     /** @var array */
     protected $bind = [];
 
-    /** @var array */
-    protected $wire = [];
-
     /** @var array ref. Pimple */
     protected $frozen = [];
 
@@ -112,7 +109,7 @@ class Container implements ContainerInterface
             return $this->get($this->aliases[$name]);
         }
         if (!isset($this->instances[$name])) {
-            switch($this->keys[$name]) {
+            switch($key) {
                 case 'closure':
                     $this->instances[$name] = call_user_func($this->closures[$name], $this, $this->get('config'));
                     break;
@@ -120,7 +117,7 @@ class Container implements ContainerInterface
                     $this->instances[$name] = $this->create($this->bind[$name]);
                     break;
                 case 'wire':
-                    $this->instances[$name] = $this->create($this->wire[$name]);
+                    $this->instances[$name] = $this->create($this->bind[$name]);
                     $this->inject($this->instances[$name]);
                     break;
             }
@@ -183,15 +180,8 @@ class Container implements ContainerInterface
      */
     public function wire($name, $class = null)
     {
-        if (!isset($class)) {
-            $class = $name;
-        }
-        $this->destroy($name);
+        $this->bind($name, $class);
         $this->keys[$name] = 'wire';
-        $this->wire[$name] = $class;
-        if ($name !== $class) {
-            $this->alias($class, $name);
-        }
         return $this;
     }
 
@@ -274,7 +264,7 @@ class Container implements ContainerInterface
     /**
      * {@inheritdoc}
      */
-    public function inject($object)
+    public function inject($object, array $injectee = [])
     {
         $reflectionObject = new \ReflectionObject($object);
 
