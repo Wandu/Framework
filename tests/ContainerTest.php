@@ -313,4 +313,22 @@ class ContainerTest extends PHPUnit_Framework_TestCase
 
         $this->assertSame($this->container->get(DepInterface::class), $this->container->get(DepFoo::class));
     }
+
+    public function testAutoWiring()
+    {
+        $this->container->bind(DepInterface::class, DepFoo::class);
+        $this->container->wire(AutoWiredClient::class);
+
+        $this->assertInstanceOf(AutoWiredClient::class, $this->container->get(AutoWiredClient::class));
+
+        $this->assertSame($this->container->get(AutoWiredClient::class), $this->container->get(AutoWiredClient::class));
+
+        $this->assertInstanceOf(DepInterface::class, $this->container->get(AutoWiredClient::class)->getDep1());
+        $this->assertInstanceOf(DepInterface::class, $this->container->get(AutoWiredClient::class)->getDep2());
+
+        $this->assertSame(
+            $this->container->get(AutoWiredClient::class)->getDep1(),
+            $this->container->get(AutoWiredClient::class)->getDep2()
+        );
+    }
 }

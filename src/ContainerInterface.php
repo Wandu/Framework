@@ -66,6 +66,13 @@ interface ContainerInterface extends ArrayAccess
     public function bind($name, $class = null);
 
     /**
+     * @param string $name
+     * @param string $class
+     * @return self
+     */
+    public function wire($name, $class = null);
+
+    /**
      * @param $name
      * @return self
      */
@@ -84,4 +91,9 @@ interface ContainerInterface extends ArrayAccess
      * @return mixed
      */
     public function call(callable $callee);
+
+    /**
+     * @param object $object
+     */
+    public function inject($object);
 }

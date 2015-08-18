@@ -24,6 +24,9 @@ class Container implements ContainerInterface
     /** @var array */
     protected $bind = [];
 
+    /** @var array */
+    protected $wire = [];
+
     /** @var array ref. Pimple */
     protected $frozen = [];
 
@@ -109,10 +112,17 @@ class Container implements ContainerInterface
             return $this->get($this->aliases[$name]);
         }
         if (!isset($this->instances[$name])) {
-            if ($this->keys[$name] === 'closure') {
-                $this->instances[$name] = call_user_func($this->closures[$name], $this, $this->get('config'));
-            } elseif ($this->keys[$name] === 'bind') {
-                $this->instances[$name] = $this->create($this->bind[$name]);
+            switch($this->keys[$name]) {
+                case 'closure':
+                    $this->instances[$name] = call_user_func($this->closures[$name], $this, $this->get('config'));
+                    break;
+                case 'bind':
+                    $this->instances[$name] = $this->create($this->bind[$name]);
+                    break;
+                case 'wire':
+                    $this->instances[$name] = $this->create($this->wire[$name]);
+                    $this->inject($this->instances[$name]);
+                    break;
             }
         }
         return $this->instances[$name];
@@ -165,6 +175,23 @@ class Container implements ContainerInterface
         $this->destroy($name);
         $this->keys[$name] = 'alias';
         $this->aliases[$name] = $origin;
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function wire($name, $class = null)
+    {
+        if (!isset($class)) {
+            $class = $name;
+        }
+        $this->destroy($name);
+        $this->keys[$name] = 'wire';
+        $this->wire[$name] = $class;
+        if ($name !== $class) {
+            $this->alias($class, $name);
+        }
         return $this;
     }
 
@@ -242,6 +269,38 @@ class Container implements ContainerInterface
             $callee,
             $this->getParameters(new ReflectionCallable($callee), $parameters)
         );
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function inject($object)
+    {
+        $reflectionObject = new \ReflectionObject($object);
+
+        foreach ($reflectionObject->getProperties() as $property) {
+            $comment = $property->getDocComment();
+            if (strpos($comment, '@Autowired') !== false) {
+                $class = $this->getInjectClassFromDocComment($comment);
+                if ($class[0] === '\\') {
+                    $class = substr($class, 1);
+                } else {
+                    $class = $reflectionObject->getNamespaceName() . '\\' . $class;
+                }
+                $property->setAccessible(true);
+                $property->setValue($object, $this->get($class));
+            }
+        }
+    }
+
+    /**
+     * @param string $comment
+     * @return string
+     */
+    protected function getInjectClassFromDocComment($comment)
+    {
+        preg_match('/^([a-zA-Z0-9\\\\]+)/', ltrim(substr($comment, strpos($comment, '@var') + 4)), $matches);
+        return $matches[0];
     }
 
     /**
