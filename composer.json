@@ -1,7 +1,7 @@
 {
     "name": "wandu/di",
     "description": "Dependency Injection Container.",
-    "keywords": ["wandu", "dependency injection", "di"],
+    "keywords": ["wandu", "dependency injection", "di", "ioc", "auto resolve", "auto wiring"],
     "license": "MIT",
     "authors": [
         {
