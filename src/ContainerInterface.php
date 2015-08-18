@@ -25,7 +25,7 @@ interface ContainerInterface extends ArrayAccess
 
     /**
      * @param string $name
-     * @param callable $handler
+     * @param Closure $handler
      * @return self
      */
     public function closure($name, Closure $handler);
@@ -46,7 +46,7 @@ interface ContainerInterface extends ArrayAccess
 
     /**
      * @param string $name
-     * @param callable $handler
+     * @param Closure $handler
      * @return self
      */
     public function extend($name, Closure $handler);
