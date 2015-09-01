@@ -4,7 +4,8 @@ namespace Wandu\DI;
 use ArrayObject;
 use Mockery;
 use PHPUnit_Framework_TestCase;
-use Wandu\DI\Stub\AutoWiredClient;
+use Wandu\DI\Stub\ClientWithAutoWired;
+use Wandu\DI\Stub\ClientWithBlankAutoWired;
 use Wandu\DI\Stub\Invoker;
 use Wandu\DI\Stub\StubClient;
 use Wandu\DI\Stub\StubClientWithConfig;
@@ -314,21 +315,32 @@ class ContainerTest extends PHPUnit_Framework_TestCase
         $this->assertSame($this->container->get(DepInterface::class), $this->container->get(DepFoo::class));
     }
 
+    public function testInject()
+    {
+        $this->container->bind(DepInterface::class, DepFoo::class);
+
+        $client = new ClientWithBlankAutoWired();
+
+        try {
+            $this->container->inject($client);
+            $this->fail();
+        } catch (CannotInjectException $e) {
+            $this->assertEquals('Cannot inject; Wandu\DI\Stub\ClientWithBlankAutoWired::$dep', $e->getMessage());
+        }
+
+        $this->container->inject($client, ['dep' => 111]);
+        $this->assertSame(111, $client->getDep());
+    }
+
     public function testAutoWiring()
     {
         $this->container->bind(DepInterface::class, DepFoo::class);
-        $this->container->wire(AutoWiredClient::class);
+        $this->container->wire(ClientWithAutoWired::class);
 
-        $this->assertInstanceOf(AutoWiredClient::class, $this->container->get(AutoWiredClient::class));
+        $this->assertInstanceOf(ClientWithAutoWired::class, $this->container->get(ClientWithAutoWired::class));
 
-        $this->assertSame($this->container->get(AutoWiredClient::class), $this->container->get(AutoWiredClient::class));
+        $this->assertSame($this->container->get(ClientWithAutoWired::class), $this->container->get(ClientWithAutoWired::class));
 
-        $this->assertInstanceOf(DepInterface::class, $this->container->get(AutoWiredClient::class)->getDep1());
-        $this->assertInstanceOf(DepInterface::class, $this->container->get(AutoWiredClient::class)->getDep2());
-
-        $this->assertSame(
-            $this->container->get(AutoWiredClient::class)->getDep1(),
-            $this->container->get(AutoWiredClient::class)->getDep2()
-        );
+        $this->assertInstanceOf(DepInterface::class, $this->container->get(ClientWithAutoWired::class)->getDep());
     }
 }

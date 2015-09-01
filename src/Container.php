@@ -4,6 +4,7 @@ namespace Wandu\DI;
 use ArrayAccess;
 use Closure;
 use ReflectionClass;
+use ReflectionObject;
 use ReflectionFunctionAbstract;
 use Wandu\Reflection\ReflectionCallable;
 
@@ -264,21 +265,23 @@ class Container implements ContainerInterface
     /**
      * {@inheritdoc}
      */
-    public function inject($object, array $injectee = [])
+    public function inject($object, array $parameters = [])
     {
-        $reflectionObject = new \ReflectionObject($object);
+        $reflectionObject = new ReflectionObject($object);
 
         foreach ($reflectionObject->getProperties() as $property) {
             $comment = $property->getDocComment();
             if (strpos($comment, '@Autowired') !== false) {
-                $class = $this->getInjectClassFromDocComment($comment);
-                if ($class[0] === '\\') {
-                    $class = substr($class, 1);
+                $className = $this->getClassNameFromDocComment($comment);
+                if (isset($className)) {
+                    $property->setAccessible(true);
+                    $property->setValue($object, $this->get($className));
+                } elseif (isset($parameters[$propertyName = $property->getName()])) {
+                    $property->setAccessible(true);
+                    $property->setValue($object, $parameters[$propertyName]);
                 } else {
-                    $class = $reflectionObject->getNamespaceName() . '\\' . $class;
+                    throw new CannotInjectException(get_class($object), $property->getName());
                 }
-                $property->setAccessible(true);
-                $property->setValue($object, $this->get($class));
             }
         }
     }
@@ -287,10 +290,18 @@ class Container implements ContainerInterface
      * @param string $comment
      * @return string
      */
-    protected function getInjectClassFromDocComment($comment)
+    protected function getClassNameFromDocComment($comment)
     {
-        preg_match('/^([a-zA-Z0-9\\\\]+)/', ltrim(substr($comment, strpos($comment, '@var') + 4)), $matches);
-        return $matches[0];
+        $varPosition = strpos($comment, '@var');
+        if ($varPosition === false) {
+            return null;
+        }
+        preg_match('/^([a-zA-Z0-9\\\\]+)/', ltrim(substr($comment, $varPosition + 4)), $matches);
+        $className =  $matches[0];
+        if ($className[0] === '\\') {
+            $className = substr($className, 1);
+        }
+        return $className;
     }
 
     /**

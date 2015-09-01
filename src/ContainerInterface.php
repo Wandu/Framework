@@ -94,6 +94,7 @@ interface ContainerInterface extends ArrayAccess
 
     /**
      * @param object $object
+     * @param array $parameters
      */
-    public function inject($object);
+    public function inject($object, array $parameters = []);
 }
