@@ -128,25 +128,14 @@ $container[Product::class] instanceof Product; // true
 class Product
 {
     /**
-     * @Autowired 전체 경로로 사용가능합니다.
+     * @Autowired 전체 경로로만 사용가능합니다.
      * @var \Your\OwnNamespace\RequireInterface
      */
-    private $property1;
+    private $property;
 
-    /**
-     * @Autowired 상대 경로도 사용가능합니다. (단, use RequireInterface as Req로 선언된 경우 Req는 사용 불가능합니다.)
-     * @var RequireInterface
-     */
-    private $property2;
-
-    public function getProperty1()
+    public function getProperty()
     {
-        return $this->property1;
-    }
-
-    public function getProperty2()
-    {
-        return $this->property2;
+        return $this->property;
     }
 }
 
@@ -155,8 +144,7 @@ $container->bind(RequireInterface::class, RequirePackage::class);
 $container->wire(Product::class);
 
 $container[Product::class] instanceof Product; // true
-$container[Product::class]->getProperty1() instanceof RequireInterface; // true
-$container[Product::class]->getProperty2() instanceof RequireInterface; // true
+$container[Product::class]->getProperty() instanceof RequireInterface; // true
 ```
 
 
