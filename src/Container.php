@@ -29,14 +29,16 @@ class Container implements ContainerInterface
     protected $frozen = [];
 
     /**
-     * @param ArrayAccess $configs
+     * @param \ArrayAccess $config
      */
-    public function __construct(ArrayAccess $configs)
+    public function __construct(ArrayAccess $config = null)
     {
         $this->instance('container', $this)->freeze('container');
-        $this->instance('config', $configs)->freeze('config');
         $this->alias(ContainerInterface::class, 'container')
             ->freeze(ContainerInterface::class);
+        if (isset($config)) {
+            $this->instance('config', $config)->freeze('config');
+        }
     }
 
     /**
@@ -305,7 +307,7 @@ class Container implements ContainerInterface
     }
 
     /**
-     * @param ReflectionFunctionAbstract $reflectionFunction
+     * @param \ReflectionFunctionAbstract $reflectionFunction
      * @param array $parameters
      * @return array
      */

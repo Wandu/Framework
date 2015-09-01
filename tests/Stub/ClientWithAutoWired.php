@@ -10,7 +10,7 @@ class ClientWithAutoWired
     private $dep;
 
     /**
-     * @return DepInterface
+     * @return \Wandu\DI\Stub\DepInterface
      */
     public function getDep()
     {

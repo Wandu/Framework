@@ -25,7 +25,7 @@ interface ContainerInterface extends ArrayAccess
 
     /**
      * @param string $name
-     * @param Closure $handler
+     * @param \Closure $handler
      * @return self
      */
     public function closure($name, Closure $handler);
@@ -46,14 +46,14 @@ interface ContainerInterface extends ArrayAccess
 
     /**
      * @param string $name
-     * @param Closure $handler
+     * @param \Closure $handler
      * @return self
      */
     public function extend($name, Closure $handler);
 
 
     /**
-     * @param ServiceProviderInterface $provider
+     * @param \Wandu\DI\ServiceProviderInterface $provider
      * @return self
      */
     public function register(ServiceProviderInterface $provider);
