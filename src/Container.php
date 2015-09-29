@@ -278,12 +278,12 @@ class Container implements ContainerInterface
                 if (isset($className)) {
                     $property->setAccessible(true);
                     $property->setValue($object, $this->get($className));
-                } elseif (isset($parameters[$propertyName = $property->getName()])) {
-                    $property->setAccessible(true);
-                    $property->setValue($object, $parameters[$propertyName]);
                 } else {
                     throw new CannotInjectException(get_class($object), $property->getName());
                 }
+            } elseif (isset($parameters[$propertyName = $property->getName()])) {
+                $property->setAccessible(true);
+                $property->setValue($object, $parameters[$propertyName]);
             }
         }
     }

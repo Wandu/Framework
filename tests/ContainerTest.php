@@ -4,8 +4,6 @@ namespace Wandu\DI;
 use ArrayObject;
 use Mockery;
 use PHPUnit_Framework_TestCase;
-use Wandu\DI\Stub\ClientWithAutoWired;
-use Wandu\DI\Stub\ClientWithBlankAutoWired;
 use Wandu\DI\Stub\Invoker;
 use Wandu\DI\Stub\StubClient;
 use Wandu\DI\Stub\StubClientWithConfig;
@@ -67,7 +65,7 @@ class ContainerTest extends PHPUnit_Framework_TestCase
             $this->container->get('Unknown');
             $this->fail();
         } catch (NullReferenceException $exception) {
-            $this->assertEquals('You cannot access null reference container; Unknown', $exception->getMessage());
+            $this->assertEquals('not exists in this container; Unknown', $exception->getMessage());
         }
     }
 
@@ -134,7 +132,7 @@ class ContainerTest extends PHPUnit_Framework_TestCase
             });
             $this->fail();
         } catch (NullReferenceException $e) {
-            $this->assertEquals('You cannot access null reference container; Unknown', $e->getMessage());
+            $this->assertEquals('not exists in this container; Unknown', $e->getMessage());
         }
     }
 
@@ -313,34 +311,5 @@ class ContainerTest extends PHPUnit_Framework_TestCase
         $this->assertInstanceOf(DepInterface::class, $this->container->get(DepFoo::class));
 
         $this->assertSame($this->container->get(DepInterface::class), $this->container->get(DepFoo::class));
-    }
-
-    public function testInject()
-    {
-        $this->container->bind(DepInterface::class, DepFoo::class);
-
-        $client = new ClientWithBlankAutoWired();
-
-        try {
-            $this->container->inject($client);
-            $this->fail();
-        } catch (CannotInjectException $e) {
-            $this->assertEquals('Cannot inject; Wandu\DI\Stub\ClientWithBlankAutoWired::$dep', $e->getMessage());
-        }
-
-        $this->container->inject($client, ['dep' => 111]);
-        $this->assertSame(111, $client->getDep());
-    }
-
-    public function testAutoWiring()
-    {
-        $this->container->bind(DepInterface::class, DepFoo::class);
-        $this->container->wire(ClientWithAutoWired::class);
-
-        $this->assertInstanceOf(ClientWithAutoWired::class, $this->container->get(ClientWithAutoWired::class));
-
-        $this->assertSame($this->container->get(ClientWithAutoWired::class), $this->container->get(ClientWithAutoWired::class));
-
-        $this->assertInstanceOf(DepInterface::class, $this->container->get(ClientWithAutoWired::class)->getDep());
     }
 }
