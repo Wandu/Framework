@@ -1,7 +1,7 @@
 {
     "name": "wandu/di",
-    "description": "Dependency Injection Container.",
-    "keywords": ["wandu", "dependency injection", "di", "ioc", "auto resolve", "auto wiring"],
+    "description": "Dependency Injection Container. Support Auto-Resolve and Auto-Wiring.",
+    "keywords": ["di", "ioc", "auto resolve", "auto wiring", "dependency injection", "wandu"],
     "license": "MIT",
     "authors": [
         {
@@ -12,7 +12,7 @@
     "require": {
         "php": ">=5.5.0",
         "wandu/reflection": "^0.0.1"
-    },
+},
     "require-dev": {
         "phpunit/phpunit": "4.5.*",
         "mockery/mockery": "0.9.*"
@@ -29,7 +29,7 @@
     },
     "extra": {
         "branch-alias": {
-            "dev-master": "2.1-dev"
+            "dev-master": "2.3-dev"
         }
     }
 }
