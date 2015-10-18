@@ -1,11 +1,10 @@
 <?php
 namespace Wandu\DI;
 
-use ArrayAccess;
 use Closure;
 use ReflectionClass;
-use ReflectionObject;
 use ReflectionFunctionAbstract;
+use ReflectionObject;
 use Wandu\Reflection\ReflectionCallable;
 
 class Container implements ContainerInterface
@@ -28,17 +27,11 @@ class Container implements ContainerInterface
     /** @var array ref. Pimple */
     protected $frozen = [];
 
-    /**
-     * @param \ArrayAccess $config
-     */
-    public function __construct(ArrayAccess $config = null)
+    public function __construct()
     {
         $this->instance('container', $this)->freeze('container');
         $this->alias(ContainerInterface::class, 'container')
             ->freeze(ContainerInterface::class);
-        if (isset($config)) {
-            $this->instance('config', $config)->freeze('config');
-        }
     }
 
     /**
@@ -114,7 +107,7 @@ class Container implements ContainerInterface
         if (!isset($this->instances[$name])) {
             switch($key) {
                 case 'closure':
-                    $this->instances[$name] = call_user_func($this->closures[$name], $this, $this->get('config'));
+                    $this->instances[$name] = call_user_func($this->closures[$name], $this);
                     break;
                 case 'bind':
                     $this->instances[$name] = $this->create($this->bind[$name]);
@@ -217,7 +210,7 @@ class Container implements ContainerInterface
      */
     public function register(ServiceProviderInterface $provider)
     {
-        $provider->register($this, $this->get('config'));
+        $provider->register($this);
         return $this;
     }
 
@@ -233,33 +226,28 @@ class Container implements ContainerInterface
     /**
      * {@inheritdoc}
      */
+    public function create($class, ...$arguments)
     {
-        $parameters = func_get_args();
-        array_shift($parameters); // remove first argument
-
         $reflectionClass = new ReflectionClass($class);
         $reflectionMethod = $reflectionClass->getConstructor();
         if ($reflectionMethod) {
             try {
-                $parameters = $this->getParameters($reflectionMethod, $parameters);
+                $arguments = $this->getParameters($reflectionMethod, $arguments);
             } catch (CannotResolveException $e) {
                 throw new CannotResolveException($class);
             }
         }
-        return $reflectionClass->newInstanceArgs($parameters);
+        return $reflectionClass->newInstanceArgs($arguments);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function call(callable $callee)
+    public function call(callable $callee, ...$arguments)
     {
-        $parameters = func_get_args();
-        array_shift($parameters); // remove first argument
-
         return call_user_func_array(
             $callee,
-            $this->getParameters(new ReflectionCallable($callee), $parameters)
+            $this->getParameters(new ReflectionCallable($callee), $arguments)
         );
     }
 
@@ -324,5 +312,15 @@ class Container implements ContainerInterface
         }
         $parametersToReturn = array_merge($parametersToReturn, $parameters);
         return $parametersToReturn;
+    }
+
+    /**
+     * @param string $name
+     * @param array $arguments
+     * @return mixed
+     */
+    public function __call($name, $arguments)
+    {
+        return $this->call([$this->get($name), 'handle'], ...$arguments);
     }
 }

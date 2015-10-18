@@ -23,13 +23,7 @@ class ContainerTest extends PHPUnit_Framework_TestCase
     public function setUp()
     {
         parent::setUp();
-        $this->configs = new ArrayObject([
-            'database' => [
-                'username' => 'username string',
-                'password' => 'password string',
-            ]
-        ]);
-        $this->container = new Container($this->configs);
+        $this->container = new Container();
     }
 
     public function testHas()
@@ -82,8 +76,11 @@ class ContainerTest extends PHPUnit_Framework_TestCase
     public function testClosureParameters()
     {
         $this->container[DepInterface::class] = $foo = new DepFoo();
-        $this->container->closure(StubClientWithConfig::class, function ($app, $config) {
-            return new StubClientWithConfig($app[DepInterface::class], $config['database']);
+        $this->container->closure(StubClientWithConfig::class, function ($app) {
+            return new StubClientWithConfig($app[DepInterface::class], [
+                'username' => 'username string',
+                'password' => 'password string',
+            ]);
         });
 
         $this->assertSame($foo, $this->container[StubClientWithConfig::class]->getDependency());
@@ -219,7 +216,7 @@ class ContainerTest extends PHPUnit_Framework_TestCase
     public function testRegisterServiceProvider()
     {
         $mockProvider = Mockery::mock(ServiceProviderInterface::class);
-        $mockProvider->shouldReceive('register')->with($this->container, $this->configs);
+        $mockProvider->shouldReceive('register')->with($this->container);
 
         $this->assertSame($this->container, $this->container->register($mockProvider));
     }
