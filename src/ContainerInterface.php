@@ -80,17 +80,17 @@ interface ContainerInterface extends ArrayAccess
 
     /**
      * @param string $class
-     * @param mixed ...$parameters
+     * @param mixed ...$arguments
      * @return object
      */
-    public function create($class);
+    public function create($class, ...$arguments);
 
     /**
      * @param callable $callee
-     * @param mixed ...$parameters
+     * @param mixed ...$arguments
      * @return mixed
      */
-    public function call(callable $callee);
+    public function call(callable $callee, ...$arguments);
 
     /**
      * @param object $object

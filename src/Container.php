@@ -233,7 +233,6 @@ class Container implements ContainerInterface
     /**
      * {@inheritdoc}
      */
-    public function create($class)
     {
         $parameters = func_get_args();
         array_shift($parameters); // remove first argument
