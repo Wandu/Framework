@@ -49,7 +49,7 @@ class Route
             $middleware = array_shift($middlewares);
             return call_user_func([
                 $loader->load($middleware), 'handle'
-            ], $request, function () use ($request, $loader, $middlewares) {
+            ], $request, function (ServerRequestInterface $request) use ($loader, $middlewares) {
                 return $this->dispatch($request, $loader, $middlewares);
             });
         }
