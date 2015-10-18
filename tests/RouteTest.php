@@ -16,7 +16,7 @@ class RouteTest extends PHPUnit_Framework_TestCase
 
         $mockRequest = Mockery::mock(ServerRequestInterface::class);
 
-        $this->assertEquals('index@AdminController string', $route->execute($mockRequest));
+        $this->assertEquals('index@Admin', $route->execute($mockRequest));
     }
 
     public function testExecuteWithMiddleware()
@@ -27,7 +27,7 @@ class RouteTest extends PHPUnit_Framework_TestCase
 
         $mockRequest = Mockery::mock(ServerRequestInterface::class);
 
-        $this->assertEquals('auth[index@AdminController string]', $route->execute($mockRequest));
+        $this->assertEquals('auth[index@Admin]', $route->execute($mockRequest));
     }
 
     public function testExecuteWithPreventedMiddleware()

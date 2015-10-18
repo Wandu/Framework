@@ -1,13 +1,13 @@
 <?php
 namespace Wandu\Router;
 
-use Wandu\Router\MapperInterface;
-use Wandu\Router\stubs\AdminController;
-use Psr\Http\Message\ServerRequestInterface;
 use Mockery;
 use PHPUnit_Framework_TestCase;
-use ArrayObject;
-use Wandu\Router\Stubs\AuthMiddleware;
+use Psr\Http\Message\ServerRequestInterface;
+use Wandu\Router\stubs\AdminController;
+use Wandu\Router\Stubs\AuthFailMiddleware;
+use Wandu\Router\Stubs\AuthSuccessMiddleware;
+use Wandu\Router\Stubs\HomeController;
 
 class RouterTest extends PHPUnit_Framework_TestCase
 {
@@ -16,21 +16,7 @@ class RouterTest extends PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $mockMapper = Mockery::mock(MapperInterface::class);
-        $mockMapper
-            ->shouldReceive('mapHandler')
-            ->with('index@AdminController')
-            ->andReturn([new AdminController, 'index']);
-        $mockMapper
-            ->shouldReceive('mapHandler')
-            ->with('action@AdminController')
-            ->andReturn([new AdminController, 'action']);
-        $mockMapper
-            ->shouldReceive('mapMiddleware')
-            ->with('AuthMiddleware')
-            ->andReturn(new AuthMiddleware);
-
-        $this->router = new Router($mockMapper);
+        $this->router = new Router();
     }
 
     public function tearDown()
@@ -38,214 +24,113 @@ class RouterTest extends PHPUnit_Framework_TestCase
         Mockery::close();
     }
 
-    public function testDefaultAction()
+    public function testDispatchDefault()
     {
         $mockRequest = Mockery::mock(ServerRequestInterface::class);
-        $mockRequest->shouldReceive('getParsedBody')->andReturn([]);
-        $mockRequest->shouldReceive('getMethod')->andReturn('GET');
-        $mockRequest->shouldReceive('getUri->getPath')->andReturn('/');
-        $mockRequest->shouldReceive('setArguments')->with([
-        ]);
+        $mockRequest->shouldReceive('getParsedBody')->once()->andReturn([]);
+        $mockRequest->shouldReceive('getMethod')->once()->andReturn('GET');
+        $mockRequest->shouldReceive('getUri->getPath')->once()->andReturn('/');
 
-        $this->router->createRoute('GET', '', 'index@AdminController');
-        $this->assertEquals('index@AdminController string', $this->router->dispatch($mockRequest));
+        $this->router->createRoute(['GET'], '/', AdminController::class, 'index');
+
+        $this->assertEquals('index@Admin', $this->router->dispatch($mockRequest));
     }
 
-    public function testDispatch()
+    public function testDispatchMethod()
     {
         $mockGetRequest = Mockery::mock(ServerRequestInterface::class);
-        $mockGetRequest->shouldReceive('getParsedBody')->andReturn([]);
-        $mockGetRequest->shouldReceive('getMethod')->andReturn('GET');
-        $mockGetRequest->shouldReceive('getUri->getPath')->andReturn('/');
-        $mockGetRequest->shouldReceive('setArguments')->with([
-        ]);
+        $mockGetRequest->shouldReceive('getParsedBody')->once()->andReturn([]);
+        $mockGetRequest->shouldReceive('getMethod')->once()->andReturn('GET');
+        $mockGetRequest->shouldReceive('getUri->getPath')->once()->andReturn('/');
 
         $mockPostRequest = Mockery::mock(ServerRequestInterface::class);
-        $mockPostRequest->shouldReceive('getParsedBody')->andReturn([]);
-        $mockPostRequest->shouldReceive('getMethod')->andReturn('POST');
-        $mockPostRequest->shouldReceive('getUri->getPath')->andReturn('/');
-        $mockPostRequest->shouldReceive('setArguments')->with([
-        ]);
+        $mockPostRequest->shouldReceive('getParsedBody')->once()->andReturn([]);
+        $mockPostRequest->shouldReceive('getMethod')->once()->andReturn('POST');
+        $mockPostRequest->shouldReceive('getUri->getPath')->once()->andReturn('/');
 
-        $getCalledCount = 0;
-        $postCalledCount = 0;
+        $this->router->createRoute(['GET'], '/', AdminController::class, 'index', [AuthSuccessMiddleware::class]);
+        $this->router->createRoute(['POST'], '/', AdminController::class, 'index', [AuthFailMiddleware::class]);
 
-        $this->router->get(
-            '',
-            function (ServerRequestInterface $req) use (&$getCalledCount) {
-                $getCalledCount++;
-                return 'get';
-            },
-            [function (ServerRequestInterface $req, callable $next) {
-                return $next($req) . ' getMiddleware';
-            }]
-        );
+        $this->assertEquals('auth[index@Admin]', $this->router->dispatch($mockGetRequest));
 
-        $this->router->post(
-            '',
-            function (ServerRequestInterface $req) use (&$postCalledCount) {
-                $postCalledCount++;
-                return 'post';
-            },
-            [function (ServerRequestInterface $req, callable $next) {
-                return $next($req) . ' postMiddleware';
-            }]
-        );
-
-        $this->assertEquals('get getMiddleware', $this->router->dispatch($mockGetRequest));
-
-        $this->assertEquals(1, $getCalledCount);
-        $this->assertEquals(0, $postCalledCount);
-
-        $this->assertEquals('post postMiddleware', $this->router->dispatch($mockPostRequest));
-
-        $this->assertEquals(1, $getCalledCount);
-        $this->assertEquals(1, $postCalledCount);
+        $this->assertEquals('auth fail...', $this->router->dispatch($mockPostRequest));
     }
 
-    public function testDispatchWithArguments()
-    {
-
-        $getMock = Mockery::mock(ServerRequestInterface::class);
-        $getMock->shouldReceive('getParsedBody')->andReturn([]);
-        $getMock->shouldReceive('getMethod')->andReturn('GET');
-        $getMock->shouldReceive('getUri->getPath')->andReturn('/jicjjang/hello');
-        $getMock->shouldReceive('withAttribute')->andReturn($getMock);
-
-        $this->router->get(
-            '/{name}/{message}',
-            function (ServerRequestInterface $req) {
-                return 'get';
-            },
-            [function (ServerRequestInterface $req, callable $next) {
-                return $next($req) . ' getMiddleware';
-            }]
-        );
-
-        $this->assertEquals('get getMiddleware', $this->router->dispatch($getMock));
-    }
-
-    public function testAnyMethod()
-    {
-        $anyMock = Mockery::mock(ServerRequestInterface::class);
-        $anyMock->shouldReceive('getParsedBody')->andReturn([]);
-        $anyMock->shouldReceive('getMethod')->andReturn('GET');
-        $anyMock->shouldReceive('getUri->getPath')->andReturn('/');
-        $anyMock->shouldReceive('setArguments')->with([
-        ]);
-
-        $this->router->any('', function () {
-            return 'any';
-        });
-
-        $this->assertEquals('any', $this->router->dispatch($anyMock));
-        $this->assertEquals('any', $this->router->dispatch($anyMock));
-    }
-
-    public function testExecuteWithController()
+    public function testDispatchMatchingUri()
     {
         $getMock = Mockery::mock(ServerRequestInterface::class);
-        $getMock->shouldReceive('getParsedBody')->andReturn([]);
-        $getMock->shouldReceive('getMethod')->andReturn('GET');
-        $getMock->shouldReceive('getUri->getPath')->andReturn('/');
-        $getMock->shouldReceive('setArguments')->with([
-        ]);
+        $getMock->shouldReceive('getParsedBody')->once()->andReturn([]);
+        $getMock->shouldReceive('getMethod')->once()->andReturn('GET');
+        $getMock->shouldReceive('getUri->getPath')->once()->andReturn('/admin/index');
 
-        $this->router->get('/', "action@AdminController", ["AuthMiddleware"]);
+        $this->router->createRoute(['GET'], '/admin/index', AdminController::class, 'index');
+        $this->router->createRoute(['GET'], '/admin/action', AdminController::class, 'action');
 
-        $this->assertEquals('action@AdminController string middleware~', $this->router->dispatch($getMock));
+        $this->assertEquals('index@Admin', $this->router->dispatch($getMock));
+    }
+
+    public function testDispatchMatchingRegExpUri()
+    {
+        $getMock = Mockery::mock(ServerRequestInterface::class);
+        $getMock->shouldReceive('getParsedBody')->once()->andReturn([]);
+        $getMock->shouldReceive('getMethod')->once()->andReturn('GET');
+        $getMock->shouldReceive('getUri->getPath')->once()->andReturn('/admin/doit/hello');
+
+        $getMock->shouldReceive('withAttribute')->once()->with('action', 'hello')->andReturn($getMock);
+        $getMock->shouldReceive('getAttribute')->once()->with('action')->andReturn('hello');
+
+        $this->router->createRoute(['GET', 'POST'], '/admin/doit/{action}', AdminController::class, 'doit');
+
+        $this->assertEquals('doit@Admin, hello', $this->router->dispatch($getMock));
     }
 
     public function testGroup()
     {
-        $router = $this->router;
-
-        $this->router->get('', function () { return '/!'; });
-        $this->router->group('/hello', function () use ($router) {
-            $this->router->get('', function () { return '/hello!'; });
-            $this->router->get('/world', function () { return '/hello/world!'; });
-            $this->router->get('/another', function () { return '/hello/another!'; });
+        $this->router->createRoute(['GET'], '/', HomeController::class, 'index');
+        $this->router->group([
+            'prefix' => '/admin',
+            'middleware' => [AuthSuccessMiddleware::class],
+        ], function (Router $router) {
+            $router->createRoute(['GET'], '', AdminController::class, 'index');
+            $router->createRoute(['GET'], '/action', AdminController::class, 'action');
+            $router->createRoute(['GET'], '/doit/{action}', AdminController::class, 'doit');
         });
-
-        $mockRequest = Mockery::mock(ServerRequestInterface::class);
-        $mockRequest->shouldReceive('getParsedBody')->andReturn([]);
-        $mockRequest->shouldReceive('getMethod')->andReturn('GET');
-        $mockRequest->shouldReceive('getUri->getPath')->andReturn('/hello/world');
-
-        $this->assertEquals('/hello/world!', $this->router->dispatch($mockRequest));
-
-        $mockRequest = Mockery::mock(ServerRequestInterface::class);
-        $mockRequest->shouldReceive('getParsedBody')->andReturn([]);
-        $mockRequest->shouldReceive('getMethod')->andReturn('GET');
-        $mockRequest->shouldReceive('getUri->getPath')->andReturn('/hello/world');
-
-        $this->assertEquals('/hello/world!', $this->router->dispatch($mockRequest));
-
-        $mockRequest = Mockery::mock(ServerRequestInterface::class);
-        $mockRequest->shouldReceive('getParsedBody')->andReturn([]);
-        $mockRequest->shouldReceive('getMethod')->andReturn('GET');
-        $mockRequest->shouldReceive('getUri->getPath')->andReturn('/hello');
-
-        $this->assertEquals('/hello!', $this->router->dispatch($mockRequest));
 
         $mockRequest = Mockery::mock(ServerRequestInterface::class);
         $mockRequest->shouldReceive('getParsedBody')->andReturn([]);
         $mockRequest->shouldReceive('getMethod')->andReturn('GET');
         $mockRequest->shouldReceive('getUri->getPath')->andReturn('/');
 
-        $this->assertEquals('/!', $this->router->dispatch($mockRequest));
-    }
-
-    public function testGroupWithMiddleware()
-    {
-        $router = $this->router;
-
-        $this->router->get('', function () { return '/!'; });
-        $this->router->group([
-            'prefix' => '/hello',
-            'middleware' => [function ($request, $next) { return '[m]' . $next($request); }]
-        ], function () use ($router) {
-            $this->router->get('', function () { return '/hello!'; });
-        });
+        $this->assertEquals('index@Home', $this->router->dispatch($mockRequest));
 
         $mockRequest = Mockery::mock(ServerRequestInterface::class);
         $mockRequest->shouldReceive('getParsedBody')->andReturn([]);
         $mockRequest->shouldReceive('getMethod')->andReturn('GET');
-        $mockRequest->shouldReceive('getUri->getPath')->andReturn('/hello');
+        $mockRequest->shouldReceive('getUri->getPath')->andReturn('/admin');
 
-        $this->assertEquals('[m]/hello!', $this->router->dispatch($mockRequest));
-    }
+        $this->assertEquals('auth[index@Admin]', $this->router->dispatch($mockRequest));
 
-    public function testMultipleGroup()
-    {
-        $router = $this->router;
+        $mockRequest = Mockery::mock(ServerRequestInterface::class);
+        $mockRequest->shouldReceive('getParsedBody')->andReturn([]);
+        $mockRequest->shouldReceive('getMethod')->andReturn('GET');
+        $mockRequest->shouldReceive('getUri->getPath')->andReturn('/admin/action');
 
-        $this->router->get('', 'index@Main');
-        $this->router->group([
-            'prefix' => '/admin',
-            'middleware' => ['auth@Admin']
-        ], function () use ($router) {
-            $this->router->group([
-                'prefix' => '/member',
-                'middleware' => ['member@Admin']
-            ], function () use ($router) {
-                $this->router->get('/', 'index@AdminMember');
-                $this->router->get('', 'index@AdminMember');
-            });
-        });
+        $this->assertEquals('auth[action@Admin]', $this->router->dispatch($mockRequest));
 
-        $routes = $this->router->getRoutes();
+        $mockRequest = Mockery::mock(ServerRequestInterface::class);
+        $mockRequest->shouldReceive('getParsedBody')->andReturn([]);
+        $mockRequest->shouldReceive('getMethod')->andReturn('GET');
+        $mockRequest->shouldReceive('getUri->getPath')->andReturn('/admin/doit/chu');
 
-        $this->assertTrue(isset($routes['GET,HEAD/']));
-        $this->assertTrue(isset($routes['GET,HEAD/admin/member']));
-        $this->assertTrue(isset($routes['GET,HEAD/admin/member/']));
+        $mockRequest->shouldReceive('withAttribute')->once()->with('action', 'chu')->andReturn($mockRequest);
+        $mockRequest->shouldReceive('getAttribute')->once()->with('action')->andReturn('chu');
+
+        $this->assertEquals('auth[doit@Admin, chu]', $this->router->dispatch($mockRequest));
     }
 
     public function testVirtualMethod()
     {
-        $this->router->put('', function () {
-            return 'call put!';
-        });
+        $this->router->createRoute(['PUT'], '', AdminController::class, 'index');
 
         $mockRequest = Mockery::mock(ServerRequestInterface::class);
         $mockRequest->shouldReceive('getUri->getPath')->andReturn('/');
@@ -254,39 +139,6 @@ class RouterTest extends PHPUnit_Framework_TestCase
             '_method' => 'put'
         ]);
 
-        $this->assertEquals('call put!', $this->router->dispatch($mockRequest));
-    }
-
-    public function testGroupSlashSensitive()
-    {
-        $router = $this->router;
-
-        $this->router->get('', function () { return '/!'; });
-        $this->router->group('/hello', function () use ($router) {
-            $this->router->get('', function () { return '/hello!'; });
-            $this->router->get('/', function () { return '/hello/!'; });
-            $this->router->get('///abc', function () { return '/hello///abc!'; });
-        });
-
-        $mockRequest = Mockery::mock(ServerRequestInterface::class);
-        $mockRequest->shouldReceive('getParsedBody')->andReturn([]);
-        $mockRequest->shouldReceive('getMethod')->andReturn('GET');
-        $mockRequest->shouldReceive('getUri->getPath')->andReturn('/hello');
-
-        $this->assertEquals('/hello!', $this->router->dispatch($mockRequest));
-
-        $mockRequest = Mockery::mock(ServerRequestInterface::class);
-        $mockRequest->shouldReceive('getParsedBody')->andReturn([]);
-        $mockRequest->shouldReceive('getMethod')->andReturn('GET');
-        $mockRequest->shouldReceive('getUri->getPath')->andReturn('/hello/');
-
-        $this->assertEquals('/hello/!', $this->router->dispatch($mockRequest));
-
-        $mockRequest = Mockery::mock(ServerRequestInterface::class);
-        $mockRequest->shouldReceive('getParsedBody')->andReturn([]);
-        $mockRequest->shouldReceive('getMethod')->andReturn('GET');
-        $mockRequest->shouldReceive('getUri->getPath')->andReturn('/hello///abc');
-
-        $this->assertEquals('/hello///abc!', $this->router->dispatch($mockRequest));
+        $this->assertEquals('index@Admin', $this->router->dispatch($mockRequest));
     }
 }

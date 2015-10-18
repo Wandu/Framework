@@ -1,9 +1,10 @@
 <?php
 namespace Wandu\Router;
 
-use FastRoute\Dispatcher;
-use Psr\Http\Message\ServerRequestInterface;
 use Closure;
+use FastRoute\Dispatcher;
+use FastRoute\RouteCollector;
+use Psr\Http\Message\ServerRequestInterface;
 use Wandu\Router\Exception\HandlerNotFoundException;
 use Wandu\Router\Exception\MethodNotAllowedException;
 
@@ -14,75 +15,52 @@ class Router
     /** @var Route[] */
     protected $routes = [];
 
-    /** @var MapperInterface */
-    protected $mapper;
-
-    /** @var FastRoute */
-    protected $fastRoute;
+    /** @var array */
+    protected $dispatches = [];
 
     /** @var array */
-    protected $attributes;
+    protected $attributes = [
+        'prefix' => '',
+        'middleware' => [],
+    ];
 
     /**
-     * @param MapperInterface $mapper
      * @param array $attributes
+     * @param \Closure $handler
      */
-    public function __construct(MapperInterface $mapper, array $attributes = [])
+    public function group(array $attributes, Closure $handler)
     {
-        $this->mapper = $mapper;
-        $this->fastRoute = new FastRoute();
-        $this->attributes = $attributes + [
-                'prefix' => '',
-                'middleware' => [],
-            ];
-    }
-
-    /**
-     * @param string|array $attributes
-     * @param callable $handler
-     */
-    public function group($attributes, Closure $handler)
-    {
-        if (!is_array($attributes)) {
-            $attributes = ['prefix' => $attributes];
-        }
-        $attributes += [
-            'prefix' => '',
-            'middleware' => []
-        ];
         $beforeAttributes = $this->attributes;
-        $this->attributes = [
-            'prefix' => $this->joinPath($beforeAttributes['prefix'], $attributes['prefix']),
-            'middleware' => array_merge($beforeAttributes['middleware'], $attributes['middleware']),
-        ];
-        call_user_func($handler, $this);
+        if (isset($attributes['prefix'])) {
+            $this->attributes['prefix'] = $beforeAttributes['prefix'] . $attributes['prefix'] ?: '/';
+        }
+        if (isset($attributes['middleware'])) {
+            $this->attributes['middleware'] = array_merge($beforeAttributes['middleware'], $attributes['middleware']);
+        }
+        $handler($this);
         $this->attributes = $beforeAttributes;
     }
 
     /**
-     * @param string|string[] $methods
+     * @param array $methods
      * @param string $path
-     * @param callable|string $handler
+     * @param string $className
+     * @param string $methodName
      * @param array $middlewares
-     * @return Route
+     * @return \Wandu\Router\Route
      */
-    public function createRoute($methods, $path, $handler, array $middlewares = [])
+    public function createRoute(array $methods, $path, $className, $methodName, array $middlewares = [])
     {
-        if (!is_array($methods)) {
-            $methods = [$methods];
-        }
-
         $path = $this->attributes['prefix'] . $path ?: '/';
         $middlewares = array_merge($this->attributes['middleware'], $middlewares);
 
-        $handleKey =  implode(',', $methods) . $path;
-        $this->fastRoute->addRoute($methods, $path, $handleKey);
-        return $this->routes[$handleKey] = new Route($handler, $middlewares);
-    }
-
-    protected function joinPath($path, $pathToJoin)
-    {
-        return $path . $pathToJoin ?: '/';
+        $handler = implode(',', $methods) . $path;
+        $this->dispatches[] = [
+            'methods' => $methods,
+            'path' => $path,
+            'handler' => $handler,
+        ] ;
+        return $this->routes[$handler] = new Route($className, $methodName, $middlewares);
     }
 
     /**
@@ -91,7 +69,11 @@ class Router
      */
     public function dispatch(ServerRequestInterface $request)
     {
-        $dispatcher = $this->fastRoute->getDispatcher();
+        $dispatcher = \FastRoute\simpleDispatcher(function (RouteCollector $router) {
+            foreach ($this->dispatches as $attrs) {
+                $router->addRoute($attrs['methods'], $attrs['path'], $attrs['handler']);
+            }
+        });
         $method = $request->getMethod();
         $parsedBody = $request->getParsedBody();
         if (isset($parsedBody['_method'])) {
@@ -101,7 +83,7 @@ class Router
         foreach ($routeInfo[2] as $key => $value) {
             $request = $request->withAttribute($key, $value);
         }
-        return $this->routes[$routeInfo[1]]->execute($request, $this->mapper);
+        return $this->routes[$routeInfo[1]]->execute($request);
     }
 
     /**
@@ -121,21 +103,5 @@ class Router
             case Dispatcher::FOUND:
                 return $routeInfo;
         }
-    }
-
-    /**
-     * @param array $routes
-     */
-    public function setRoutes(array $routes)
-    {
-        $this->routes = $routes;
-    }
-
-    /**
-     * @return array
-     */
-    public function getRoutes()
-    {
-        return $this->routes;
     }
 }
