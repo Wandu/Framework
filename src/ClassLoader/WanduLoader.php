@@ -1,11 +1,11 @@
 <?php
-namespace Wandu\Router\Mapper;
+namespace Wandu\Router\ClassLoader;
 
 use Wandu\DI\ContainerInterface;
-use Wandu\Router\MapperInterface;
+use Wandu\Router\Contracts\ClassLoaderInterface;
 use Wandu\Router\Middleware\MiddlewareInterface;
 
-class WanduMapper implements MapperInterface
+class WanduLoader implements ClassLoaderInterface
 {
     /** @var string */
     protected $prefixHandler;

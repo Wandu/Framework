@@ -2,6 +2,7 @@
 namespace Wandu\Router;
 
 use Psr\Http\Message\ServerRequestInterface;
+use Wandu\Router\Contracts\ClassLoaderInterface;
 
 class Route
 {
@@ -28,25 +29,30 @@ class Route
 
     /**
      * @param \Psr\Http\Message\ServerRequestInterface $request
+     * @param \Wandu\Router\Contracts\ClassLoaderInterface $loader
      * @return mixed
      */
-    public function execute(ServerRequestInterface $request)
+    public function execute(ServerRequestInterface $request, ClassLoaderInterface $loader)
     {
-        return $this->dispatch($request, $this->middlewares);
+        return $this->dispatch($request, $loader, $this->middlewares);
     }
 
     /**
      * @param \Psr\Http\Message\ServerRequestInterface $request
+     * @param \Wandu\Router\Contracts\ClassLoaderInterface $loader
+     * @param array $middlewares
      * @return mixed
      */
-    public function dispatch(ServerRequestInterface $request, array $middlewares)
+    public function dispatch(ServerRequestInterface $request, ClassLoaderInterface $loader, array $middlewares)
     {
         if (count($middlewares)) {
             $middleware = array_shift($middlewares);
-            return call_user_func([new $middleware, 'handle'], $request, function () use ($request, $middlewares) {
-                return $this->dispatch($request, $middlewares);
+            return call_user_func([
+                $loader->load($middleware), 'handle'
+            ], $request, function () use ($request, $loader, $middlewares) {
+                return $this->dispatch($request, $loader, $middlewares);
             });
         }
-        return call_user_func([new $this->className, $this->methodName], $request);
+        return call_user_func([$loader->load($this->className), $this->methodName], $request);
     }
 }

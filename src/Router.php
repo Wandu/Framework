@@ -5,6 +5,8 @@ use Closure;
 use FastRoute\Dispatcher;
 use FastRoute\RouteCollector;
 use Psr\Http\Message\ServerRequestInterface;
+use Wandu\Router\ClassLoader\DefaultLoader;
+use Wandu\Router\Contracts\ClassLoaderInterface;
 use Wandu\Router\Exception\HandlerNotFoundException;
 use Wandu\Router\Exception\MethodNotAllowedException;
 
@@ -23,6 +25,17 @@ class Router
         'prefix' => '',
         'middleware' => [],
     ];
+
+    /**
+     * @param \Wandu\Router\Contracts\ClassLoaderInterface $classLoader
+     */
+    public function __construct(ClassLoaderInterface $classLoader = null)
+    {
+        if (!isset($classLoader)) {
+            $classLoader = new DefaultLoader();
+        }
+        $this->classLoader = $classLoader;
+    }
 
     /**
      * @param array $attributes
@@ -85,7 +98,7 @@ class Router
         foreach ($routeInfo[2] as $key => $value) {
             $request = $request->withAttribute($key, $value);
         }
-        return $this->routes[$routeInfo[1]]->execute($request);
+        return $this->routes[$routeInfo[1]]->execute($request, $this->classLoader);
     }
 
     /**
