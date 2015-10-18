@@ -4,7 +4,7 @@ namespace Wandu\Router\Stubs;
 use Psr\Http\Message\ServerRequestInterface;
 use Wandu\Router\Middleware\MiddlewareInterface;
 
-class AuthMiddleware implements MiddlewareInterface
+class AuthSuccessMiddleware implements MiddlewareInterface
 {
     /**
      * @param ServerRequestInterface $request
@@ -13,6 +13,6 @@ class AuthMiddleware implements MiddlewareInterface
      */
     public function handle(ServerRequestInterface $request, callable $next)
     {
-        return $next($request) . ' middleware~';
+        return "auth[{$next($request)}]";
     }
 }

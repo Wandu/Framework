@@ -5,75 +5,48 @@ use Psr\Http\Message\ServerRequestInterface;
 
 class Route
 {
-    /** @var string|callable */
-    protected $handler;
+    /** @var string */
+    protected $className;
+
+    /** @var string */
+    protected $methodName;
 
     /** @var array */
     protected $middlewares;
 
-    /** @var int */
-    protected $nextCount;
-
-    /** @var MapperInterface */
-    protected $mapper;
-
     /**
-     * @param string|callable $handler
+     * @param string $className
+     * @param string $methodName
      * @param array $middlewares
      */
-    public function __construct($handler, array $middlewares = [])
+    public function __construct($className, $methodName, array $middlewares = [])
     {
-        $this->handler = $handler;
+        $this->className = $className;
+        $this->methodName = $methodName;
         $this->middlewares = $middlewares;
     }
 
     /**
      * @param ServerRequestInterface $request
-     * @param MapperInterface $mapper
      * @return mixed
      */
-    public function execute(ServerRequestInterface $request, MapperInterface $mapper = null)
+    public function execute(ServerRequestInterface $request)
     {
-        $this->nextCount = 0;
-        $this->mapper = $mapper;
-        return $this->next($request);
+        return $this->dispatch($request, $this->middlewares);
     }
 
     /**
      * @param ServerRequestInterface $request
      * @return mixed
      */
-    public function next(ServerRequestInterface $request)
+    public function dispatch(ServerRequestInterface $request, array $middlewares)
     {
-        if (!isset($this->middlewares[$this->nextCount])) {
-            return call_user_func($this->filterHandler($this->handler), $request);
+        if (count($middlewares)) {
+            $middleware = array_shift($middlewares);
+            return call_user_func([new $middleware, 'handle'], $request, function () use ($request, $middlewares) {
+                return $this->dispatch($request, $middlewares);
+            });
         }
-        $handler = $this->filterMiddleware($this->middlewares[$this->nextCount]);
-        $this->nextCount++;
-        return call_user_func($handler, $request, [$this, 'next']);
-    }
-
-    /**
-     * @param string|callable $handler
-     * @return callable
-     */
-    protected function filterHandler($handler)
-    {
-        if (!is_callable($handler)) {
-            $handler = $this->mapper->mapHandler($handler);
-        }
-        return $handler;
-    }
-
-    /**
-     * @param string|callable $handler
-     * @return callable
-     */
-    protected function filterMiddleware($handler)
-    {
-        if (!is_callable($handler)) {
-            $handler = [$this->mapper->mapMiddleware($handler), 'handle'];
-        }
-        return $handler;
+        return call_user_func([new $this->className, $this->methodName], $request);
     }
 }
