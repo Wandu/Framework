@@ -20,7 +20,8 @@
     },
     "require-dev": {
         "phpunit/phpunit": "~4.6",
-        "mockery/mockery": "0.9.*"
+        "mockery/mockery": "0.9.*",
+        "wandu/di": "~2.2"
     },
     "extra": {
         "branch-alias": {
