@@ -105,7 +105,7 @@ class Container implements ContainerInterface
             return $this->get($this->aliases[$name]);
         }
         if (!isset($this->instances[$name])) {
-            switch($key) {
+            switch ($key) {
                 case 'closure':
                     $this->instances[$name] = call_user_func($this->closures[$name], $this);
                     break;
@@ -306,6 +306,8 @@ class Container implements ContainerInterface
                 $parametersToReturn[] = $this->get($paramClassReflection->getName());
             } elseif (count($parameters)) {
                 $parametersToReturn[] = array_shift($parameters);
+            } elseif ($param->isDefaultValueAvailable()) {
+                $parametersToReturn[] = $param->getDefaultValue();
             } else {
                 throw new CannotResolveException();
             }
