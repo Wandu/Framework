@@ -27,7 +27,7 @@ class Route
     }
 
     /**
-     * @param ServerRequestInterface $request
+     * @param \Psr\Http\Message\ServerRequestInterface $request
      * @return mixed
      */
     public function execute(ServerRequestInterface $request)
@@ -36,7 +36,7 @@ class Route
     }
 
     /**
-     * @param ServerRequestInterface $request
+     * @param \Psr\Http\Message\ServerRequestInterface $request
      * @return mixed
      */
     public function dispatch(ServerRequestInterface $request, array $middlewares)

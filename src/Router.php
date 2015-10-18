@@ -10,9 +10,9 @@ use Wandu\Router\Exception\MethodNotAllowedException;
 
 class Router
 {
-    use RouterMethodsTrait;
+    use ShortRouterMethods;
 
-    /** @var Route[] */
+    /** @var \Wandu\Router\Route[] */
     protected $routes = [];
 
     /** @var array */
@@ -64,7 +64,7 @@ class Router
     }
 
     /**
-     * @param ServerRequestInterface $request
+     * @param \Psr\Http\Message\ServerRequestInterface $request
      * @return mixed
      */
     public function dispatch(ServerRequestInterface $request)
@@ -75,6 +75,8 @@ class Router
             }
         });
         $method = $request->getMethod();
+
+        // virtual method
         $parsedBody = $request->getParsedBody();
         if (isset($parsedBody['_method'])) {
             $method = strtoupper($parsedBody['_method']);
@@ -87,7 +89,7 @@ class Router
     }
 
     /**
-     * @param Dispatcher $dispatcher
+     * @param \FastRoute\Dispatcher $dispatcher
      * @param string $method
      * @param string $path
      * @return array
