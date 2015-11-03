@@ -18,8 +18,8 @@ class PathLoader
      * @param string $path
      * @return string
      */
-    public function handle($path)
+    public function __invoke($path)
     {
-        return $this->base .'/' .$path;
+        return $this->base . $path;
     }
 }

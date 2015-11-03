@@ -1,8 +1,6 @@
 <?php
 namespace Wandu\DI\Helper;
 
-use Wandu\DI\ContainerInterface;
-
 class ConfigLoader
 {
     /** @var string */
@@ -24,7 +22,7 @@ class ConfigLoader
      * @param mixed $default
      * @return mixed
      */
-    public function handle($name, $default = null)
+    public function __invoke($name, $default = null)
     {
         if (!isset($this->cachedConfig[$name])) {
             $names = explode('.', $name);

@@ -5,7 +5,11 @@ interface ServiceProviderInterface
 {
     /**
      * @param \Wandu\DI\ContainerInterface $app
-     * @return self
      */
     public function register(ContainerInterface $app);
+
+    /**
+     * @param \Wandu\DI\ContainerInterface $app
+     */
+    public function boot(ContainerInterface $app);
 }

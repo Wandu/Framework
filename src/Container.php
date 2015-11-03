@@ -27,6 +27,9 @@ class Container implements ContainerInterface
     /** @var array ref. Pimple */
     protected $frozen = [];
 
+    /** @var \Wandu\DI\ServiceProviderInterface[] */
+    protected $providers = [];
+
     public function __construct()
     {
         $this->instance('container', $this)->freeze('container');
@@ -211,6 +214,7 @@ class Container implements ContainerInterface
     public function register(ServiceProviderInterface $provider)
     {
         $provider->register($this);
+        $this->providers[] = $provider;
         return $this;
     }
 
@@ -323,6 +327,17 @@ class Container implements ContainerInterface
      */
     public function __call($name, $arguments)
     {
-        return $this->call([$this->get($name), 'handle'], ...$arguments);
+        return $this->call($this->get($name), ...$arguments);
+    }
+
+    /**
+     * @return self
+     */
+    public function boot()
+    {
+        foreach ($this->providers as $provider) {
+            $provider->boot($this);
+        }
+        return $this;
     }
 }
