@@ -3,6 +3,7 @@ namespace Wandu\Router;
 
 use Psr\Http\Message\ServerRequestInterface;
 use Wandu\Router\Contracts\ClassLoaderInterface;
+use Wandu\Router\Exception\HandlerNotFoundException;
 
 class Route
 {
@@ -52,6 +53,9 @@ class Route
             ], $request, function (ServerRequestInterface $request) use ($loader, $middlewares) {
                 return $this->dispatch($request, $loader, $middlewares);
             });
+        }
+        if (!method_exists($this->className, $this->methodName)) {
+            throw new HandlerNotFoundException($this->className, $this->methodName);
         }
         return call_user_func([$loader->load($this->className), $this->methodName], $request);
     }
