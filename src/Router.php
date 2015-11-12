@@ -7,7 +7,7 @@ use FastRoute\RouteCollector;
 use Psr\Http\Message\ServerRequestInterface;
 use Wandu\Router\ClassLoader\DefaultLoader;
 use Wandu\Router\Contracts\ClassLoaderInterface;
-use Wandu\Router\Exception\HandlerNotFoundException;
+use Wandu\Router\Exception\RouteNotFoundException;
 use Wandu\Router\Exception\MethodNotAllowedException;
 
 class Router
@@ -112,7 +112,7 @@ class Router
         $routeInfo = $dispatcher->dispatch($method, $path);
         switch ($routeInfo[0]) {
             case Dispatcher::NOT_FOUND:
-                throw new HandlerNotFoundException();
+                throw new RouteNotFoundException();
             case Dispatcher::METHOD_NOT_ALLOWED:
                 throw new MethodNotAllowedException();
             case Dispatcher::FOUND:
