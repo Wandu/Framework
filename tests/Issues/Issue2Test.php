@@ -1,29 +1,14 @@
 <?php
-namespace Wandu\Router;
+namespace Wandu\Router\Issues;
 
 use Mockery;
-use PHPUnit_Framework_TestCase;
 use Psr\Http\Message\ServerRequestInterface;
 use Wandu\Router\Exception\HandlerNotFoundException;
-use Wandu\Router\Exception\RouteNotFoundException;
-use Wandu\Router\Stubs\CookieMiddleware;
+use Wandu\Router\RouterTestCase;
 use Wandu\Router\Stubs\HomeController;
 
-class Issue2Test extends PHPUnit_Framework_TestCase
+class Issue2Test extends RouterTestCase
 {
-    /** @var \Wandu\Router\Router */
-    protected $router;
-
-    public function setUp()
-    {
-        $this->router = new Router();
-    }
-
-    public function tearDown()
-    {
-        Mockery::close();
-    }
-
     public function testDispatch()
     {
         $request = Mockery::mock(ServerRequestInterface::class);
@@ -34,7 +19,7 @@ class Issue2Test extends PHPUnit_Framework_TestCase
 
         $this->router->get('/', HomeController::class, 'wrong');
         try {
-            $this->router->dispatch($request);
+            $this->dispatcher->dispatch($request, $this->router);
             $this->fail();
         } catch (HandlerNotFoundException $exception) {
             $this->assertEquals(

@@ -2,23 +2,21 @@
 namespace Wandu\Router;
 
 use Closure;
+use FastRoute\DataGenerator;
+use FastRoute\DataGenerator\GroupCountBased as GCBDataGenerator;
 use FastRoute\Dispatcher;
 use FastRoute\RouteCollector;
-use Psr\Http\Message\ServerRequestInterface;
-use Wandu\Router\ClassLoader\DefaultLoader;
-use Wandu\Router\Contracts\ClassLoaderInterface;
-use Wandu\Router\Exception\RouteNotFoundException;
-use Wandu\Router\Exception\MethodNotAllowedException;
+use FastRoute\RouteParser\Std;
 
 class Router
 {
     use ShortRouterMethods;
 
+    /** @var \FastRoute\RouteCollector */
+    protected $collector;
+
     /** @var \Wandu\Router\Route[] */
     protected $routes = [];
-
-    /** @var array */
-    protected $dispatches = [];
 
     /** @var string */
     protected $prefix = '';
@@ -26,15 +24,25 @@ class Router
     /** @var array */
     protected $middlewares = [];
 
-    /**
-     * @param \Wandu\Router\Contracts\ClassLoaderInterface $classLoader
-     */
-    public function __construct(ClassLoaderInterface $classLoader = null)
+    public function __construct()
     {
-        if (!isset($classLoader)) {
-            $classLoader = new DefaultLoader();
-        }
-        $this->classLoader = $classLoader;
+        $this->collector = new RouteCollector(new Std(), new GCBDataGenerator());
+    }
+
+    /**
+     * @return \FastRoute\RouteCollector
+     */
+    public function getCollector()
+    {
+        return $this->collector;
+    }
+
+    /**
+     * @return \Wandu\Router\Route[]
+     */
+    public function getRoutes()
+    {
+        return $this->routes;
     }
 
     /**
@@ -97,55 +105,7 @@ class Router
         $middlewares = array_merge($this->middlewares, $middlewares);
 
         $handler = implode(',', $methods) . $path;
-        $this->dispatches[] = [
-            'methods' => $methods,
-            'path' => $path,
-            'handler' => $handler,
-        ] ;
+        $this->collector->addRoute($methods, $path, $handler);
         return $this->routes[$handler] = new Route($className, $methodName, $middlewares);
-    }
-
-    /**
-     * @param \Psr\Http\Message\ServerRequestInterface $request
-     * @return mixed
-     */
-    public function dispatch(ServerRequestInterface $request)
-    {
-        $dispatcher = \FastRoute\simpleDispatcher(function (RouteCollector $router) {
-            foreach ($this->dispatches as $attrs) {
-                $router->addRoute($attrs['methods'], $attrs['path'], $attrs['handler']);
-            }
-        });
-        $method = $request->getMethod();
-
-        // virtual method
-        $parsedBody = $request->getParsedBody();
-        if (isset($parsedBody['_method'])) {
-            $method = strtoupper($parsedBody['_method']);
-        }
-        $routeInfo = $this->runDispatcher($dispatcher, $method, $request->getUri()->getPath());
-        foreach ($routeInfo[2] as $key => $value) {
-            $request = $request->withAttribute($key, $value);
-        }
-        return $this->routes[$routeInfo[1]]->execute($request, $this->classLoader);
-    }
-
-    /**
-     * @param \FastRoute\Dispatcher $dispatcher
-     * @param string $method
-     * @param string $path
-     * @return array
-     */
-    protected function runDispatcher(Dispatcher $dispatcher, $method, $path)
-    {
-        $routeInfo = $dispatcher->dispatch($method, $path);
-        switch ($routeInfo[0]) {
-            case Dispatcher::NOT_FOUND:
-                throw new RouteNotFoundException();
-            case Dispatcher::METHOD_NOT_ALLOWED:
-                throw new MethodNotAllowedException();
-            case Dispatcher::FOUND:
-                return $routeInfo;
-        }
     }
 }

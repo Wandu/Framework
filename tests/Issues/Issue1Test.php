@@ -1,27 +1,14 @@
 <?php
-namespace Wandu\Router;
+namespace Wandu\Router\Issues;
 
 use Mockery;
-use PHPUnit_Framework_TestCase;
 use Psr\Http\Message\ServerRequestInterface;
+use Wandu\Router\RouterTestCase;
 use Wandu\Router\Stubs\CookieMiddleware;
 use Wandu\Router\Stubs\HomeController;
 
-class Issue1Test extends PHPUnit_Framework_TestCase
+class Issue1Test extends RouterTestCase
 {
-    /** @var \Wandu\Router\Router */
-    protected $router;
-
-    public function setUp()
-    {
-        $this->router = new Router();
-    }
-
-    public function tearDown()
-    {
-        Mockery::close();
-    }
-
     public function testDispatch()
     {
         $changedRequest = Mockery::mock(ServerRequestInterface::class);
@@ -37,6 +24,6 @@ class Issue1Test extends PHPUnit_Framework_TestCase
             CookieMiddleware::class
         ]);
 
-        $this->assertEquals('cookie~~', $this->router->dispatch($request));
+        $this->assertEquals('cookie~~', $this->dispatcher->dispatch($request, $this->router));
     }
 }

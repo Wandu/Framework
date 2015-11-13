@@ -2,28 +2,14 @@
 namespace Wandu\Router;
 
 use Mockery;
-use PHPUnit_Framework_TestCase;
 use Psr\Http\Message\ServerRequestInterface;
 use Wandu\Router\stubs\AdminController;
 use Wandu\Router\Stubs\AuthFailMiddleware;
 use Wandu\Router\Stubs\AuthSuccessMiddleware;
 use Wandu\Router\Stubs\HomeController;
 
-class RouterTest extends PHPUnit_Framework_TestCase
+class RouterTest extends RouterTestCase
 {
-    /** @var Router */
-    protected $router;
-
-    public function setUp()
-    {
-        $this->router = new Router();
-    }
-
-    public function tearDown()
-    {
-        Mockery::close();
-    }
-
     public function testDispatchDefault()
     {
         $mockRequest = Mockery::mock(ServerRequestInterface::class);
@@ -33,7 +19,7 @@ class RouterTest extends PHPUnit_Framework_TestCase
 
         $this->router->createRoute(['GET'], '/', AdminController::class, 'index');
 
-        $this->assertEquals('index@Admin', $this->router->dispatch($mockRequest));
+        $this->assertEquals('index@Admin', $this->dispatcher->dispatch($mockRequest, $this->router));
     }
 
     public function testDispatchMethod()
@@ -51,9 +37,9 @@ class RouterTest extends PHPUnit_Framework_TestCase
         $this->router->createRoute(['GET'], '/', AdminController::class, 'index', [AuthSuccessMiddleware::class]);
         $this->router->createRoute(['POST'], '/', AdminController::class, 'index', [AuthFailMiddleware::class]);
 
-        $this->assertEquals('auth[index@Admin]', $this->router->dispatch($mockGetRequest));
+        $this->assertEquals('auth[index@Admin]', $this->dispatcher->dispatch($mockGetRequest, $this->router));
 
-        $this->assertEquals('auth fail...', $this->router->dispatch($mockPostRequest));
+        $this->assertEquals('auth fail...', $this->dispatcher->dispatch($mockPostRequest, $this->router));
     }
 
     public function testDispatchMatchingUri()
@@ -66,7 +52,7 @@ class RouterTest extends PHPUnit_Framework_TestCase
         $this->router->createRoute(['GET'], '/admin/index', AdminController::class, 'index');
         $this->router->createRoute(['GET'], '/admin/action', AdminController::class, 'action');
 
-        $this->assertEquals('index@Admin', $this->router->dispatch($getMock));
+        $this->assertEquals('index@Admin', $this->dispatcher->dispatch($getMock, $this->router));
     }
 
     public function testDispatchMatchingRegExpUri()
@@ -81,7 +67,7 @@ class RouterTest extends PHPUnit_Framework_TestCase
 
         $this->router->createRoute(['GET', 'POST'], '/admin/doit/{action}', AdminController::class, 'doit');
 
-        $this->assertEquals('doit@Admin, hello', $this->router->dispatch($getMock));
+        $this->assertEquals('doit@Admin, hello', $this->dispatcher->dispatch($getMock, $this->router));
     }
 
     public function testGroup()
@@ -101,21 +87,21 @@ class RouterTest extends PHPUnit_Framework_TestCase
         $mockRequest->shouldReceive('getMethod')->andReturn('GET');
         $mockRequest->shouldReceive('getUri->getPath')->andReturn('/');
 
-        $this->assertEquals('index@Home', $this->router->dispatch($mockRequest));
+        $this->assertEquals('index@Home', $this->dispatcher->dispatch($mockRequest, $this->router));
 
         $mockRequest = Mockery::mock(ServerRequestInterface::class);
         $mockRequest->shouldReceive('getParsedBody')->andReturn([]);
         $mockRequest->shouldReceive('getMethod')->andReturn('GET');
         $mockRequest->shouldReceive('getUri->getPath')->andReturn('/admin');
 
-        $this->assertEquals('auth[index@Admin]', $this->router->dispatch($mockRequest));
+        $this->assertEquals('auth[index@Admin]', $this->dispatcher->dispatch($mockRequest, $this->router));
 
         $mockRequest = Mockery::mock(ServerRequestInterface::class);
         $mockRequest->shouldReceive('getParsedBody')->andReturn([]);
         $mockRequest->shouldReceive('getMethod')->andReturn('GET');
         $mockRequest->shouldReceive('getUri->getPath')->andReturn('/admin/action');
 
-        $this->assertEquals('auth[action@Admin]', $this->router->dispatch($mockRequest));
+        $this->assertEquals('auth[action@Admin]', $this->dispatcher->dispatch($mockRequest, $this->router));
 
         $mockRequest = Mockery::mock(ServerRequestInterface::class);
         $mockRequest->shouldReceive('getParsedBody')->andReturn([]);
@@ -125,7 +111,7 @@ class RouterTest extends PHPUnit_Framework_TestCase
         $mockRequest->shouldReceive('withAttribute')->once()->with('action', 'chu')->andReturn($mockRequest);
         $mockRequest->shouldReceive('getAttribute')->once()->with('action')->andReturn('chu');
 
-        $this->assertEquals('auth[doit@Admin, chu]', $this->router->dispatch($mockRequest));
+        $this->assertEquals('auth[doit@Admin, chu]', $this->dispatcher->dispatch($mockRequest, $this->router));
     }
 
     public function testPrefix()
@@ -142,21 +128,21 @@ class RouterTest extends PHPUnit_Framework_TestCase
         $mockRequest->shouldReceive('getMethod')->andReturn('GET');
         $mockRequest->shouldReceive('getUri->getPath')->andReturn('/');
 
-        $this->assertEquals('index@Home', $this->router->dispatch($mockRequest));
+        $this->assertEquals('index@Home', $this->dispatcher->dispatch($mockRequest, $this->router));
 
         $mockRequest = Mockery::mock(ServerRequestInterface::class);
         $mockRequest->shouldReceive('getParsedBody')->andReturn([]);
         $mockRequest->shouldReceive('getMethod')->andReturn('GET');
         $mockRequest->shouldReceive('getUri->getPath')->andReturn('/admin');
 
-        $this->assertEquals('index@Admin', $this->router->dispatch($mockRequest));
+        $this->assertEquals('index@Admin', $this->dispatcher->dispatch($mockRequest, $this->router));
 
         $mockRequest = Mockery::mock(ServerRequestInterface::class);
         $mockRequest->shouldReceive('getParsedBody')->andReturn([]);
         $mockRequest->shouldReceive('getMethod')->andReturn('GET');
         $mockRequest->shouldReceive('getUri->getPath')->andReturn('/admin/action');
 
-        $this->assertEquals('action@Admin', $this->router->dispatch($mockRequest));
+        $this->assertEquals('action@Admin', $this->dispatcher->dispatch($mockRequest, $this->router));
 
         $mockRequest = Mockery::mock(ServerRequestInterface::class);
         $mockRequest->shouldReceive('getParsedBody')->andReturn([]);
@@ -166,7 +152,7 @@ class RouterTest extends PHPUnit_Framework_TestCase
         $mockRequest->shouldReceive('withAttribute')->once()->with('action', 'chu')->andReturn($mockRequest);
         $mockRequest->shouldReceive('getAttribute')->once()->with('action')->andReturn('chu');
 
-        $this->assertEquals('doit@Admin, chu', $this->router->dispatch($mockRequest));
+        $this->assertEquals('doit@Admin, chu', $this->dispatcher->dispatch($mockRequest, $this->router));
     }
 
     public function testMiddlewares()
@@ -182,14 +168,14 @@ class RouterTest extends PHPUnit_Framework_TestCase
         $mockRequest->shouldReceive('getMethod')->andReturn('GET');
         $mockRequest->shouldReceive('getUri->getPath')->andReturn('/');
 
-        $this->assertEquals('auth[index@Admin]', $this->router->dispatch($mockRequest));
+        $this->assertEquals('auth[index@Admin]', $this->dispatcher->dispatch($mockRequest, $this->router));
 
         $mockRequest = Mockery::mock(ServerRequestInterface::class);
         $mockRequest->shouldReceive('getParsedBody')->andReturn([]);
         $mockRequest->shouldReceive('getMethod')->andReturn('GET');
         $mockRequest->shouldReceive('getUri->getPath')->andReturn('/action');
 
-        $this->assertEquals('auth[action@Admin]', $this->router->dispatch($mockRequest));
+        $this->assertEquals('auth[action@Admin]', $this->dispatcher->dispatch($mockRequest, $this->router));
 
         $mockRequest = Mockery::mock(ServerRequestInterface::class);
         $mockRequest->shouldReceive('getParsedBody')->andReturn([]);
@@ -199,7 +185,7 @@ class RouterTest extends PHPUnit_Framework_TestCase
         $mockRequest->shouldReceive('withAttribute')->once()->with('action', 'chu')->andReturn($mockRequest);
         $mockRequest->shouldReceive('getAttribute')->once()->with('action')->andReturn('chu');
 
-        $this->assertEquals('auth[doit@Admin, chu]', $this->router->dispatch($mockRequest));
+        $this->assertEquals('auth[doit@Admin, chu]', $this->dispatcher->dispatch($mockRequest, $this->router));
     }
 
     public function testVirtualMethod()
@@ -213,6 +199,6 @@ class RouterTest extends PHPUnit_Framework_TestCase
             '_method' => 'put'
         ]);
 
-        $this->assertEquals('index@Admin', $this->router->dispatch($mockRequest));
+        $this->assertEquals('index@Admin', $this->dispatcher->dispatch($mockRequest, $this->router));
     }
 }

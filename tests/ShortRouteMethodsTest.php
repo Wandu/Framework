@@ -2,38 +2,30 @@
 namespace Wandu\Router;
 
 use Mockery;
-use PHPUnit_Framework_TestCase;
 use Psr\Http\Message\ServerRequestInterface;
 use Wandu\Router\Exception\MethodNotAllowedException;
 use Wandu\Router\Stubs\HomeController;
 
-class ShortRouteMethods extends PHPUnit_Framework_TestCase
+class ShortRouteMethods extends RouterTestCase
 {
-    /** @var Router */
-    protected $router;
-
-    public function setUp()
-    {
-        $this->router = new Router();
-    }
-
-    public function tearDown()
-    {
-        Mockery::close();
-    }
-
     public function testGet()
     {
         $this->router->get('/', HomeController::class, 'index');
 
         // success
         foreach (['GET', 'HEAD'] as $method) {
-            $this->assertEquals('index@Home', $this->router->dispatch($this->createRequest($method, '/')));
+            $this->assertEquals('index@Home', $this->dispatcher->dispatch(
+                $this->createRequest($method, '/'),
+                $this->router
+            ));
         }
         // fail
         foreach (['POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'] as $method) {
             try {
-                $this->router->dispatch($this->createRequest($method, '/'));
+                $this->dispatcher->dispatch(
+                    $this->createRequest($method, '/'),
+                    $this->router
+                );
                 $this->fail();
             } catch (MethodNotAllowedException $e) {
             }
@@ -46,12 +38,18 @@ class ShortRouteMethods extends PHPUnit_Framework_TestCase
 
         // success
         foreach (['POST'] as $method) {
-            $this->assertEquals('index@Home', $this->router->dispatch($this->createRequest($method, '/')));
+            $this->assertEquals('index@Home', $this->dispatcher->dispatch(
+                $this->createRequest($method, '/'),
+                $this->router
+            ));
         }
         // fail
         foreach (['GET', 'HEAD', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'] as $method) {
             try {
-                $this->router->dispatch($this->createRequest($method, '/'));
+                $this->dispatcher->dispatch(
+                    $this->createRequest($method, '/'),
+                    $this->router
+                );
                 $this->fail();
             } catch (MethodNotAllowedException $e) {
             }
@@ -64,12 +62,18 @@ class ShortRouteMethods extends PHPUnit_Framework_TestCase
 
         // success
         foreach (['PUT'] as $method) {
-            $this->assertEquals('index@Home', $this->router->dispatch($this->createRequest($method, '/')));
+            $this->assertEquals('index@Home', $this->dispatcher->dispatch(
+                $this->createRequest($method, '/'),
+                $this->router
+            ));
         }
         // fail
         foreach (['GET', 'HEAD', 'POST', 'DELETE', 'OPTIONS', 'PATCH'] as $method) {
             try {
-                $this->router->dispatch($this->createRequest($method, '/'));
+                $this->dispatcher->dispatch(
+                    $this->createRequest($method, '/'),
+                    $this->router
+                );
                 $this->fail();
             } catch (MethodNotAllowedException $e) {
             }
@@ -82,12 +86,18 @@ class ShortRouteMethods extends PHPUnit_Framework_TestCase
 
         // success
         foreach (['DELETE'] as $method) {
-            $this->assertEquals('index@Home', $this->router->dispatch($this->createRequest($method, '/')));
+            $this->assertEquals('index@Home', $this->dispatcher->dispatch(
+                $this->createRequest($method, '/'),
+                $this->router
+            ));
         }
         // fail
         foreach (['GET', 'HEAD', 'POST', 'PUT', 'OPTIONS', 'PATCH'] as $method) {
             try {
-                $this->router->dispatch($this->createRequest($method, '/'));
+                $this->dispatcher->dispatch(
+                    $this->createRequest($method, '/'),
+                    $this->router
+                );
                 $this->fail();
             } catch (MethodNotAllowedException $e) {
             }
@@ -100,12 +110,18 @@ class ShortRouteMethods extends PHPUnit_Framework_TestCase
 
         // success
         foreach (['OPTIONS'] as $method) {
-            $this->assertEquals('index@Home', $this->router->dispatch($this->createRequest($method, '/')));
+            $this->assertEquals('index@Home', $this->dispatcher->dispatch(
+                $this->createRequest($method, '/'),
+                $this->router
+            ));
         }
         // fail
         foreach (['GET', 'HEAD', 'POST', 'PUT', 'DELETE', 'PATCH'] as $method) {
             try {
-                $this->router->dispatch($this->createRequest($method, '/'));
+                $this->dispatcher->dispatch(
+                    $this->createRequest($method, '/'),
+                    $this->router
+                );
                 $this->fail();
             } catch (MethodNotAllowedException $e) {
             }
@@ -118,12 +134,18 @@ class ShortRouteMethods extends PHPUnit_Framework_TestCase
 
         // success
         foreach (['PATCH'] as $method) {
-            $this->assertEquals('index@Home', $this->router->dispatch($this->createRequest($method, '/')));
+            $this->assertEquals('index@Home', $this->dispatcher->dispatch(
+                $this->createRequest($method, '/'),
+                $this->router
+            ));
         }
         // fail
         foreach (['GET', 'HEAD', 'POST', 'PUT', 'DELETE', 'OPTIONS'] as $method) {
             try {
-                $this->router->dispatch($this->createRequest($method, '/'));
+                $this->dispatcher->dispatch(
+                    $this->createRequest($method, '/'),
+                    $this->router
+                );
                 $this->fail();
             } catch (MethodNotAllowedException $e) {
             }
@@ -136,7 +158,10 @@ class ShortRouteMethods extends PHPUnit_Framework_TestCase
 
         // success
         foreach (['GET', 'HEAD', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'] as $method) {
-            $this->assertEquals('index@Home', $this->router->dispatch($this->createRequest($method, '/')));
+            $this->assertEquals('index@Home', $this->dispatcher->dispatch(
+                $this->createRequest($method, '/'),
+                $this->router
+            ));
         }
     }
 
