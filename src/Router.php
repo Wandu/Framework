@@ -20,11 +20,11 @@ class Router
     /** @var array */
     protected $dispatches = [];
 
+    /** @var string */
+    protected $prefix = '';
+
     /** @var array */
-    protected $attributes = [
-        'prefix' => '',
-        'middleware' => [],
-    ];
+    protected $middlewares = [];
 
     /**
      * @param \Wandu\Router\Contracts\ClassLoaderInterface $classLoader
@@ -38,20 +38,49 @@ class Router
     }
 
     /**
+     * @param string $prefix
+     * @param \Closure $handler
+     */
+    public function prefix($prefix, Closure $handler)
+    {
+        $beforePrefix = $this->prefix;
+        $this->prefix = $beforePrefix . $prefix ?: '/';
+        $handler($this);
+        $this->prefix = $beforePrefix;
+    }
+
+    /**
+     * @param array $middlewares
+     * @param \Closure $handler
+     */
+    public function middlewares(array $middlewares, Closure $handler)
+    {
+        $beforeMiddlewares = $this->middlewares;
+        $this->middlewares = array_merge($beforeMiddlewares, $middlewares);
+        $handler($this);
+        $this->middlewares = $beforeMiddlewares;
+    }
+
+    /**
      * @param array $attributes
      * @param \Closure $handler
      */
     public function group(array $attributes, Closure $handler)
     {
-        $beforeAttributes = $this->attributes;
+        $beforePrefix = $this->prefix;
+        $beforeMiddlewares = $this->middlewares;
+
         if (isset($attributes['prefix'])) {
-            $this->attributes['prefix'] = $beforeAttributes['prefix'] . $attributes['prefix'] ?: '/';
+            $this->prefix = $beforePrefix . $attributes['prefix'] ?: '/';
         }
         if (isset($attributes['middleware'])) {
-            $this->attributes['middleware'] = array_merge($beforeAttributes['middleware'], $attributes['middleware']);
+            $this->middlewares = array_merge($beforeMiddlewares, $attributes['middleware']);
         }
+
         $handler($this);
-        $this->attributes = $beforeAttributes;
+
+        $this->prefix = $beforePrefix;
+        $this->middlewares = $beforeMiddlewares;
     }
 
     /**
@@ -64,8 +93,8 @@ class Router
      */
     public function createRoute(array $methods, $path, $className, $methodName, array $middlewares = [])
     {
-        $path = $this->attributes['prefix'] . $path ?: '/';
-        $middlewares = array_merge($this->attributes['middleware'], $middlewares);
+        $path = '/' . trim($this->prefix . $path, '/');
+        $middlewares = array_merge($this->middlewares, $middlewares);
 
         $handler = implode(',', $methods) . $path;
         $this->dispatches[] = [
