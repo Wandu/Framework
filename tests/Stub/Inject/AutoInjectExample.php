@@ -5,12 +5,12 @@ class AutoInjectExample
 {
     /**
      * @Autowired
-     * @var \Wandu\DI\Stub\RequiredLibraryInterface
+     * @var \Wandu\DI\Stub\Resolve\DependInterface
      */
     private $requiredLibrary;
 
     /**
-     * @return \Wandu\DI\Stub\RequiredLibraryInterface
+     * @return \Wandu\DI\Stub\Resolve\DependInterface
      */
     public function getRequiredLibrary()
     {

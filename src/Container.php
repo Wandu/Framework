@@ -5,6 +5,11 @@ use Closure;
 use ReflectionClass;
 use ReflectionFunctionAbstract;
 use ReflectionObject;
+use RuntimeException;
+use Wandu\DI\Exception\CannotChangeException;
+use Wandu\DI\Exception\CannotInjectException;
+use Wandu\DI\Exception\CannotResolveException;
+use Wandu\DI\Exception\NullReferenceException;
 use Wandu\Reflection\ReflectionCallable;
 
 class Container implements ContainerInterface
@@ -230,14 +235,14 @@ class Container implements ContainerInterface
     /**
      * {@inheritdoc}
      */
-    public function create($class, ...$arguments)
+    public function create($class, array $arguments = [])
     {
         $reflectionClass = new ReflectionClass($class);
         $reflectionMethod = $reflectionClass->getConstructor();
         if ($reflectionMethod) {
             try {
                 $arguments = $this->getParameters($reflectionMethod, $arguments);
-            } catch (CannotResolveException $e) {
+            } catch (RuntimeException $e) {
                 throw new CannotResolveException($class);
             }
         }
@@ -268,7 +273,11 @@ class Container implements ContainerInterface
                 $className = $this->getClassNameFromDocComment($comment);
                 if (isset($className)) {
                     $property->setAccessible(true);
-                    $property->setValue($object, $this->get($className));
+                    try {
+                        $property->setValue($object, $this->get($className));
+                    } catch (NullReferenceException $e) {
+                        throw new CannotInjectException(get_class($object), $property->getName());
+                    }
                 } else {
                     throw new CannotInjectException(get_class($object), $property->getName());
                 }
@@ -299,33 +308,46 @@ class Container implements ContainerInterface
 
     /**
      * @param \ReflectionFunctionAbstract $reflectionFunction
-     * @param array $parameters
+     * @param array $arguments
      * @return array
      */
-    protected function getParameters(ReflectionFunctionAbstract $reflectionFunction, array $parameters)
+    protected function getParameters(ReflectionFunctionAbstract $reflectionFunction, array $arguments)
     {
         $parametersToReturn = [];
+        $parameters = $this->getOnlySeqArray($arguments);
         foreach ($reflectionFunction->getParameters() as $param) {
-            if ($paramClassReflection = $param->getClass()) {
+            if (isset($arguments[$param->getName()])) {
+                $parametersToReturn[] = $arguments[$param->getName()];
+            } elseif ($paramClassReflection = $param->getClass()) {
                 $parametersToReturn[] = $this->get($paramClassReflection->getName());
-            } elseif (count($parameters)) {
+            } elseif (count($arguments)) {
                 $parametersToReturn[] = array_shift($parameters);
-            } elseif ($param->isDefaultValueAvailable()) {
-                $parametersToReturn[] = $param->getDefaultValue();
             } else {
-                throw new CannotResolveException();
+                throw new RuntimeException('Fail to get parameter.');
             }
         }
-        $parametersToReturn = array_merge($parametersToReturn, $parameters);
-        return $parametersToReturn;
+        return array_merge($parametersToReturn, $parameters);
     }
 
     /**
-     * @param string $name
-     * @param array $arguments
-     * @return mixed
+     * @param array $array
+     * @return array
      */
-    public function __call($name, $arguments)
+    protected function getOnlySeqArray(array $array)
+    {
+        $arrayToReturn = [];
+        foreach ($array as $key => $item) {
+            if (is_int($key)) {
+                $arrayToReturn[] = $item;
+            }
+        }
+        return $arrayToReturn;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function __call($name, array $arguments)
     {
         return $this->call($this->get($name), ...$arguments);
     }

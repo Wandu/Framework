@@ -2,10 +2,11 @@
 namespace Wandu\DI;
 
 use Mockery;
+use Wandu\DI\Exception\CannotInjectException;
 use Wandu\DI\Stub\Inject\AutoInjectExample;
 use Wandu\DI\Stub\Inject\DirectInjectExample;
-use Wandu\DI\Stub\RequiredLibrary;
-use Wandu\DI\Stub\RequiredLibraryInterface;
+use Wandu\DI\Stub\Resolve\AutoResolvedDepend;
+use Wandu\DI\Stub\Resolve\DependInterface;
 
 class InjectTest extends TestCase
 {
@@ -15,7 +16,7 @@ class InjectTest extends TestCase
         $example1 = new DirectInjectExample();
         $this->assertNull($example1->getSomething()); // null
 
-        $something = new RequiredLibrary();
+        $something = new AutoResolvedDepend();
         $this->container->inject($example1, [
             'something' => $something
         ]);
@@ -41,17 +42,14 @@ class InjectTest extends TestCase
         try {
             $this->container->inject($example);
             $this->fail();
-        } catch (NullReferenceException $e) {
-            $this->assertEquals(
-                'not exists in this container; ' . RequiredLibraryInterface::class,
-                $e->getMessage()
-            );
+        } catch (CannotInjectException $e) {
+            $this->assertEquals(AutoInjectExample::class, $e->getClass());
         }
     }
 
     public function testAutoInjectWithSuccess()
     {
-        $this->container->bind(RequiredLibraryInterface::class, RequiredLibrary::class);
+        $this->container->bind(DependInterface::class, AutoResolvedDepend::class);
 
         $example = new AutoInjectExample();
         $this->assertNull($example->getRequiredLibrary());
@@ -59,12 +57,12 @@ class InjectTest extends TestCase
         $this->container->inject($example);
 
         // inject success!
-        $this->assertInstanceOf(RequiredLibraryInterface::class, $example->getRequiredLibrary());
+        $this->assertInstanceOf(DependInterface::class, $example->getRequiredLibrary());
     }
 
     public function testAutoWiring()
     {
-        $this->container->bind(RequiredLibraryInterface::class, RequiredLibrary::class);
+        $this->container->bind(DependInterface::class, AutoResolvedDepend::class);
         $this->container->wire(AutoInjectExample::class); // wire method is like auto inject + bind
 
         $this->assertInstanceOf(AutoInjectExample::class, $this->container->get(AutoInjectExample::class));
@@ -74,6 +72,6 @@ class InjectTest extends TestCase
         );
 
         $example = $this->container->get(AutoInjectExample::class);
-        $this->assertInstanceOf(RequiredLibraryInterface::class, $example->getRequiredLibrary());
+        $this->assertInstanceOf(DependInterface::class, $example->getRequiredLibrary());
     }
 }

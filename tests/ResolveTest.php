@@ -1,113 +1,134 @@
 <?php
 namespace Wandu\DI;
 
-use Wandu\DI\Stub\RequiredLibrary;
-use Wandu\DI\Stub\RequiredLibraryInterface;
-use Wandu\DI\Stub\Resolve\ConstructHasTypeHintAndConfig;
-use Wandu\DI\Stub\Resolve\ConstructHasTypeHintOnly;
+use Wandu\DI\Exception\CannotResolveException;
+use Wandu\DI\Stub\Resolve\AutoResolvedDepend;
+use Wandu\DI\Stub\Resolve\CallExample;
+use Wandu\DI\Stub\Resolve\DependInterface;
+use Wandu\DI\Stub\Resolve\CreateWithArrayExample;
+use Wandu\DI\Stub\Resolve\CreateNormalExample;
+use Wandu\DI\Stub\Resolve\ReplacedDepend;
 
 class ResolveTest extends TestCase
 {
-    public function testCreateWithNullReferenceException()
+    public function testCreateFail()
     {
         try {
-            $this->container->create(ConstructHasTypeHintOnly::class);
+            $this->container->create(CreateNormalExample::class);
             $this->fail();
-        } catch (NullReferenceException $e) {
-            $this->assertEquals(
-                'not exists in this container; ' . RequiredLibraryInterface::class,
-                $e->getMessage()
-            );
+        } catch (CannotResolveException $e) {
+            $this->assertEquals(CreateNormalExample::class, $e->getClass());
         }
     }
 
-    public function testCreateWithSuccess()
+    public function testCreateSuccess()
     {
-        $this->container->bind(RequiredLibraryInterface::class, RequiredLibrary::class);
+        $this->container->bind(DependInterface::class, AutoResolvedDepend::class);
 
         $this->assertInstanceOf(
-            ConstructHasTypeHintOnly::class,
-            $this->container->create(ConstructHasTypeHintOnly::class)
+            CreateNormalExample::class,
+            $this->container->create(CreateNormalExample::class)
+        );
+
+        $this->assertInstanceOf(
+            AutoResolvedDepend::class,
+            $this->container->create(CreateNormalExample::class)->getDepend()
         );
     }
 
-    public function testCreateWithCannotResolveException()
+    public function testCreateFailBecauseOfTypeHint()
     {
-        $this->container->bind(RequiredLibraryInterface::class, RequiredLibrary::class);
+        $this->container->bind(DependInterface::class, AutoResolvedDepend::class);
 
         try {
-            $this->container->create(ConstructHasTypeHintAndConfig::class);
+            $this->container->create(CreateWithArrayExample::class);
             $this->fail();
         } catch (CannotResolveException $e) {
-            $this->assertEquals(
-                'Auto resolver can resolve the class that use params with type hint; ' . ConstructHasTypeHintAndConfig::class,
-                $e->getMessage()
-            );
+            $this->assertEquals(CreateWithArrayExample::class, $e->getClass());
         }
     }
 
-//
-//    public function testResolveWithArguments()
-//    {
-//        $this->container->closure(DepInterface::class, function () {
-//            return new DepFoo();
-//        });
-//
-//        $created = $created = $this->container->create(StubClientWithConfig::class, ['config' => 'config string!']);
-//
-//        $this->assertInstanceOf(StubClientWithConfig::class, $created);
-//        $this->assertEquals(['config' => 'config string!'], $created->getConfig());
-//    }
-//
-//    /**
-//     * test 6 types of callable
-//     */
-//    public function testCall()
-//    {
-//        $this->container->closure(DepInterface::class, function () {
-//            return new DepFoo();
-//        });
-//
-//        function stub(DepInterface $dep)
-//        {
-//            return 'call function';
-//        }
-//
-//        // closure
-//        $this->assertEquals('call closure', $this->container->call(function (DepInterface $dep) {
-//            return 'call closure';
-//        }));
-//
-//        // function
-//        $this->assertEquals('call function', $this->container->call(__NAMESPACE__ . '\\stub'));
-//
-//        // static method
-//        $this->assertInstanceOf(StubClient::class, $this->container->call(StubClient::class . '::create'));
-//
-//        // array of static
-//        $this->assertInstanceOf(StubClient::class, $this->container->call([StubClient::class, 'create']));
-//
-//        // array of method
-//        $this->assertEquals(
-//            'call with dependency',
-//            $this->container->call([new StubClient(new DepFoo), 'callWithDependency'])
-//        );
-//
-//        // invoker
-//        $this->assertEquals(
-//            'invoke with',
-//            $this->container->call(new Invoker())
-//        );
-//
-//    }
-//
-//    public function testAutoResolveBind()
-//    {
-//        $this->container->bind(DepInterface::class, DepFoo::class);
+    public function testCreateWithArguments()
+    {
+        $this->container->bind(DependInterface::class, AutoResolvedDepend::class);
+
+        $created = $this->container->create(CreateWithArrayExample::class, [
+            ['config' => 'config string!'],
+        ]);
+
+        $this->assertInstanceOf(CreateWithArrayExample::class, $created);
+
+        $this->assertEquals(['config' => 'config string!'], $created->getConfigs());
+        $this->assertInstanceOf(AutoResolvedDepend::class, $created->getDepend());
+    }
+
+    public function testCreateWithOtherDepend()
+    {
+        $this->container->bind(DependInterface::class, AutoResolvedDepend::class);
+
+        $created = $this->container->create(CreateWithArrayExample::class, [
+            ['config' => 'config string!'],
+            'depend' => new ReplacedDepend(), // key => value mean use this
+        ]);
+
+        $this->assertInstanceOf(CreateWithArrayExample::class, $created);
+
+        $this->assertEquals(['config' => 'config string!'], $created->getConfigs());
+        $this->assertInstanceOf(ReplacedDepend::class, $created->getDepend());
+    }
+
+    /**
+     * test 6 types of callable
+     */
+    public function testCall()
+    {
+        $this->container->bind(DependInterface::class, AutoResolvedDepend::class);
+
+        function stub(DependInterface $dep)
+        {
+            return 'call function';
+        }
+
+        // closure
+        $this->assertEquals('call closure', $this->container->call(function (DependInterface $dep) {
+            return 'call closure';
+        }));
+
+        // function
+        $this->assertEquals('call function', $this->container->call(__NAMESPACE__ . '\\stub'));
+
+        // static method
+        $this->assertEquals(
+            'static method',
+            $this->container->call(CallExample::class . '::staticMethod')
+        );
+
+        // array of static
+        $this->assertEquals(
+            'static method',
+            $this->container->call([CallExample::class, 'staticMethod'])
+        );
+
+        // array of method
+        $this->assertEquals(
+            'instance method',
+            $this->container->call([new CallExample, 'instanceMethod'])
+        );
+
+        // invoker
+        $this->assertEquals(
+            'invoke',
+            $this->container->call(new CallExample())
+        );
+    }
+
+    public function testCreateWithManys()
+    {
+//        $this->container->bind(DependInterface::class, Dependd::class);
 //        $this->container->bind(StubClient::class);
 //
 //        $this->assertInstanceOf(StubClient::class, $this->container->get(StubClient::class));
 //
 //        $this->assertSame($this->container->get(StubClient::class), $this->container->get(StubClient::class));
-//    }
+    }
 }

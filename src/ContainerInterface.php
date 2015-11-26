@@ -80,10 +80,10 @@ interface ContainerInterface extends ArrayAccess
 
     /**
      * @param string $class
-     * @param mixed ...$arguments
+     * @param array $arguments
      * @return object
      */
-    public function create($class, ...$arguments);
+    public function create($class, array $arguments = []);
 
     /**
      * @param callable $callee
@@ -97,4 +97,11 @@ interface ContainerInterface extends ArrayAccess
      * @param array $parameters
      */
     public function inject($object, array $parameters = []);
+
+    /**
+     * @param string $name
+     * @param array $arguments
+     * @return mixed
+     */
+    public function __call($name, array $arguments);
 }
