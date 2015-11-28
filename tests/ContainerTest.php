@@ -1,156 +1,95 @@
 <?php
 namespace Wandu\DI;
 
-use ArrayObject;
 use Mockery;
-use PHPUnit_Framework_TestCase;
 use Wandu\DI\Exception\CannotChangeException;
-use Wandu\DI\Exception\CannotResolveException;
 use Wandu\DI\Exception\NullReferenceException;
-use Wandu\DI\Stub\Invoker;
-use Wandu\DI\Stub\StubClient;
-use Wandu\DI\Stub\StubClientWithConfig;
-use Wandu\DI\Stub\DepBar;
-use Wandu\DI\Stub\DepFoo;
-use Wandu\DI\Stub\DepInterface;
-use Wandu\DI\Stub\NonDepInterface;
+use Wandu\DI\Stub\HttpControllerWithConfig;
+use Wandu\DI\Stub\JsonRenderer;
+use Wandu\DI\Stub\Renderable;
+use Wandu\DI\Stub\ServerAccessible;
+use Wandu\DI\Stub\XmlRenderer;
 
-class ContainerTest extends PHPUnit_Framework_TestCase
+class ContainerTest extends TestCase
 {
-    /** @var ContainerInterface */
-    protected $container;
-
-    /** @var ArrayObject */
-    protected $configs;
-
-    public function setUp()
-    {
-        parent::setUp();
-        $this->container = new Container();
-    }
-
     public function testHas()
     {
-        $this->container->instance(DepInterface::class, new DepFoo);
+        $this->container->instance(Renderable::class, new XmlRenderer);
 
-        $this->assertFalse($this->container->has(NonDepInterface::class));
-        $this->assertTrue($this->container->has(DepInterface::class));
+        $this->assertFalse($this->container->has(ServerAccessible::class));
+        $this->assertTrue($this->container->has(Renderable::class));
 
         // has map to offsetExists
-        $this->assertFalse(isset($this->container[NonDepInterface::class]));
-        $this->assertTrue(isset($this->container[DepInterface::class]));
+        $this->assertFalse(isset($this->container[ServerAccessible::class]));
+        $this->assertTrue(isset($this->container[Renderable::class]));
     }
 
     public function testInstance()
     {
-        $this->container->instance('foo', $foo = new DepFoo());
+        $this->container->instance('xml', $xml = new XmlRenderer());
 
         // instance map to offsetSet
-        $this->container['bar'] = $bar = new DepBar();
+        $this->container['json'] = $json = new JsonRenderer();
 
-        $this->assertSame($foo, $this->container->get('foo'));
-        $this->assertSame($bar, $this->container->get('bar'));
+        $this->assertSame($xml, $this->container->get('xml'));
+        $this->assertSame($json, $this->container->get('json'));
 
         // get map to offsetGet
-        $this->assertSame($foo, $this->container['foo']);
-        $this->assertSame($bar, $this->container['bar']);
-    }
-
-    public function testGetUnknown()
-    {
-        try {
-            $this->container->get('Unknown');
-            $this->fail();
-        } catch (NullReferenceException $exception) {
-            $this->assertEquals('not exists in this container; Unknown', $exception->getMessage());
-        }
+        $this->assertSame($xml, $this->container['xml']);
+        $this->assertSame($json, $this->container['json']);
     }
 
     public function testClosure()
     {
-        $this->container->closure(DepInterface::class, function () {
-            return new DepFoo;
+        $this->container->closure(Renderable::class, function () {
+            return new XmlRenderer;
         });
 
-        $this->assertEquals($this->container[DepInterface::class], $this->container[DepInterface::class]);
-        $this->assertSame($this->container[DepInterface::class], $this->container[DepInterface::class]);
+        $this->assertEquals($this->container[Renderable::class], $this->container[Renderable::class]);
+        $this->assertSame($this->container[Renderable::class], $this->container[Renderable::class]);
     }
 
-    public function testClosureParameters()
+    public function testClosureWithParameters()
     {
-        $this->container[DepInterface::class] = $foo = new DepFoo();
-        $this->container->closure(StubClientWithConfig::class, function ($app) {
-            return new StubClientWithConfig($app[DepInterface::class], [
-                'username' => 'username string',
-                'password' => 'password string',
-            ]);
+        $this->container->instance(Renderable::class, $foo = new XmlRenderer());
+
+        $this->container->closure(HttpControllerWithConfig::class, function ($app) {
+            return new HttpControllerWithConfig(
+                $app[Renderable::class],
+                [
+                    'username' => 'username string',
+                    'password' => 'password string',
+                ]
+            );
         });
 
-        $this->assertSame($foo, $this->container[StubClientWithConfig::class]->getDependency());
+        $this->assertSame($foo, $this->container[HttpControllerWithConfig::class]->getRenderer());
         $this->assertEquals([
             'username' => 'username string',
             'password' => 'password string',
-        ], $this->container[StubClientWithConfig::class]->getConfig());
+        ], $this->container[HttpControllerWithConfig::class]->getConfig());
     }
 
     public function testAlias()
     {
-        $this->container->instance(DepInterface::class, $foo = new DepFoo);
+        $this->container->instance(Renderable::class, $foo = new XmlRenderer);
 
-        $this->container->alias('myalias', DepInterface::class);
+        $this->container->alias('myalias', Renderable::class);
         $this->container->alias('otheralias', 'myalias');
 
-        $this->assertSame($foo, $this->container[DepInterface::class]);
+        $this->assertSame($foo, $this->container[Renderable::class]);
         $this->assertSame($foo, $this->container['myalias']);
         $this->assertSame($foo, $this->container['otheralias']);
     }
 
-    public function testExtend()
+    public function testGetFail()
     {
-        $this->container->instance('instance', new DepFoo());
-        $this->container->closure('closure', function () {
-            return new DepBar();
-        });
-        $this->container->extend('instance', function ($item) {
-            $item->contents = 'instance contents';
-            return $item;
-        });
-        $this->container->extend('closure', function ($item) {
-            $item->contents = 'closure contents';
-            return $item;
-        });
-
-        $this->assertEquals('instance contents', $this->container['instance']->contents);
-        $this->assertEquals('closure contents', $this->container['closure']->contents);
-
-        $this->assertSame($this->container['closure'], $this->container['closure']);
-        $this->assertSame($this->container['instance'], $this->container['instance']);
-
         try {
-            $this->container->extend('Unknown', function ($item) {
-                return $item .' extended..';
-            });
+            $this->container->get('unknown');
             $this->fail();
-        } catch (NullReferenceException $e) {
-            $this->assertEquals('not exists in this container; Unknown', $e->getMessage());
+        } catch (NullReferenceException $exception) {
+            $this->assertEquals('unknown', $exception->getClass());
         }
-    }
-
-    public function testAliasExtend()
-    {
-        $this->container = new Container(new ArrayObject());
-        $this->container->instance('instance1', new DepFoo);
-        $this->container->instance('instance2', new DepBar);
-
-        $this->container->alias('myalias', 'instance1');
-        $this->container->alias('otheralias', 'myalias');
-
-        $this->container->extend('otheralias', function ($item) {
-            $item->contents = 'alias contents';
-            return $item;
-        });
-
-        $this->assertEquals('alias contents', $this->container['instance1']->contents);
     }
 
     public function testFrozon()
@@ -178,7 +117,7 @@ class ContainerTest extends PHPUnit_Framework_TestCase
             $this->container->instance('instance', 'instance string changed 2');
             $this->fail();
         } catch (CannotChangeException $exception) {
-            $this->assertEquals('You cannot change the data; instance', $exception->getMessage());
+            $this->assertEquals('It cannot be changed; instance', $exception->getMessage());
         }
         try {
             $this->container->closure('closure', function () {
@@ -186,13 +125,13 @@ class ContainerTest extends PHPUnit_Framework_TestCase
             });
             $this->fail();
         } catch (CannotChangeException $exception) {
-            $this->assertEquals('You cannot change the data; closure', $exception->getMessage());
+            $this->assertEquals('It cannot be changed; closure', $exception->getMessage());
         }
         try {
             $this->container->alias('alias', 'closure');
             $this->fail();
         } catch (CannotChangeException $exception) {
-            $this->assertEquals('You cannot change the data; alias', $exception->getMessage());
+            $this->assertEquals('It cannot be changed; alias', $exception->getMessage());
         }
 
         // also cannot remove
@@ -200,116 +139,19 @@ class ContainerTest extends PHPUnit_Framework_TestCase
             $this->container->offsetUnset('instance');
             $this->fail();
         } catch (CannotChangeException $exception) {
-            $this->assertEquals('You cannot change the data; instance', $exception->getMessage());
+            $this->assertEquals('It cannot be changed; instance', $exception->getMessage());
         }
         try {
             $this->container->offsetUnset('closure');
             $this->fail();
         } catch (CannotChangeException $exception) {
-            $this->assertEquals('You cannot change the data; closure', $exception->getMessage());
+            $this->assertEquals('It cannot be changed; closure', $exception->getMessage());
         }
         try {
             $this->container->offsetUnset('alias');
             $this->fail();
         } catch (CannotChangeException $exception) {
-            $this->assertEquals('You cannot change the data; alias', $exception->getMessage());
+            $this->assertEquals('It cannot be changed; alias', $exception->getMessage());
         }
-    }
-
-    public function testRegisterServiceProvider()
-    {
-        $mockProvider = Mockery::mock(ServiceProviderInterface::class);
-        $mockProvider->shouldReceive('register')->with($this->container);
-
-        $this->assertSame($this->container, $this->container->register($mockProvider));
-    }
-
-    public function testResolve()
-    {
-        $this->container->closure(DepInterface::class, function () {
-            return new DepFoo();
-        });
-
-        $this->assertInstanceOf(StubClient::class, $this->container->create(StubClient::class));
-        try {
-            $this->container->create(StubClientWithConfig::class);
-            $this->fail();
-        } catch (CannotResolveException $e) {
-            $this->assertEquals('Auto resolver can resolve the class that use params with type hint; Wandu\DI\Stub\StubClientWithConfig', $e->getMessage());
-        }
-    }
-
-    public function testResolveWithArguments()
-    {
-        $this->container->closure(DepInterface::class, function () {
-            return new DepFoo();
-        });
-
-        $created = $created = $this->container->create(StubClientWithConfig::class, ['config' => 'config string!']);
-
-        $this->assertInstanceOf(StubClientWithConfig::class, $created);
-        $this->assertEquals(['config' => 'config string!'], $created->getConfig());
-    }
-
-    /**
-     * test 6 types of callable
-     */
-    public function testCall()
-    {
-        $this->container->closure(DepInterface::class, function () {
-            return new DepFoo();
-        });
-
-        function stub(DepInterface $dep)
-        {
-            return 'call function';
-        }
-
-        // closure
-        $this->assertEquals('call closure', $this->container->call(function (DepInterface $dep) {
-            return 'call closure';
-        }));
-
-        // function
-        $this->assertEquals('call function', $this->container->call(__NAMESPACE__ . '\\stub'));
-
-        // static method
-        $this->assertInstanceOf(StubClient::class, $this->container->call(StubClient::class . '::create'));
-
-        // array of static
-        $this->assertInstanceOf(StubClient::class, $this->container->call([StubClient::class, 'create']));
-
-        // array of method
-        $this->assertEquals(
-            'call with dependency',
-            $this->container->call([new StubClient(new DepFoo), 'callWithDependency'])
-        );
-
-        // invoker
-        $this->assertEquals(
-            'invoke with',
-            $this->container->call(new Invoker())
-        );
-
-    }
-
-    public function testAutoResolveBind()
-    {
-        $this->container->bind(DepInterface::class, DepFoo::class);
-        $this->container->bind(StubClient::class);
-
-        $this->assertInstanceOf(StubClient::class, $this->container->get(StubClient::class));
-
-        $this->assertSame($this->container->get(StubClient::class), $this->container->get(StubClient::class));
-    }
-
-    public function testBindClassNameAlsoAllow()
-    {
-        $this->container->bind(DepInterface::class, DepFoo::class);
-
-        $this->assertInstanceOf(DepInterface::class, $this->container->get(DepInterface::class));
-        $this->assertInstanceOf(DepInterface::class, $this->container->get(DepFoo::class));
-
-        $this->assertSame($this->container->get(DepInterface::class), $this->container->get(DepFoo::class));
     }
 }

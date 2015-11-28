@@ -108,8 +108,7 @@ class Container implements ContainerInterface
             throw new NullReferenceException($name);
         }
         $this->freeze($name);
-        $key = $this->keys[$name];
-        if ($key === 'alias') {
+        if ('alias' === $key = $this->keys[$name]) {
             return $this->get($this->aliases[$name]);
         }
         if (!isset($this->instances[$name])) {
@@ -241,18 +240,20 @@ class Container implements ContainerInterface
         $reflectionMethod = $reflectionClass->getConstructor();
         if ($reflectionMethod) {
             try {
-                $arguments = $this->getParameters($reflectionMethod, $arguments);
+                $parameters = $this->getParameters($reflectionMethod, $arguments);
             } catch (RuntimeException $e) {
                 throw new CannotResolveException($class);
             }
+        } else {
+            $parameters = [];
         }
-        return $reflectionClass->newInstanceArgs($arguments);
+        return $reflectionClass->newInstanceArgs($parameters);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function call(callable $callee, ...$arguments)
+    public function call(callable $callee, array $arguments = [])
     {
         return call_user_func_array(
             $callee,

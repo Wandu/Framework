@@ -87,16 +87,16 @@ interface ContainerInterface extends ArrayAccess
 
     /**
      * @param callable $callee
-     * @param mixed ...$arguments
+     * @param array $arguments
      * @return mixed
      */
-    public function call(callable $callee, ...$arguments);
+    public function call(callable $callee, array $arguments = []);
 
     /**
      * @param object $object
-     * @param array $parameters
+     * @param array $properties
      */
-    public function inject($object, array $parameters = []);
+    public function inject($object, array $properties = []);
 
     /**
      * @param string $name

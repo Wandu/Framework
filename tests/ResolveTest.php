@@ -4,9 +4,9 @@ namespace Wandu\DI;
 use Wandu\DI\Exception\CannotResolveException;
 use Wandu\DI\Stub\Resolve\AutoResolvedDepend;
 use Wandu\DI\Stub\Resolve\CallExample;
-use Wandu\DI\Stub\Resolve\DependInterface;
-use Wandu\DI\Stub\Resolve\CreateWithArrayExample;
 use Wandu\DI\Stub\Resolve\CreateNormalExample;
+use Wandu\DI\Stub\Resolve\CreateWithArrayExample;
+use Wandu\DI\Stub\Resolve\DependInterface;
 use Wandu\DI\Stub\Resolve\ReplacedDepend;
 
 class ResolveTest extends TestCase
@@ -122,13 +122,14 @@ class ResolveTest extends TestCase
         );
     }
 
-    public function testCreateWithManys()
+    public function testCallWithParams()
     {
-//        $this->container->bind(DependInterface::class, Dependd::class);
-//        $this->container->bind(StubClient::class);
-//
-//        $this->assertInstanceOf(StubClient::class, $this->container->get(StubClient::class));
-//
-//        $this->assertSame($this->container->get(StubClient::class), $this->container->get(StubClient::class));
+
+        $callback = function () {
+            return func_get_args();
+        };
+
+        $this->assertEquals([], $this->container->call($callback));
+        $this->assertEquals([1,2,3], $this->container->call($callback, [1, 2, 3]));
     }
 }

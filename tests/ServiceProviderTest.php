@@ -2,24 +2,23 @@
 namespace Wandu\DI;
 
 use Mockery;
-use PHPUnit_Framework_TestCase;
-use Wandu\DI\Stub\Boot\BootProvider;
-use Wandu\DI\Stub\Boot\ProviderCheckable;
+use Wandu\DI\Stub\ServiceProvider\BootProvider;
+use Wandu\DI\Stub\ServiceProvider\ProviderCheckable;
 
-class ContainerBootTest extends PHPUnit_Framework_TestCase
+class ServiceProviderTest extends TestCase
 {
-    /** @var \Wandu\DI\Container */
-    protected $container;
-
-    public function setUp()
+    public function testRegister()
     {
-        parent::setUp();
-        $this->container = new Container();
+        $mockProvider = Mockery::mock(ServiceProviderInterface::class);
+        $mockProvider->shouldReceive('register')->once()->with($this->container);
+
+        $this->assertSame($this->container, $this->container->register($mockProvider));
     }
 
     public function testOnlyRegister()
     {
         $mockery = Mockery::mock(ProviderCheckable::class);
+
         $mockery->shouldReceive('register')->once();
         $mockery->shouldReceive('boot')->never();
 

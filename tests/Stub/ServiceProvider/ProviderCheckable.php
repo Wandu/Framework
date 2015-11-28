@@ -1,5 +1,5 @@
 <?php
-namespace Wandu\DI\Stub\Boot;
+namespace Wandu\DI\Stub\ServiceProvider;
 
 interface ProviderCheckable
 {
