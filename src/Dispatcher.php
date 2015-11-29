@@ -33,7 +33,9 @@ class Dispatcher
 
     public function flush()
     {
-
+        if (!$this->config['cache_disabled']) {
+            @unlink($this->config['cache_file']);
+        }
     }
 
     /**
@@ -53,18 +55,36 @@ class Dispatcher
      */
     public function dispatch(ServerRequestInterface $request)
     {
-        $router = new Router;
-        $this->routing->__invoke($router);
+        $cacheDisabled = $this->config['cache_disabled'];
+        $cacheFile = $this->config['cache_file'];
+        if (!$cacheDisabled && file_exists($cacheFile)) {
+            $cacheData = require $cacheFile;
+            $dispatchData = $cacheData['dispatch_data'];
+            $routes = $cacheData['routes'];
+        } else {
+            $router = new Router;
+            $this->routing->__invoke($router);
+            $dispatchData = $router->getCollector()->getData();
+            $routes = $router->getRoutes();
+        }
+
+        if (!$cacheDisabled) {
+            file_put_contents($cacheFile, '<?php return ' . var_export([
+                    'dispatch_data' => $dispatchData,
+                    'routes' => $routes,
+                ], true) .';');
+        }
+
         $request = $this->applyVirtualMethod($request);
         $routeInfo = $this->runDispatcher(
-            new GCBDispatcher($router->getCollector()->getData()),
+            new GCBDispatcher($dispatchData),
             $request->getMethod(),
             $request->getUri()->getPath()
         );
         foreach ($routeInfo[2] as $key => $value) {
             $request = $request->withAttribute($key, $value);
         }
-        return $router->getRoutes()[$routeInfo[1]]->execute($request, $this->classLoader);
+        return $routes[$routeInfo[1]]->execute($request, $this->classLoader);
     }
 
     /**

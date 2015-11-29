@@ -6,6 +6,19 @@ use Wandu\Router\Contracts\ClassLoaderInterface;
 
 class Route
 {
+    /**
+     * @param array $dataSet
+     * @return static
+     */
+    public static function __set_state(array $dataSet)
+    {
+        return new static(
+            $dataSet['className'],
+            $dataSet['methodName'],
+            $dataSet['middlewares']
+        );
+    }
+
     /** @var string */
     protected $className;
 
