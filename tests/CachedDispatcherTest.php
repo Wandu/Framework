@@ -3,7 +3,7 @@ namespace Wandu\Router;
 
 use Mockery;
 use Wandu\Router\ClassLoader\DefaultLoader;
-use Wandu\Router\stubs\AdminController;
+use Wandu\Router\Stubs\AdminController;
 
 class CachedDispatcherTest extends TestCase
 {

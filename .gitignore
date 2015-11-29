@@ -2,3 +2,6 @@
 /vendor
 .DS_Store
 composer.lock
+
+# cache file
+/tests/*.cache.*
