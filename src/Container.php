@@ -318,15 +318,50 @@ class Container implements ContainerInterface
         $parametersToReturn = [];
         $parameters = $this->getOnlySeqArray($arguments);
         foreach ($reflectionFunction->getParameters() as $param) {
-            if (isset($arguments[$param->getName()])) {
-                $parametersToReturn[] = $arguments[$param->getName()];
-            } elseif ($paramClassReflection = $param->getClass()) {
-                $parametersToReturn[] = $this->get($paramClassReflection->getName());
-            } elseif (count($arguments)) {
-                $parametersToReturn[] = array_shift($parameters);
-            } else {
-                throw new RuntimeException('Fail to get parameter.');
+            // if parameter doesn't have type hint,
+            // 1.1. search in arguments by param name
+            // 1.2. insert remain arguments
+            // 1.3. if has default value, insert default value.
+            // 1.4. exception
+
+            // if parameter has type hint,
+            // 2.1. search in arguments by param name ( == 1.1)
+            // 2.2. search in arguments by class name
+            // 2.3. search in container by class name
+            // 2.4. if has default value, insert default vlue. ( == 1.3)
+            // 2.5. exception ( == 1.4)a
+
+            // 1.1, 2.1
+            if (isset($arguments[$paramName = $param->getName()])) {
+                $parametersToReturn[] = $arguments[$paramName];
+                continue;
             }
+            if ($paramClassReflection = $param->getClass()) { // 2.*
+                // 2.2
+                $paramClassName = $paramClassReflection->getName();
+                if (isset($arguments[$paramClassName])) {
+                    $parametersToReturn[] = $arguments[$paramClassName];
+                    continue;
+                }
+                // 2.3
+                if ($this->has($paramClassName)) {
+                    $parametersToReturn[] = $this->get($paramClassName);
+                    continue;
+                }
+            } else { // 1.*
+                // 1.2
+                if (count($parameters)) {
+                    $parametersToReturn[] = array_shift($parameters);
+                    continue;
+                }
+            }
+            // 1.3, 2.4
+            if ($param->isDefaultValueAvailable()) {
+                $parametersToReturn[] = $param->getDefaultValue();
+                continue;
+            }
+            // 1.4, 2.5
+            throw new RuntimeException('Fail to get parameter.');
         }
         return array_merge($parametersToReturn, $parameters);
     }

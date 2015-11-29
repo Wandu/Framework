@@ -1,6 +1,8 @@
 <?php
 namespace Wandu\DI;
 
+use ArrayAccess;
+use ArrayObject;
 use Wandu\DI\Exception\CannotResolveException;
 use Wandu\DI\Stub\Resolve\AutoResolvedDepend;
 use Wandu\DI\Stub\Resolve\CallExample;
@@ -124,12 +126,59 @@ class ResolveTest extends TestCase
 
     public function testCallWithParams()
     {
-
         $callback = function () {
             return func_get_args();
         };
 
         $this->assertEquals([], $this->container->call($callback));
-        $this->assertEquals([1,2,3], $this->container->call($callback, [1, 2, 3]));
+        $this->assertEquals([1, 2], $this->container->call($callback, [1, 2]));
+        $this->assertEquals([1, 2], $this->container->call($callback, [1, 2, 'foo' => 'foo string']));
+
+        $callback = function ($foo = null) {
+            return func_get_args();
+        };
+
+        $this->assertEquals([null], $this->container->call($callback));
+        $this->assertEquals([1, 2], $this->container->call($callback, [1, 2]));
+        $this->assertEquals(
+            ['foo!', 1, 2],
+            $this->container->call($callback, ['foo' => 'foo!', 1, 2,])
+        );
+        $this->assertEquals(
+            ['foo!', 1, 2],
+            $this->container->call($callback, [1, 2, 'foo' => 'foo!'])
+        );
+
+        $callback = function ($foo = 'default', $bar = null) {
+            return func_get_args();
+        };
+
+        $this->assertEquals(['default', null], $this->container->call($callback));
+        $this->assertEquals([null, 2], $this->container->call($callback, [null, 2]));
+        $this->assertEquals([1, 2], $this->container->call($callback, [1, 2]));
+        $this->assertEquals(
+            ['foo!', 1, 2],
+            $this->container->call($callback, [1, 2, 'foo' => 'foo!'])
+        );
+
+        $callback = function (ArrayAccess $foo = null) {
+            return func_get_args();
+        };
+
+        $this->assertEquals([null], $this->container->call($callback));
+        $this->assertEquals([null, 1, 2], $this->container->call($callback, [1, 2]));
+
+        // instantly insert!
+        $param = new ArrayObject();
+        $this->assertEquals(
+            [$param, 1, 2, 3],
+            $this->container->call($callback, [1, 2, 3, 'foo' => $param])
+        );
+        $this->assertEquals(
+            [$param, 1, 2, 3],
+            $this->container->call($callback, [1, 2, 3, ArrayAccess::class => $param])
+        );
+
+        $this->assertFalse($this->container->has(ArrayAccess::class));
     }
 }
