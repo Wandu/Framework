@@ -2,20 +2,11 @@
 namespace Wandu\Router\Stubs;
 
 use Psr\Http\Message\ServerRequestInterface;
-use Wandu\Router\Contracts\ControllerInterface;
 
-class HomeController implements ControllerInterface
+class HomeController
 {
-    /**
-     * @return string
-     */
-    public function index()
+    public function index(ServerRequestInterface $request)
     {
-        return "index@Home";
-    }
-
-    public function login(ServerRequestInterface $request)
-    {
-        return $request->getAttribute('cookie', 'null');
+        return "[{$request->getMethod()}] index@Home";
     }
 }

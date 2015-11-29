@@ -2,22 +2,20 @@
 namespace Wandu\Router;
 
 use Mockery;
-use PHPUnit_Framework_TestCase;
-use Psr\Http\Message\ServerRequestInterface;
 use Wandu\Router\ClassLoader\DefaultLoader;
 use Wandu\Router\Stubs\AdminController;
 use Wandu\Router\Stubs\AuthFailMiddleware;
 use Wandu\Router\Stubs\AuthSuccessMiddleware;
 
-class RouteTest extends PHPUnit_Framework_TestCase
+class RouteTest extends TestCase
 {
     public function testExecuteWithoutMiddlewares()
     {
         $route = new Route(AdminController::class, 'index');
 
-        $mockRequest = Mockery::mock(ServerRequestInterface::class);
+        $request = $this->createRequest('GET', '/');
 
-        $this->assertEquals('index@Admin', $route->execute($mockRequest, new DefaultLoader()));
+        $this->assertEquals('[GET] index@Admin', $route->execute($request, new DefaultLoader()));
     }
 
     public function testExecuteWithMiddleware()
@@ -26,9 +24,9 @@ class RouteTest extends PHPUnit_Framework_TestCase
             AuthSuccessMiddleware::class
         ]);
 
-        $mockRequest = Mockery::mock(ServerRequestInterface::class);
+        $request = $this->createRequest('GET', '/');
 
-        $this->assertEquals('auth[index@Admin]', $route->execute($mockRequest, new DefaultLoader()));
+        $this->assertEquals('[GET] auth success; [GET] index@Admin', $route->execute($request, new DefaultLoader()));
     }
 
     public function testExecuteWithPreventedMiddleware()
@@ -37,8 +35,8 @@ class RouteTest extends PHPUnit_Framework_TestCase
             AuthFailMiddleware::class
         ]);
 
-        $mockRequest = Mockery::mock(ServerRequestInterface::class);
+        $request = $this->createRequest('GET', '/');
 
-        $this->assertEquals('auth fail...', $route->execute($mockRequest, new DefaultLoader()));
+        $this->assertEquals('[GET] auth fail;', $route->execute($request, new DefaultLoader()));
     }
 }

@@ -1,8 +1,10 @@
 <?php
 namespace Wandu\Router\ClassLoader;
 
+use Psr\Http\Message\ServerRequestInterface;
 use Wandu\DI\ContainerInterface;
 use Wandu\Router\Contracts\ClassLoaderInterface;
+use Wandu\Router\Exception\HandlerNotFoundException;
 
 class WanduLoader implements ClassLoaderInterface
 {
@@ -20,8 +22,26 @@ class WanduLoader implements ClassLoaderInterface
     /**
      * {@inheritdoc}
      */
-    public function load($name)
+    public function create(ServerRequestInterface $request, $className)
     {
-        return $this->container->create($name);
+        if (!class_exists($className)) {
+            throw new HandlerNotFoundException($className);
+        }
+        return $this->container->create($className, [
+            ServerRequestInterface::class => $request,
+        ]);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function call(ServerRequestInterface $request, $object, $methodName)
+    {
+        if (!method_exists($object, $methodName)) {
+            throw new HandlerNotFoundException(get_class($object), $methodName);
+        }
+        return $this->container->call([$object, $methodName], [
+            ServerRequestInterface::class => $request,
+        ]);
     }
 }

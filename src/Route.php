@@ -44,19 +44,17 @@ class Route
      * @param array $middlewares
      * @return mixed
      */
-    public function dispatch(ServerRequestInterface $request, ClassLoaderInterface $loader, array $middlewares)
+    protected function dispatch(ServerRequestInterface $request, ClassLoaderInterface $loader, array $middlewares)
     {
         if (count($middlewares)) {
             $middleware = array_shift($middlewares);
             return call_user_func([
-                $loader->load($middleware), 'handle'
+                $loader->create($request, $middleware), 'handle'
             ], $request, function (ServerRequestInterface $request) use ($loader, $middlewares) {
                 return $this->dispatch($request, $loader, $middlewares);
             });
         }
-        if (!method_exists($this->className, $this->methodName)) {
-            throw new HandlerNotFoundException($this->className, $this->methodName);
-        }
-        return call_user_func([$loader->load($this->className), $this->methodName], $request);
+        $controllerClass = $loader->create($request, $this->className);
+        return $loader->call($request, $controllerClass, $this->methodName);
     }
 }

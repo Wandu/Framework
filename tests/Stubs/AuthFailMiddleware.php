@@ -2,7 +2,7 @@
 namespace Wandu\Router\Stubs;
 
 use Psr\Http\Message\ServerRequestInterface;
-use Wandu\Router\Middleware\MiddlewareInterface;
+use Wandu\Router\Contracts\MiddlewareInterface;
 
 class AuthFailMiddleware implements MiddlewareInterface
 {
@@ -13,6 +13,6 @@ class AuthFailMiddleware implements MiddlewareInterface
      */
     public function handle(ServerRequestInterface $request, callable $next)
     {
-        return "auth fail...";
+        return "[{$request->getMethod()}] auth fail;";
     }
 }

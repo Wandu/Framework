@@ -2,32 +2,16 @@
 namespace Wandu\Router\Stubs;
 
 use Psr\Http\Message\ServerRequestInterface;
-use Wandu\Router\Contracts\ControllerInterface;
 
-class AdminController implements ControllerInterface
+class AdminController
 {
-    /**
-     * @return string
-     */
-    public function index()
+    public function index(ServerRequestInterface $request)
     {
-        return "index@Admin";
+        return "[{$request->getMethod()}] index@Admin";
     }
 
-    /**
-     * @return string
-     */
-    public function action()
+    public function action(ServerRequestInterface $request)
     {
-        return "action@Admin";
-    }
-
-    /**
-     * @param \Psr\Http\Message\ServerRequestInterface $request
-     * @return string
-     */
-    public function doit(ServerRequestInterface $request)
-    {
-        return "doit@Admin, " . $request->getAttribute('action');
+        return "[{$request->getMethod()}] action@Admin";
     }
 }
