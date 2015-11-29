@@ -25,17 +25,17 @@ interface ContainerInterface extends ArrayAccess
 
     /**
      * @param string $name
-     * @param \Closure $handler
-     * @return self
-     */
-    public function closure($name, Closure $handler);
-
-    /**
-     * @param string $name
      * @param mixed $value
      * @return self
      */
     public function instance($name, $value);
+
+    /**
+     * @param string $name
+     * @param \Closure $handler
+     * @return self
+     */
+    public function closure($name, Closure $handler);
 
     /**
      * @param string $name

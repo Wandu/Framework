@@ -37,9 +37,10 @@ class Container implements ContainerInterface
 
     public function __construct()
     {
-        $this->instance('container', $this)->freeze('container');
-        $this->alias(ContainerInterface::class, 'container')
+        $this->instance(ContainerInterface::class, $this)
             ->freeze(ContainerInterface::class);
+        $this->alias('container', ContainerInterface::class)
+            ->freeze('container');
     }
 
     /**

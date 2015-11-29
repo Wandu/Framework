@@ -4,7 +4,7 @@ namespace Wandu\DI;
 use Mockery;
 use Wandu\DI\Exception\CannotChangeException;
 use Wandu\DI\Exception\NullReferenceException;
-use Wandu\DI\Stub\HttpControllerWithConfig;
+use Wandu\DI\Stub\HttpController;
 use Wandu\DI\Stub\JsonRenderer;
 use Wandu\DI\Stub\Renderable;
 use Wandu\DI\Stub\ServerAccessible;
@@ -41,20 +41,10 @@ class ContainerTest extends TestCase
 
     public function testClosure()
     {
-        $this->container->closure(Renderable::class, function () {
-            return new XmlRenderer;
-        });
+        $this->container->instance(Renderable::class, $renderer = new XmlRenderer());
 
-        $this->assertEquals($this->container[Renderable::class], $this->container[Renderable::class]);
-        $this->assertSame($this->container[Renderable::class], $this->container[Renderable::class]);
-    }
-
-    public function testClosureWithParameters()
-    {
-        $this->container->instance(Renderable::class, $foo = new XmlRenderer());
-
-        $this->container->closure(HttpControllerWithConfig::class, function ($app) {
-            return new HttpControllerWithConfig(
+        $this->container->closure(HttpController::class, function ($app) {
+            return new HttpController(
                 $app[Renderable::class],
                 [
                     'username' => 'username string',
@@ -63,11 +53,19 @@ class ContainerTest extends TestCase
             );
         });
 
-        $this->assertSame($foo, $this->container[HttpControllerWithConfig::class]->getRenderer());
+        $this->assertInstanceOf(
+            HttpController::class,
+            $this->container[HttpController::class]
+        );
+        $this->assertSame(
+            $this->container[HttpController::class],
+            $this->container[HttpController::class]
+        );
+        $this->assertSame($renderer, $this->container[HttpController::class]->getRenderer());
         $this->assertEquals([
             'username' => 'username string',
             'password' => 'password string',
-        ], $this->container[HttpControllerWithConfig::class]->getConfig());
+        ], $this->container[HttpController::class]->getConfig());
     }
 
     public function testAlias()

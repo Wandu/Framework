@@ -17,7 +17,7 @@ class ExtendConfigTest extends TestCase
 
         $this->assertEquals(
             'hello_world',
-            $configLoader('config.app')
+            call_user_func($configLoader, 'config.app')
         );
 
         // more simple way.

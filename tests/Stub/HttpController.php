@@ -3,24 +3,20 @@ namespace Wandu\DI\Stub;
 
 class HttpController
 {
-    /**
-     * @param \Wandu\DI\Stub\Renderable $depInterface
-     * @return static
-     */
-    public static function create(Renderable $depInterface)
-    {
-        return new static($depInterface);
-    }
-
     /** @var \Wandu\DI\Stub\Renderable */
     protected $renderer;
 
+    /** @var array */
+    protected $config;
+
     /**
      * @param \Wandu\DI\Stub\Renderable $renderer
+     * @param array $config
      */
-    public function __construct(Renderable $renderer)
+    public function __construct(Renderable $renderer, array $config)
     {
         $this->renderer = $renderer;
+        $this->config = $config;
     }
 
     /**
@@ -31,8 +27,11 @@ class HttpController
         return $this->renderer;
     }
 
-    public function callWithRenderer(Renderable $dep)
+    /**
+     * @return array
+     */
+    public function getConfig()
     {
-        return 'call with renderer';
+        return $this->config;
     }
 }

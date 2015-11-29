@@ -17,7 +17,7 @@ class ExtendPathTest extends TestCase
 
         $this->assertEquals(
             dirname(__DIR__).'/Stub/myfile.php',
-            $pathLoader('/myfile.php')
+            call_user_func($pathLoader, '/myfile.php')
         );
 
         // more simple way.
