@@ -14,4 +14,9 @@ class AdminController
     {
         return "[{$request->getMethod()}] action@Admin";
     }
+
+    public function users(ServerRequestInterface $request)
+    {
+        return "[{$request->getMethod()}] users/{$request->getAttribute('user')}@Admin";
+    }
 }

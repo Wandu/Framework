@@ -4,7 +4,6 @@ namespace Wandu\Router;
 use Closure;
 use FastRoute\DataGenerator;
 use FastRoute\DataGenerator\GroupCountBased as GCBDataGenerator;
-use FastRoute\Dispatcher;
 use FastRoute\RouteCollector;
 use FastRoute\RouteParser\Std;
 
@@ -61,8 +60,11 @@ class Router
      * @param array $middlewares
      * @param \Closure $handler
      */
-    public function middlewares(array $middlewares, Closure $handler)
+    public function middlewares($middlewares, Closure $handler)
     {
+        if (!is_array($middlewares)) {
+            $middlewares = [$middlewares];
+        }
         $beforeMiddlewares = $this->middlewares;
         $this->middlewares = array_merge($beforeMiddlewares, $middlewares);
         $handler($this);
@@ -99,7 +101,7 @@ class Router
      * @param array $middlewares
      * @return \Wandu\Router\Route
      */
-    public function createRoute(array $methods, $path, $className, $methodName, array $middlewares = [])
+    public function createRoute(array $methods, $path, $className, $methodName = 'index', array $middlewares = [])
     {
         $path = '/' . trim($this->prefix . $path, '/');
         $middlewares = array_merge($this->middlewares, $middlewares);

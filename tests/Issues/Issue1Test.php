@@ -2,28 +2,31 @@
 namespace Wandu\Router\Issues;
 
 use Mockery;
-use Psr\Http\Message\ServerRequestInterface;
-use Wandu\Router\RouterTestCase;
+use Wandu\Router\ClassLoader\DefaultLoader;
+use Wandu\Router\Route;
+use Wandu\Router\Stubs\AuthController;
 use Wandu\Router\Stubs\CookieMiddleware;
-use Wandu\Router\Stubs\HomeController;
+use Wandu\Router\TestCase;
 
-class Issue1Test extends RouterTestCase
+class Issue1Test extends TestCase
 {
     public function testDispatch()
     {
-        $changedRequest = Mockery::mock(ServerRequestInterface::class);
-        $changedRequest->shouldReceive('getAttribute')->once()->with('cookie', 'null')->andReturn('cookie~~');
+        $changedRequest = $this->createRequest('GET', '/');
+        $changedRequest->shouldReceive('getAttribute')->once()
+            ->with('cookie', [])->andReturn(['name' => 'wan2land']);
 
-        $request = Mockery::mock(ServerRequestInterface::class);
-        $request->shouldReceive('getParsedBody')->once()->andReturn([]);
-        $request->shouldReceive('getMethod')->once()->andReturn('GET');
-        $request->shouldReceive('getUri->getPath')->once()->andReturn('/');
-        $request->shouldReceive('withAttribute')->once()->with('cookie', 'cookie~~')->andReturn($changedRequest);
+        $request = $this->createRequest('GET', '/');
+        $request->shouldReceive('withAttribute')->once()
+            ->with('cookie', ['name' => 'wan2land'])->andReturn($changedRequest);
 
-        $this->router->createRoute(['GET'], '/', HomeController::class, 'login', [
+        $route = new Route(AuthController::class, 'login', [
             CookieMiddleware::class
         ]);
 
-        $this->assertEquals('cookie~~', $this->dispatcher->dispatch($request, $this->router));
+        $this->assertEquals(
+            'login@Auth, cookie={"name":"wan2land"}',
+            $route->execute($request, new DefaultLoader())
+        );
     }
 }

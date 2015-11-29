@@ -3,7 +3,6 @@ namespace Wandu\Router;
 
 use Psr\Http\Message\ServerRequestInterface;
 use Wandu\Router\Contracts\ClassLoaderInterface;
-use Wandu\Router\Exception\HandlerNotFoundException;
 
 class Route
 {

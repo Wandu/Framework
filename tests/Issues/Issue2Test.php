@@ -2,24 +2,23 @@
 namespace Wandu\Router\Issues;
 
 use Mockery;
-use Psr\Http\Message\ServerRequestInterface;
+use Wandu\Router\ClassLoader\DefaultLoader;
+use Wandu\Router\Dispatcher;
 use Wandu\Router\Exception\HandlerNotFoundException;
-use Wandu\Router\RouterTestCase;
+use Wandu\Router\Router;
 use Wandu\Router\Stubs\HomeController;
+use Wandu\Router\TestCase;
 
-class Issue2Test extends RouterTestCase
+class Issue2Test extends TestCase
 {
     public function testDispatch()
     {
-        $request = Mockery::mock(ServerRequestInterface::class);
-        $request->shouldReceive('getParsedBody')->once()->andReturn([]);
-        $request->shouldReceive('getMethod')->once()->andReturn('GET');
-        $request->shouldReceive('getUri->getPath')->once()->andReturn('/');
+        $dispatcher = (new Dispatcher(new DefaultLoader()))->withRouter(function (Router $router) {
+            $router->createRoute(['GET'], '/', HomeController::class, 'wrong');
+        });
 
-
-        $this->router->get('/', HomeController::class, 'wrong');
         try {
-            $this->dispatcher->dispatch($request, $this->router);
+            $dispatcher->dispatch($this->createRequest('GET', '/'));
             $this->fail();
         } catch (HandlerNotFoundException $exception) {
             $this->assertEquals(

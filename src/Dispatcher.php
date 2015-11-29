@@ -1,10 +1,11 @@
 <?php
 namespace Wandu\Router;
 
+use Closure;
+use FastRoute\Dispatcher as FastDispatcher;
 use FastRoute\Dispatcher\GroupCountBased as GCBDispatcher;
 use Psr\Http\Message\ServerRequestInterface;
 use Wandu\Router\Contracts\ClassLoaderInterface;
-use FastRoute\Dispatcher as FastDispatcher;
 use Wandu\Router\Exception\MethodNotAllowedException;
 use Wandu\Router\Exception\RouteNotFoundException;
 
@@ -13,34 +14,73 @@ class Dispatcher
     /** @var \Wandu\Router\Contracts\ClassLoaderInterface */
     protected $classLoader;
 
+    /** @var \Closure */
+    protected $routing;
+
     /**
      * @param \Wandu\Router\Contracts\ClassLoaderInterface $loader
+     * @param array $config
      */
-    public function __construct(ClassLoaderInterface $loader)
+    public function __construct(ClassLoaderInterface $loader, array $config = [])
     {
         $this->classLoader = $loader;
+        $this->config = $config + [
+            'virtual_method_disabled' => true,
+            'cache_disabled' => true,
+            'cache_file' => null,
+        ];
+    }
+
+    public function flush()
+    {
+
+    }
+
+    /**
+     * @param \Closure $routing
+     * @return \Wandu\Router\Dispatcher
+     */
+    public function withRouter(Closure $routing)
+    {
+        $inst = clone $this;
+        $inst->routing = $routing;
+        return $inst;
     }
 
     /**
      * @param \Psr\Http\Message\ServerRequestInterface $request
-     * @param \Wandu\Router\Router $router
      * @return mixed
      */
-    public function dispatch(ServerRequestInterface $request, Router $router)
+    public function dispatch(ServerRequestInterface $request)
     {
-        $dispatcher = new GCBDispatcher($router->getCollector()->getData());
-        $method = $request->getMethod();
-
-        // virtual method
-        $parsedBody = $request->getParsedBody();
-        if (isset($parsedBody['_method'])) {
-            $method = strtoupper($parsedBody['_method']);
-        }
-        $routeInfo = $this->runDispatcher($dispatcher, $method, $request->getUri()->getPath());
+        $router = new Router;
+        $this->routing->__invoke($router);
+        $request = $this->applyVirtualMethod($request);
+        $routeInfo = $this->runDispatcher(
+            new GCBDispatcher($router->getCollector()->getData()),
+            $request->getMethod(),
+            $request->getUri()->getPath()
+        );
         foreach ($routeInfo[2] as $key => $value) {
             $request = $request->withAttribute($key, $value);
         }
         return $router->getRoutes()[$routeInfo[1]]->execute($request, $this->classLoader);
+    }
+
+    /**
+     * @param \Psr\Http\Message\ServerRequestInterface $request
+     * @return \Psr\Http\Message\ServerRequestInterface
+     */
+    protected function applyVirtualMethod(ServerRequestInterface $request)
+    {
+        if ($this->config['virtual_method_disabled']) {
+            return $request;
+        }
+        $parsedBody = $request->getParsedBody();
+        if (!isset($parsedBody['_method'])) {
+            return $request;
+        }
+        return $request->withMethod(strtoupper($parsedBody['_method']));
     }
 
     /**
