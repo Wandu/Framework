@@ -1,7 +1,7 @@
 <?php
-namespace Wandu\DI\Helper;
+namespace Wandu\DI\Extension;
 
-class ConfigLoader
+class ExtendConfig
 {
     /** @var string */
     protected $path;

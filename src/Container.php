@@ -350,7 +350,7 @@ class Container implements ContainerInterface
      */
     public function __call($name, array $arguments)
     {
-        return $this->call($this->get($name), ...$arguments);
+        return $this->call($this->get($name), $arguments);
     }
 
     /**
