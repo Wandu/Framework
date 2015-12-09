@@ -32,7 +32,7 @@ class CachedDispatcherTest extends TestCase
     public function testDispatchWithCache()
     {
         $dispatcher = new Dispatcher(new DefaultLoader(), [
-            'cache_disabled' => false,
+            'cache_enabled' => true,
             'cache_file' => __DIR__ . '/router.cache.php',
         ]);
 
@@ -52,7 +52,7 @@ class CachedDispatcherTest extends TestCase
     public function testFlush()
     {
         $dispatcher = new Dispatcher(new DefaultLoader(), [
-            'cache_disabled' => false,
+            'cache_enabled' => true,
             'cache_file' => __DIR__ . '/router.cache.php',
         ]);
 

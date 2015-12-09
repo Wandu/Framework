@@ -17,30 +17,36 @@ Based on [Jicjjang/June](https://github.com/jicjjang/June). :D
 ## Basic Usage
 
 ```php
+<?php
+use Wandu\Router\ClassLoader\DefaultLoader;
+use Wandu\Router\Dispatcher;
+use Wandu\Router\Exception\HandlerNotFoundException;
+use Wandu\Router\Exception\MethodNotAllowedException;
+use Wandu\Router\Exception\RouteNotFoundException;
 use Wandu\Router\Router;
-use Wandu\Http\Factory\ServerRequestFactory;
 
-// psr-7 server request request
-$request = ServerRequestFactory::fromGlobals();
+$dispatcher = new Dispatcher(new DefaultLoader(), [
+    'virtual_method_enabled' => false,
+    'cache_enabled' => true,
+    'cache_file' => __DIR__ . '/routes.cache.php',
+]);
 
-$router = new Router();
-
-$router->get('/', function () {
-    return "Hello World :D";
+$dispatcher = $dispatcher->withRouter(function (Router $router) {
+    $router->prefix('/admin', function (Router $router) {
+        $router->get('/pages', PageController::class, 'index');
+        $router->get('/users', UserController::class, 'index');
+        $router->get('/users/{user}', UserController::class, 'show');
+    });
 });
 
-$contents = $router->dispatch($request);
-
-echo $contents; // "Hello World :D"
+try {
+    $response = $dispatcher->dispatch($request); // $request is PSR7 ServerRequestInterface
+} catch (MethodNotAllowedException $e) {
+    // reutrn 405
+} catch (RouteNotFoundException $e) {
+    // return 404
+} catch (HandlerNotFoundException $e) {
+    // return 500
+}
 ```
 
-## Documents
-
-### Constructor
-
-
-
-### Get
-
-```php
-```

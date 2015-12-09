@@ -25,15 +25,15 @@ class Dispatcher
     {
         $this->classLoader = $loader;
         $this->config = $config + [
-            'virtual_method_disabled' => true,
-            'cache_disabled' => true,
+            'virtual_method_enabled' => false,
+            'cache_enabled' => false,
             'cache_file' => null,
         ];
     }
 
     public function flush()
     {
-        if (!$this->config['cache_disabled']) {
+        if ($this->config['cache_enabled']) {
             @unlink($this->config['cache_file']);
         }
     }
@@ -55,9 +55,10 @@ class Dispatcher
      */
     public function dispatch(ServerRequestInterface $request)
     {
-        $cacheDisabled = $this->config['cache_disabled'];
+        $cacheEnabled = $this->config['cache_enabled'];
+
         $cacheFile = $this->config['cache_file'];
-        if (!$cacheDisabled && file_exists($cacheFile)) {
+        if ($cacheEnabled && file_exists($cacheFile)) {
             $cacheData = require $cacheFile;
             $dispatchData = $cacheData['dispatch_data'];
             $routes = $cacheData['routes'];
@@ -68,7 +69,7 @@ class Dispatcher
             $routes = $router->getRoutes();
         }
 
-        if (!$cacheDisabled) {
+        if ($cacheEnabled) {
             file_put_contents($cacheFile, '<?php return ' . var_export([
                     'dispatch_data' => $dispatchData,
                     'routes' => $routes,
@@ -93,7 +94,7 @@ class Dispatcher
      */
     protected function applyVirtualMethod(ServerRequestInterface $request)
     {
-        if ($this->config['virtual_method_disabled']) {
+        if (!$this->config['virtual_method_enabled']) {
             return $request;
         }
         $parsedBody = $request->getParsedBody();

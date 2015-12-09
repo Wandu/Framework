@@ -209,7 +209,7 @@ class DispatcherTest extends TestCase
     public function testVirtualMethodEnabled()
     {
         $dispatcher = (new Dispatcher(new DefaultLoader(), [
-            'virtual_method_disabled' => false,
+            'virtual_method_enabled' => true,
         ]))->withRouter(function (Router $router) {
             $router->createRoute(['PUT'], '/', HomeController::class);
         });
