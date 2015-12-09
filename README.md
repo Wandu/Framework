@@ -23,6 +23,10 @@ use Wandu\Router\Exception\MethodNotAllowedException;
 use Wandu\Router\Exception\RouteNotFoundException;
 use Wandu\Router\Router;
 
+// first of argument is class loader. there are 3 predefined loader.
+// 1. DefaultLoader
+// 2. ArrayAccessLoader
+// 3. WanduLoader : with wandu/di package.
 $dispatcher = new Dispatcher(new DefaultLoader(), [
     'virtual_method_enabled' => false,
     'cache_enabled' => true,
@@ -48,3 +52,38 @@ try {
 }
 ```
 
+## Middleware
+
+**Middleware**
+
+```php
+<?php
+namespace Wandu\Router\Stubs;
+
+use Psr\Http\Message\ServerRequestInterface;
+use Wandu\Router\Contracts\MiddlewareInterface;
+
+class CookieMiddleware implements MiddlewareInterface
+{
+    /**
+     * @param ServerRequestInterface $request
+     * @param callable $next
+     * @return mixed
+     */
+    public function handle(ServerRequestInterface $request, callable $next)
+    {
+        $request = $request->withAttribute('cookie', ['name' => 'wan2land']);
+        return $next($request);
+    }
+}
+```
+
+**Router With Middlewares**
+
+```php
+$dispatcher = $dispatcher->withRouter(function (Router $router) {
+    $router->middleware([CookieMiddleware::class], function (Router $router) {
+        ...
+    });
+});
+```
