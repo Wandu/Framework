@@ -12,8 +12,6 @@ Wandu Router
 
 FastRouter with PSR-7 Wrapper Library.
 
-Based on [Jicjjang/June](https://github.com/jicjjang/June). :D
-
 ## Basic Usage
 
 ```php
