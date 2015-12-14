@@ -51,7 +51,7 @@ class InjectTest extends TestCase
             $this->container->inject($example);
             $this->fail();
         } catch (CannotInjectException $e) {
-            $this->assertEquals(AutoInjectExample::class, $e->getClass());
+            $this->assertEquals(DependInterface::class, $e->getClass());
             $this->assertEquals('something', $e->getProperty());
         }
     }

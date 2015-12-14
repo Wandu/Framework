@@ -298,7 +298,7 @@ class Container implements ContainerInterface
                         $this->injectProperty($property, $object, $this->get($propertyClassName));
                         continue;
                     } else {
-                        throw new CannotInjectException(get_class($object), $property->getName());
+                        throw new CannotInjectException($propertyClassName, $property->getName());
                     }
                 }
             }
