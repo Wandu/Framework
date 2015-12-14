@@ -5,6 +5,7 @@ use Closure;
 use ReflectionClass;
 use ReflectionFunctionAbstract;
 use ReflectionObject;
+use ReflectionProperty;
 use RuntimeException;
 use Wandu\DI\Exception\CannotChangeException;
 use Wandu\DI\Exception\CannotInjectException;
@@ -265,29 +266,54 @@ class Container implements ContainerInterface
     /**
      * {@inheritdoc}
      */
-    public function inject($object, array $parameters = [])
+    public function inject($object, array $properties = [])
     {
         $reflectionObject = new ReflectionObject($object);
-
         foreach ($reflectionObject->getProperties() as $property) {
-            $comment = $property->getDocComment();
-            if (strpos($comment, '@Autowired') !== false) {
-                $className = $this->getClassNameFromDocComment($comment);
-                if (isset($className)) {
-                    $property->setAccessible(true);
-                    try {
-                        $property->setValue($object, $this->get($className));
-                    } catch (NullReferenceException $e) {
+            // if property doesn't have doc type hint,
+            // 1.1. search in properties by property name
+
+            // if property has doc type hint,
+            // 2.1. search in properties by property name ( == 1.1)
+            // 2.2. search in properties by class name (in doc)
+            // 2.3. if has doc @Autowired then search in container by class name (in doc)
+            //      else exception!
+
+            // 1.1, 2.1
+            if (array_key_exists($propertyName = $property->getName(), $properties)) {
+                $this->injectProperty($property, $object, $properties[$propertyName]);
+                continue;
+            }
+            $docComment = $property->getDocComment();
+            $propertyClassName = $this->getClassNameFromDocComment($docComment);
+            if ($propertyClassName) {
+                // 2.2
+                if (array_key_exists($propertyClassName, $properties)) {
+                    $this->injectProperty($property, $object, $properties[$propertyClassName]);
+                    continue;
+                }
+                // 2.3
+                if ($this->hasAutowiredFromDocComment($docComment)) {
+                    if ($this->has($propertyClassName)) {
+                        $this->injectProperty($property, $object, $this->get($propertyClassName));
+                        continue;
+                    } else {
                         throw new CannotInjectException(get_class($object), $property->getName());
                     }
-                } else {
-                    throw new CannotInjectException(get_class($object), $property->getName());
                 }
-            } elseif (isset($parameters[$propertyName = $property->getName()])) {
-                $property->setAccessible(true);
-                $property->setValue($object, $parameters[$propertyName]);
             }
         }
+    }
+
+    /**
+     * @param \ReflectionProperty $property
+     * @param object $object
+     * @param mixed $target
+     */
+    protected function injectProperty(ReflectionProperty $property, $object, $target)
+    {
+        $property->setAccessible(true);
+        $property->setValue($object, $target);
     }
 
     /**
@@ -306,6 +332,15 @@ class Container implements ContainerInterface
             $className = substr($className, 1);
         }
         return $className;
+    }
+
+    /**
+     * @param string $comment
+     * @return bool
+     */
+    protected function hasAutowiredFromDocComment($comment)
+    {
+        return strpos($comment, '@Autowired') !== false || strpos($comment, '@autowired') !== false;
     }
 
     /**

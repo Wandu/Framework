@@ -7,13 +7,21 @@ class AutoInjectExample
      * @Autowired
      * @var \Wandu\DI\Stub\Resolve\DependInterface
      */
-    private $requiredLibrary;
+    private $something;
+
+    /** @var mixed */
+    private $otherthing;
 
     /**
-     * @return \Wandu\DI\Stub\Resolve\DependInterface
+     * @return mixed
      */
-    public function getRequiredLibrary()
+    public function getSomething()
     {
-        return $this->requiredLibrary;
+        return $this->something;
+    }
+
+    public function getOtherthing()
+    {
+        return $this->otherthing;
     }
 }
