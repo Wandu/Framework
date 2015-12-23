@@ -1,20 +1,20 @@
 <?php
-namespace Wandu\Queue;
+namespace Wandu\Q;
 
-use Wandu\Queue\Contracts\AdapterInterface;
-use Wandu\Queue\Contracts\SerializerInterface;
+use Wandu\Q\Contracts\AdapterInterface;
+use Wandu\Q\Contracts\SerializerInterface;
 
 class Queue
 {
-    /** @var \Wandu\Queue\Contracts\SerializerInterface */
+    /** @var \Wandu\Q\Contracts\SerializerInterface */
     protected $serializer;
 
-    /** @var \Wandu\Queue\Contracts\AdapterInterface */
+    /** @var \Wandu\Q\Contracts\AdapterInterface */
     protected $adapter;
 
     /**
-     * @param \Wandu\Queue\Contracts\SerializerInterface $serializer
-     * @param \Wandu\Queue\Contracts\AdapterInterface $adapter
+     * @param \Wandu\Q\Contracts\SerializerInterface $serializer
+     * @param \Wandu\Q\Contracts\AdapterInterface $adapter
      */
     public function __construct(SerializerInterface $serializer, AdapterInterface $adapter)
     {
@@ -31,7 +31,7 @@ class Queue
     }
 
     /**
-     * @return \Wandu\Queue\Contracts\JobInterface
+     * @return \Wandu\Q\Contracts\JobInterface
      */
     public function dequeue()
     {

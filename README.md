@@ -1,4 +1,4 @@
-Wandu Queue
+Wandu Q
 ===
 
 Very Simple Queue.
@@ -10,9 +10,9 @@ Very Simple Queue.
 **Sender**
 
 ```php
-use Wandu\Queue\Adapter\SqsAdapter;
-use Wandu\Queue\Queue;
-use Wandu\Queue\Serializer\JsonSerializer;
+use Wandu\Q\Adapter\SqsAdapter;
+use Wandu\Q\Queue;
+use Wandu\Q\Serializer\JsonSerializer;
 
 $sender = new Queue(new JsonSerializer(), new SqsAdapter(
     'xxxxxxxxxxxx', // key
@@ -29,9 +29,9 @@ $sender->enqueue([
 **Receiver**
 
 ```php
-use Wandu\Queue\Adapter\SqsAdapter;
-use Wandu\Queue\Queue;
-use Wandu\Queue\Serializer\JsonSerializer;
+use Wandu\Q\Adapter\SqsAdapter;
+use Wandu\Q\Queue;
+use Wandu\Q\Serializer\JsonSerializer;
 
 $sender = new Queue(new JsonSerializer(), new SqsAdapter(
     'xxxxxxxxxxxx', // key

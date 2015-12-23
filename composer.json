@@ -1,6 +1,6 @@
 {
-    "name": "wandu/queue",
-    "description": "Queue.",
+    "name": "wandu/q",
+    "description": "Very Simple Queue.",
     "keywords": ["wandu", "queue"],
     "license": "MIT",
     "authors": [
@@ -19,12 +19,12 @@
     },
     "autoload": {
         "psr-4": {
-            "Wandu\\Queue\\": "src/"
+            "Wandu\\Q\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Wandu\\Queue\\": "tests/"
+            "Wandu\\Q\\": "tests/"
         }
     },
     "suggest": {

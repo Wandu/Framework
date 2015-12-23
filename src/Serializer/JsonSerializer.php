@@ -1,7 +1,7 @@
 <?php
-namespace Wandu\Queue\Serializer;
+namespace Wandu\Q\Serializer;
 
-use Wandu\Queue\Contracts\SerializerInterface;
+use Wandu\Q\Contracts\SerializerInterface;
 
 class JsonSerializer implements SerializerInterface
 {

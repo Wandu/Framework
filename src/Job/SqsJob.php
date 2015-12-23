@@ -1,8 +1,8 @@
 <?php
-namespace Wandu\Queue\Job;
+namespace Wandu\Q\Job;
 
 use Aws\Sqs\SqsClient;
-use Wandu\Queue\Contracts\JobInterface;
+use Wandu\Q\Contracts\JobInterface;
 
 class SqsJob implements JobInterface
 {

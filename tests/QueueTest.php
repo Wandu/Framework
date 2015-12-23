@@ -1,11 +1,11 @@
 <?php
-namespace Wandu\Queue\Queue;
+namespace Wandu\Q\Queue;
 
 use Mockery;
 use PHPUnit_Framework_TestCase;
-use Wandu\Queue\Contracts\AdapterInterface;
-use Wandu\Queue\Contracts\SerializerInterface;
-use Wandu\Queue\Queue;
+use Wandu\Q\Contracts\AdapterInterface;
+use Wandu\Q\Contracts\SerializerInterface;
+use Wandu\Q\Queue;
 
 class QueueTest extends PHPUnit_Framework_TestCase
 {

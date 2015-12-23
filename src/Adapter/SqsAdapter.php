@@ -1,10 +1,10 @@
 <?php
-namespace Wandu\Queue\Adapter;
+namespace Wandu\Q\Adapter;
 
 use Aws\Sqs\SqsClient;
-use Wandu\Queue\Contracts\AdapterInterface;
-use Wandu\Queue\Contracts\SerializerInterface;
-use Wandu\Queue\Job\SqsJob;
+use Wandu\Q\Contracts\AdapterInterface;
+use Wandu\Q\Contracts\SerializerInterface;
+use Wandu\Q\Job\SqsJob;
 
 class SqsAdapter implements AdapterInterface
 {

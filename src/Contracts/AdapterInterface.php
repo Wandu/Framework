@@ -1,18 +1,18 @@
 <?php
-namespace Wandu\Queue\Contracts;
+namespace Wandu\Q\Contracts;
 
 interface AdapterInterface
 {
     /**
-     * @param \Wandu\Queue\Contracts\SerializerInterface $serializer
+     * @param \Wandu\Q\Contracts\SerializerInterface $serializer
      * @param string $payload
      * @return mixed
      */
     public function enqueue(SerializerInterface $serializer, $payload);
 
     /**
-     * @param \Wandu\Queue\Contracts\SerializerInterface $serializer
-     * @return \Wandu\Queue\Contracts\JobInterface
+     * @param \Wandu\Q\Contracts\SerializerInterface $serializer
+     * @return \Wandu\Q\Contracts\JobInterface
      */
     public function dequeue(SerializerInterface $serializer);
 }

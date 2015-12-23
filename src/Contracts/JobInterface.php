@@ -1,5 +1,5 @@
 <?php
-namespace Wandu\Queue\Contracts;
+namespace Wandu\Q\Contracts;
 
 interface JobInterface
 {
