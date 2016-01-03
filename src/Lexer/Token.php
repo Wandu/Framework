@@ -4,6 +4,7 @@ namespace Wandu\Tempy\Lexer;
 class Token
 {
     const
+        T_WHITESPACE = 0,
         T_OPEN_BRACKET = 1,
         T_CLOSE_BRACKET = 2,
         T_VARIABLE = 3,

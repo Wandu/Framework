@@ -5,7 +5,7 @@ class Lexer
 {
     /** @var array */
     protected static $tokens = [
-        0 => '\s',
+        Token::T_WHITESPACE => '\s',
         Token::T_OPEN_BRACKET => '\{\{',
         Token::T_CLOSE_BRACKET => '\}\}',
         Token::T_VARIABLE => '\$[a-zA-Z_][a-zA-Z0-9_]*',
@@ -36,14 +36,14 @@ class Lexer
             $tokenNumber = $this->findTokenNumber($matches, $idx, $word);
             if ($isOpenBracket) {
                 switch ($tokenNumber) {
-                    case 0:
+                    case Token::T_WHITESPACE:
                         break;
                     case Token::T_VARIABLE :
                         $tokens[] = [Token::T_VARIABLE, $word];
                         break;
                     case Token::T_CLOSE_BRACKET : // not need break.
                         $isOpenBracket = false;
-                        $tokens[] = [$tokenNumber];
+                        $tokens[] = [Token::T_CLOSE_BRACKET];
                         break;
                     default:
                         $tokens[] = [$tokenNumber];
