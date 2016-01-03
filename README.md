@@ -138,3 +138,8 @@ ref. `latte/latte`
 ### Add Macro
 
 ### Pre-Process / Runtime-Process
+
+
+## References
+
+- **Lexer**: http://nikic.github.io/2014/02/18/Fast-request-routing-using-regular-expressions.html
