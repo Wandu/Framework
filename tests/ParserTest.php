@@ -14,6 +14,14 @@ class ParserTest extends PHPUnit_Framework_TestCase
         $this->parser = new Parser();
     }
 
+    public function provider()
+    {
+        return [
+            ['variable-as-variable.php'],
+            ['variable-with-default.php'],
+        ];
+    }
+
     /**
      * @dataProvider provider
      * @param string $fileName
@@ -24,12 +32,5 @@ class ParserTest extends PHPUnit_Framework_TestCase
         $output = trim(file_get_contents(__DIR__ . "/output/{$fileName}"));
 
         $this->assertEquals($output, $this->parser->parse($input));
-    }
-
-    public function provider()
-    {
-        return [
-            ['variable-as-variable.php'],
-        ];
     }
 }
