@@ -19,6 +19,7 @@ class ParserTest extends PHPUnit_Framework_TestCase
         return [
             ['variable-as-variable.php'],
             ['variable-with-default.php'],
+            ['condition.php'],
         ];
     }
 

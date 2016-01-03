@@ -40,12 +40,29 @@ class Parser
                     throw new SyntaxException();
                 }
                 $this->result .= "<?php ";
-                if ($this->codeStatus[0] === 'echo') {
-                    $this->result .= "echo {$this->codeStatus[1]}";
-                } elseif ($this->codeStatus[0] === 'echo-default') {
-                    $variable = $this->codeStatus[1];
-                    $default = $this->codeBuffer;
-                    $this->result .= "echo isset({$variable}) ? {$variable} : {$default}";
+                switch ($this->codeStatus[0]) {
+                    case 'echo' :
+                        $this->result .= "echo {$this->codeStatus[1]}";
+                        break;
+                    case 'echo-default' :
+                        $variable = $this->codeStatus[1];
+                        $default = $this->codeBuffer;
+                        $this->result .= "echo isset({$variable}) ? {$variable} :{$default}";
+                        break;
+                    case 'if' :
+                        $default = $this->codeBuffer;
+                        $this->result .= "if{$default}:";
+                        break;
+                    case 'elseif' :
+                        $default = $this->codeBuffer;
+                        $this->result .= "elseif{$default}:";
+                        break;
+                    case 'else' :
+                        $this->result .= "else :";
+                        break;
+                    case 'endif' :
+                        $this->result .= "endif";
+                        break;
                 }
                 $this->result .= " ?>";
 
@@ -57,8 +74,20 @@ class Parser
             '\$[a-zA-Z_][a-zA-Z0-9_]*' => function ($word) {
                 if (!$this->isOpenBracket) {
                     $this->textBuffer .= $word;
+                } elseif ($this->isAllowedCode) {
+                    $this->codeBuffer .= $word;
                 } else {
                     $this->codeStatus = ['echo', $word];
+                }
+            },
+            '[a-zA-Z_][a-zA-Z0-9_]*' => function ($word) {
+                if (!$this->isOpenBracket) {
+                    $this->textBuffer .= $word;
+                } elseif ($this->isAllowedCode) {
+                    $this->codeBuffer .= $word;
+                } else {
+                    $this->codeStatus = [$word];
+                    $this->isAllowedCode = true;
                 }
             },
             '\?\?' => function ($word) {
@@ -76,17 +105,17 @@ class Parser
             '[\s\n]' => function ($word) {
                 if (!$this->isOpenBracket) {
                     $this->textBuffer .= $word;
+                } elseif ($this->isAllowedCode) {
+                    $this->codeBuffer .= $word;
                 }
             },
             '.' => function ($word) {
                 if (!$this->isOpenBracket) {
                     $this->textBuffer .= $word;
+                } elseif ($this->isAllowedCode) {
+                    $this->codeBuffer .= $word;
                 } else {
-                    if (!$this->isAllowedCode) {
-                        throw new SyntaxException($word);
-                    } else {
-                        $this->codeBuffer .= $word;
-                    }
+                    throw new SyntaxException($word);
                 }
             },
         ]);
