@@ -21,7 +21,7 @@ class LexicalAnalyzer
         $idx = 0;
         foreach ($tokens as $token => $handler) {
             $tokensToJoin[] = $token;
-            if ($handler instanceof Closure) {
+            if (is_callable($handler)) {
                 $this->tokenMap[$idx] = $handler;
             } else {
                 $this->tokenMap[$idx] = null;
