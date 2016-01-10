@@ -3,8 +3,9 @@ namespace Wandu\DI;
 
 use ArrayAccess;
 use Closure;
+use Interop\Container\ContainerInterface as InteropContainerInterface;
 
-interface ContainerInterface extends ArrayAccess
+interface ContainerInterface extends ArrayAccess, InteropContainerInterface
 {
     /**
      * @param string $name

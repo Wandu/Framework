@@ -9,9 +9,13 @@
             "email": "im@wani.kr"
         }
     ],
+    "provide": {
+        "container-interop/container-interop-implementation": "^1.1"
+    },
     "require": {
         "php": ">=5.6.0",
-        "wandu/reflection": "^0.0.1"
+        "wandu/reflection": "^0.0.1",
+        "container-interop/container-interop": "^1.1"
     },
     "require-dev": {
         "phpunit/phpunit": "4.5.*",

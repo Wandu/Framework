@@ -1,7 +1,9 @@
 <?php
 namespace Wandu\DI\Exception;
 
-class NullReferenceException extends DIException
+use Interop\Container\Exception\NotFoundException;
+
+class NullReferenceException extends DIException implements NotFoundException
 {
     /**
      * @param string $class
