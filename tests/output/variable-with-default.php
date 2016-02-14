@@ -1,1 +1,1 @@
-Hello, <?php echo isset($target) ? $target : "World"  ?>!
+Hello, <?php echo isset($target) ? $target : "World" ?>!

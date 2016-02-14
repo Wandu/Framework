@@ -17,9 +17,8 @@ class ParserTest extends PHPUnit_Framework_TestCase
     public function provider()
     {
         return [
-            ['variable-as-variable.php'],
-            ['variable-with-default.php'],
-            ['condition.php'],
+            ['variable-as-variable'],
+            ['variable-with-default'],
         ];
     }
 
@@ -29,8 +28,8 @@ class ParserTest extends PHPUnit_Framework_TestCase
      */
     public function testParse($fileName)
     {
-        $input = trim(file_get_contents(__DIR__ . "/input/{$fileName}"));
-        $output = trim(file_get_contents(__DIR__ . "/output/{$fileName}"));
+        $input = trim(file_get_contents(__DIR__ . "/input/{$fileName}.tempy"));
+        $output = trim(file_get_contents(__DIR__ . "/output/{$fileName}.php"));
 
         $this->assertEquals($output, $this->parser->parse($input));
     }
