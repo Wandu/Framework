@@ -21,8 +21,26 @@ class Parser
     {
         $this->lexer = new LexicalAnalyzer([
             '\$[a-zA-Z_][a-zA-Z0-9_]*' => function ($word) {
-                $this->buffer .= $word;
+                if ($this->buffer) {
+                    $this->arguments[] = $this->buffer;
+                    $this->buffer = '';
+                }
+                $this->arguments[] = $word;
                 $this->status = 'echo';
+            },
+            '\[a-zA-Z_][a-zA-Z0-9_]*\(' => function ($word) {
+                if ($this->buffer) {
+                    $this->arguments[] = $this->buffer;
+                    $this->buffer = '';
+                }
+                $this->arguments[] = $word;
+            },
+            '\)' => function ($word) {
+                if ($this->buffer) {
+                    $this->arguments[] = $this->buffer;
+                    $this->buffer = '';
+                }
+                $this->arguments[] = $word;
             },
             '\?\?' => function () {
                 if ($this->buffer) {
