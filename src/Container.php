@@ -111,7 +111,7 @@ class Container implements ContainerInterface
     {
         if (!isset($this->keys[$name])) {
             if (class_exists($name)) {
-                return $this->create($name);
+                $this->bind($name);
             } else {
                 throw new NullReferenceException($name);
             }
