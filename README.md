@@ -16,7 +16,7 @@ PHP Base Compiler.
 
 ## Lexical Analyer
 
-** Example. **
+**Example.**
 
 ```php
 $lexer = new \Wandu\Compiler\LexicalAnalyzer([
@@ -46,7 +46,7 @@ $lexer->analyze('10 + 20 = 0')); // ['t_number', 't_add', 't_number', 't_equal',
 
 ## Syntax Analyzer (Todo)
 
-** Example. **
+**Example.**
 
 ```php
 $syntaxer = new SyntaxAnalyzer(new LexicalAnalyzer([
