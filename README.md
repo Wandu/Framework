@@ -17,7 +17,7 @@ PHP Base Compiler.
 ## Examples
 
 ```php
-$lexer = new LexicalAnalyzer([
+$lexer = new \Wandu\Compiler\LexicalAnalyzer([
     '\\+' => function () {
         return 't_add';
     },
