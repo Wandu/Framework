@@ -59,15 +59,10 @@ class ExtendTest extends TestCase
         $this->assertSame($renderer, $this->container['xml.other.alias']);
     }
 
-    public function testExtendFail()
+    public function testExtendUnknown()
     {
-        try {
-            $this->container->extend('unknown', function ($item) {
-                return $item .' extended..';
-            });
-            $this->fail();
-        } catch (NullReferenceException $e) {
-            $this->assertEquals('unknown', $e->getClass());
-        }
+        $this->container->extend('unknown', function ($item) {
+            return $item .' extended..';
+        });
     }
 }

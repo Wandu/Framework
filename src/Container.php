@@ -33,6 +33,9 @@ class Container implements ContainerInterface
     /** @var array ref. Pimple */
     protected $frozen = [];
 
+    /** @var array */
+    protected $extenders = [];
+
     /** @var \Wandu\DI\ServiceProviderInterface[] */
     protected $providers = [];
 
@@ -107,12 +110,18 @@ class Container implements ContainerInterface
     public function get($name)
     {
         if (!isset($this->keys[$name])) {
-            throw new NullReferenceException($name);
+            if (class_exists($name)) {
+                return $this->create($name);
+            } else {
+                throw new NullReferenceException($name);
+            }
         }
         $this->freeze($name);
+        // alias
         if ('alias' === $key = $this->keys[$name]) {
             return $this->get($this->aliases[$name]);
         }
+
         if (!isset($this->instances[$name])) {
             switch ($key) {
                 case 'closure':
@@ -127,7 +136,13 @@ class Container implements ContainerInterface
                     break;
             }
         }
-        return $this->instances[$name];
+        $instance = $this->instances[$name];
+        if (isset($this->extenders[$name])) {
+            foreach ($this->extenders[$name] as $extender) {
+                $instance = $extender($instance);
+            }
+        }
+        return $instance;
     }
 
     /**
@@ -192,22 +207,14 @@ class Container implements ContainerInterface
      */
     public function extend($name, Closure $handler)
     {
-        if (!isset($this->keys[$name])) {
-            throw new NullReferenceException($name);
-        }
         if (isset($this->aliases[$name])) {
             $this->extend($this->aliases[$name], $handler);
             return $this;
         }
-        if (isset($this->instances[$name])) {
-            $this->instances[$name] = call_user_func($handler, $this->instances[$name]);
+        if (!isset($this->extenders[$name])) {
+            $this->extenders[$name] = [];
         }
-        if (isset($this->closures[$name])) {
-            $closure = $this->closures[$name];
-            $this->closures[$name] = function () use ($closure, $handler) {
-                return call_user_func($handler, call_user_func($closure, $this));
-            };
-        }
+        $this->extenders[$name][] = $handler;
         return $this;
     }
 

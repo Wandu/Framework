@@ -80,6 +80,12 @@ class ContainerTest extends TestCase
         $this->assertSame($foo, $this->container['otheralias']);
     }
 
+    public function testGet()
+    {
+        $controller = $this->container->get(JsonRenderer::class);
+        $this->assertInstanceOf(JsonRenderer::class, $controller);
+    }
+
     public function testGetFail()
     {
         try {
