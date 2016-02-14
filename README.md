@@ -14,7 +14,9 @@ PHP Base Compiler.
 
 템플릿 엔진을 만들다가, 이런거 하나 만들어두면 언젠가 자체 스크립트 만들때 두고두고 써먹을 수 있겠다라는 생각이 들었습니다.
 
-## Examples
+## Lexical Analyer
+
+** Example. **
 
 ```php
 $lexer = new \Wandu\Compiler\LexicalAnalyzer([
@@ -40,6 +42,58 @@ $lexer = new \Wandu\Compiler\LexicalAnalyzer([
 ]);
 
 $lexer->analyze('10 + 20 = 0')); // ['t_number', 't_add', 't_number', 't_equal', 't_number',]
+```
+
+## Syntax Analyzer (Todo)
+
+** Example. **
+
+```php
+$syntaxer = new SyntaxAnalyzer(new LexicalAnalyzer([
+    '\\+' => function () {
+        return 'T_ADD';
+    },
+    '\\-' => function () {
+        return 'T_MINUS';
+    },
+    '\\*' => function () {
+        return 'T_MULTI';
+    },
+    '\\/' => function () {
+        return 'T_DIV';
+    },
+    '\\=' => function () {
+        return 'T_EQUAL';
+    },
+    '[1-9][0-9]*|0([0-7]+|(x|X)[0-9A-Fa-f]*)?' => function ($word) {
+        return new Token("T_NUMBER", $word);
+    },
+    '\s' => null,
+]));
+
+$syntaxer->addToken(['T_ADD', 'T_MINUS', 'T_MULTI', 'T_DIV', 'T_EQUAL']);
+
+$syntaxer->setRootSyntax('root');
+$syntaxer->addSyntax('root', ['formula'], function ($x) {
+    return $x;
+});
+$syntaxer->addSyntax('formula', ['T_NUMBER', 'T_MINUS', 'T_NUMBER'], function ($x, $_, $y) {
+    return $x - $y;
+});
+$syntaxer->addSyntax('formula', ['T_NUMBER', 'T_MINUS', 'T_NUMBER'], function ($x, $_, $y) {
+    return $x - $y;
+});
+$syntaxer->addSyntax('formula', ['T_NUMBER', 'T_ADD', 'T_NUMBER'], function ($x, $_, $y) {
+    return $x + $y;
+});
+$syntaxer->addSyntax('formula', ['T_NUMBER', 'T_MULTI', 'T_NUMBER'], function ($x, $_, $y) {
+    return $x * $y;
+});
+$syntaxer->addSyntax('formula', ['T_NUMBER', 'T_DIV', 'T_NUMBER'], function ($x, $_, $y) {
+    return $x / $y;
+});
+
+$syntaxer->analyze('10 + 20'); // 30
 ```
 
 ## References
