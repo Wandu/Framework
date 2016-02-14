@@ -163,9 +163,6 @@ class Container implements ContainerInterface
         $this->destroy($name);
         $this->keys[$name] = 'bind';
         $this->bind[$name] = $class;
-        if ($name !== $class) {
-            $this->alias($class, $name);
-        }
         return $this;
     }
 
@@ -340,7 +337,9 @@ class Container implements ContainerInterface
      */
     protected function hasAutowiredFromDocComment($comment)
     {
-        return strpos($comment, '@Autowired') !== false || strpos($comment, '@autowired') !== false;
+        return strpos($comment, '@autowired') !== false ||
+            strpos($comment, '@Autowired') !== false ||
+            strpos($comment, '@AUTOWIRED') !== false;
     }
 
     /**
