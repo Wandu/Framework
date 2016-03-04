@@ -1,48 +1,32 @@
 <?php
 namespace Wandu\Caster;
 
-class Caster
+class Caster implements CasterInterface
 {
-    /** @var mixed */
-    protected $value;
-
     /** @var array */
     protected $boolFalse = [
         '0', 'false', 'False', 'FALSE', 'n', 'N', 'no', 'No', 'NO', 'off', 'Off', 'OFF'
     ];
 
     /**
-     * @param mixed $value
+     * {@inheritdoc}
      */
-    public function __construct($value)
+    public function cast($value, $type)
     {
-        $this->value = $value;
-    }
-
-    /**
-     * @param string $type
-     * @return mixed
-     */
-    public function cast($type = null)
-    {
-        if (!isset($type)) {
-            return $this->value;
-        }
-        $value = $this->value;
-        if (($p = strpos($type, '[]')) !== false || $type === 'array') {
-            if (!is_array($value)) {
-                if (strpos($value, ',') !== false) {
-                    $value = explode(',', $value);
-                } else {
-                    $value = [$value];
-                }
+        if (is_array($type)) {
+            $value = $this->castToArray($value);
+            foreach ($type as $key => $value) {
             }
+            return $value;
+        }
+        if (($p = strpos($type, '[]')) !== false || $type === 'array') {
+            $value = $this->castToArray($value);
             if ($type === 'array') {
                 return $value;
             }
             $typeInArray = substr($type, 0, $p);
             return array_map(function ($item) use ($typeInArray) {
-                return (new static($item))->cast($typeInArray);
+                return $this->cast($item, $typeInArray);
             }, $value);
         }
         switch ($type) {
@@ -62,7 +46,23 @@ class Caster
                 }
                 break;
         }
+
         settype($value, $type);
         return $value;
+    }
+
+    /**
+     * @param mixed $value
+     * @return array
+     */
+    private function castToArray($value)
+    {
+        if (is_array($value)) {
+            return $value;
+        }
+        if (strpos($value, ',') !== false) {
+            return explode(',', $value);
+        }
+        return [$value];
     }
 }
