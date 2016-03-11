@@ -6,25 +6,21 @@ trait CastProviderTrait
     public function castingProvider()
     {
         return [
-            [['10', '20', '30'], [], ['10', '20', '30']],
-            ['10,20,30', [], ['10', '20', '30']],
+            ['No', 'unknown', new UnsupportTypeException('unknown')],
 
             [['10', '20', '30'], 'int[]', [10, 20, 30]],
             [['10', '20', '30'], 'integer[]', [10, 20, 30]],
             [['10', '20', '30'], 'string[]', ['10', '20', '30']],
-            [['10', '20', '30'], 'array', ['10', '20', '30']],
             [['10', '20', '30'], 'string', '10,20,30'],
 
             ['10,20,30', 'int[]', [10, 20, 30]],
             ['10,20,30', 'integer[]', [10, 20, 30]],
             ['10,20,30', 'string[]', ['10', '20', '30']],
-            ['10,20,30', 'array', ['10', '20', '30']],
             ['10,20,30', 'string', '10,20,30'],
 
             ['10', 'int[]', [10]],
             ['10', 'integer[]', [10]],
             ['10', 'string[]', ['10']],
-            ['10', 'array', ['10']],
             ['10', 'string', '10'],
 
             ['10', 'int', 10],
@@ -40,6 +36,30 @@ trait CastProviderTrait
             ['Off', 'boolean', false],
             ['FALSE', 'boolean', false],
             ['No', 'boolean', false],
+
+            [null, 'string', ''],
+            [null, 'int', 0],
+            [null, 'number', 0.0],
+            [null, 'float', 0.0],
+            [null, 'double', 0.0],
+            [null, 'bool', false],
+            [null, 'boolean', false],
+
+            [null, 'string?', null],
+            [null, 'int?', null],
+            [null, 'number?', null],
+            [null, 'float?', null],
+            [null, 'double?', null],
+            [null, 'bool?', null],
+            [null, 'boolean?', null],
+
+//            [null, 'string[]?', null],
+//            [null, 'int[]?', null],
+//            [null, 'number[]?', null],
+//            [null, 'float[]?', null],
+//            [null, 'double[]?', null],
+//            [null, 'bool[]?', null],
+//            [null, 'boolean[]?', null],
         ];
     }
 }

@@ -4,6 +4,11 @@ namespace Wandu\Caster;
 class Caster implements CasterInterface
 {
     /** @var array */
+    protected static $supportCasts = [
+        'string', 'int', 'integer', 'num', 'number', 'float', 'double', 'bool', 'boolean'
+    ];
+
+    /** @var array */
     protected $boolFalse = [
         '0', 'false', 'False', 'FALSE', 'n', 'N', 'no', 'No', 'NO', 'off', 'Off', 'OFF'
     ];
@@ -13,49 +18,27 @@ class Caster implements CasterInterface
      */
     public function cast($value, $type)
     {
-        if (is_array($type)) {
-            $value = $this->castToArray($value);
-            foreach ($type as $key => $value) {
-            }
-            return $value;
-        }
-        if (($p = strpos($type, '[]')) !== false || $type === 'array') {
-            $value = $this->castToArray($value);
-            if ($type === 'array') {
-                return $value;
-            }
-            $typeInArray = substr($type, 0, $p);
-            return array_map(function ($item) use ($typeInArray) {
-                return $this->cast($item, $typeInArray);
+        if (($p = strpos($type, '[]')) !== false) {
+            $value = $this->normalizeArray($value);
+            $type = substr($type, 0, $p);
+            return array_map(function ($item) use ($type) {
+                return $this->cast($item, $type);
             }, $value);
         }
-        switch ($type) {
-            case 'string':
-                if (is_array($value)) {
-                    return implode(',', $value);
-                }
-                break;
-            case "num":
-            case "number":
-                $type = 'float';
-                break;
-            case "bool":
-            case "boolean":
-                if (in_array($value, $this->boolFalse)) {
-                    $value = false;
-                }
-                break;
+        if (strpos($type, '?') !== false) {
+            if ($value === null) {
+                return null;
+            }
+            $type = str_replace($type, '?', '');
         }
-
-        settype($value, $type);
-        return $value;
+        return $this->castPlainType($type, $value);
     }
 
     /**
      * @param mixed $value
      * @return array
      */
-    private function castToArray($value)
+    private function normalizeArray($value)
     {
         if (is_array($value)) {
             return $value;
@@ -64,5 +47,51 @@ class Caster implements CasterInterface
             return explode(',', $value);
         }
         return [$value];
+    }
+
+    private function castPlainType($type, $value)
+    {
+        if ($value === null) {
+            switch ($type) {
+                case 'string':
+                    return '';
+                case 'int':
+                case 'integer':
+                    return 0;
+                case 'num':
+                case 'number':
+                case 'float':
+                case 'double':
+                    return (float) 0;
+                case 'bool':
+                case 'boolean':
+                    return false;
+            }
+        }
+
+        if (is_array($value)) {
+            $value = implode(',', $value);
+        }
+
+        switch ($type) {
+            case 'string':
+                return (string) $value;
+            case 'int':
+            case 'integer':
+                return (int) $value;
+            case 'num':
+            case 'number':
+            case 'float':
+            case 'double':
+                return (double) $value;
+            case 'bool':
+            case 'boolean':
+                if (in_array($value, $this->boolFalse)) {
+                    return false;
+                }
+                return (bool) $value;
+        }
+
+        throw new UnsupportTypeException($type);
     }
 }
