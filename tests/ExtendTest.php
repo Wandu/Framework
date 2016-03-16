@@ -42,7 +42,7 @@ class ExtendTest extends TestCase
 
     public function testAliasExtend()
     {
-        $this->container = new Container(new ArrayObject());
+        $this->container = new Container();
         $this->container->instance('xml', $renderer = new XmlRenderer);
 
         $this->container->alias('xml.alias', 'xml');

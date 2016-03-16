@@ -84,7 +84,7 @@ class Container implements ContainerInterface
      */
     public function has($name)
     {
-        return isset($this->keys[$name]);
+        return isset($this->keys[$name]) || class_exists($name);
     }
 
     /**
