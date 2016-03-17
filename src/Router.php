@@ -57,10 +57,20 @@ class Router
     }
 
     /**
-     * @param array $middlewares
+     * @deprecated use middleware
+     * @param array|string $middlewares
      * @param \Closure $handler
      */
     public function middlewares($middlewares, Closure $handler)
+    {
+        $this->middleware($middlewares, $handler);
+    }
+
+    /**
+     * @param array|string $middlewares
+     * @param \Closure $handler
+     */
+    public function middleware($middlewares, Closure $handler)
     {
         if (!is_array($middlewares)) {
             $middlewares = [$middlewares];
@@ -84,6 +94,9 @@ class Router
             $this->prefix = $beforePrefix . $attributes['prefix'] ?: '/';
         }
         if (isset($attributes['middleware'])) {
+            if (!is_array($attributes['middleware'])) {
+                $attributes['middleware'] = [$attributes['middleware']];
+            }
             $this->middlewares = array_merge($beforeMiddlewares, $attributes['middleware']);
         }
 
@@ -98,12 +111,15 @@ class Router
      * @param string $path
      * @param string $className
      * @param string $methodName
-     * @param array $middlewares
+     * @param array|string $middlewares
      * @return \Wandu\Router\Route
      */
     public function createRoute(array $methods, $path, $className, $methodName = 'index', array $middlewares = [])
     {
         $path = '/' . trim($this->prefix . $path, '/');
+        if (!is_array($middlewares)) {
+            $middlewares = [$middlewares];
+        }
         $middlewares = array_merge($this->middlewares, $middlewares);
 
         $handler = implode(',', $methods) . $path;
