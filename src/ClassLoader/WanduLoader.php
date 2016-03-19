@@ -37,11 +37,18 @@ class WanduLoader implements ClassLoaderInterface
      */
     public function call(ServerRequestInterface $request, $object, $methodName)
     {
-        if (!method_exists($object, $methodName)) {
+        if (!method_exists($object, $methodName) && !method_exists($object, '__call')) {
             throw new HandlerNotFoundException(get_class($object), $methodName);
         }
-        return $this->container->call([$object, $methodName], [
-            ServerRequestInterface::class => $request,
+        if (method_exists($object, $methodName)) {
+            return $this->container->call([$object, $methodName], [
+                ServerRequestInterface::class => $request,
+            ]);
+        }
+        return $this->container->call([$object, '__call'], [
+            $methodName, [
+                ServerRequestInterface::class => $request
+            ],
         ]);
     }
 }
