@@ -26,9 +26,9 @@ class RequestFactory
         return new Request(
             $method,
             $this->makeUriObjectWithPsrHeaders($uri, $headers),
-            '1.1',
+            isset($stream) ? $stream : new Stream('php://memory'),
             $headers,
-            isset($stream) ? $stream : new Stream('php://memory')
+            '1.1'
         );
     }
 
@@ -57,9 +57,9 @@ class RequestFactory
         return new Request(
             $method,
             $this->makeUriObjectWithPsrHeaders($uri, $headers),
-            explode('/', $serverProtocol)[1],
+            isset($stream) ? $stream : new Stream('php://memory'),
             $headers,
-            isset($stream) ? $stream : new Stream('php://memory')
+            explode('/', $serverProtocol)[1]
         );
     }
 }

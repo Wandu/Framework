@@ -3,7 +3,6 @@ namespace Wandu\Http\Psr;
 
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\StreamInterface;
-use Psr\Http\Message\UriInterface;
 use Wandu\Http\Traits\RequestTrait;
 
 class Request extends Message implements RequestInterface
@@ -12,20 +11,20 @@ class Request extends Message implements RequestInterface
 
     /**
      * @param string $method
-     * @param \Psr\Http\Message\UriInterface $uri
-     * @param string $protocolVersion
-     * @param array $headers
+     * @param \Psr\Http\Message\UriInterface|string $uri
      * @param \Psr\Http\Message\StreamInterface $body
+     * @param array $headers
+     * @param string $protocolVersion
      */
     public function __construct(
         $method = null,
-        UriInterface $uri = null,
-        $protocolVersion = '1.1',
+        $uri = null,
+        StreamInterface $body = null,
         array $headers = [],
-        StreamInterface $body = null
+        $protocolVersion = '1.1'
     ) {
         $this->method = $this->filterMethod($method);
-        $this->uri = $uri;
+        $this->uri = is_string($uri) ? new Uri($uri) : $uri;
         parent::__construct($body, $headers, $protocolVersion);
     }
 }

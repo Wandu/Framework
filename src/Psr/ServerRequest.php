@@ -45,6 +45,6 @@ class ServerRequest extends Request implements ServerRequestInterface
         $this->parsedBody = $parsedBody;
         $this->attributes = $attributes;
 
-        parent::__construct($method, $uri, $protocolVersion, $headers, $body);
+        parent::__construct($method, $uri, $body, $headers, $protocolVersion);
     }
 }
