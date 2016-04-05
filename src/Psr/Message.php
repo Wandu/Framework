@@ -12,15 +12,15 @@ class Message implements MessageInterface
     /**
      * @param string $protocolVersion
      * @param array $headers
-     * @param \Psr\Http\Message\StreamInterface|null $body
+     * @param \Psr\Http\Message\StreamInterface $body
      */
-    public function __construct($protocolVersion = '1.1', array $headers = [], StreamInterface $body = null)
+    public function __construct(StreamInterface $body = null, array $headers = [], $protocolVersion = '1.1')
     {
-        $this->protocolVersion = $protocolVersion;
+        $this->body = $body;
         foreach ($headers as $name => $header) {
             $this->headerNames[strtolower($name)] = $name;
             $this->headers[$name] = $header;
         }
-        $this->body = $body;
+        $this->protocolVersion = $protocolVersion;
     }
 }

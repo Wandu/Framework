@@ -28,6 +28,6 @@ class Response extends Message implements ResponseInterface
         $this->statusCode = $statusCode;
         $this->reasonPhrase = $this->filterReasonPhrase($statusCode, $reasonPhrase);
 
-        parent::__construct($protocolVersion, $headers, $body);
+        parent::__construct($body, $headers, $protocolVersion);
     }
 }

@@ -26,6 +26,6 @@ class Request extends Message implements RequestInterface
     ) {
         $this->method = $this->filterMethod($method);
         $this->uri = $uri;
-        parent::__construct($protocolVersion, $headers, $body);
+        parent::__construct($body, $headers, $protocolVersion);
     }
 }
