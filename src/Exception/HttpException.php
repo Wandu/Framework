@@ -54,10 +54,10 @@ class HttpException extends Exception implements ResponseInterface
     {
         return new Response(
             $this->getStatusCode(),
-            $this->getReasonPhrase(),
-            $this->getProtocolVersion(),
+            $this->getBody(),
             $this->getHeaders(),
-            $this->getBody()
+            $this->getReasonPhrase(),
+            $this->getProtocolVersion()
         );
     }
 

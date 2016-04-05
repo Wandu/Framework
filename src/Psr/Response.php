@@ -11,17 +11,17 @@ class Response extends Message implements ResponseInterface
 
     /**
      * @param int $statusCode
+     * @param \Psr\Http\Message\StreamInterface $body
+     * @param array $headers
      * @param string $reasonPhrase
      * @param string $protocolVersion
-     * @param array $headers
-     * @param \Psr\Http\Message\StreamInterface $body
      */
     public function __construct(
         $statusCode = 200,
-        $reasonPhrase = '',
-        $protocolVersion = '1.1',
+        StreamInterface $body = null,
         array $headers = [],
-        StreamInterface $body = null
+        $reasonPhrase = '',
+        $protocolVersion = '1.1'
     ) {
         $this->validStatusCode($statusCode);
 

@@ -19,10 +19,10 @@ class ResponseFactory
     {
         return new Response(
             $status,
-            '',
-            '1.1',
+            isset($content) ? new StringStream($content) : null,
             $headers,
-            isset($content) ? new StringStream($content) : null
+            '',
+            '1.1'
         );
     }
 
@@ -99,10 +99,10 @@ class ResponseFactory
     {
         return new Response(
             $status,
-            '',
-            '1.1',
+            new GeneratorStream($generator),
             $headers,
-            new GeneratorStream($generator)
+            '',
+            '1.1'
         );
     }
 }
