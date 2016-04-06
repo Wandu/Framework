@@ -100,9 +100,9 @@ class ServerRequestFactory
             [],
             isset($server['REQUEST_METHOD']) ? $server['REQUEST_METHOD'] : 'GET',
             $this->getUri($server),
-            '1.1',
+            $stream,
             $headers,
-            $stream
+            '1.1'
         );
     }
 

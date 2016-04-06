@@ -74,13 +74,14 @@ class ServerRequestTest extends PHPUnit_Framework_TestCase
             ['status' => 'join'],
             'GET',
             $mockUri,
-            '2.0',
+            null,
             [
                 'host' => ['localhost:8002'],
                 'connection' => ['keep-alive'],
                 'user-agent' => ['Mozilla/5.0'],
                 'cookie' => ['PHPSESSID=32eo4tk9dcaacb2f3hqg0s6s54'],
-            ]
+            ],
+            '2.0'
         );
         $this->assertEquals(['PHPSESSID' => '32eo4tk9dcaacb2f3hqg0s6s54'], $request->getCookieParams());
         $this->assertEquals(['page' => 1, 'order' => false], $request->getQueryParams());
