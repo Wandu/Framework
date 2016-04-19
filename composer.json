@@ -29,5 +29,10 @@
         "psr-4": {
             "Wandu\\": "src/Wandu/"
         }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Wandu\\": "tests/Wandu/"
+        }
     }
 }
