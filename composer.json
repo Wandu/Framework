@@ -14,6 +14,7 @@
         "wandu/http": "self.version",
         "wandu/router": "self.version"
     },
+    "bin": ["bin/wandu"],
     "require": {
         "php": ">=7.0.0",
         "psr/http-message": "^1",
