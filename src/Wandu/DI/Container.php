@@ -2,6 +2,7 @@
 namespace Wandu\DI;
 
 use Closure;
+use Interop\Container\ContainerInterface as InteropContainerInterface;
 use ReflectionClass;
 use ReflectionFunctionAbstract;
 use ReflectionObject;
@@ -41,9 +42,13 @@ class Container implements ContainerInterface
 
     public function __construct()
     {
-        $this->instance(ContainerInterface::class, $this)
+        $this->instance(Container::class, $this)->freeze(Container::class);
+
+        $this->alias(ContainerInterface::class, Container::class)
             ->freeze(ContainerInterface::class);
-        $this->alias('container', ContainerInterface::class)
+        $this->alias(InteropContainerInterface::class, Container::class)
+            ->freeze(InteropContainerInterface::class);
+        $this->alias('container', Container::class)
             ->freeze('container');
     }
 
