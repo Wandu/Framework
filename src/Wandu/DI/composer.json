@@ -3,12 +3,6 @@
     "description": "Dependency Injection Container. Support Auto-Resolve and Auto-Wiring.",
     "keywords": ["di", "ioc", "auto resolve", "auto wiring", "dependency injection", "wandu"],
     "license": "MIT",
-    "authors": [
-        {
-            "name": "Changwan Jun",
-            "email": "im@wani.kr"
-        }
-    ],
     "provide": {
         "container-interop/container-interop-implementation": "^1.1"
     },
@@ -17,18 +11,9 @@
         "wandu/reflection": "^0.0.1",
         "container-interop/container-interop": "^1.1"
     },
-    "require-dev": {
-        "phpunit/phpunit": "4.5.*",
-        "mockery/mockery": "0.9.*"
-    },
     "autoload": {
         "psr-4": {
-            "Wandu\\DI\\": "src/"
-        }
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "Wandu\\DI\\": "tests/"
+            "Wandu\\DI\\": ""
         }
     },
     "extra": {
