@@ -6,10 +6,6 @@ Wandu Router
 [![Total Downloads](https://poser.pugx.org/wandu/router/downloads.svg)](https://packagist.org/packages/wandu/router)
 [![License](https://poser.pugx.org/wandu/router/license.svg)](https://packagist.org/packages/wandu/router)
 
-[![Build Status](https://img.shields.io/travis/Wandu/Router/master.svg)](https://travis-ci.org/Wandu/Router)
-[![Code Coverage](https://scrutinizer-ci.com/g/Wandu/Router/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/Wandu/Router/?branch=master)
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/Wandu/Router/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/Wandu/Router/?branch=master)
-
 FastRouter with PSR-7 Wrapper Library.
 
 ## Basic Usage
