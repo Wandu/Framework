@@ -1,5 +1,5 @@
 <?php
-namespace Wandu\Wuild\Console;
+namespace Wandu\Console;
 
 use Symfony\Component\Console\Output\OutputInterface;
 

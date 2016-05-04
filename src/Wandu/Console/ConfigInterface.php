@@ -10,5 +10,8 @@ interface ConfigInterface
      */
     public function register(ContainerInterface $app);
 
+    /**
+     * @param \Wandu\Console\Dispatcher $dispatcher
+     */
     public function commands(Dispatcher $dispatcher);
 }

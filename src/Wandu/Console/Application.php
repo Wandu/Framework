@@ -1,7 +1,6 @@
 <?php
 namespace Wandu\Console;
 
-use Wandu\Console\Output\StdOutput;
 use Wandu\DI\Container;
 use Symfony\Component\Console\Application as SymfonyApplication;
 
