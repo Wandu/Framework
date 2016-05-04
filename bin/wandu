@@ -1,6 +1,10 @@
 #!/usr/bin/env php
 <?php
-use Wandu\Console\Application;
+use Wandu\Console\ConfigInterface;
+use Wandu\Console\Dispatcher;
+use Wandu\Console\Kernel;
+use Wandu\DI\ContainerInterface;
+use Wandu\Foundation\Application;
 
 if (is_file(__DIR__ . '/../vendor/autoload.php')) {
     require_once __DIR__ . '/../vendor/autoload.php';
@@ -10,5 +14,16 @@ if (is_file(__DIR__ . '/../vendor/autoload.php')) {
     require_once __DIR__ . '/../autoload.php';
 }
 
-$app = new Application(require getcwd() . '/.wandu.php');
-$app->execute();
+$configFile = getcwd() . '/.wandu.php';
+if (file_exists($configFile)) {
+    $config = require $configFile;
+} else {
+    $config = new class implements ConfigInterface {
+        public function register(ContainerInterface $app) {}
+        public function commands(Dispatcher $dispatcher) {}
+    };
+}
+
+$app = new Application(new Kernel($config));
+$app->boot();
+exit($app->execute());

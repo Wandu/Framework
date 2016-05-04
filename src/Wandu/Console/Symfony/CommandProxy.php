@@ -16,6 +16,6 @@ class CommandProxy extends SymfonyCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $this->command->withIO($input, $output)->execute();
+        return $this->command->withIO($input, $output)->execute();
     }
 }

@@ -14,11 +14,16 @@ return new class implements ConfigInterface
     {
     }
 
+    /**
+     * @param \Wandu\Router\Router $router
+     */
     public function routes(Router $router)
     {
-        // TODO: Implement routes() method.
     }
 
+    /**
+     * @param \Wandu\Console\Dispatcher $dispatcher
+     */
     public function commands(Dispatcher $dispatcher)
     {
         $dispatcher->command('hello', HelloWorld::class);
