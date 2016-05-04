@@ -10,9 +10,14 @@ class ShortRouteMethods extends TestCase
 {
     public function testGet()
     {
-        $dispatcher = (new Dispatcher(new DefaultLoader()))->withRouter(function (Router $router) {
-            $router->get('/', HomeController::class, 'index');
-        });
+        $dispatcher = (new Dispatcher(new DefaultLoader()))->withRoutes(
+            new class implements RoutesInterface
+            {
+                public function routes(Router $router) {
+                    $router->get('/', HomeController::class, 'index');
+                }
+            }
+        );
 
         // success
         foreach (['GET', 'HEAD'] as $method) {
@@ -34,9 +39,15 @@ class ShortRouteMethods extends TestCase
 
     public function testPost()
     {
-        $dispatcher = (new Dispatcher(new DefaultLoader()))->withRouter(function (Router $router) {
-            $router->post('/', HomeController::class, 'index');
-        });
+        $dispatcher = (new Dispatcher(new DefaultLoader()))->withRoutes(
+            new class implements RoutesInterface
+            {
+                public function routes(Router $router)
+                {
+                    $router->post('/', HomeController::class, 'index');
+                }
+            }
+        );
 
         // success
         foreach (['POST'] as $method) {
@@ -58,9 +69,15 @@ class ShortRouteMethods extends TestCase
 
     public function testPut()
     {
-        $dispatcher = (new Dispatcher(new DefaultLoader()))->withRouter(function (Router $router) {
-            $router->put('/', HomeController::class, 'index');
-        });
+        $dispatcher = (new Dispatcher(new DefaultLoader()))->withRoutes(
+            new class implements RoutesInterface
+            {
+                public function routes(Router $router)
+                {
+                    $router->put('/', HomeController::class, 'index');
+                }
+            }
+        );
 
         // success
         foreach (['PUT'] as $method) {
@@ -82,9 +99,16 @@ class ShortRouteMethods extends TestCase
 
     public function testDelete()
     {
-        $dispatcher = (new Dispatcher(new DefaultLoader()))->withRouter(function (Router $router) {
-            $router->delete('/', HomeController::class, 'index');
-        });
+        $dispatcher = (new Dispatcher(new DefaultLoader()))->withRoutes(
+            new class implements RoutesInterface
+            {
+                public function routes(Router $router)
+                {
+
+                    $router->delete('/', HomeController::class, 'index');
+                }
+            }
+        );
 
         // success
         foreach (['DELETE'] as $method) {
@@ -106,9 +130,15 @@ class ShortRouteMethods extends TestCase
 
     public function testOptions()
     {
-        $dispatcher = (new Dispatcher(new DefaultLoader()))->withRouter(function (Router $router) {
-            $router->options('/', HomeController::class, 'index');
-        });
+        $dispatcher = (new Dispatcher(new DefaultLoader()))->withRoutes(
+            new class implements RoutesInterface
+            {
+                public function routes(Router $router)
+                {
+                    $router->options('/', HomeController::class, 'index');
+                }
+            }
+        );
 
         // success
         foreach (['OPTIONS'] as $method) {
@@ -130,9 +160,14 @@ class ShortRouteMethods extends TestCase
 
     public function testPatch()
     {
-        $dispatcher = (new Dispatcher(new DefaultLoader()))->withRouter(function (Router $router) {
-            $router->patch('/', HomeController::class, 'index');
-        });
+        $dispatcher = (new Dispatcher(new DefaultLoader()))->withRoutes(
+            new class implements RoutesInterface
+            {
+                public function routes(Router $router) {
+                    $router->patch('/', HomeController::class, 'index');
+                }
+            }
+        );
 
         // success
         foreach (['PATCH'] as $method) {
@@ -154,9 +189,15 @@ class ShortRouteMethods extends TestCase
 
     public function testAny()
     {
-        $dispatcher = (new Dispatcher(new DefaultLoader()))->withRouter(function (Router $router) {
-            $router->any('/', HomeController::class, 'index');
-        });
+        $dispatcher = (new Dispatcher(new DefaultLoader()))->withRoutes(
+            new class implements RoutesInterface
+            {
+                public function routes(Router $router)
+                {
+                    $router->any('/', HomeController::class, 'index');
+                }
+            }
+        );
 
         // success
         foreach (['GET', 'HEAD', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'] as $method) {

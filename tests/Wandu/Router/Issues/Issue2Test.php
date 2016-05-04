@@ -6,6 +6,7 @@ use Wandu\Router\ClassLoader\DefaultLoader;
 use Wandu\Router\Dispatcher;
 use Wandu\Router\Exception\HandlerNotFoundException;
 use Wandu\Router\Router;
+use Wandu\Router\RoutesInterface;
 use Wandu\Router\Stubs\HomeController;
 use Wandu\Router\TestCase;
 
@@ -13,9 +14,15 @@ class Issue2Test extends TestCase
 {
     public function testDispatch()
     {
-        $dispatcher = (new Dispatcher(new DefaultLoader()))->withRouter(function (Router $router) {
-            $router->createRoute(['GET'], '/', HomeController::class, 'wrong');
-        });
+        $dispatcher = (new Dispatcher(new DefaultLoader()))->withRoutes(
+            new class implements RoutesInterface
+            {
+                public function routes(Router $router)
+                {
+                    $router->createRoute(['GET'], '/', HomeController::class, 'wrong');
+                }
+            }
+        );
 
         try {
             $dispatcher->dispatch($this->createRequest('GET', '/'));

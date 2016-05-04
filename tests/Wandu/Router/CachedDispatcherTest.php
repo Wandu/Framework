@@ -16,17 +16,24 @@ class CachedDispatcherTest extends TestCase
     {
         $dispatcher = new Dispatcher(new DefaultLoader());
 
-        $loadCount = 0;
-        $dispatcher = $dispatcher->withRouter(function (Router $router) use (&$loadCount) {
-            $loadCount++;
-            $router->get('admin', AdminController::class, 'index');
-        });
+        $dispatcher = $dispatcher->withRoutes(
+            $routes = new class implements RoutesInterface
+            {
+                public $loadCount = 0;
+
+                public function routes(Router $router)
+                {
+                    $this->loadCount++;
+                    $router->get('admin', AdminController::class, 'index');
+                }
+            }
+        );
 
         $dispatcher->dispatch($this->createRequest('GET', '/admin'));
         $dispatcher->dispatch($this->createRequest('GET', '/admin'));
         $dispatcher->dispatch($this->createRequest('GET', '/admin'));
 
-        $this->assertEquals(3, $loadCount);
+        $this->assertEquals(3, $routes->loadCount);
     }
 
     public function testDispatchWithCache()
@@ -36,17 +43,24 @@ class CachedDispatcherTest extends TestCase
             'cache_file' => __DIR__ . '/router.cache.php',
         ]);
 
-        $loadCount = 0;
-        $dispatcher = $dispatcher->withRouter(function (Router $router) use (&$loadCount) {
-            $loadCount++;
-            $router->get('admin', AdminController::class, 'index');
-        });
+        $dispatcher = $dispatcher->withRoutes(
+            $routes = new class implements RoutesInterface
+            {
+                public $loadCount = 0;
+
+                public function routes(Router $router)
+                {
+                    $this->loadCount++;
+                    $router->get('admin', AdminController::class, 'index');
+                }
+            }
+        );
 
         $dispatcher->dispatch($this->createRequest('GET', '/admin'));
         $dispatcher->dispatch($this->createRequest('GET', '/admin'));
         $dispatcher->dispatch($this->createRequest('GET', '/admin'));
 
-        $this->assertEquals(1, $loadCount);
+        $this->assertEquals(1, $routes->loadCount);
     }
 
     public function testFlush()
@@ -57,16 +71,24 @@ class CachedDispatcherTest extends TestCase
         ]);
 
         $loadCount = 0;
-        $dispatcher = $dispatcher->withRouter(function (Router $router) use (&$loadCount) {
-            $loadCount++;
-            $router->get('admin', AdminController::class, 'index');
-        });
+        $dispatcher = $dispatcher->withRoutes(
+            $routes = new class implements RoutesInterface
+            {
+                public $loadCount = 0;
+
+                public function routes(Router $router)
+                {
+                    $this->loadCount++;
+                    $router->get('admin', AdminController::class, 'index');
+                }
+            }
+        );
 
         $dispatcher->dispatch($this->createRequest('GET', '/admin'));
         $dispatcher->dispatch($this->createRequest('GET', '/admin'));
         $dispatcher->flush();
         $dispatcher->dispatch($this->createRequest('GET', '/admin'));
 
-        $this->assertEquals(2, $loadCount);
+        $this->assertEquals(2, $routes->loadCount);
     }
 }

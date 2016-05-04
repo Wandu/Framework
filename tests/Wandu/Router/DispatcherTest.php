@@ -12,9 +12,14 @@ class DispatcherTest extends TestCase
 {
     public function testSimpleDispatcher()
     {
-        $dispatcher = (new Dispatcher(new DefaultLoader()))->withRouter(function (Router $router) {
-            $router->createRoute(['GET'], '/', HomeController::class);
-        });
+        $dispatcher = (new Dispatcher(new DefaultLoader()))->withRoutes(
+            new class implements RoutesInterface
+            {
+                public function routes(Router $router) {
+                    $router->createRoute(['GET'], '/', HomeController::class);
+                }
+            }
+        );
 
         $this->assertEquals(
             '[GET] index@Home',
@@ -24,10 +29,15 @@ class DispatcherTest extends TestCase
 
     public function testDispatchMethod()
     {
-        $dispatcher = (new Dispatcher(new DefaultLoader()))->withRouter(function (Router $router) {
-            $router->createRoute(['GET'], '/admin', AdminController::class, 'index');
-            $router->createRoute(['POST'], '/admin', AdminController::class, 'action');
-        });
+        $dispatcher = (new Dispatcher(new DefaultLoader()))->withRoutes(
+            new class implements RoutesInterface
+            {
+                public function routes(Router $router) {
+                    $router->createRoute(['GET'], '/admin', AdminController::class, 'index');
+                    $router->createRoute(['POST'], '/admin', AdminController::class, 'action');
+                }
+            }
+        );
 
         $this->assertEquals(
             '[GET] index@Admin',
@@ -49,10 +59,16 @@ class DispatcherTest extends TestCase
 
     public function testDispatchMatchingUri()
     {
-        $dispatcher = (new Dispatcher(new DefaultLoader()))->withRouter(function (Router $router) {
-            $router->createRoute(['GET'], '/admin/index', AdminController::class, 'index');
-            $router->createRoute(['GET'], '/admin/action', AdminController::class, 'action');
-        });
+        $dispatcher = (new Dispatcher(new DefaultLoader()))->withRoutes(
+            new class implements RoutesInterface
+            {
+                public function routes(Router $router)
+                {
+                    $router->createRoute(['GET'], '/admin/index', AdminController::class, 'index');
+                    $router->createRoute(['GET'], '/admin/action', AdminController::class, 'action');
+                }
+            }
+        );
 
         $this->assertEquals(
             '[GET] index@Admin',
@@ -66,9 +82,15 @@ class DispatcherTest extends TestCase
 
     public function testDispatchMatchingRegExpUri()
     {
-        $dispatcher = (new Dispatcher(new DefaultLoader()))->withRouter(function (Router $router) {
-            $router->createRoute(['GET'], '/admin/users/{user}', AdminController::class, 'users');
-        });
+        $dispatcher = (new Dispatcher(new DefaultLoader()))->withRoutes(
+            new class implements RoutesInterface
+            {
+                public function routes(Router $router)
+                {
+                    $router->createRoute(['GET'], '/admin/users/{user}', AdminController::class, 'users');
+                }
+            }
+        );
 
         $request = $this->createRequest('GET', '/admin/users/37');
         $request->shouldReceive('withAttribute')->with('user', '37')->andReturn($request);
@@ -82,17 +104,23 @@ class DispatcherTest extends TestCase
 
     public function testGroup()
     {
-        $dispatcher = (new Dispatcher(new DefaultLoader()))->withRouter(function (Router $router) {
-            $router->createRoute(['GET'], '/', HomeController::class, 'index');
-            $router->group([
-                'prefix' => '/admin',
-                'middleware' => [AuthSuccessMiddleware::class],
-            ], function (Router $router) {
-                $router->createRoute(['GET'], '/', AdminController::class, 'index');
-                $router->createRoute(['POST'], '/', AdminController::class, 'action');
-                $router->createRoute(['GET'], '/users/{user}', AdminController::class, 'users');
-            });
-        });
+        $dispatcher = (new Dispatcher(new DefaultLoader()))->withRoutes(
+            new class implements RoutesInterface
+            {
+                public function routes(Router $router)
+                {
+                    $router->createRoute(['GET'], '/', HomeController::class, 'index');
+                    $router->group([
+                        'prefix' => '/admin',
+                        'middleware' => [AuthSuccessMiddleware::class],
+                    ], function (Router $router) {
+                        $router->createRoute(['GET'], '/', AdminController::class, 'index');
+                        $router->createRoute(['POST'], '/', AdminController::class, 'action');
+                        $router->createRoute(['GET'], '/users/{user}', AdminController::class, 'users');
+                    });
+                }
+            }
+        );
 
         $this->assertEquals(
             '[GET] index@Home',
@@ -121,14 +149,20 @@ class DispatcherTest extends TestCase
 
     public function testPrefix()
     {
-        $dispatcher = (new Dispatcher(new DefaultLoader()))->withRouter(function (Router $router) {
-            $router->createRoute(['GET'], '/', HomeController::class, 'index');
-            $router->prefix('/admin', function (Router $router) {
-                $router->createRoute(['GET'], '/', AdminController::class, 'index');
-                $router->createRoute(['POST'], '/', AdminController::class, 'action');
-                $router->createRoute(['GET'], '/users/{user}', AdminController::class, 'users');
-            });
-        });
+        $dispatcher = (new Dispatcher(new DefaultLoader()))->withRoutes(
+            new class implements RoutesInterface
+            {
+                public function routes(Router $router)
+                {
+                    $router->createRoute(['GET'], '/', HomeController::class, 'index');
+                    $router->prefix('/admin', function (Router $router) {
+                        $router->createRoute(['GET'], '/', AdminController::class, 'index');
+                        $router->createRoute(['POST'], '/', AdminController::class, 'action');
+                        $router->createRoute(['GET'], '/users/{user}', AdminController::class, 'users');
+                    });
+                }
+            }
+        );
 
         $this->assertEquals(
             '[GET] index@Home',
@@ -157,13 +191,19 @@ class DispatcherTest extends TestCase
 
     public function testMiddlewares()
     {
-        $dispatcher = (new Dispatcher(new DefaultLoader()))->withRouter(function (Router $router) {
-            $router->middlewares([AuthSuccessMiddleware::class], function (Router $router) {
-                $router->createRoute(['GET'], '/admin', AdminController::class, 'index');
-                $router->createRoute(['POST'], '/admin', AdminController::class, 'action');
-                $router->createRoute(['GET'], '/admin/users/{user}', AdminController::class, 'users');
-            });
-        });
+        $dispatcher = (new Dispatcher(new DefaultLoader()))->withRoutes(
+            new class implements RoutesInterface
+            {
+                public function routes(Router $router)
+                {
+                    $router->middlewares([AuthSuccessMiddleware::class], function (Router $router) {
+                        $router->createRoute(['GET'], '/admin', AdminController::class, 'index');
+                        $router->createRoute(['POST'], '/admin', AdminController::class, 'action');
+                        $router->createRoute(['GET'], '/admin/users/{user}', AdminController::class, 'users');
+                    });
+                }
+            }
+        );
 
         $this->assertEquals(
             '[GET] auth success; [GET] index@Admin',
@@ -187,9 +227,15 @@ class DispatcherTest extends TestCase
 
     public function testVirtualMethod()
     {
-        $dispatcher = (new Dispatcher(new DefaultLoader()))->withRouter(function (Router $router) {
-            $router->createRoute(['PUT'], '/', HomeController::class);
-        });
+        $dispatcher = (new Dispatcher(new DefaultLoader()))->withRoutes(
+            new class implements RoutesInterface
+            {
+                public function routes(Router $router)
+                {
+                    $router->createRoute(['PUT'], '/', HomeController::class);
+                }
+            }
+        );
 
         $request = $this->createRequest('POST', '/');
         $request->shouldReceive('getParsedBody')->andReturn([
@@ -210,9 +256,15 @@ class DispatcherTest extends TestCase
     {
         $dispatcher = (new Dispatcher(new DefaultLoader(), [
             'virtual_method_enabled' => true,
-        ]))->withRouter(function (Router $router) {
-            $router->createRoute(['PUT'], '/', HomeController::class);
-        });
+        ]))->withRoutes(
+            new class implements RoutesInterface
+            {
+                public function routes(Router $router)
+                {
+                    $router->createRoute(['PUT'], '/', HomeController::class);
+                }
+            }
+        );
 
         $request = $this->createRequest('POST', '/');
         $request->shouldReceive('getParsedBody')->andReturn([

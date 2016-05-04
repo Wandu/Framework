@@ -1,7 +1,6 @@
 <?php
 namespace Wandu\Router;
 
-use Closure;
 use FastRoute\Dispatcher as FastDispatcher;
 use FastRoute\Dispatcher\GroupCountBased as GCBDispatcher;
 use Psr\Http\Message\ServerRequestInterface;
@@ -14,8 +13,8 @@ class Dispatcher
     /** @var \Wandu\Router\Contracts\ClassLoaderInterface */
     protected $classLoader;
 
-    /** @var \Closure */
-    protected $routing;
+    /** @var \Wandu\Router\RoutesInterface */
+    protected $routes;
 
     /**
      * @param \Wandu\Router\Contracts\ClassLoaderInterface $loader
@@ -39,13 +38,13 @@ class Dispatcher
     }
 
     /**
-     * @param \Closure $routing
+     * @param \Wandu\Router\RoutesInterface $routes
      * @return \Wandu\Router\Dispatcher
      */
-    public function withRouter(Closure $routing)
+    public function withRoutes(RoutesInterface $routes)
     {
         $inst = clone $this;
-        $inst->routing = $routing;
+        $inst->routes = $routes;
         return $inst;
     }
 
@@ -63,8 +62,7 @@ class Dispatcher
             $dispatchData = $cacheData['dispatch_data'];
             $routes = $cacheData['routes'];
         } else {
-            $router = new Router;
-            $this->routing->__invoke($router);
+            $this->routes->routes($router = new Router);
             $dispatchData = $router->getCollector()->getData();
             $routes = $router->getRoutes();
         }

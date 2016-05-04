@@ -1,14 +1,16 @@
 <?php
-namespace Wandu\Console;
+namespace Wandu\Foundation\Kernels;
 
 use Symfony\Component\Console\Application as SymfonyApplication;
+use Wandu\Console\Dispatcher;
 use Wandu\DI\ContainerInterface;
 use Wandu\Foundation\Application;
+use Wandu\Foundation\ConfigInterface;
 use Wandu\Foundation\KernelInterface;
 
-class Kernel implements KernelInterface
+class ConsoleKernel implements KernelInterface
 {
-    /** @var \Wandu\Console\ConfigInterface */
+    /** @var \Wandu\Foundation\ConfigInterface */
     protected $config;
 
     public function __construct(ConfigInterface $config)
