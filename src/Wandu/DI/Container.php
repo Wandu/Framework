@@ -252,6 +252,8 @@ class Container implements ContainerInterface
         if ($reflectionMethod) {
             try {
                 $parameters = $this->getParameters($reflectionMethod, $arguments);
+            } catch (CannotResolveException $e) {
+                throw $e;
             } catch (RuntimeException $e) {
                 throw new CannotResolveException($class);
             }

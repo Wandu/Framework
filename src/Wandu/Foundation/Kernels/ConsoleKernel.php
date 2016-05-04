@@ -23,7 +23,7 @@ class ConsoleKernel implements KernelInterface
      */
     public function boot(ContainerInterface $app)
     {
-        $this->config->register($app);
+        $this->config->providers($app);
     }
 
     /**

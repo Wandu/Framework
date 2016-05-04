@@ -1,8 +1,10 @@
 <?php
+use Wandu\Config\DotConfig;
 use Wandu\Console\Controllers\HelloWorld;
 use Wandu\Console\Dispatcher;
 use Wandu\DI\ContainerInterface;
 use Wandu\Foundation\ConfigInterface;
+use Wandu\Router\RouterServiceProvider;
 use Wandu\Router\Router;
 
 return new class implements ConfigInterface
@@ -10,8 +12,11 @@ return new class implements ConfigInterface
     /**
      * @param \Wandu\DI\ContainerInterface $app
      */
-    public function register(ContainerInterface $app)
+    public function providers(ContainerInterface $app)
     {
+        $app['config'] = new DotConfig([]);
+
+        $app->register(new RouterServiceProvider());
     }
 
     /**
