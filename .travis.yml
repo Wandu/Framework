@@ -6,7 +6,6 @@ matrix:
     - php: 7.0
       env:
         - EXECUTE_COVERAGE=true
-    - php: hhvm
 
 before_script:
   - if [[ $EXECUTE_COVERAGE != 'true' ]]; then phpenv config-rm xdebug.ini || return 0 ; fi
