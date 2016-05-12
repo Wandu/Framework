@@ -1,0 +1,10 @@
+{{import helloworld as Hello}}
+{{layout "/layout/default.markdown"}}
+
+{{append:scripts}}
+{{/append}}
+{{append:styles}}
+{{/append}}
+{{section:main}}
+Body is Body~
+{{/section}}
