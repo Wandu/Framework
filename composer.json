@@ -9,11 +9,6 @@
             "email": "im@wani.kr"
         }
     ],
-    "replace": {
-        "wandu/di": "self.version",
-        "wandu/http": "self.version",
-        "wandu/router": "self.version"
-    },
     "bin": ["bin/wandu"],
     "require": {
         "php": ">=7.0.0",
@@ -21,6 +16,7 @@
         "container-interop/container-interop": "^1.1",
         "nikic/fast-route": "^0.6",
         "wandu/reflection": "^0.0.1",
+        "wandu/fastelper": "^0.1.0",
         "symfony/console": "^3.0"
     },
     "require-dev": {
@@ -38,5 +34,17 @@
             "Wandu\\": "tests/Wandu/",
             "Publ\\": "tests/Publ/"
         }
+    },
+    "replace": {
+        "wandu/caster": "self.version",
+        "wandu/compiler": "self.version",
+        "wandu/di": "self.version",
+        "wandu/http": "self.version",
+        "wandu/q": "self.version",
+        "wandu/router": "self.version",
+        "wandu/tempy": "self.version"
+    },
+    "suggest": {
+        "aws/aws-sdk-php": "for SQS queue"
     }
 }
