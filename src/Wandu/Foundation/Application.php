@@ -6,7 +6,7 @@ use Wandu\DI\Container;
 class Application extends Container
 {
     const NAME = "Wandu";
-    const VERSION = "3.0.0-alpha1";
+    const VERSION = "3.0.0-alpha3";
 
     /** @var \Wandu\Foundation\KernelInterface */
     protected $kernel;
