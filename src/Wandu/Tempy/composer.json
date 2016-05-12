@@ -1,0 +1,20 @@
+{
+    "name": "wandu/tempy",
+    "description": "Very Simple Template Engine.",
+    "keywords": ["template", "tempy", "wandu"],
+    "license": "MIT",
+    "require": {
+        "php": ">=7.0.0",
+        "wandu/compiler": "~0.1.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "Wandu\\Tempy\\": ""
+        }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "3.0-dev"
+        }
+    }
+}
