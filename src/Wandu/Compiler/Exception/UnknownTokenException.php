@@ -8,9 +8,9 @@ class UnknownTokenException extends RuntimeException
     /** @var string */
     protected $remainContext;
 
-    public function __construct($remainContext)
+    public function __construct($nonterm)
     {
-        $this->remainContext = $remainContext;
+        $this->remainContext = $nonterm;
         $this->message = "unknown token.";
     }
 
