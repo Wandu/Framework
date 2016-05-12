@@ -1,0 +1,19 @@
+{
+    "name": "wandu/caster",
+    "description": "Perfect Type Casting Library.",
+    "keywords": ["wandu", "type cast"],
+    "license": "MIT",
+    "require": {
+        "php": ">=7.0.0",
+    },
+    "autoload": {
+        "psr-4": {
+            "Wandu\\Caster\\": ""
+        }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "3.0-dev"
+        }
+    }
+}

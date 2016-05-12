@@ -1,0 +1,20 @@
+{
+    "name": "wandu/compiler",
+    "description": "PHP Base Compiler(Lexical Analyzer).",
+    "keywords": ["compiler", "lexer", "lex", "yacc", "wandu"],
+    "license": "MIT",
+    "require": {
+        "php": ">=7.0.0",
+        "wandu/fastelper": "^0.1.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Wandu\\Compiler\\": ""
+        }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "3.0-dev"
+        }
+    }
+}
