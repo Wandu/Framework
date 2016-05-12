@@ -29,12 +29,14 @@
     },
     "autoload": {
         "psr-4": {
-            "Wandu\\": "src/Wandu/"
+            "Wandu\\": "src/Wandu/",
+            "Publ\\": "src/Publ/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Wandu\\": "tests/Wandu/"
+            "Wandu\\": "tests/Wandu/",
+            "Publ\\": "tests/Publ/"
         }
     }
 }

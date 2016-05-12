@@ -19,7 +19,7 @@ if (file_exists($configFile)) {
     $config = require $configFile;
 } else {
     $config = new class implements ConfigInterface {
-        public function register(ContainerInterface $app) {}
+        public function providers(ContainerInterface $app) {}
         public function commands(Dispatcher $dispatcher) {}
         public function routes(Router $router) {}
     };

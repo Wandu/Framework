@@ -1,11 +1,13 @@
 <?php
 use Wandu\Config\DotConfig;
-use Wandu\Console\Controllers\HelloWorld;
+use Wandu\Console\Controllers\HelloWorld as ConsoleHelloWorld;
 use Wandu\Console\Dispatcher;
 use Wandu\DI\ContainerInterface;
 use Wandu\Foundation\ConfigInterface;
-use Wandu\Router\RouterServiceProvider;
+use Wandu\Http\Controllers\HelloWorld as HttpHelloWorld;
+use Wandu\Http\Middleware\Responsify;
 use Wandu\Router\Router;
+use Wandu\Router\RouterServiceProvider;
 
 return new class implements ConfigInterface
 {
@@ -15,7 +17,6 @@ return new class implements ConfigInterface
     public function providers(ContainerInterface $app)
     {
         $app['config'] = new DotConfig([]);
-
         $app->register(new RouterServiceProvider());
     }
 
@@ -24,6 +25,11 @@ return new class implements ConfigInterface
      */
     public function routes(Router $router)
     {
+        $router->middleware([
+            Responsify::class,
+        ], function (Router $router) {
+            $router->get('/', HttpHelloWorld::class);
+        });
     }
 
     /**
@@ -31,6 +37,6 @@ return new class implements ConfigInterface
      */
     public function commands(Dispatcher $dispatcher)
     {
-        $dispatcher->command('hello', HelloWorld::class);
+        $dispatcher->command('hello', ConsoleHelloWorld::class);
     }
 };
