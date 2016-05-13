@@ -1,7 +1,16 @@
 Wandu Framework
 ===
 
-Merging...
+[![Latest Stable Version](https://poser.pugx.org/wandu/framework/v/stable.svg)](https://packagist.org/packages/wandu/framework)
+[![Latest Unstable Version](https://poser.pugx.org/wandu/framework/v/unstable.svg)](https://packagist.org/packages/wandu/framework)
+[![Total Downloads](https://poser.pugx.org/wandu/framework/downloads.svg)](https://packagist.org/packages/wandu/framework)
+[![License](https://poser.pugx.org/wandu/framework/license.svg)](https://packagist.org/packages/wandu/framework)
+
+[![Build Status](https://img.shields.io/travis/Wandu/Framework/master.svg)](https://travis-ci.org/Wandu/Framework)
+[![Code Coverage](https://scrutinizer-ci.com/g/Wandu/Framework/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/Wandu/Framework/?branch=master)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/Wandu/Framework/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/Wandu/Framework/?branch=master)
+
+Wandu is PHP7 Framework.
 
 ## Index
 

@@ -3,12 +3,6 @@
     "description": "Wandu Framework",
     "keywords": ["wandu", "framework", "psr7"],
     "license": "MIT",
-    "authors": [
-        {
-            "name": "Changwan Jun",
-            "email": "im@wani.kr"
-        }
-    ],
     "bin": ["bin/wandu"],
     "require": {
         "php": ">=7.0.0",
@@ -45,6 +39,6 @@
         "wandu/tempy": "self.version"
     },
     "suggest": {
-        "aws/aws-sdk-php": "for SQS queue"
+        "aws/aws-sdk-php": "for SQS queue in Wandu/Q"
     }
 }
