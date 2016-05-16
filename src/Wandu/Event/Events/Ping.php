@@ -1,0 +1,28 @@
+<?php
+namespace Wandu\Event\Events;
+
+use Wandu\Event\Event;
+use Wandu\Event\QueueEventInterface;
+use Wandu\Q\Queue;
+
+class Ping extends Event implements QueueEventInterface
+{
+    /** @var string */
+    protected $message;
+
+    /**
+     * @param string $message
+     */
+    public function __construct($message)
+    {
+        $this->message = $message;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getMessage()
+    {
+        return $this->message;
+    }
+}

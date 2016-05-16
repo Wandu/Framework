@@ -2,6 +2,7 @@
 namespace Wandu\Event;
 
 use Interop\Container\ContainerInterface;
+use Wandu\Q\Queue;
 
 class Dispatcher implements DispatcherInterface
 {
@@ -44,20 +45,30 @@ class Dispatcher implements DispatcherInterface
         if (!count($this->listeners)) {
             return;
         }
-        $this->runListeners(get_class($event), $event);
+        if ($event instanceof QueueEventInterface) {
+            if (!$this->container->has(Queue::class)) {
+                throw new \InvalidArgumentException('Cannot load queue.');
+            }
+            $this->container->get(Queue::class)->enqueue([
+                'method' => 'event:execute',
+                'event' => $event,
+            ]);
+        } else {
+            $this->executeListeners($event);
+        }
     }
 
     /**
-     * @param string $eventName
      * @param \Wandu\Event\EventInterface $event
      */
-    protected function runListeners($eventName, EventInterface $event)
+    public function executeListeners(EventInterface $event)
     {
+        $eventName = $event->getEventName();
         if (!isset($this->listeners[$eventName])) {
             return;
         }
         foreach ($this->listeners[$eventName] as $listenerName) {
-            $this->container->get($listenerName)->handle($event);
+            $this->container->get($listenerName)->call($event);
         }
     }
 }

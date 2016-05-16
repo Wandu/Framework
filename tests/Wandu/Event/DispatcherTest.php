@@ -7,40 +7,67 @@ use Wandu\DI\Container;
 
 class DispatcherTest extends PHPUnit_Framework_TestCase
 {
-    public function testTrigger()
+    public function testTriggerByClass()
     {
-        $dispatcher = new Dispatcher(new Container());
+        $container = new Container();
+        $container->instance(DispatcherTestListener::class, $listener = new DispatcherTestListener());
 
-        $dispatcher->on(StubEvent::class, StubListener::class);
+        $dispatcher = new Dispatcher($container);
 
-        ob_start();
-        $dispatcher->trigger(new StubEvent(30));
-        $obBuffer = ob_get_contents();
-        ob_end_clean();
+        $dispatcher->on(DispatcherTestEvent::class, DispatcherTestListener::class);
 
-        $this->assertEquals('30', $obBuffer);
+        // check init event & listener
+        $event = new DispatcherTestEvent();
+        $this->assertEquals(0, $event->getCallCount());
+        $this->assertEquals(0, $listener->getLastCallCount());
+        
+        $dispatcher->trigger($event);
+
+        $this->assertEquals(1, $event->getCallCount());
+        $this->assertEquals(1, $listener->getLastCallCount());
+
+        $dispatcher->trigger($event);
+        $dispatcher->trigger($event);
+        $dispatcher->trigger($event);
+
+        $this->assertEquals(4, $event->getCallCount());
+        $this->assertEquals(4, $listener->getLastCallCount());
     }
 }
 
-class StubEvent implements EventInterface
+class DispatcherTestEvent extends Event
 {
-    private $id;
-
-    public function __construct($id)
+    private $callCount = 0;
+    
+    public function call()
     {
-        $this->id = $id;
+        $this->callCount++;
+        return $this->callCount;
     }
 
-    public function getId()
+    /**
+     * @return int
+     */
+    public function getCallCount()
     {
-        return $this->id;
+        return $this->callCount;
     }
 }
 
-class StubListener implements ListenerInterface
+class DispatcherTestListener extends Listener
 {
-    public function handle(StubEvent $event)
+    protected $lastCallCount = 0;
+    
+    public function handle(DispatcherTestEvent $event)
     {
-        echo $event->getId();
+        $this->lastCallCount = $event->call();
+    }
+
+    /**
+     * @return null
+     */
+    public function getLastCallCount()
+    {
+        return $this->lastCallCount;
     }
 }

@@ -1,0 +1,17 @@
+{
+    "name": "wandu/event",
+    "description": "Simple Event",
+    "keywords": ["wandu", "queue"],
+    "license": "MIT",
+    "require": {
+        "php": ">=7.0.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Wandu\\Event\\": ""
+        }
+    },
+    "suggest": {
+        "wandu/q": "for Q Event"
+    }
+}

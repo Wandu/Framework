@@ -3,11 +3,16 @@ namespace Wandu\Event;
 
 use Wandu\DI\ContainerInterface;
 use Wandu\DI\ServiceProviderInterface;
+use Wandu\Event\Events\Ping;
+use Wandu\Event\Listeners\Pong;
 
 class EventServiceProvider implements ServiceProviderInterface
 {
     /** @var array */
     protected $listeners = [
+        Ping::class => [
+            Pong::class,
+        ]
     ];
 
     /**
@@ -23,8 +28,10 @@ class EventServiceProvider implements ServiceProviderInterface
      */
     public function register(ContainerInterface $app)
     {
-        $app->closure(DispatcherInterface::class, function ($container) {
+        $app->closure(Dispatcher::class, function ($container) {
             return new Dispatcher($container);
         });
+        $app->alias(DispatcherInterface::class, Dispatcher::class);
+        $app->alias('event', Dispatcher::class);
     }
 }

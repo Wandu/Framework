@@ -3,9 +3,13 @@ use Wandu\Config\DotConfig;
 use Wandu\Console\Controllers\HelloWorld as ConsoleHelloWorld;
 use Wandu\Console\Dispatcher;
 use Wandu\DI\ContainerInterface;
+use Wandu\Event\Console\ListenController;
+use Wandu\Event\Console\TriggerPingController;
+use Wandu\Event\EventServiceProvider;
 use Wandu\Foundation\ConfigInterface;
 use Wandu\Http\Controllers\HelloWorld as HttpHelloWorld;
 use Wandu\Http\Middleware\Responsify;
+use Wandu\Q\BeanstalkdQueueServiceProvider;
 use Wandu\Router\Router;
 use Wandu\Router\RouterServiceProvider;
 
@@ -18,6 +22,8 @@ return new class implements ConfigInterface
     {
         $app['config'] = new DotConfig([]);
         $app->register(new RouterServiceProvider());
+        $app->register(new EventServiceProvider());
+        $app->register(new BeanstalkdQueueServiceProvider());
     }
 
     /**
@@ -38,5 +44,7 @@ return new class implements ConfigInterface
     public function commands(Dispatcher $dispatcher)
     {
         $dispatcher->command('hello', ConsoleHelloWorld::class);
+        $dispatcher->command('event:listen', ListenController::class);
+        $dispatcher->command('event:ping', TriggerPingController::class);
     }
 };
