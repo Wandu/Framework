@@ -4,7 +4,7 @@ use Wandu\Console\Controllers\HelloWorld as ConsoleHelloWorld;
 use Wandu\Console\Dispatcher;
 use Wandu\DI\ContainerInterface;
 use Wandu\Event\Console\ListenController;
-use Wandu\Event\Console\TriggerPingController;
+use Wandu\Event\Console\PingController;
 use Wandu\Event\EventServiceProvider;
 use Wandu\Foundation\ConfigInterface;
 use Wandu\Http\Controllers\HelloWorld as HttpHelloWorld;
@@ -45,6 +45,6 @@ return new class implements ConfigInterface
     {
         $dispatcher->command('hello', ConsoleHelloWorld::class);
         $dispatcher->command('event:listen', ListenController::class);
-        $dispatcher->command('event:ping', TriggerPingController::class);
+        $dispatcher->command('event:ping', PingController::class);
     }
 };

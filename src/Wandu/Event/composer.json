@@ -12,6 +12,6 @@
         }
     },
     "suggest": {
-        "wandu/q": "for Q Event"
+        "wandu/q": "for Queue Event"
     }
 }

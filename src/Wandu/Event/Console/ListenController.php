@@ -7,6 +7,12 @@ use Wandu\Q\Queue;
 
 class ListenController extends Controller
 {
+    const EXECUTE_TIMEOUT = 2;
+
+    /**
+     * @param \Wandu\Q\Queue $queue
+     * @param \Wandu\Event\Dispatcher $dispatcher
+     */
     public function __construct(Queue $queue, Dispatcher $dispatcher)
     {
         $this->queue = $queue;
@@ -15,7 +21,7 @@ class ListenController extends Controller
 
     function execute()
     {
-        $this->output->writeln("Start Queued Event Listener..");
+        $this->output->writeln("Start Queued Events Listener..");
         while (1) {
             $job = $this->queue->dequeue();
             if (isset($job)) {
@@ -25,8 +31,9 @@ class ListenController extends Controller
                     $this->dispatcher->executeListeners($payload['event']);
                     $job->delete();
                 }
+            } else {
+                sleep(static::EXECUTE_TIMEOUT);
             }
-            sleep(3);
         }
     }
 }

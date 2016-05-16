@@ -10,7 +10,7 @@ class QueueEventTest extends PHPUnit_Framework_TestCase
 {
     public function testQueueEvent()
     {
-        $event = new QueueEventTestEvent();
+        $event = new ViaQueueEventTestEvent();
         
         $queue = Mockery::mock(Queue::class);
         $queue->shouldReceive('enqueue')->with([
@@ -22,13 +22,13 @@ class QueueEventTest extends PHPUnit_Framework_TestCase
         $container[Queue::class] = $queue;
         $dispatcher = new Dispatcher($container);
         
-        $dispatcher->on(QueueEventTestEvent::class, QueueEventTestListener::class);
+        $dispatcher->on(ViaQueueEventTestEvent::class, QueueEventTestListener::class);
         
         $dispatcher->trigger($event);
     }
 }
 
-class QueueEventTestEvent extends Event implements QueueEventInterface
+class ViaQueueEventTestEvent extends Event implements ViaQueue
 {
     private $callCount = 0;
 

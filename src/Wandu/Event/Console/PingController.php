@@ -6,7 +6,7 @@ use Wandu\Event\Dispatcher;
 use Wandu\Event\Events\Ping;
 use Wandu\Q\Queue;
 
-class TriggerPingController extends Controller
+class PingController extends Controller
 {
     public function __construct(Queue $queue, Dispatcher $dispatcher)
     {
@@ -16,7 +16,7 @@ class TriggerPingController extends Controller
 
     function execute()
     {
-        $this->output->writeln("Send Test Event..");
-        $this->dispatcher->trigger(new Ping("ping :-)"));
+        $this->output->writeln("Send Ping Event..");
+        $this->dispatcher->trigger(new Ping("Ping..."));
     }
 }

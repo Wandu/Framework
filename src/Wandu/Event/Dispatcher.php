@@ -45,7 +45,7 @@ class Dispatcher implements DispatcherInterface
         if (!count($this->listeners)) {
             return;
         }
-        if ($event instanceof QueueEventInterface) {
+        if ($event instanceof ViaQueue) {
             if (!$this->container->has(Queue::class)) {
                 throw new \InvalidArgumentException('Cannot load queue.');
             }

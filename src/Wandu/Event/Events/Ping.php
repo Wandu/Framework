@@ -2,10 +2,10 @@
 namespace Wandu\Event\Events;
 
 use Wandu\Event\Event;
-use Wandu\Event\QueueEventInterface;
+use Wandu\Event\ViaQueue;
 use Wandu\Q\Queue;
 
-class Ping extends Event implements QueueEventInterface
+class Ping extends Event implements ViaQueue
 {
     /** @var string */
     protected $message;
