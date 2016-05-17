@@ -3,6 +3,9 @@ namespace Wandu\DI\Exception;
 
 use RuntimeException;
 
+/**
+ * @deprecated use RuntimeException directly.
+ */
 class DIException extends RuntimeException
 {
     /** @var string */
