@@ -7,8 +7,9 @@ use ReflectionClass;
 use ReflectionFunctionAbstract;
 use ReflectionObject;
 use ReflectionProperty;
-use RuntimeException;
+use ReflectionException;
 use Wandu\DI\Exception\CannotChangeException;
+use Wandu\DI\Exception\CannotFindParameterException;
 use Wandu\DI\Exception\CannotInjectException;
 use Wandu\DI\Exception\CannotResolveException;
 use Wandu\DI\Exception\NullReferenceException;
@@ -254,8 +255,8 @@ class Container implements ContainerInterface
                 $parameters = $this->getParameters($reflectionMethod, $arguments);
             } catch (CannotResolveException $e) {
                 throw $e;
-            } catch (RuntimeException $e) {
-                throw new CannotResolveException($class);
+            } catch (CannotFindParameterException $e) {
+                throw new CannotResolveException($class, $e->getParameter());
             }
         } else {
             $parameters = [];
@@ -380,36 +381,41 @@ class Container implements ContainerInterface
             // 2.5. exception ( == 1.4)a
 
             // 1.1, 2.1
-            if (isset($arguments[$paramName = $param->getName()])) {
+            $paramName = $param->getName();
+            if (isset($arguments[$paramName])) {
                 $parametersToReturn[] = $arguments[$paramName];
                 continue;
             }
-            if ($paramClassReflection = $param->getClass()) { // 2.*
-                // 2.2
-                $paramClassName = $paramClassReflection->getName();
-                if (isset($arguments[$paramClassName])) {
-                    $parametersToReturn[] = $arguments[$paramClassName];
+            try {
+                if ($paramClassReflection = $param->getClass()) { // 2.*
+                    // 2.2
+                    $paramClassName = $paramClassReflection->getName();
+                    if (isset($arguments[$paramClassName])) {
+                        $parametersToReturn[] = $arguments[$paramClassName];
+                        continue;
+                    }
+                    // 2.3
+                    if ($this->has($paramClassName)) {
+                        $parametersToReturn[] = $this->get($paramClassName);
+                        continue;
+                    }
+                } else { // 1.*
+                    // 1.2
+                    if (count($parameters)) {
+                        $parametersToReturn[] = array_shift($parameters);
+                        continue;
+                    }
+                }
+                // 1.3, 2.4
+                if ($param->isDefaultValueAvailable()) {
+                    $parametersToReturn[] = $param->getDefaultValue();
                     continue;
                 }
-                // 2.3
-                if ($this->has($paramClassName)) {
-                    $parametersToReturn[] = $this->get($paramClassName);
-                    continue;
-                }
-            } else { // 1.*
-                // 1.2
-                if (count($parameters)) {
-                    $parametersToReturn[] = array_shift($parameters);
-                    continue;
-                }
+                // 1.4, 2.5
+                throw new CannotFindParameterException($paramName);
+            } catch (ReflectionException $e) {
+                throw new CannotFindParameterException($paramName);
             }
-            // 1.3, 2.4
-            if ($param->isDefaultValueAvailable()) {
-                $parametersToReturn[] = $param->getDefaultValue();
-                continue;
-            }
-            // 1.4, 2.5
-            throw new RuntimeException('Fail to get parameter.');
         }
         return array_merge($parametersToReturn, $parameters);
     }

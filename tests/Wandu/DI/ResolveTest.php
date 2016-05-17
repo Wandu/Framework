@@ -181,4 +181,37 @@ class ResolveTest extends TestCase
 
         $this->assertFalse($this->container->has(ArrayAccess::class));
     }
+    
+    public function testResolveException()
+    {
+        try {
+            $this->container->get(StubResolveException1Depth::class);
+            $this->fail();
+        } catch (CannotResolveException $e) {
+            $this->assertEquals('unknown', $e->getParameter());
+            $this->assertEquals(StubResolveException1Depth::class, $e->getClass());
+        }
+
+        try {
+            $this->container->get(StubResolveException2Depth::class);
+            $this->fail();
+        } catch (CannotResolveException $e) {
+            $this->assertEquals('unknown', $e->getParameter());
+            $this->assertEquals(StubResolveException1Depth::class, $e->getClass());
+        }
+    }
+}
+
+class StubResolveException1Depth
+{
+    public function __construct(UnknownDepend $unknown)
+    {
+    }
+}
+
+class StubResolveException2Depth
+{
+    public function __construct(StubResolveException1Depth $depth1)
+    {
+    }
 }
