@@ -5,7 +5,7 @@ use Exception;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Wandu\DI\ContainerInterface;
-use Wandu\Foundation\ConfigInterface;
+use Wandu\Foundation\DefinitionInterface;
 use Wandu\Foundation\KernelInterface;
 use Wandu\Http\Exception\HttpException;
 use Wandu\Http\Exception\MethodNotAllowedException;
@@ -20,13 +20,13 @@ use Wandu\Router\Exception\RouteNotFoundException;
 
 class HttpRouterKernel implements KernelInterface
 {
-    /** @var \Wandu\Foundation\ConfigInterface */
+    /** @var \Wandu\Foundation\DefinitionInterface */
     private $config;
 
     /**
-     * @param \Wandu\Foundation\ConfigInterface $config
+     * @param \Wandu\Foundation\DefinitionInterface $config
      */
-    public function __construct(ConfigInterface $config)
+    public function __construct(DefinitionInterface $config)
     {
         $this->config = $config;
     }

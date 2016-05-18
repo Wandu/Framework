@@ -12,17 +12,17 @@ class HandlerNotFoundException extends RuntimeException
     protected $methodName;
 
     /**
-     * @param string $className
+     * @param string $classParameter
      * @param string $methodName
      */
-    public function __construct($className, $methodName = null)
+    public function __construct($classParameter, $methodName = null)
     {
-        $this->className = $className;
+        $this->className = $classParameter;
         if (isset($methodName)) {
             $this->methodName = $methodName;
-            parent::__construct("\"{$className}::{$methodName}\" is not found.");
+            parent::__construct("\"{$classParameter}::{$methodName}\" is not found.");
         } else {
-            parent::__construct("\"{$className}\" is not found.");
+            parent::__construct("\"{$classParameter}\" is not found.");
         }
     }
 

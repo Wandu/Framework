@@ -6,7 +6,7 @@ use Wandu\DI\ContainerInterface;
 use Wandu\Router\Router;
 use Wandu\Router\RoutesInterface;
 
-interface ConfigInterface extends RoutesInterface
+interface DefinitionInterface extends RoutesInterface
 {
     /**
      * @param \Wandu\DI\ContainerInterface $app

@@ -2,7 +2,7 @@
 use Wandu\Console\Dispatcher;
 use Wandu\DI\ContainerInterface;
 use Wandu\Foundation\Application;
-use Wandu\Foundation\ConfigInterface;
+use Wandu\Foundation\DefinitionInterface;
 use Wandu\Foundation\Kernels\HttpRouterKernel;
 use Wandu\Router\Router;
 
@@ -18,7 +18,7 @@ $configFile = dirname(__DIR__) . '/.wandu.php';
 if (file_exists($configFile)) {
     $config = require $configFile;
 } else {
-    $config = new class implements ConfigInterface {
+    $config = new class implements DefinitionInterface {
         public function providers(ContainerInterface $app) {}
         public function commands(Dispatcher $dispatcher) {}
         public function routes(Router $router) {}

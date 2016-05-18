@@ -1,26 +1,30 @@
 <?php
-use Wandu\Config\DotConfig;
+use Wandu\Config\Config;
+use Wandu\Config\Contracts\ConfigInterface;
 use Wandu\Console\Controllers\HelloWorld as ConsoleHelloWorld;
 use Wandu\Console\Dispatcher;
 use Wandu\DI\ContainerInterface;
 use Wandu\Event\Console\ListenController;
 use Wandu\Event\Console\PingController;
 use Wandu\Event\EventServiceProvider;
-use Wandu\Foundation\ConfigInterface;
+use Wandu\Foundation\DefinitionInterface;
 use Wandu\Http\Controllers\HelloWorld as HttpHelloWorld;
 use Wandu\Http\Middleware\Responsify;
 use Wandu\Q\BeanstalkdQueueServiceProvider;
 use Wandu\Router\Router;
 use Wandu\Router\RouterServiceProvider;
 
-return new class implements ConfigInterface
+return new class implements DefinitionInterface
 {
     /**
      * @param \Wandu\DI\ContainerInterface $app
      */
     public function providers(ContainerInterface $app)
     {
-        $app['config'] = new DotConfig([]);
+        $app->instance(Config::class, new Config([]));
+        $app->alias(ConfigInterface::class, Config::class);
+        $app->alias('config', Config::class);
+        
         $app->register(new RouterServiceProvider());
         $app->register(new EventServiceProvider());
         $app->register(new BeanstalkdQueueServiceProvider());
