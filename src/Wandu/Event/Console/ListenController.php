@@ -9,6 +9,9 @@ class ListenController extends Controller
 {
     const EXECUTE_TIMEOUT = 2;
 
+    /** @var string */
+    protected $description = "Listen queued events";
+    
     /**
      * @param \Wandu\Q\Queue $queue
      * @param \Wandu\Event\Dispatcher $dispatcher

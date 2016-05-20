@@ -8,6 +8,13 @@ use Wandu\Q\Queue;
 
 class PingController extends Controller
 {
+    /** @var string */
+    protected $description = "Queue a \"Ping\" event for testing";
+
+    /**
+     * @param \Wandu\Q\Queue $queue
+     * @param \Wandu\Event\Dispatcher $dispatcher
+     */
     public function __construct(Queue $queue, Dispatcher $dispatcher)
     {
         $this->queue = $queue;

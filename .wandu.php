@@ -40,10 +40,8 @@ return new class implements DefinitionInterface
         $app->register(new KernelServiceProvider());
         $app->register(new HttpServiceProvider()); // HttpRouterKernel
         $app->register(new RouterServiceProvider()); // HttpRouterKernel
-
         $app->register(new EventServiceProvider());
         $app->register(new BeanstalkdQueueServiceProvider());
-
         $app->register(new MonologServiceProvider());
         $app->register(new DatabaseServiceProvider());
     }
