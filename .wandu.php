@@ -1,15 +1,19 @@
 <?php
 use Wandu\Config\Config;
 use Wandu\Config\Contracts\ConfigInterface;
-use Wandu\Console\Controllers\HelloWorld as ConsoleHelloWorld;
+use Wandu\Console\Controllers\HelloWandu as ConsoleHelloWorld;
 use Wandu\Console\Dispatcher;
 use Wandu\DI\ContainerInterface;
+use Wandu\Error\ErrorServiceProvider;
 use Wandu\Event\Console\ListenController;
 use Wandu\Event\Console\PingController;
 use Wandu\Event\EventServiceProvider;
-use Wandu\Foundation\DefinitionInterface;
+use Wandu\Foundation\Contracts\DefinitionInterface;
+use Wandu\Foundation\KernelServiceProvider;
 use Wandu\Http\Controllers\HelloWorld as HttpHelloWorld;
+use Wandu\Http\HttpServiceProvider;
 use Wandu\Http\Middleware\Responsify;
+use Wandu\Log\LogServiceProvider;
 use Wandu\Q\BeanstalkdQueueServiceProvider;
 use Wandu\Router\Router;
 use Wandu\Router\RouterServiceProvider;
@@ -21,13 +25,22 @@ return new class implements DefinitionInterface
      */
     public function providers(ContainerInterface $app)
     {
-        $app->instance(Config::class, new Config([]));
+        $app->instance(Config::class, new Config([
+            'debug' => true,
+            'log' => [
+                'path' => null,
+            ]
+        ]));
         $app->alias(ConfigInterface::class, Config::class);
         $app->alias('config', Config::class);
         
-        $app->register(new RouterServiceProvider());
+        $app->register(new KernelServiceProvider());
+        $app->register(new HttpServiceProvider()); // HttpRouterKernel
+        $app->register(new RouterServiceProvider()); // HttpRouterKernel
+
         $app->register(new EventServiceProvider());
         $app->register(new BeanstalkdQueueServiceProvider());
+        $app->register(new LogServiceProvider());
     }
 
     /**
