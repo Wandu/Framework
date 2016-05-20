@@ -2,20 +2,21 @@
 namespace Wandu\Foundation;
 
 use Wandu\DI\Container;
+use Wandu\Foundation\Contracts\KernelInterface;
 
 class Application extends Container
 {
     const NAME = "Wandu";
     const VERSION = "3.0.0-alpha3";
 
-    /** @var \Wandu\Foundation\KernelInterface */
+    /** @var \Wandu\Foundation\Contracts\KernelInterface */
     protected $kernel;
 
     /** @var \Wandu\Foundation\Application */
     public static $app;
 
     /**
-     * @param \Wandu\Foundation\KernelInterface $kernel
+     * @param \Wandu\Foundation\Contracts\KernelInterface $kernel
      */
     public function __construct(KernelInterface $kernel)
     {

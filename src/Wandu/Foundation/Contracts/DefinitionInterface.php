@@ -1,5 +1,5 @@
 <?php
-namespace Wandu\Foundation;
+namespace Wandu\Foundation\Contracts;
 
 use Wandu\Console\Dispatcher;
 use Wandu\DI\ContainerInterface;

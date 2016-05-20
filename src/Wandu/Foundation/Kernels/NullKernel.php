@@ -1,7 +1,7 @@
 <?php
 namespace Wandu\Foundation\Kernels;
 
-use Wandu\Foundation\KernelInterface;
+use Wandu\Foundation\Contracts\KernelInterface;
 use Wandu\DI\ContainerInterface;
 
 class NullKernel implements KernelInterface

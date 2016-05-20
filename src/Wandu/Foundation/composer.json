@@ -1,0 +1,14 @@
+{
+    "name": "wandu/foundation",
+    "keywords": ["wandu", "foundation"],
+    "license": "MIT",
+    "require": {
+        "php": ">=7.0.0",
+        "filp/whoops": "^2.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "Wandu\\Foundation\\": ""
+        }
+    }
+}

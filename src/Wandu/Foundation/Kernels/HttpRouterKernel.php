@@ -4,12 +4,18 @@ namespace Wandu\Foundation\Kernels;
 use Exception;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Wandu\Config\Contracts\ConfigInterface;
 use Wandu\DI\ContainerInterface;
-use Wandu\Foundation\DefinitionInterface;
-use Wandu\Foundation\KernelInterface;
+use Wandu\Foundation\Bridges\WhoopsToPsr7;
+use Wandu\Foundation\Contracts\HttpErrorHandlerInterface;
+use Wandu\Foundation\Contracts\DefinitionInterface;
+use Wandu\Foundation\Contracts\KernelInterface;
+use Wandu\Http\Exception\AbstractHttpException;
 use Wandu\Http\Exception\HttpException;
-use Wandu\Http\Exception\MethodNotAllowedException;
-use Wandu\Http\Exception\NotFoundException;
+use Wandu\Http\Exception\HttpMethodNotAllowedException;
+use Wandu\Http\Exception\HttpNotFoundException;
+use Wandu\Http\Exception\InternalServerErrorException;
+use Wandu\Http\Middleware\Responsify;
 use Wandu\Http\Psr\Factory\ServerRequestFactory;
 use Wandu\Http\Psr\Response;
 use Wandu\Http\Psr\Sender\ResponseSender;
@@ -17,14 +23,15 @@ use Wandu\Http\Psr\Stream\StringStream;
 use Wandu\Router\Dispatcher;
 use Wandu\Router\Exception\MethodNotAllowedException as RouteMethodException;
 use Wandu\Router\Exception\RouteNotFoundException;
+use Throwable;
 
 class HttpRouterKernel implements KernelInterface
 {
-    /** @var \Wandu\Foundation\DefinitionInterface */
+    /** @var \Wandu\Foundation\Contracts\DefinitionInterface */
     private $config;
 
     /**
-     * @param \Wandu\Foundation\DefinitionInterface $config
+     * @param \Wandu\Foundation\Contracts\DefinitionInterface $config
      */
     public function __construct(DefinitionInterface $config)
     {
@@ -44,55 +51,51 @@ class HttpRouterKernel implements KernelInterface
      */
     public function execute(ContainerInterface $app)
     {
-        // @todo remove ErrorHandlerProvider
-        // @todo add Error handler, and Whoops pretty when debug === true in Error Handler.
-        $request = $this->createRequest($app);
+        /* @var \Wandu\Config\Contracts\ConfigInterface $config*/
+        $config = $app->get(ConfigInterface::class);
+        
+        /* @var \Psr\Http\Message\ServerRequestInterface $request */
+        $request = $app->get(ServerRequestFactory::class)->createFromGlobals();
+
         try {
             $response = $this->dispatch($app->get(Dispatcher::class), $request);
-            $app->get(ResponseSender::class)->sendToGlobal($response);
-        } catch (Exception $exception) {
-            if ($exception instanceof HttpException) {
-                $httpException = $exception;
+        } catch (AbstractHttpException $exception) {
+            /* @var \Wandu\Foundation\Contracts\HttpErrorHandlerInterface $handler */
+            $handler = $app->get(HttpErrorHandlerInterface::class);
+            $response = $handler->handle($request, $exception);
+        } catch (Throwable $exception) {
+            // if Debug Mode, make prettyfy response.
+            if ($config->get('debug', true)) {
+                /* @var \Wandu\Foundation\Bridges\WhoopsToPsr7 $prettifier */
+                $prettifier = $app->get(WhoopsToPsr7::class);
+                $response = $prettifier->responsify($exception);
             } else {
-                // if not HttpException and debug mode, exception will be prettify(by Whoops).
-                if ($app['config']->get('debug', true)) {
-                    throw $exception;
-                }
-                $httpException = new HttpException();
+                /* @var \Wandu\Foundation\Contracts\HttpErrorHandlerInterface $handler */
+                $handler = $app->get(HttpErrorHandlerInterface::class);
+                $response = $handler->handle($request, $exception);
             }
-            $handler = $app['config']->get('error.handler');
-            if ($handler) {
-                $response = $this->responsify(
-                    $app->create($handler)->handle($request, $exception),
-                    $httpException
-                );
-            } else {
-                $response = $httpException->toResponse();
-            }
-            // body is ''
             if (!$response->getBody()) {
                 $body = $response->getReasonPhrase();
                 $response = $response->withBody(new Stringstream($body));
             }
-            $app->get(ResponseSender::class)->sendToGlobal($response);
         }
-    }
+        $responify = new Responsify(\Wandu\Http\response());
+        $r = $responify->handle($request, function () use ($response) {
+            return $response;
+        });
 
-    /**
-     * @param \Wandu\DI\ContainerInterface $app
-     * @return \Psr\Http\Message\ServerRequestInterface
-     */
-    protected function createRequest(ContainerInterface $app)
-    {
-        return $app->get(ServerRequestFactory::class)->fromGlobals();
+        /* @var \Wandu\Http\Psr\Sender\ResponseSender $sender */
+        $sender = $app->get(ResponseSender::class);
+        $sender->sendToGlobal($r);
+        return 0;
     }
-
+    
     /**
      * @param \Wandu\Router\Dispatcher $dispatcher
      * @param \Psr\Http\Message\ServerRequestInterface $request
      * @return mixed
-     * @throws \Wandu\Http\Exception\MethodNotAllowedException
-     * @throws \Wandu\Http\Exception\NotFoundException
+     * @throws \Wandu\Http\Exception\HttpMethodNotAllowedException
+     * @throws \Wandu\Http\Exception\HttpNotFoundException
      */
     protected function dispatch(Dispatcher $dispatcher, ServerRequestInterface $request)
     {
@@ -100,41 +103,9 @@ class HttpRouterKernel implements KernelInterface
         try {
             return $dispatcher->dispatch($request);
         } catch (RouteNotFoundException $exception) {
-            throw new NotFoundException();
+            throw new HttpNotFoundException();
         } catch (RouteMethodException $exception) {
-            throw new MethodNotAllowedException();
+            throw new HttpMethodNotAllowedException();
         }
-    }
-
-    /**
-     * @param mixed $response
-     * @param \Wandu\Http\Exception\HttpException $exception
-     * @return \Wandu\Http\Psr\Response
-     */
-    protected function responsify($response, HttpException $exception)
-    {
-        if ($response instanceof ResponseInterface) {
-            return $response;
-        }
-        $isJson = false;
-        if (!isset($response)) {
-            $body = $exception->getReasonPhrase();
-        } elseif (!is_string($response) && !is_numeric($response)) {
-            $body = json_encode($response);
-            $isJson = true;
-        } else {
-            $body = $response;
-        }
-        $responseToReturn = new Response(
-            $exception->getStatusCode(),
-            $exception->getReasonPhrase(),
-            '1.1',
-            [],
-            new StringStream($body)
-        );
-        if ($isJson) {
-            $responseToReturn = $responseToReturn->withHeader('Content-Type', 'application/json');
-        }
-        return $responseToReturn;
     }
 }

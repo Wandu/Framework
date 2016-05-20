@@ -5,12 +5,12 @@ use Symfony\Component\Console\Application as SymfonyApplication;
 use Wandu\Console\Dispatcher;
 use Wandu\DI\ContainerInterface;
 use Wandu\Foundation\Application;
-use Wandu\Foundation\DefinitionInterface;
-use Wandu\Foundation\KernelInterface;
+use Wandu\Foundation\Contracts\DefinitionInterface;
+use Wandu\Foundation\Contracts\KernelInterface;
 
 class ConsoleKernel implements KernelInterface
 {
-    /** @var \Wandu\Foundation\DefinitionInterface */
+    /** @var \Wandu\Foundation\Contracts\DefinitionInterface */
     protected $config;
 
     public function __construct(DefinitionInterface $config)
