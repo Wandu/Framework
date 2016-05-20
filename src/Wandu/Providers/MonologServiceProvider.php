@@ -1,5 +1,5 @@
 <?php
-namespace Wandu\Log;
+namespace Wandu\Providers;
 
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
@@ -7,7 +7,7 @@ use Psr\Log\LoggerInterface;
 use Wandu\DI\ContainerInterface;
 use Wandu\DI\ServiceProviderInterface;
 
-class LogServiceProvider implements ServiceProviderInterface
+class MonologServiceProvider implements ServiceProviderInterface
 {
     public function register(ContainerInterface $app)
     {

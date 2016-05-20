@@ -4,7 +4,6 @@ use Wandu\Config\Contracts\ConfigInterface;
 use Wandu\Console\Controllers\HelloWandu as ConsoleHelloWorld;
 use Wandu\Console\Dispatcher;
 use Wandu\DI\ContainerInterface;
-use Wandu\Error\ErrorServiceProvider;
 use Wandu\Event\Console\ListenController;
 use Wandu\Event\Console\PingController;
 use Wandu\Event\EventServiceProvider;
@@ -13,7 +12,8 @@ use Wandu\Foundation\KernelServiceProvider;
 use Wandu\Http\Controllers\HelloWorld as HttpHelloWorld;
 use Wandu\Http\HttpServiceProvider;
 use Wandu\Http\Middleware\Responsify;
-use Wandu\Log\LogServiceProvider;
+use Wandu\Providers\DatabaseServiceProvider;
+use Wandu\Providers\MonologServiceProvider;
 use Wandu\Q\BeanstalkdQueueServiceProvider;
 use Wandu\Router\Router;
 use Wandu\Router\RouterServiceProvider;
@@ -27,6 +27,9 @@ return new class implements DefinitionInterface
     {
         $app->instance(Config::class, new Config([
             'debug' => true,
+            'database' => [
+                'connections' => [],
+            ],
             'log' => [
                 'path' => null,
             ]
@@ -40,7 +43,9 @@ return new class implements DefinitionInterface
 
         $app->register(new EventServiceProvider());
         $app->register(new BeanstalkdQueueServiceProvider());
-        $app->register(new LogServiceProvider());
+
+        $app->register(new MonologServiceProvider());
+        $app->register(new DatabaseServiceProvider());
     }
 
     /**
