@@ -61,12 +61,12 @@ class Route
         if (count($middlewares)) {
             $middleware = array_shift($middlewares);
             return call_user_func([
-                $loader->create($request, $middleware), 'handle'
+                $loader->create($middleware), 'handle'
             ], $request, function (ServerRequestInterface $request) use ($loader, $middlewares) {
                 return $this->dispatch($request, $loader, $middlewares);
             });
         }
-        $controllerClass = $loader->create($request, $this->className);
+        $controllerClass = $loader->create($this->className);
         return $loader->call($request, $controllerClass, $this->methodName);
     }
 }

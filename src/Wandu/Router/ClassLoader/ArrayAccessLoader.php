@@ -2,7 +2,6 @@
 namespace Wandu\Router\ClassLoader;
 
 use ArrayAccess;
-use Psr\Http\Message\ServerRequestInterface;
 use Wandu\Router\Contracts\ClassLoaderInterface;
 use Wandu\Router\Exception\HandlerNotFoundException;
 
@@ -22,7 +21,7 @@ class ArrayAccessLoader extends DefaultLoader implements ClassLoaderInterface
     /**
      * {@inheritdoc}
      */
-    public function create(ServerRequestInterface $request, $className)
+    public function create($className)
     {
         if (!isset($this->container[$className])) {
             throw new HandlerNotFoundException($className);

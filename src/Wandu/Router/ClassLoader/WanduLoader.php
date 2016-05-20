@@ -22,14 +22,12 @@ class WanduLoader implements ClassLoaderInterface
     /**
      * {@inheritdoc}
      */
-    public function create(ServerRequestInterface $request, $className)
+    public function create($className)
     {
         if (!class_exists($className)) {
             throw new HandlerNotFoundException($className);
         }
-        return $this->container->create($className, [
-            ServerRequestInterface::class => $request,
-        ]);
+        return $this->container->create($className);
     }
 
     /**

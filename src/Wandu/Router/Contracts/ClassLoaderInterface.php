@@ -6,11 +6,10 @@ use Psr\Http\Message\ServerRequestInterface;
 interface ClassLoaderInterface
 {
     /**
-     * @param \Psr\Http\Message\ServerRequestInterface $request
      * @param string $className
      * @return object
      */
-    public function create(ServerRequestInterface $request, $className);
+    public function create($className);
 
     /**
      * @param \Psr\Http\Message\ServerRequestInterface $request

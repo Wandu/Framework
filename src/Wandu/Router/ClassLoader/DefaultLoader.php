@@ -10,7 +10,7 @@ class DefaultLoader implements ClassLoaderInterface
     /**
      * {@inheritdoc}
      */
-    public function create(ServerRequestInterface $request, $className)
+    public function create($className)
     {
         if (!class_exists($className)) {
             throw new HandlerNotFoundException($className);
