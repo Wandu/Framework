@@ -1,17 +1,24 @@
 <?php
 namespace Wandu\Error;
 
-use Exception;
 use ErrorException;
+use SplQueue;
+use Throwable;
 
-class ErrorHandler
+/**
+ * @reference https://github.com/filp/whoops
+ */
+class Dispatcher
 {
     /** @var bool */
     protected $canThrowExceptions = true;
 
+    /** @var \SplQueue */
+    protected $handlers;
+    
     public function __construct()
     {
-
+        $this->handlers = new SplQueue();
     }
 
     public function boot()
@@ -21,11 +28,46 @@ class ErrorHandler
         register_shutdown_function([$this, 'handleShutdown']);
     }
 
-    public function handleException(Exception $exception)
+    /**
+     * @param \Wandu\Error\HandlerInterface $handler
+     * @return \Wandu\Error\Dispatcher
+     */
+    public function pushHandler(HandlerInterface $handler)
     {
-
+        $this->handlers->enqueue($handler);
+        return $this;
     }
 
+    /**
+     * @param \Throwable $exception
+     * @return string
+     */
+    public function handleException(Throwable $exception)
+    {
+        while (!$this->handlers->isEmpty()) {
+            /* @var \Wandu\Error\HandlerInterface $handler */
+            $handler = $this->handlers->dequeue();
+            $return = $handler->handle($exception);
+            if ($return === HandlerInterface::RETURN_EXIT) {
+                break;
+            }
+        }
+        
+        $output = ob_get_contents();
+        while (ob_get_level()) {
+            ob_end_clean();
+        }
+        return $output;
+    }
+
+    /**
+     * @param int $level
+     * @param string $message
+     * @param string $file
+     * @param int $line
+     * @return bool
+     * @throws \ErrorException
+     */
     public function handleError($level, $message, $file = null, $line = null)
     {
         if ($level & error_reporting()) {
