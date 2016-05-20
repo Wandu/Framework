@@ -79,14 +79,10 @@ class HttpRouterKernel implements KernelInterface
                 $response = $response->withBody(new Stringstream($body));
             }
         }
-        $responify = new Responsify(\Wandu\Http\response());
-        $r = $responify->handle($request, function () use ($response) {
-            return $response;
-        });
 
         /* @var \Wandu\Http\Psr\Sender\ResponseSender $sender */
         $sender = $app->get(ResponseSender::class);
-        $sender->sendToGlobal($r);
+        $sender->sendToGlobal($response);
         return 0;
     }
     
