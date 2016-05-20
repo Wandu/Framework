@@ -26,6 +26,8 @@ if (file_exists($configFile)) {
     };
 }
 
-$app = new Application(new ConsoleKernel($config));
-$app->boot();
-exit($app->execute());
+exit(
+    (new Application(
+        new ConsoleKernel($config)
+    ))->execute()
+);

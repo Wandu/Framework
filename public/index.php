@@ -25,6 +25,8 @@ if (file_exists($configFile)) {
     };
 }
 
-$app = new Application(new HttpRouterKernel($config));
-$app->boot();
-exit($app->execute());
+exit(
+    (new Application(
+        new HttpRouterKernel($config)
+    ))->execute()
+);

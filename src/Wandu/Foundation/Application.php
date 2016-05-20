@@ -40,6 +40,7 @@ class Application extends Container
      */
     public function execute()
     {
+        $this->boot();
         return $this->kernel->execute($this);
     }
 
