@@ -2,7 +2,7 @@
 use Wandu\Console\Dispatcher;
 use Wandu\DI\ContainerInterface;
 use Wandu\Foundation\Application;
-use Wandu\Foundation\DefinitionInterface;
+use Wandu\Foundation\Contracts\DefinitionInterface;
 use Wandu\Foundation\Kernels\HttpRouterKernel;
 use Wandu\Router\Router;
 
