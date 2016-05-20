@@ -12,6 +12,7 @@ class CommandProxy extends SymfonyCommand
     {
         parent::__construct($name);
         $this->command = $command;
+        $this->setDescription($command->getDescription());
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
