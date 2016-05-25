@@ -8,6 +8,8 @@ use ReflectionFunctionAbstract;
 use ReflectionObject;
 use ReflectionProperty;
 use ReflectionException;
+use Wandu\DI\Containee\ClosureContainee;
+use Wandu\DI\Containee\InstanceContainee;
 use Wandu\DI\Exception\CannotChangeException;
 use Wandu\DI\Exception\CannotFindParameterException;
 use Wandu\DI\Exception\CannotInjectException;
@@ -17,12 +19,12 @@ use Wandu\Reflection\ReflectionCallable;
 
 class Container implements ContainerInterface
 {
+    /** @var \Wandu\DI\ContaineeInterface[] */
+    protected $containees = [];
+    
     /** @var array */
     protected $keys = [];
-
-    /** @var array */
-    protected $closures = [];
-
+    
     /** @var array */
     protected $instances = [];
 
@@ -90,7 +92,7 @@ class Container implements ContainerInterface
      */
     public function has($name)
     {
-        return isset($this->keys[$name]) || class_exists($name);
+        return isset($this->keys[$name]) || array_key_exists($name, $this->containees) || class_exists($name);
     }
 
     /**
@@ -98,12 +100,16 @@ class Container implements ContainerInterface
      */
     public function destroy($name)
     {
+        if (array_key_exists($name, $this->containees)) {
+            if ($this->containees[$name]->isFrozen()) {
+                throw new CannotChangeException($name);
+            }
+        }
         if (isset($this->frozen[$name])) {
             throw new CannotChangeException($name);
         }
         unset(
             $this->keys[$name],
-            $this->closures[$name],
             $this->instances[$name],
             $this->aliases[$name],
             $this->bind[$name]
@@ -115,34 +121,36 @@ class Container implements ContainerInterface
      */
     public function get($name)
     {
-        if (!isset($this->keys[$name])) {
-            if (class_exists($name)) {
-                $this->bind($name);
-            } else {
-                throw new NullReferenceException($name);
+        if (array_key_exists($name, $this->containees)) {
+            $instance = $this->containees[$name]->create();
+        } else {
+            if (!isset($this->keys[$name])) {
+                if (class_exists($name)) {
+                    $this->bind($name);
+                } else {
+                    throw new NullReferenceException($name);
+                }
             }
-        }
-        $this->freeze($name);
-        // alias
-        if ('alias' === $key = $this->keys[$name]) {
-            return $this->get($this->aliases[$name]);
-        }
+            $this->freeze($name);
 
-        if (!isset($this->instances[$name])) {
-            switch ($key) {
-                case 'closure':
-                    $this->instances[$name] = call_user_func($this->closures[$name], $this);
-                    break;
-                case 'bind':
-                    $this->instances[$name] = $this->create($this->bind[$name]);
-                    break;
-                case 'wire':
-                    $this->instances[$name] = $this->create($this->bind[$name]);
-                    $this->inject($this->instances[$name]);
-                    break;
+            // alias
+            if ('alias' === $key = $this->keys[$name]) {
+                return $this->get($this->aliases[$name]);
             }
+
+            if (!isset($this->instances[$name])) {
+                switch ($key) {
+                    case 'bind':
+                        $this->instances[$name] = $this->create($this->bind[$name]);
+                        break;
+                    case 'wire':
+                        $this->instances[$name] = $this->create($this->bind[$name]);
+                        $this->inject($this->instances[$name]);
+                        break;
+                }
+            }
+            $instance = $this->instances[$name];
         }
-        $instance = $this->instances[$name];
         if (isset($this->extenders[$name])) {
             foreach ($this->extenders[$name] as $extender) {
                 $instance = $extender($instance);
@@ -157,8 +165,7 @@ class Container implements ContainerInterface
     public function instance($name, $value)
     {
         $this->destroy($name);
-        $this->keys[$name] = 'instance';
-        $this->instances[$name] = $value;
+        $this->containees[$name] = new InstanceContainee($value, $this);
         return $this;
     }
 
@@ -168,8 +175,7 @@ class Container implements ContainerInterface
     public function closure($name, Closure $handler)
     {
         $this->destroy($name);
-        $this->keys[$name] = 'closure';
-        $this->closures[$name] = $handler;
+        $this->containees[$name] = new ClosureContainee($handler, $this);
         return $this;
     }
 
