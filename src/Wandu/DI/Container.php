@@ -184,12 +184,16 @@ class Container implements ContainerInterface
      */
     public function bind($name, $class = null)
     {
+        $this->destroy($name);
+        $this->destroy($class);
         if (!isset($class)) {
             $class = $name;
         }
-        $this->destroy($name);
-        $this->keys[$name] = 'bind';
-        $this->bind[$name] = $class;
+        $this->keys[$class] = 'bind';
+        $this->bind[$class] = $class;
+        if ($name !== $class) {
+            $this->alias($name, $class);
+        }
         return $this;
     }
 

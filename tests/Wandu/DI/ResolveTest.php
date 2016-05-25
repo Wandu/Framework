@@ -13,6 +13,23 @@ use Wandu\DI\Stub\Resolve\ReplacedDepend;
 
 class ResolveTest extends TestCase
 {
+    public function testBind()
+    {
+        $this->container->bind(DependInterface::class, AutoResolvedDepend::class);
+
+        $this->assertInstanceOf(
+            AutoResolvedDepend::class,
+            $instance1 = $this->container->get(AutoResolvedDepend::class)
+        );
+
+        $this->assertInstanceOf(
+            AutoResolvedDepend::class,
+            $instance2 = $this->container->get(DependInterface::class)
+        );
+        
+        $this->assertSame($instance1, $instance2);
+    }
+
     public function testCreateFail()
     {
         try {
@@ -22,7 +39,7 @@ class ResolveTest extends TestCase
             $this->assertEquals(CreateNormalExample::class, $e->getClass());
         }
     }
-
+    
     public function testCreateSuccess()
     {
         $this->container->bind(DependInterface::class, AutoResolvedDepend::class);
