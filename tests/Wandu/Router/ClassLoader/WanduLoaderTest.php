@@ -16,32 +16,27 @@ class WanduLoaderTest extends PHPUnit_Framework_TestCase
 
     public function testCreate()
     {
-        $request = Mockery::mock(ServerRequestInterface::class);
-
         $container = Mockery::mock(ContainerInterface::class);
-        $container->shouldReceive('create')->with(StubInLoader::class, [
-            ServerRequestInterface::class => $request,
-        ])->once()->andReturn(new StubInLoader());
+        $container->shouldReceive('create')->with(StubInLoader::class)
+            ->once()->andReturn(new StubInLoader());
 
         $loader = new WanduLoader($container);
 
         $this->assertInstanceOf(
             StubInLoader::class,
-            $loader->create($request, StubInLoader::class)
+            $loader->create(StubInLoader::class)
         );
     }
 
     public function testCreateFail()
     {
-        $request = Mockery::mock(ServerRequestInterface::class);
-
         $container = Mockery::mock(ContainerInterface::class);
         $container->shouldReceive('create')->never();
 
         $loader = new WanduLoader($container);
 
         try {
-            $loader->create($request, 'ThereIsNoClass');
+            $loader->create('ThereIsNoClass');
             $this->fail();
         } catch (HandlerNotFoundException $exception) {
             $this->assertEquals('ThereIsNoClass', $exception->getClassName());
