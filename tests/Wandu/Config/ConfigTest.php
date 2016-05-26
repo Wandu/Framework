@@ -2,7 +2,9 @@
 namespace Wandu\Config;
 
 use PHPUnit_Framework_TestCase;
+use Wandu\Config\Contracts\ConfigInterface;
 use Wandu\Config\Exception\NotAllowedMethodException;
+use InvalidArgumentException;
 
 class ConfigTest extends PHPUnit_Framework_TestCase
 {
@@ -213,6 +215,36 @@ class ConfigTest extends PHPUnit_Framework_TestCase
             $this->fail();
         } catch (NotAllowedMethodException $e) {
         }
-        
+    }
+    
+    public function testSubset()
+    {
+        $config = new Config([
+            'foo' => 'foo string!',
+            'bar' => [
+                'bar1' => 'bar1 string!',
+                'bar2' => 'bar2 string!',
+            ],
+            'null' => null,
+        ]);
+
+        $this->assertInstanceOf(ConfigInterface::class, $config->subset('bar'));
+        $this->assertEquals([
+            'bar1' => 'bar1 string!',
+            'bar2' => 'bar2 string!',
+        ], $config->subset('bar')->get(''));
+
+        try {
+            $config->subset('foo');
+            $this->fail();
+        } catch (InvalidArgumentException $e) {}
+        try {
+            $config->subset('null');
+            $this->fail();
+        } catch (InvalidArgumentException $e) {}
+        try {
+            $config->subset('bar.unknown');
+            $this->fail();
+        } catch (InvalidArgumentException $e) {}
     }
 }

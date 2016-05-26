@@ -3,6 +3,7 @@ namespace Wandu\Config;
 
 use Wandu\Config\Contracts\ConfigInterface;
 use Wandu\Config\Exception\NotAllowedMethodException;
+use InvalidArgumentException;
 
 class Config implements ConfigInterface
 {
@@ -122,6 +123,18 @@ class Config implements ConfigInterface
             }
         }
         return true;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function subset($name)
+    {
+        $subset = $this->get($name);
+        if (!is_array($subset)) {
+            throw new InvalidArgumentException('subset must be an array.');
+        }
+        return new static($subset);
     }
 
     /**

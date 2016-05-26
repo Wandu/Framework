@@ -12,6 +12,12 @@ interface ConfigInterface extends ArrayAccess
 
     /**
      * @param string $name
+     * @return \Wandu\Config\Contracts\ConfigInterface
+     */
+    public function subset($name);
+    
+    /**
+     * @param string $name
      * @param mixed $default
      * @return mixed
      */
