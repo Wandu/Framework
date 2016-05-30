@@ -9,6 +9,11 @@ interface ContaineeInterface
     public function isFrozen();
 
     /**
+     * @return \Wandu\DI\ContaineeInterface
+     */
+    public function freeze();
+    
+    /**
      * @return mixed
      */
     public function create();

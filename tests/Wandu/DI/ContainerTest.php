@@ -96,7 +96,7 @@ class ContainerTest extends TestCase
         }
     }
 
-    public function testFrozon()
+    public function testFrozen()
     {
         $this->container->instance('instance', 'instance string');
         $this->container->closure('closure', function () {

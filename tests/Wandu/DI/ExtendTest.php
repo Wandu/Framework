@@ -59,6 +59,27 @@ class ExtendTest extends TestCase
         $this->assertSame($renderer, $this->container['xml.other.alias']);
     }
 
+    public function testAliasExtendPropagation()
+    {
+        $this->container = new Container();
+
+        // extend first,,
+        $this->container->extend('xml.other.alias', function ($item) {
+            $item->contents = 'alias contents';
+            return $item;
+        });
+
+        $this->container->instance('xml', $renderer = new XmlRenderer);
+
+        $this->container->alias('xml.alias', 'xml');
+        $this->container->alias('xml.other.alias', 'xml.alias');
+        
+        $this->assertEquals('alias contents', $this->container['xml']->contents);
+
+        // and equal :-)
+        $this->assertSame($renderer, $this->container['xml.other.alias']);
+    }
+
     public function testExtendUnknown()
     {
         $this->container->extend('unknown', function ($item) {

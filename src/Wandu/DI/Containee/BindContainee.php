@@ -1,18 +1,17 @@
 <?php
 namespace Wandu\DI\Containee;
 
-use Closure;
 use Wandu\DI\ContainerInterface;
 
-class ClosureContainee extends ContaineeAbstract
+class BindContainee extends ContaineeAbstract
 {
-    /** @var mixed */
+    /** @var object */
     protected $caching;
     
-    public function __construct($name, Closure $handler, ContainerInterface $container)
+    public function __construct($name, $className, ContainerInterface $container)
     {
         $this->name = $name;
-        $this->handler = $handler;
+        $this->className = $className;
         $this->container = $container;
     }
 
@@ -23,7 +22,7 @@ class ClosureContainee extends ContaineeAbstract
     {
         $this->frozen = true;
         if (!isset($this->caching)) {
-            $this->caching = $this->handler->__invoke($this->container);
+            $this->caching = $this->container->create($this->className);
         }
         return $this->caching;
     }

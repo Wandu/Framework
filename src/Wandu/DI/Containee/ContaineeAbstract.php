@@ -5,6 +5,9 @@ use Wandu\DI\ContaineeInterface;
 
 abstract class ContaineeAbstract implements ContaineeInterface
 {
+    /** @var string */
+    protected $name;
+    
     /** @var bool */
     protected $frozen = false;
 
@@ -14,5 +17,11 @@ abstract class ContaineeAbstract implements ContaineeInterface
     public function isFrozen()
     {
         return $this->frozen;
+    }
+
+    public function freeze()
+    {
+        $this->frozen = true;
+        return $this;
     }
 }

@@ -8,8 +8,11 @@ use ReflectionFunctionAbstract;
 use ReflectionObject;
 use ReflectionProperty;
 use ReflectionException;
+use Wandu\DI\Containee\AliasContainee;
+use Wandu\DI\Containee\BindContainee;
 use Wandu\DI\Containee\ClosureContainee;
 use Wandu\DI\Containee\InstanceContainee;
+use Wandu\DI\Containee\WireContainee;
 use Wandu\DI\Exception\CannotChangeException;
 use Wandu\DI\Exception\CannotFindParameterException;
 use Wandu\DI\Exception\CannotInjectException;
@@ -22,26 +25,14 @@ class Container implements ContainerInterface
     /** @var \Wandu\DI\ContaineeInterface[] */
     protected $containees = [];
     
-    /** @var array */
-    protected $keys = [];
-    
-    /** @var array */
-    protected $instances = [];
-
-    /** @var array */
-    protected $aliases = [];
-
-    /** @var array */
-    protected $bind = [];
-
-    /** @var array ref. Pimple */
-    protected $frozen = [];
+    /** @var \Wandu\DI\ServiceProviderInterface[] */
+    protected $providers = [];
 
     /** @var array */
     protected $extenders = [];
-
-    /** @var \Wandu\DI\ServiceProviderInterface[] */
-    protected $providers = [];
+    
+    /** @var array */
+    protected $indexOfAliases = [];
 
     public function __construct()
     {
@@ -92,7 +83,7 @@ class Container implements ContainerInterface
      */
     public function has($name)
     {
-        return isset($this->keys[$name]) || array_key_exists($name, $this->containees) || class_exists($name);
+        return array_key_exists($name, $this->containees) || class_exists($name);
     }
 
     /**
@@ -105,15 +96,7 @@ class Container implements ContainerInterface
                 throw new CannotChangeException($name);
             }
         }
-        if (isset($this->frozen[$name])) {
-            throw new CannotChangeException($name);
-        }
-        unset(
-            $this->keys[$name],
-            $this->instances[$name],
-            $this->aliases[$name],
-            $this->bind[$name]
-        );
+        unset($this->containees[$name]);
     }
 
     /**
@@ -121,39 +104,27 @@ class Container implements ContainerInterface
      */
     public function get($name)
     {
-        if (array_key_exists($name, $this->containees)) {
-            $instance = $this->containees[$name]->create();
-        } else {
-            if (!isset($this->keys[$name])) {
-                if (class_exists($name)) {
-                    $this->bind($name);
-                } else {
-                    throw new NullReferenceException($name);
-                }
+        if (!array_key_exists($name, $this->containees)) {
+            if (class_exists($name)) {
+                $this->bind($name);
+            } else {
+                throw new NullReferenceException($name);
             }
-            $this->freeze($name);
-
-            // alias
-            if ('alias' === $key = $this->keys[$name]) {
-                return $this->get($this->aliases[$name]);
-            }
-
-            if (!isset($this->instances[$name])) {
-                switch ($key) {
-                    case 'bind':
-                        $this->instances[$name] = $this->create($this->bind[$name]);
-                        break;
-                    case 'wire':
-                        $this->instances[$name] = $this->create($this->bind[$name]);
-                        $this->inject($this->instances[$name]);
-                        break;
-                }
-            }
-            $instance = $this->instances[$name];
         }
+        $instance = $this->containees[$name]->create();
         if (isset($this->extenders[$name])) {
             foreach ($this->extenders[$name] as $extender) {
                 $instance = $extender($instance);
+            }
+        }
+        // extend propagation
+        $aliasName = $name;
+        while (isset($this->indexOfAliases[$aliasName])) {
+            $aliasName = $this->indexOfAliases[$aliasName];
+            if (isset($this->extenders[$aliasName])) {
+                foreach ($this->extenders[$aliasName] as $extender) {
+                    $instance = $extender($instance);
+                }
             }
         }
         return $instance;
@@ -165,8 +136,8 @@ class Container implements ContainerInterface
     public function instance($name, $value)
     {
         $this->destroy($name);
-        $this->containees[$name] = new InstanceContainee($value, $this);
-        return $this;
+        $this->containees[$name] = new InstanceContainee($name, $value, $this);
+        return $this; // will be change
     }
 
     /**
@@ -175,8 +146,8 @@ class Container implements ContainerInterface
     public function closure($name, Closure $handler)
     {
         $this->destroy($name);
-        $this->containees[$name] = new ClosureContainee($handler, $this);
-        return $this;
+        $this->containees[$name] = new ClosureContainee($name, $handler, $this);
+        return $this; // will be change
     }
 
     /**
@@ -189,8 +160,7 @@ class Container implements ContainerInterface
         if (!isset($class)) {
             $class = $name;
         }
-        $this->keys[$class] = 'bind';
-        $this->bind[$class] = $class;
+        $this->containees[$class] = new BindContainee($name, $class, $this);
         if ($name !== $class) {
             $this->alias($name, $class);
         }
@@ -202,9 +172,9 @@ class Container implements ContainerInterface
      */
     public function alias($name, $origin)
     {
+        $this->indexOfAliases[$origin] = $name;
         $this->destroy($name);
-        $this->keys[$name] = 'alias';
-        $this->aliases[$name] = $origin;
+        $this->containees[$name] = new AliasContainee($name, $origin, $this);
         return $this;
     }
 
@@ -213,8 +183,15 @@ class Container implements ContainerInterface
      */
     public function wire($name, $class = null)
     {
-        $this->bind($name, $class);
-        $this->keys[$name] = 'wire';
+        $this->destroy($name);
+        $this->destroy($class);
+        if (!isset($class)) {
+            $class = $name;
+        }
+        $this->containees[$class] = new WireContainee($name, $class, $this);
+        if ($name !== $class) {
+            $this->alias($name, $class);
+        }
         return $this;
     }
 
@@ -223,10 +200,6 @@ class Container implements ContainerInterface
      */
     public function extend($name, Closure $handler)
     {
-        if (isset($this->aliases[$name])) {
-            $this->extend($this->aliases[$name], $handler);
-            return $this;
-        }
         if (!isset($this->extenders[$name])) {
             $this->extenders[$name] = [];
         }
@@ -249,7 +222,7 @@ class Container implements ContainerInterface
      */
     public function freeze($name)
     {
-        $this->frozen[$name] = true;
+        $this->containees[$name]->freeze();
         return $this;
     }
 
