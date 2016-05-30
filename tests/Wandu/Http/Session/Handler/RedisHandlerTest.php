@@ -2,65 +2,43 @@
 namespace Wandu\Http\Session\Handler;
 
 use Mockery;
-use PHPUnit_Framework_TestCase;
 use Predis\Client;
+use Predis\Connection\ConnectionException;
+use Wandu\Http\Session\HandlerTestCase;
 
-class RedisHandlerTest extends PHPUnit_Framework_TestCase
+class RedisHandlerTest extends HandlerTestCase
 {
-    /** @var \Mockery\Mock */
+    /** @var \Predis\Client */
     protected $client;
-
-    /** @var \Wandu\Http\Session\Adapter\RedisAdapter */
-    protected $adapter;
-
+    
     public function setUp()
     {
-        $this->client = Mockery::mock(Client::class);
+        $this->client = new Client();
+        try {
+            $this->client->ping();
+        } catch (ConnectionException $e) {
+            $this->markTestSkipped('cannot redis connection!');
+        }
         $this->adapter = new RedisHandler($this->client);
     }
 
     public function tearDown()
     {
-        parent::tearDown();
+        $this->client->flushall();
     }
 
-    public function testEmptySession()
+    /**
+     * {@inheritdoc}
+     */
+    public function testGarbageCollection()
     {
-        $this->client->shouldReceive('get')->andReturn('');
-
-        if (!isset($this->adapter)) {
-            $this->markTestSkipped('there is no adapter! :-)');
-        }
-        $session = $this->adapter->read(sha1(uniqid()));
-
-        $this->assertEquals('', $session);
+        // test 1 second.
+        $this->adapter = new RedisHandler($this->client, 1);
+        parent::testGarbageCollection();
     }
 
-    public function testWriteSession()
+    protected function getCountOfSessionFiles()
     {
-        if (!isset($this->adapter)) {
-            $this->markTestSkipped('there is no adapter! :-)');
-        }
-        $sessionId = sha1(uniqid());
-
-        $this->client->shouldReceive('set')->with("wandu.http.sess.{$sessionId}", serialize([
-            'hello' => 'world',
-            'what' => 'um..'
-        ]));
-        $this->client->shouldReceive('expire')->with("wandu.http.sess.{$sessionId}", 1800);
-        $this->client->shouldReceive('del')->with("wandu.http.sess.{$sessionId}");
-        $this->client->shouldReceive('get')->andReturn([]);
-
-        // write
-//        $this->adapter->write($sessionId, [
-//            'hello' => 'world',
-//            'what' => 'um..'
-//        ]);
-
-        // destroy
-        $this->adapter->destroy($sessionId);
-
-        // then blank
-//        $this->assertEquals([], $this->adapter->read($sessionId));
+        return count($this->client->keys('wandu*'));
     }
 }
