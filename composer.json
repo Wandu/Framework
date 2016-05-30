@@ -20,7 +20,8 @@
         "phpunit/phpunit": "^5.3",
         "mockery/mockery": "^0.9.4",
         "pda/pheanstalk": "^3.1",
-        "aws/aws-sdk-php": "^3.18"
+        "aws/aws-sdk-php": "^3.18",
+        "predis/predis": "^1.0"
     },
     "autoload": {
         "psr-4": {
@@ -47,6 +48,7 @@
         "wandu/tempy": "self.version"
     },
     "suggest": {
+        "predis/predis": "for Redis session in Wandu/Http",
         "aws/aws-sdk-php": "for SQS queue in Wandu/Q",
         "pda/pheanstalk": "for Beanstalkd queue in Wandu/Q"
     }
