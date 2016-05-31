@@ -30,8 +30,8 @@ composer require wandu/di
 
 - Chaining Methods
     1. [freeze](#1-freeze)
-    1. [wire](#1-wire)
-    1. [factory](#1-factory)
+    1. [wire](#2-wire)
+    1. [factory](#3-factory)
 
 - Service Provider
     1. [register](#1-register)
@@ -55,7 +55,6 @@ composer require wandu/di
 ### Simple Example
 
 ```php
-
 $container = new \Wandu\DI\Container();
 
 $container->instance('config', [
@@ -104,7 +103,6 @@ Use this method when you inject a object to the **Container**. This `instance` m
 **Example**
 
 ```php
-
 $container = new \Wandu\DI\Container();
 
 $container->instance('config1', [
@@ -139,7 +137,6 @@ This `closure` method create the object when call this object of name.
 **Example**
 
 ```php
-
 $container = new \Wandu\DI\Container();
 
 $container->closure(DbAdapterInterface::class, function () {
@@ -160,7 +157,6 @@ Auto Resolve를 위한 메서드입니다. 생성자 전체가 타입힌트가 �
 **Example**
 
 ```php
-
 $container = new \Wandu\DI\Container();
 
 $container->bind(DbAdapterInterface::class, MySqlAdapter::class);
@@ -186,7 +182,6 @@ $this->assertSame($container[DbAdapterInterface::class], $container[MySqlAdapter
 **Example**
 
 ```php
-
 $container = new \Wandu\DI\Container();
 
 $container->bind(DbAdapterInterface::class, MySqlAdapter::class);
@@ -203,8 +198,8 @@ $this->assertInstanceOf(
 ### Chaining Methods
 
 1. [freeze](#1-freeze)
-1. [wire](#1-wire)
-1. [factory](#1-factory)
+1. [wire](#2-wire)
+1. [factory](#3-factory)
 
 #### 1. Freeze
 

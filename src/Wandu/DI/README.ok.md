@@ -30,8 +30,8 @@ composer require wandu/di
 
 - Chaining Methods
     1. [freeze](#1-freeze)
-    1. [wire](#1-wire)
-    1. [factory](#1-factory)
+    1. [wire](#2-wire)
+    1. [factory](#3-factory)
 
 - Service Provider
     1. [register](#1-register)
@@ -108,8 +108,8 @@ Auto Resolve를 위한 메서드입니다. 생성자 전체가 타입힌트가 �
 ### Chaining Methods
 
 1. [freeze](#1-freeze)
-1. [wire](#1-wire)
-1. [factory](#1-factory)
+1. [wire](#2-wire)
+1. [factory](#3-factory)
 
 #### 1. Freeze
 
