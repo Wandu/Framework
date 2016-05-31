@@ -14,7 +14,7 @@ class DatabaseServiceProvider implements ServiceProviderInterface
     {
         $app->closure(Manager::class, function (ContainerInterface $app) {
             $capsule = new Manager;
-            foreach ($app['config']->get('database.connections') as $name => $connection) {
+            foreach ($app['config']->get('database.connections', []) as $name => $connection) {
                 $capsule->addConnection($connection, $name);
             }
             return $capsule;

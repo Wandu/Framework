@@ -1,5 +1,5 @@
 <?php
-namespace Wandu\Http\Middleware;
+namespace Wandu\Router\Middleware;
 
 use Closure;
 use Generator;

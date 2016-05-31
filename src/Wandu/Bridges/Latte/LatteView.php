@@ -1,5 +1,5 @@
 <?php
-namespace Festiv\View;
+namespace Wandu\Bridges\Latte;
 
 use Latte\Engine;
 use Latte\Loaders\FileLoader;

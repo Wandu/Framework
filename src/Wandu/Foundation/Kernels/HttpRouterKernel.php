@@ -1,29 +1,26 @@
 <?php
 namespace Wandu\Foundation\Kernels;
 
-use Exception;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Throwable;
 use Wandu\Config\Contracts\ConfigInterface;
 use Wandu\DI\ContainerInterface;
 use Wandu\Foundation\Bridges\WhoopsToPsr7;
-use Wandu\Foundation\Contracts\HttpErrorHandlerInterface;
 use Wandu\Foundation\Contracts\DefinitionInterface;
+use Wandu\Foundation\Contracts\HttpErrorHandlerInterface;
 use Wandu\Foundation\Contracts\KernelInterface;
 use Wandu\Http\Exception\AbstractHttpException;
-use Wandu\Http\Exception\HttpException;
 use Wandu\Http\Exception\HttpMethodNotAllowedException;
 use Wandu\Http\Exception\HttpNotFoundException;
-use Wandu\Http\Exception\InternalServerErrorException;
-use Wandu\Http\Middleware\Responsify;
+use Wandu\Http\Psr\Factory\ResponseFactory;
 use Wandu\Http\Psr\Factory\ServerRequestFactory;
-use Wandu\Http\Psr\Response;
 use Wandu\Http\Psr\Sender\ResponseSender;
 use Wandu\Http\Psr\Stream\StringStream;
 use Wandu\Router\Dispatcher;
 use Wandu\Router\Exception\MethodNotAllowedException as RouteMethodException;
 use Wandu\Router\Exception\RouteNotFoundException;
-use Throwable;
+use Wandu\Router\Middleware\Responsify;
 
 class HttpRouterKernel implements KernelInterface
 {
@@ -78,6 +75,13 @@ class HttpRouterKernel implements KernelInterface
                 $body = $response->getReasonPhrase();
                 $response = $response->withBody(new Stringstream($body));
             }
+        }
+
+        // apply responsify
+        if (!($response instanceof ResponseInterface)) {
+            $response = $app[Responsify::class]->handle($request, function () use ($response) {
+                return $response;
+            });
         }
 
         /* @var \Wandu\Http\Psr\Sender\ResponseSender $sender */

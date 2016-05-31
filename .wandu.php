@@ -1,4 +1,5 @@
 <?php
+use Wandu\Bridges\Latte\LatteServiceProvider;
 use Wandu\Config\Config;
 use Wandu\Config\Contracts\ConfigInterface;
 use Wandu\Console\Controllers\HelloWandu as ConsoleHelloWorld;
@@ -9,12 +10,11 @@ use Wandu\Event\Console\PingController;
 use Wandu\Event\EventServiceProvider;
 use Wandu\Foundation\Contracts\DefinitionInterface;
 use Wandu\Foundation\KernelServiceProvider;
-use Wandu\Http\Controllers\HelloWorld as HttpHelloWorld;
 use Wandu\Http\HttpServiceProvider;
-use Wandu\Http\Middleware\Responsify;
 use Wandu\Providers\DatabaseServiceProvider;
 use Wandu\Providers\MonologServiceProvider;
 use Wandu\Q\BeanstalkdQueueServiceProvider;
+use Wandu\Router\Controllers\HelloWorldController;
 use Wandu\Router\Router;
 use Wandu\Router\RouterServiceProvider;
 
@@ -32,6 +32,10 @@ return new class implements DefinitionInterface
             ],
             'log' => [
                 'path' => null,
+            ],
+            'view' => [
+                'path' => __DIR__ . '/views',
+                'cache' => __DIR__ . '/cache/views',
             ]
         ]));
         $app->alias(ConfigInterface::class, Config::class);
@@ -44,6 +48,7 @@ return new class implements DefinitionInterface
         $app->register(new BeanstalkdQueueServiceProvider());
         $app->register(new MonologServiceProvider());
         $app->register(new DatabaseServiceProvider());
+        $app->register(new LatteServiceProvider());
     }
 
     /**
@@ -51,11 +56,7 @@ return new class implements DefinitionInterface
      */
     public function routes(Router $router)
     {
-        $router->middleware([
-            Responsify::class,
-        ], function (Router $router) {
-            $router->get('/', HttpHelloWorld::class);
-        });
+        $router->get('/', HelloWorldController::class);
     }
 
     /**

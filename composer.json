@@ -29,7 +29,8 @@
             "Publ\\": "src/Publ/"
         },
         "files" : [
-            "src/Wandu/Http/functions.php"
+            "src/Wandu/Http/functions.php",
+            "src/Wandu/View/functions.php"
         ]
     },
     "autoload-dev": {

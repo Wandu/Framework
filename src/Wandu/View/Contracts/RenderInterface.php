@@ -11,8 +11,8 @@ interface RenderInterface
 
     /**
      * @param string $template
-     * @param array $values
+     * @param array $attributes
      * @return string
      */
-    public function render($template, array $values = []);
+    public function render($template, array $attributes = []);
 }

@@ -14,11 +14,11 @@ if (is_file(__DIR__ . '/../vendor/autoload.php')) {
     require_once __DIR__ . '/../autoload.php';
 }
 
-$configFile = dirname(__DIR__) . '/.wandu.php';
-if (file_exists($configFile)) {
-    $config = require $configFile;
+$defininitionPath = dirname(__DIR__) . '/.wandu.php';
+if (file_exists($defininitionPath)) {
+    $definition = require $defininitionPath;
 } else {
-    $config = new class implements DefinitionInterface {
+    $definition = new class implements DefinitionInterface {
         public function providers(ContainerInterface $app) {}
         public function commands(Dispatcher $dispatcher) {}
         public function routes(Router $router) {}
@@ -27,6 +27,6 @@ if (file_exists($configFile)) {
 
 exit(
     (new Application(
-        new HttpRouterKernel($config)
+        new HttpRouterKernel($definition)
     ))->execute()
 );

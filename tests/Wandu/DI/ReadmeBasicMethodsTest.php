@@ -8,7 +8,6 @@ class ReadmeBasicMethodsTest extends TestCase
     public function testSimpleExample()
     {
 /* simple_example { */
-
 $container = new \Wandu\DI\Container();
 
 $container->instance('config', [
@@ -39,7 +38,6 @@ $this->assertSame(
     public function testInstanceExample()
     {
 /* instance_example { */
-
 $container = new \Wandu\DI\Container();
 
 $container->instance('config1', [
@@ -69,7 +67,6 @@ $this->assertEquals([
     public function testClosureExample()
     {
 /* closure_example { */
-
 $container = new \Wandu\DI\Container();
 
 $container->closure(DbAdapterInterface::class, function () {
@@ -87,7 +84,6 @@ $this->assertInstanceOf(
     public function testBindExample()
     {
 /* bind_example { */
-
 $container = new \Wandu\DI\Container();
 
 $container->bind(DbAdapterInterface::class, MySqlAdapter::class);
@@ -110,7 +106,6 @@ $this->assertSame($container[DbAdapterInterface::class], $container[MySqlAdapter
     public function testAliasExample()
     {
 /* alias_example { */
-
 $container = new \Wandu\DI\Container();
 
 $container->bind(DbAdapterInterface::class, MySqlAdapter::class);

@@ -12,7 +12,6 @@ use Wandu\DI\Containee\AliasContainee;
 use Wandu\DI\Containee\BindContainee;
 use Wandu\DI\Containee\ClosureContainee;
 use Wandu\DI\Containee\InstanceContainee;
-use Wandu\DI\Containee\WireContainee;
 use Wandu\DI\Exception\CannotChangeException;
 use Wandu\DI\Exception\CannotFindParameterException;
 use Wandu\DI\Exception\CannotInjectException;
