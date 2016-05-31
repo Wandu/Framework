@@ -88,7 +88,7 @@ class InjectTest extends TestCase
     public function testAutoWiring()
     {
         $this->container->bind(DependInterface::class, AutoResolvedDepend::class);
-        $this->container->wire(AutoInjectExample::class); // wire method is like auto inject + bind
+        $this->container->bind(AutoInjectExample::class)->wire(true);
 
         $this->assertInstanceOf(AutoInjectExample::class, $this->container->get(AutoInjectExample::class));
         $this->assertSame(

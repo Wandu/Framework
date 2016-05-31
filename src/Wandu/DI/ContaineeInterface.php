@@ -14,7 +14,14 @@ interface ContaineeInterface
     public function freeze();
 
     /**
+     * @param bool $enabled
      * @return \Wandu\DI\ContaineeInterface
      */
-    public function asFactory();
+    public function wire($enabled = true);
+    
+    /**
+     * @param bool $enabled
+     * @return \Wandu\DI\ContaineeInterface
+     */
+    public function factory($enabled = true);
 }

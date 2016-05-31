@@ -194,23 +194,6 @@ class Container implements ContainerInterface
     /**
      * {@inheritdoc}
      */
-    public function wire($name, $class = null)
-    {
-        $this->destroy($name);
-        $this->destroy($class);
-        if (!isset($class)) {
-            $class = $name;
-        }
-        $containee = $this->containees[$class] = new WireContainee($name, $class, $this);
-        if ($name !== $class) {
-            $this->alias($name, $class);
-        }
-        return $containee;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function extend($name, Closure $handler)
     {
         if (!array_key_exists($name, $this->extenders)) {

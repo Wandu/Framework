@@ -61,13 +61,6 @@ interface ContainerInterface extends ArrayAccess, InteropContainerInterface
 
     /**
      * @param string $name
-     * @param string $class
-     * @return \Wandu\DI\ContaineeInterface
-     */
-    public function wire($name, $class = null);
-
-    /**
-     * @param string $name
      * @param \Closure $handler
      */
     public function extend($name, Closure $handler);

@@ -5,10 +5,18 @@ use Wandu\DI\ContainerInterface;
 
 class InstanceContainee extends ContaineeAbstract
 {
-    public function __construct($name, $value, ContainerInterface $container)
+    /** @var mixed */
+    protected $source;
+    
+    /**
+     * @param string $name
+     * @param mixed $source
+     * @param \Wandu\DI\ContainerInterface $container
+     */
+    public function __construct($name, $source, ContainerInterface $container)
     {
         $this->name = $name;
-        $this->value = $value;
+        $this->source = $source;
         $this->container = $container;
     }
 
@@ -18,6 +26,15 @@ class InstanceContainee extends ContaineeAbstract
     public function get()
     {
         $this->frozen = true;
-        return $this->value;
+        if (!isset($this->caching)) {
+            $this->caching = $this->source;
+            if ($this->wireEnabled) {
+                $this->container->inject($this->caching);
+            }
+        }
+        if ($this->factoryEnabled) {
+            return clone $this->caching;
+        }
+        return $this->caching;
     }
 }

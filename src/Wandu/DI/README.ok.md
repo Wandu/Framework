@@ -54,33 +54,7 @@ composer require wandu/di
 
 ### Simple Example
 
-```php
-
-$container = new \Wandu\DI\Container();
-
-$container->instance('config', [
-    'username' => 'db_username',
-    'password' => 'db_password',
-]);
-$container->bind(DbAdapterInterface::class, MySqlAdapter::class);
-$container->closure(Client::class, function (ContainerInterface $app) {
-    return new Client(
-        $app[DbAdapterInterface::class],
-        $app['config']['username'],
-        $app['config']['password']
-    );
-});
-$container->alias('client', Client::class);
-
-$container['client']; // return Client Object
-$container[Client::class]; // return Client Object
-
-// $container['client'] === $container[Client::class]
-$this->assertSame(
-    $container['client'],
-    $container[Client::class]
-);
-```
+%% insert ../../../tests/Wandu/DI/ReadmeBasicMethodsTest.php@simple_example
 
 ## Document
 
@@ -103,32 +77,7 @@ Use this method when you inject a object to the **Container**. This `instance` m
 
 **Example**
 
-```php
-
-$container = new \Wandu\DI\Container();
-
-$container->instance('config1', [
-    'username' => 'db_username',
-    'password' => 'db_password',
-]);
-
-$this->assertEquals([
-    'username' => 'db_username',
-    'password' => 'db_password',
-], $container['config1']);
-
-// offsetSet
-$container['config2'] = [
-    'username' => 'db_username',
-    'password' => 'db_password',
-];
-
-$this->assertEquals([
-    'username' => 'db_username',
-    'password' => 'db_password',
-], $container['config2']);
-
-```
+%% insert ../../../tests/Wandu/DI/ReadmeBasicMethodsTest.php@instance_example
 
 #### 2. Closure
 
@@ -138,20 +87,7 @@ This `closure` method create the object when call this object of name.
 
 **Example**
 
-```php
-
-$container = new \Wandu\DI\Container();
-
-$container->closure(DbAdapterInterface::class, function () {
-    return new MySqlAdapter();
-});
-
-$this->assertInstanceOf(
-    DbAdapterInterface::class,
-    $container[DbAdapterInterface::class]
-);
-
-```
+%% insert ../../../tests/Wandu/DI/ReadmeBasicMethodsTest.php@closure_example
 
 #### 3. Bind
 
@@ -159,25 +95,7 @@ Auto Resolve를 위한 메서드입니다. 생성자 전체가 타입힌트가 �
 
 **Example**
 
-```php
-
-$container = new \Wandu\DI\Container();
-
-$container->bind(DbAdapterInterface::class, MySqlAdapter::class);
-
-$this->assertInstanceOf(
-    DbAdapterInterface::class,
-    $container[DbAdapterInterface::class]
-);
-$this->assertInstanceOf(
-    MySqlAdapter::class,
-    $container[MySqlAdapter::class]
-);
-
-// also same
-$this->assertSame($container[DbAdapterInterface::class], $container[MySqlAdapter::class]);
-
-```
+%% insert ../../../tests/Wandu/DI/ReadmeBasicMethodsTest.php@bind_example
 
 #### 4. Alias
 
@@ -185,20 +103,7 @@ $this->assertSame($container[DbAdapterInterface::class], $container[MySqlAdapter
 
 **Example**
 
-```php
-
-$container = new \Wandu\DI\Container();
-
-$container->bind(DbAdapterInterface::class, MySqlAdapter::class);
-$container->alias('adapter', DbAdapterInterface::class);
-
-// get by alias name
-$this->assertInstanceOf(
-    DbAdapterInterface::class,
-    $container['adapter']
-);
-
-```
+%% insert ../../../tests/Wandu/DI/ReadmeBasicMethodsTest.php@alias_example
 
 ### Chaining Methods
 
@@ -357,12 +262,12 @@ class AutoInjectExample
 {
     /**
      * @Autowired
-     * @var WanduDIStubRequiredLibraryInterface
+     * @var \Wandu\DI\Stub\RequiredLibraryInterface
      */
     private $requiredLibrary;
 
     /**
-     * @return WanduDIStubRequiredLibraryInterface
+     * @return \Wandu\DI\Stub\RequiredLibraryInterface
      */
     public function getRequiredLibrary()
     {

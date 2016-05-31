@@ -20,9 +20,20 @@ class BindContainee extends ContaineeAbstract
      */
     public function get()
     {
+        if ($this->factoryEnabled) {
+            $object = $this->container->create($this->className);
+            if ($this->wireEnabled) {
+                $this->container->inject($object);
+            }
+            return $object;
+        }
         $this->frozen = true;
         if (!isset($this->caching)) {
-            $this->caching = $this->container->create($this->className);
+            $object = $this->container->create($this->className);
+            if ($this->wireEnabled) {
+                $this->container->inject($object);
+            }
+            $this->caching = $object;
         }
         return $this->caching;
     }

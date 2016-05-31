@@ -8,8 +8,14 @@ abstract class ContaineeAbstract implements ContaineeInterface
     /** @var string */
     protected $name;
     
+    /** @var mixed */
+    protected $caching;
+    
     /** @var bool */
-    protected $factory = false;
+    protected $factoryEnabled = false;
+    
+    /** @var bool */
+    protected $wireEnabled = false;
     
     /** @var bool */
     protected $frozen = false;
@@ -34,9 +40,18 @@ abstract class ContaineeAbstract implements ContaineeInterface
     /**
      * {@inheritdoc}
      */
-    public function asFactory()
+    public function factory($enabled = true)
     {
-        $this->factory = true;
+        $this->factoryEnabled = $enabled;
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function wire($enabled = true)
+    {
+        $this->wireEnabled = $enabled;
         return $this;
     }
 }

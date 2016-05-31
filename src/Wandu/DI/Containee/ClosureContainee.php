@@ -6,9 +6,11 @@ use Wandu\DI\ContainerInterface;
 
 class ClosureContainee extends ContaineeAbstract
 {
-    /** @var mixed */
-    protected $caching;
-    
+    /**
+     * @param string $name
+     * @param \Closure $handler
+     * @param \Wandu\DI\ContainerInterface $container
+     */
     public function __construct($name, Closure $handler, ContainerInterface $container)
     {
         $this->name = $name;
@@ -22,8 +24,19 @@ class ClosureContainee extends ContaineeAbstract
     public function get()
     {
         $this->frozen = true;
+        if ($this->factoryEnabled) {
+            $object = $this->handler->__invoke($this->container);
+            if ($this->wireEnabled) {
+                $this->container->inject($object);
+            }
+            return $object;
+        }
         if (!isset($this->caching)) {
-            $this->caching = $this->handler->__invoke($this->container);
+            $object = $this->handler->__invoke($this->container);
+            if ($this->wireEnabled) {
+                $this->container->inject($object);
+            }
+            $this->caching = $object;
         }
         return $this->caching;
     }
