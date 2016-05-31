@@ -19,7 +19,7 @@ class ClosureContainee extends ContaineeAbstract
     /**
      * {@inheritdoc}
      */
-    public function create()
+    public function get()
     {
         $this->frozen = true;
         if (!isset($this->caching)) {

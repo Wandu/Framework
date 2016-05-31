@@ -9,12 +9,13 @@ class InstanceContainee extends ContaineeAbstract
     {
         $this->name = $name;
         $this->value = $value;
+        $this->container = $container;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function create()
+    public function get()
     {
         $this->frozen = true;
         return $this->value;

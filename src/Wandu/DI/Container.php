@@ -36,14 +36,19 @@ class Container implements ContainerInterface
 
     public function __construct()
     {
-        $this->instance(Container::class, $this)->freeze(Container::class);
+        $this->instance(Container::class, $this)->freeze();
 
-        $this->alias(ContainerInterface::class, Container::class)
-            ->freeze(ContainerInterface::class);
-        $this->alias(InteropContainerInterface::class, Container::class)
-            ->freeze(InteropContainerInterface::class);
-        $this->alias('container', Container::class)
-            ->freeze('container');
+        $this->alias(ContainerInterface::class, Container::class)->freeze();
+        $this->alias(InteropContainerInterface::class, Container::class)->freeze();
+        $this->alias('container', Container::class)->freeze();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function __call($name, array $arguments)
+    {
+        return $this->call($this->get($name), $arguments);
     }
 
     /**
@@ -111,33 +116,40 @@ class Container implements ContainerInterface
                 throw new NullReferenceException($name);
             }
         }
-        $instance = $this->containees[$name]->create();
-        if (isset($this->extenders[$name])) {
-            foreach ($this->extenders[$name] as $extender) {
-                $instance = $extender($instance);
-            }
-        }
-        // extend propagation
-        $aliasName = $name;
-        while (isset($this->indexOfAliases[$aliasName])) {
-            $aliasName = $this->indexOfAliases[$aliasName];
-            if (isset($this->extenders[$aliasName])) {
-                foreach ($this->extenders[$aliasName] as $extender) {
-                    $instance = $extender($instance);
-                }
-            }
+        $instance = $this->containees[$name]->get();
+        foreach ($this->getExtenders($name) as $extender) {
+            $instance = $extender->__invoke($instance);
         }
         return $instance;
     }
 
+    /**
+     * @param string $name
+     * @return \Closure[]
+     */
+    protected function getExtenders($name)
+    {
+        $extenders = [];
+        if (isset($this->extenders[$name])) {
+            $extenders = array_merge($extenders, $this->extenders[$name]);
+        }
+
+        // extend propagation
+        if (isset($this->indexOfAliases[$name])) {
+            foreach ($this->indexOfAliases[$name] as $aliasName) {
+                $extenders = array_merge($extenders, $this->getExtenders($aliasName));
+            }
+        }
+        return $extenders;
+    }
+    
     /**
      * {@inheritdoc}
      */
     public function instance($name, $value)
     {
         $this->destroy($name);
-        $this->containees[$name] = new InstanceContainee($name, $value, $this);
-        return $this; // will be change
+        return $this->containees[$name] = new InstanceContainee($name, $value, $this);
     }
 
     /**
@@ -146,8 +158,20 @@ class Container implements ContainerInterface
     public function closure($name, Closure $handler)
     {
         $this->destroy($name);
-        $this->containees[$name] = new ClosureContainee($name, $handler, $this);
-        return $this; // will be change
+        return $this->containees[$name] = new ClosureContainee($name, $handler, $this);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function alias($name, $origin)
+    {
+        $this->destroy($name);
+        if (!array_key_exists($origin, $this->indexOfAliases)) {
+            $this->indexOfAliases[$origin] = [];
+        }
+        $this->indexOfAliases[$origin][] = $name;
+        return $this->containees[$name] = new AliasContainee($name, $origin, $this);
     }
 
     /**
@@ -160,22 +184,11 @@ class Container implements ContainerInterface
         if (!isset($class)) {
             $class = $name;
         }
-        $this->containees[$class] = new BindContainee($name, $class, $this);
+        $containee = $this->containees[$class] = new BindContainee($name, $class, $this);
         if ($name !== $class) {
             $this->alias($name, $class);
         }
-        return $this;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function alias($name, $origin)
-    {
-        $this->indexOfAliases[$origin] = $name;
-        $this->destroy($name);
-        $this->containees[$name] = new AliasContainee($name, $origin, $this);
-        return $this;
+        return $containee;
     }
 
     /**
@@ -188,11 +201,11 @@ class Container implements ContainerInterface
         if (!isset($class)) {
             $class = $name;
         }
-        $this->containees[$class] = new WireContainee($name, $class, $this);
+        $containee = $this->containees[$class] = new WireContainee($name, $class, $this);
         if ($name !== $class) {
             $this->alias($name, $class);
         }
-        return $this;
+        return $containee;
     }
 
     /**
@@ -200,11 +213,10 @@ class Container implements ContainerInterface
      */
     public function extend($name, Closure $handler)
     {
-        if (!isset($this->extenders[$name])) {
+        if (!array_key_exists($name, $this->extenders)) {
             $this->extenders[$name] = [];
         }
         $this->extenders[$name][] = $handler;
-        return $this;
     }
 
     /**
@@ -214,16 +226,25 @@ class Container implements ContainerInterface
     {
         $provider->register($this);
         $this->providers[] = $provider;
-        return $this;
     }
 
+    /**
+     * {@inheritdoc}
+     */
+    public function boot()
+    {
+        foreach ($this->providers as $provider) {
+            $provider->boot($this);
+        }
+        return $this;
+    }
+    
     /**
      * {@inheritdoc}
      */
     public function freeze($name)
     {
         $this->containees[$name]->freeze();
-        return $this;
     }
 
     /**
@@ -416,24 +437,5 @@ class Container implements ContainerInterface
             }
         }
         return $arrayToReturn;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function __call($name, array $arguments)
-    {
-        return $this->call($this->get($name), $arguments);
-    }
-
-    /**
-     * @return self
-     */
-    public function boot()
-    {
-        foreach ($this->providers as $provider) {
-            $provider->boot($this);
-        }
-        return $this;
     }
 }

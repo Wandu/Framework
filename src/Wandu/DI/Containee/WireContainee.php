@@ -1,14 +1,12 @@
 <?php
 namespace Wandu\DI\Containee;
 
-use Wandu\DI\ContainerInterface;
-
 class WireContainee extends BindContainee
 {
     /**
      * {@inheritdoc}
      */
-    public function create()
+    public function get()
     {
         $this->frozen = true;
         if (!isset($this->caching)) {

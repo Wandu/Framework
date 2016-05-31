@@ -9,6 +9,9 @@ abstract class ContaineeAbstract implements ContaineeInterface
     protected $name;
     
     /** @var bool */
+    protected $factory = false;
+    
+    /** @var bool */
     protected $frozen = false;
 
     /**
@@ -19,9 +22,21 @@ abstract class ContaineeAbstract implements ContaineeInterface
         return $this->frozen;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function freeze()
     {
         $this->frozen = true;
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function asFactory()
+    {
+        $this->factory = true;
         return $this;
     }
 }

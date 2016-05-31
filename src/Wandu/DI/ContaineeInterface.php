@@ -4,17 +4,17 @@ namespace Wandu\DI;
 interface ContaineeInterface
 {
     /**
-     * @return bool
+     * @return mixed
      */
-    public function isFrozen();
+    public function get();
 
     /**
      * @return \Wandu\DI\ContaineeInterface
      */
     public function freeze();
-    
+
     /**
-     * @return mixed
+     * @return \Wandu\DI\ContaineeInterface
      */
-    public function create();
+    public function asFactory();
 }

@@ -9,6 +9,13 @@ interface ContainerInterface extends ArrayAccess, InteropContainerInterface
 {
     /**
      * @param string $name
+     * @param array $arguments
+     * @return mixed
+     */
+    public function __call($name, array $arguments);
+
+    /**
+     * @param string $name
      * @return mixed
      */
     public function get($name);
@@ -27,55 +34,55 @@ interface ContainerInterface extends ArrayAccess, InteropContainerInterface
     /**
      * @param string $name
      * @param mixed $value
-     * @return self
+     * @return \Wandu\DI\ContaineeInterface
      */
     public function instance($name, $value);
 
     /**
      * @param string $name
      * @param \Closure $handler
-     * @return self
+     * @return \Wandu\DI\ContaineeInterface
      */
     public function closure($name, Closure $handler);
 
     /**
-     * @param string $name
+     * @param string|array $name
      * @param string $origin
-     * @return self
+     * @return \Wandu\DI\ContaineeInterface
      */
     public function alias($name, $origin);
 
     /**
      * @param string $name
-     * @param \Closure $handler
-     * @return self
-     */
-    public function extend($name, Closure $handler);
-
-
-    /**
-     * @param \Wandu\DI\ServiceProviderInterface $provider
-     * @return self
-     */
-    public function register(ServiceProviderInterface $provider);
-
-    /**
-     * @param string $name
      * @param string $class
-     * @return self
+     * @return \Wandu\DI\ContaineeInterface
      */
     public function bind($name, $class = null);
 
     /**
      * @param string $name
      * @param string $class
-     * @return self
+     * @return \Wandu\DI\ContaineeInterface
      */
     public function wire($name, $class = null);
 
     /**
+     * @param string $name
+     * @param \Closure $handler
+     */
+    public function extend($name, Closure $handler);
+    
+    /**
+     * @param \Wandu\DI\ServiceProviderInterface $provider
+     */
+    public function register(ServiceProviderInterface $provider);
+
+    /**
+     */
+    public function boot();
+
+    /**
      * @param $name
-     * @return self
      */
     public function freeze($name);
 
@@ -98,11 +105,4 @@ interface ContainerInterface extends ArrayAccess, InteropContainerInterface
      * @param array $properties
      */
     public function inject($object, array $properties = []);
-
-    /**
-     * @param string $name
-     * @param array $arguments
-     * @return mixed
-     */
-    public function __call($name, array $arguments);
 }

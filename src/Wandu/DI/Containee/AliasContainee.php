@@ -15,7 +15,7 @@ class AliasContainee extends ContaineeAbstract
     /**
      * {@inheritdoc}
      */
-    public function create()
+    public function get()
     {
         $this->frozen = true;
         return $this->container->get($this->destination);

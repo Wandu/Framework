@@ -86,6 +86,17 @@ class ContainerTest extends TestCase
         $this->assertInstanceOf(JsonRenderer::class, $controller);
     }
 
+    public function testDestroy()
+    {
+        $this->container->instance('xml', $xml = new XmlRenderer());
+
+        $this->assertTrue($this->container->has('xml'));
+
+        $this->container->destroy('xml');
+        
+        $this->assertFalse($this->container->has('xml'));
+    }
+
     public function testGetFail()
     {
         try {
