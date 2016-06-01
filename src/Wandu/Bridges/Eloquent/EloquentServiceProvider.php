@@ -1,11 +1,11 @@
 <?php
-namespace Wandu\Providers;
+namespace Wandu\Bridges\Eloquent;
 
 use Illuminate\Database\Capsule\Manager;
 use Wandu\DI\ContainerInterface;
 use Wandu\DI\ServiceProviderInterface;
 
-class DatabaseServiceProvider implements ServiceProviderInterface
+class EloquentServiceProvider implements ServiceProviderInterface
 {
     /**
      * {@inheritdoc}

@@ -1,4 +1,5 @@
 <?php
+use Wandu\Bridges\Eloquent\EloquentServiceProvider;
 use Wandu\Bridges\Latte\LatteServiceProvider;
 use Wandu\Config\Config;
 use Wandu\Config\Contracts\ConfigInterface;
@@ -11,7 +12,6 @@ use Wandu\Event\EventServiceProvider;
 use Wandu\Foundation\Contracts\DefinitionInterface;
 use Wandu\Foundation\KernelServiceProvider;
 use Wandu\Http\HttpServiceProvider;
-use Wandu\Providers\DatabaseServiceProvider;
 use Wandu\Providers\MonologServiceProvider;
 use Wandu\Q\BeanstalkdQueueServiceProvider;
 use Wandu\Router\Controllers\HelloWorldController;
@@ -47,7 +47,7 @@ return new class implements DefinitionInterface
         $app->register(new EventServiceProvider());
         $app->register(new BeanstalkdQueueServiceProvider());
         $app->register(new MonologServiceProvider());
-        $app->register(new DatabaseServiceProvider());
+        $app->register(new EloquentServiceProvider());
         $app->register(new LatteServiceProvider());
     }
 
