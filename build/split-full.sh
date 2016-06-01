@@ -1,5 +1,5 @@
 
-TAGS="v3.0.0-alpha3"
+TAGS="v3.0.0-beta1"
 
 git subsplit init git@github.com:Wandu/Framework.git
 

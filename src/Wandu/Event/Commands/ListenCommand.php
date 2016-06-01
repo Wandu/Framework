@@ -1,11 +1,11 @@
 <?php
-namespace Wandu\Event\Console;
+namespace Wandu\Event\Commands;
 
-use Wandu\Console\Controller;
+use Wandu\Console\Command;
 use Wandu\Event\Dispatcher;
 use Wandu\Q\Queue;
 
-class ListenController extends Controller
+class ListenCommand extends Command
 {
     const EXECUTE_TIMEOUT = 2;
 

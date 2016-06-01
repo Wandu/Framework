@@ -4,11 +4,11 @@ namespace Wandu\Console\Symfony;
 use Symfony\Component\Console\Command\Command as SymfonyCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Wandu\Console\Controller;
+use Wandu\Console\Command;
 
 class CommandProxy extends SymfonyCommand
 {
-    public function __construct($name, Controller $command)
+    public function __construct($name, Command $command)
     {
         parent::__construct($name);
         $this->command = $command;

@@ -4,11 +4,10 @@ use Wandu\Bridges\Latte\LatteServiceProvider;
 use Wandu\Bridges\Monolog\MonologServiceProvider;
 use Wandu\Config\Config;
 use Wandu\Config\Contracts\ConfigInterface;
-use Wandu\Console\Controllers\HelloWandu as ConsoleHelloWorld;
 use Wandu\Console\Dispatcher;
 use Wandu\DI\ContainerInterface;
-use Wandu\Event\Console\ListenController;
-use Wandu\Event\Console\PingController;
+use Wandu\Event\Commands\ListenCommand;
+use Wandu\Event\Commands\PingCommand;
 use Wandu\Event\EventServiceProvider;
 use Wandu\Foundation\Contracts\DefinitionInterface;
 use Wandu\Foundation\KernelServiceProvider;
@@ -64,8 +63,7 @@ return new class implements DefinitionInterface
      */
     public function commands(Dispatcher $dispatcher)
     {
-        $dispatcher->command('hello', ConsoleHelloWorld::class);
-        $dispatcher->command('event:listen', ListenController::class);
-        $dispatcher->command('event:ping', PingController::class);
+        $dispatcher->command('event:listen', ListenCommand::class);
+        $dispatcher->command('event:ping', PingCommand::class);
     }
 };

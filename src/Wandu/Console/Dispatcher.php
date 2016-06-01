@@ -12,7 +12,7 @@ class Dispatcher
     /** @var \Symfony\Component\Console\Application */
     protected $application;
 
-    /** @var \Wandu\Console\Command[] */
+    /** @var \Wandu\Console\DispatchedCommand[] */
     protected $commands;
 
     public function __construct(ContainerInterface $container, SymfonyApplication $application)
@@ -25,11 +25,11 @@ class Dispatcher
     /**
      * @param string $name
      * @param string $className
-     * @return \Wandu\Console\Command
+     * @return \Wandu\Console\DispatchedCommand
      */
     public function command($name, $className)
     {
-        return $this->commands[] = new Command($name, $className);
+        return $this->commands[] = new DispatchedCommand($name, $className);
     }
 
     public function execute()

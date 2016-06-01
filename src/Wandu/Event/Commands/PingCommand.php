@@ -1,12 +1,12 @@
 <?php
-namespace Wandu\Event\Console;
+namespace Wandu\Event\Commands;
 
-use Wandu\Console\Controller;
+use Wandu\Console\Command;
 use Wandu\Event\Dispatcher;
 use Wandu\Event\Events\Ping;
 use Wandu\Q\Queue;
 
-class PingController extends Controller
+class PingCommand extends Command
 {
     /** @var string */
     protected $description = "Queue a \"Ping\" event for testing";
