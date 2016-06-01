@@ -1,6 +1,7 @@
 <?php
 use Wandu\Bridges\Eloquent\EloquentServiceProvider;
 use Wandu\Bridges\Latte\LatteServiceProvider;
+use Wandu\Bridges\Monolog\MonologServiceProvider;
 use Wandu\Config\Config;
 use Wandu\Config\Contracts\ConfigInterface;
 use Wandu\Console\Controllers\HelloWandu as ConsoleHelloWorld;
@@ -12,7 +13,6 @@ use Wandu\Event\EventServiceProvider;
 use Wandu\Foundation\Contracts\DefinitionInterface;
 use Wandu\Foundation\KernelServiceProvider;
 use Wandu\Http\HttpServiceProvider;
-use Wandu\Providers\MonologServiceProvider;
 use Wandu\Q\BeanstalkdQueueServiceProvider;
 use Wandu\Router\Controllers\HelloWorldController;
 use Wandu\Router\Router;

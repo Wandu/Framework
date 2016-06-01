@@ -1,5 +1,5 @@
 <?php
-namespace Wandu\Providers;
+namespace Wandu\Bridges\Monolog;
 
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
