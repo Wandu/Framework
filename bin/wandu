@@ -8,26 +8,27 @@ use Wandu\Foundation\Kernels\ConsoleKernel;
 use Wandu\Router\Router;
 
 if (is_file(__DIR__ . '/../vendor/autoload.php')) {
-    require_once __DIR__ . '/../vendor/autoload.php';
-} elseif (is_file(__DIR__ . '/../../../autoload.php')) {
-    require_once __DIR__ . '/../../../autoload.php';
-} elseif (is_file(__DIR__ . '/../autoload.php')) {
-    require_once __DIR__ . '/../autoload.php';
-}
-
-$configFile = getcwd() . '/.wandu.php';
-if (file_exists($configFile)) {
-    $config = require $configFile;
+    define('WANDU_PATH', realpath(__DIR__ . '/..'));
+} elseif (is_file(__DIR__ . '/../../../../vendor/autoload.php')) {
+    define('WANDU_PATH', realpath(__DIR__ . '/../../../..'));
+} elseif (is_file(__DIR__ . '/../../vendor/autoload.php')) {
+    define('WANDU_PATH', realpath(__DIR__ . '/../../../..'));
 } else {
-    $config = new class implements DefinitionInterface {
+    define('WANDU_PATH', getcwd());
+}
+require_once WANDU_PATH . '/vendor/autoload.php';
+
+$definePath = getcwd() . '/.wandu.php';
+if (file_exists($definePath)) {
+    $definition = require $definePath;
+} else {
+    $definition = new class implements DefinitionInterface {
         public function providers(ContainerInterface $app) {}
         public function commands(Dispatcher $dispatcher) {}
         public function routes(Router $router) {}
     };
 }
 
-exit(
-    (new Application(
-        new ConsoleKernel($config)
-    ))->execute()
-);
+$app = new Application(new ConsoleKernel($definition));
+$app->instance('base_path', WANDU_PATH);
+exit($app->execute());

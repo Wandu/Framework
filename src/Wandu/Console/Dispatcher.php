@@ -3,6 +3,7 @@ namespace Wandu\Console;
 
 use Interop\Container\ContainerInterface;
 use Symfony\Component\Console\Application as SymfonyApplication;
+use Wandu\Console\Symfony\CommandProxy;
 
 class Dispatcher
 {
@@ -12,7 +13,7 @@ class Dispatcher
     /** @var \Symfony\Component\Console\Application */
     protected $application;
 
-    /** @var \Wandu\Console\DispatchedCommand[] */
+    /** @var string[] */
     protected $commands;
 
     public function __construct(ContainerInterface $container, SymfonyApplication $application)
@@ -25,17 +26,18 @@ class Dispatcher
     /**
      * @param string $name
      * @param string $className
-     * @return \Wandu\Console\DispatchedCommand
      */
-    public function command($name, $className)
+    public function add($name, $className)
     {
-        return $this->commands[] = new DispatchedCommand($name, $className);
+        $this->commands[$name] = $className;
     }
 
     public function execute()
     {
-        foreach ($this->commands as $command) {
-            $this->application->add($command->execute($this->container));
+        foreach ($this->commands as $name => $command) {
+            $this->application->add(
+                new CommandProxy($name, $this->container->get($command))
+            );
         }
     }
 }

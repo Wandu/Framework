@@ -7,12 +7,17 @@ use Wandu\Foundation\Kernels\HttpRouterKernel;
 use Wandu\Router\Router;
 
 if (is_file(__DIR__ . '/../vendor/autoload.php')) {
-    require_once __DIR__ . '/../vendor/autoload.php';
-} elseif (is_file(__DIR__ . '/../../../autoload.php')) {
-    require_once __DIR__ . '/../../../autoload.php';
-} elseif (is_file(__DIR__ . '/../autoload.php')) {
-    require_once __DIR__ . '/../autoload.php';
+    define('WANDU_PATH', realpath(__DIR__ . '/..'));
+} elseif (is_file(__DIR__ . '/../../../../vendor/autoload.php')) {
+    define('WANDU_PATH', realpath(__DIR__ . '/../../../..'));
+} elseif (is_file(__DIR__ . '/../../vendor/autoload.php')) {
+    define('WANDU_PATH', realpath(__DIR__ . '/../../../..'));
+} else {
+    header('HTTP/1.1 500 Internal Server Error');
+    echo "need to run composer install.";
+    exit;
 }
+require_once WANDU_PATH . '/vendor/autoload.php';
 
 $defininitionPath = dirname(__DIR__) . '/.wandu.php';
 if (file_exists($defininitionPath)) {
@@ -25,8 +30,6 @@ if (file_exists($defininitionPath)) {
     };
 }
 
-exit(
-    (new Application(
-        new HttpRouterKernel($definition)
-    ))->execute()
-);
+$app = new Application(new HttpRouterKernel($definition));
+$app->instance('base_path', WANDU_PATH);
+exit($app->execute());

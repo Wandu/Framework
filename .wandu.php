@@ -5,6 +5,8 @@ use Wandu\Bridges\Monolog\MonologServiceProvider;
 use Wandu\Config\Config;
 use Wandu\Config\Contracts\ConfigInterface;
 use Wandu\Console\Dispatcher;
+use Wandu\Database\Console\MigrateCommand;
+use Wandu\Database\Console\MigrateCreateCommand;
 use Wandu\DI\ContainerInterface;
 use Wandu\Event\Commands\ListenCommand;
 use Wandu\Event\Commands\PingCommand;
@@ -28,13 +30,16 @@ return new class implements DefinitionInterface
             'debug' => true,
             'database' => [
                 'connections' => [],
+                'migration' => [
+                    'path' => 'migrations',
+                ],
             ],
             'log' => [
                 'path' => null,
             ],
             'view' => [
-                'path' => __DIR__ . '/views',
-                'cache' => __DIR__ . '/cache/views',
+                'path' => 'views',
+                'cache' => 'cache/views',
             ]
         ]));
         $app->alias(ConfigInterface::class, Config::class);
@@ -63,7 +68,11 @@ return new class implements DefinitionInterface
      */
     public function commands(Dispatcher $dispatcher)
     {
-        $dispatcher->command('event:listen', ListenCommand::class);
-        $dispatcher->command('event:ping', PingCommand::class);
+        $dispatcher->add('event:listen', ListenCommand::class);
+        $dispatcher->add('event:ping', PingCommand::class);
+
+        $dispatcher->add('migrate', MigrateCommand::class);
+        $dispatcher->add('migrate:rollback', MigrateCommand::class);
+        $dispatcher->add('migrate:create', MigrateCreateCommand::class);
     }
 };

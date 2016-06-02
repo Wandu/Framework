@@ -15,6 +15,15 @@ abstract class Command
     /** @var string */
     protected $description = '';
     
+    /** @var string */
+    protected $help = '';
+    
+    /** @var array */
+    protected $arguments = [];
+    
+    /** @var array */
+    protected $options = [];
+    
     /**
      * @param \Symfony\Component\Console\Input\InputInterface $input
      * @param \Symfony\Component\Console\Output\OutputInterface $output
@@ -34,6 +43,30 @@ abstract class Command
     public function getDescription()
     {
         return $this->description;
+    }
+
+    /**
+     * @return string
+     */
+    public function getHelp()
+    {
+        return $this->help;
+    }
+
+    /**
+     * @return array
+     */
+    public function getArguments()
+    {
+        return $this->arguments;
+    }
+
+    /**
+     * @return array
+     */
+    public function getOptions()
+    {
+        return $this->options;
     }
     
     abstract function execute();
