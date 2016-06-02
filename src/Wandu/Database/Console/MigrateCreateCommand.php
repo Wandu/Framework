@@ -23,7 +23,7 @@ class MigrateCreateCommand extends Command
     function execute()
     {
         $name = $this->input->getArgument('name');
-        $fileName = date('YmdHis') . '_' . $name . '.php';
+        $fileName = date('ymd_His_') . $name . '.php';
         $filePath = $this->path . '/' . $fileName;
         if (file_exists($filePath) || !is_dir($this->path)) {
             throw new \InvalidArgumentException(sprintf('cannot write the file at %s.', $filePath));
