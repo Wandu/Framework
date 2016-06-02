@@ -1,24 +1,15 @@
 <?php
 namespace Wandu\Database\Console;
 
-use Wandu\Config\Contracts\ConfigInterface;
-use Wandu\Console\Command;
-
-class MigrateCreateCommand extends Command
+class MigrateCreateCommand extends MigrateCommandAbstract
 {
+    /** @var string */
+    protected $description = 'Create a migration file.';
+
     /** @var array */
     protected $arguments = [
         'name' => 'the name for the migration',
     ];
-
-    /** @var string */
-    protected $path;
-    
-    function __construct(ConfigInterface $config)
-    {
-        $this->config = $config;
-        $this->path = rtrim(WANDU_PATH . '/' . $this->config->get('database.migration.path'), '/');
-    }
 
     function execute()
     {

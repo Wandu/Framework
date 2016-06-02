@@ -7,6 +7,7 @@ use Wandu\Config\Contracts\ConfigInterface;
 use Wandu\Console\Dispatcher;
 use Wandu\Database\Console\MigrateCommand;
 use Wandu\Database\Console\MigrateCreateCommand;
+use Wandu\Database\Console\MigrateRunCommand;
 use Wandu\DI\ContainerInterface;
 use Wandu\Event\Commands\ListenCommand;
 use Wandu\Event\Commands\PingCommand;
@@ -29,7 +30,18 @@ return new class implements DefinitionInterface
         $app->instance(Config::class, new Config([
             'debug' => true,
             'database' => [
-                'connections' => [],
+                'connections' => [
+                    'default' => [
+                        'driver'    => 'mysql',
+                        'host'      => 'localhost',
+                        'database'  => 'allbus',
+                        'username'  => 'root',
+                        'password'  => 'root',
+                        'charset'   => 'utf8mb4',
+                        'collation' => 'utf8mb4_unicode_ci',
+                        'prefix'    => 'local_',
+                    ],
+                ],
                 'migration' => [
                     'path' => 'migrations',
                 ],
@@ -74,5 +86,6 @@ return new class implements DefinitionInterface
         $dispatcher->add('migrate', MigrateCommand::class);
         $dispatcher->add('migrate:rollback', MigrateCommand::class);
         $dispatcher->add('migrate:create', MigrateCreateCommand::class);
+        $dispatcher->add('migrate:run', MigrateRunCommand::class);
     }
 };

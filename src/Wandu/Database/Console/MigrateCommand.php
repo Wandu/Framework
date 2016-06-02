@@ -1,12 +1,22 @@
 <?php
 namespace Wandu\Database\Console;
 
-use Wandu\Console\Command;
-
-class MigrateCommand extends Command
+class MigrateCommand extends MigrateCommandAbstract
 {
-    function execute()
+    public function execute()
     {
-        
+//        $history = $this->getHistory();
+//        if (count($history)) {
+//            $lastMigration = array_pop($history);
+//        } else {
+//            $lastMigration = null;
+//        }
+//        $migrationFiles = $this->getAllMigrationFiles();
+//
+//        print_r($migrationFiles);
+//        if ($lastMigration &&)
+//        foreach ($migrationFiles as $migrationFile) {
+//            
+//        }
     }
 }

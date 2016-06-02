@@ -1,30 +1,30 @@
 <?php
 namespace Wandu\Database;
 
+use Illuminate\Database\Capsule\Manager;
 use Illuminate\Database\Schema\Builder;
-use Illuminate\Database\Capsule\Manager as Capsule;
 
 abstract class Migration
 {
-    const TEMPLATE_PATH = __DIR__ . '/phpmig.tmpl';
+    /** @var string */
+    protected $connection = 'default';
 
+    /**
+     * @param \Illuminate\Database\Capsule\Manager $manager
+     */
+    public function __construct(Manager $manager)
+    {
+        $this->manager = $manager;
+    }
+    
     public function up()
     {
-        $this->migrate(Capsule::schema());
+        $this->migrate($this->manager->schema($this->connection));
     }
 
     public function down()
     {
-        $this->rollback(Capsule::schema());
-    }
-
-    /**
-     * @param string $name
-     * @return \Illuminate\Database\Connection
-     */
-    protected function connection($name)
-    {
-        return Capsule::connection($name);
+        $this->rollback($this->manager->schema($this->connection));
     }
 
     /**
