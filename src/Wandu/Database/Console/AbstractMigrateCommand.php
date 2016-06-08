@@ -5,6 +5,7 @@ use DirectoryIterator;
 use Illuminate\Database\Capsule\Manager;
 use Wandu\Config\Contracts\ConfigInterface;
 use Wandu\Console\Command;
+use Wandu\Console\Exception\ConsoleException;
 
 abstract class AbstractMigrateCommand extends Command
 {
@@ -92,5 +93,23 @@ abstract class AbstractMigrateCommand extends Command
             if (strpos($file, $id . '_') === 0) return $file;
         }
         return null;
+    }
+
+    /**
+     * @param string $id
+     */
+    protected function migrateById($id)
+    {
+        $fileName = $this->getFileNameFromId($id);
+        if (!$fileName) {
+            throw new ConsoleException("<error>Error</error> there is no migration id \"{$id}\".");
+        }
+
+        require $this->path . '/' . $fileName;
+        $migrationName = $this->getMigrationNameFromFileName($fileName);
+
+        call_user_func([new $migrationName($this->manager), 'up']);
+
+        $this->saveToAppliedId($id);
     }
 }

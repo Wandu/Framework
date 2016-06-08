@@ -6,9 +6,14 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Wandu\Console\Command;
+use Wandu\Console\Exception\ConsoleException;
 
 class CommandProxy extends SymfonyCommand
 {
+    /**
+     * @param string $name
+     * @param \Wandu\Console\Command $command
+     */
     public function __construct($name, Command $command)
     {
         parent::__construct($name);
@@ -30,8 +35,18 @@ class CommandProxy extends SymfonyCommand
         }
     }
 
+    /**
+     * @param \Symfony\Component\Console\Input\InputInterface $input
+     * @param \Symfony\Component\Console\Output\OutputInterface $output
+     * @return int
+     */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        return $this->command->withIO($input, $output)->execute();
+        try {
+            return $this->command->withIO($input, $output)->execute();
+        } catch (ConsoleException $e) {
+            $output->writeln($e->getMessage());
+            return -1;
+        }
     }
 }

@@ -11,9 +11,7 @@ class MigrateStatusCommand extends AbstractMigrateCommand
         $history = $this->getAppliedIds();
 
         $migrationFiles = $this->getAllMigrationFiles();
-
-        sort($migrationFiles);
-
+        
         $this->output->writeln(' STATUS   MIGRATION ID   MIGRATION NAME');
         $this->output->writeln('----------------------------------------');
         foreach ($migrationFiles as $fileName) {
