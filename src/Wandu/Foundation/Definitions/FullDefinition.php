@@ -1,5 +1,5 @@
 <?php
-namespace Wandu\Foundation;
+namespace Wandu\Foundation\Definitions;
 
 use Wandu\Bridges\Eloquent\EloquentServiceProvider;
 use Wandu\Bridges\Latte\LatteServiceProvider;
@@ -16,6 +16,7 @@ use Wandu\Event\Commands\ListenCommand;
 use Wandu\Event\Commands\PingCommand;
 use Wandu\Event\EventServiceProvider;
 use Wandu\Foundation\Contracts\DefinitionInterface;
+use Wandu\Foundation\KernelServiceProvider;
 use Wandu\Http\HttpServiceProvider;
 use Wandu\Q\BeanstalkdQueueServiceProvider;
 use Wandu\Router\Router;

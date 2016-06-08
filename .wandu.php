@@ -1,5 +1,5 @@
 <?php
-use Wandu\Foundation\FullDefinition;
+use Wandu\Foundation\Definitions\FullDefinition;
 use Wandu\Router\Controllers\HelloWorldController;
 use Wandu\Router\Router;
 

@@ -1,6 +1,6 @@
 <?php
 use Wandu\Foundation\Application;
-use Wandu\Foundation\FullDefinition;
+use Wandu\Foundation\Definitions\FullDefinition;
 use Wandu\Foundation\Kernels\HttpRouterKernel;
 
 if (is_file(__DIR__ . '/../vendor/autoload.php')) {
