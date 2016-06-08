@@ -9,6 +9,11 @@ use Wandu\Router\RoutesInterface;
 interface DefinitionInterface extends RoutesInterface
 {
     /**
+     * @return array
+     */
+    public function configs();
+
+    /**
      * @param \Wandu\DI\ContainerInterface $app
      */
     public function providers(ContainerInterface $app);

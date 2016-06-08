@@ -4,8 +4,6 @@ namespace Wandu\Foundation\Definitions;
 use Wandu\Bridges\Eloquent\EloquentServiceProvider;
 use Wandu\Bridges\Latte\LatteServiceProvider;
 use Wandu\Bridges\Monolog\MonologServiceProvider;
-use Wandu\Config\Config;
-use Wandu\Config\Contracts\ConfigInterface;
 use Wandu\Console\Dispatcher;
 use Wandu\Database\Console\MigrateCommand;
 use Wandu\Database\Console\MigrateCreateCommand;
@@ -27,9 +25,9 @@ class FullDefinition implements DefinitionInterface
     /**
      * {@inheritdoc}
      */
-    public function providers(ContainerInterface $app)
+    public function configs()
     {
-        $app->instance(Config::class, new Config([
+        return [
             'debug' => true,
             'database' => [
                 'connections' => [
@@ -55,10 +53,14 @@ class FullDefinition implements DefinitionInterface
                 'path' => 'views',
                 'cache' => 'cache/views',
             ]
-        ]));
-        $app->alias(ConfigInterface::class, Config::class);
-        $app->alias('config', Config::class);
+        ];
+    }
 
+    /**
+     * {@inheritdoc}
+     */
+    public function providers(ContainerInterface $app)
+    {
         $app->register(new KernelServiceProvider());
         $app->register(new HttpServiceProvider()); // HttpRouterKernel
         $app->register(new RouterServiceProvider()); // HttpRouterKernel

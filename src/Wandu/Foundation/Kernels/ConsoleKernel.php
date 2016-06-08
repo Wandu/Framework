@@ -2,6 +2,8 @@
 namespace Wandu\Foundation\Kernels;
 
 use Symfony\Component\Console\Application as SymfonyApplication;
+use Wandu\Config\Config;
+use Wandu\Config\Contracts\ConfigInterface;
 use Wandu\Console\Dispatcher;
 use Wandu\DI\ContainerInterface;
 use Wandu\Foundation\Application;
@@ -11,11 +13,11 @@ use Wandu\Foundation\Contracts\KernelInterface;
 class ConsoleKernel implements KernelInterface
 {
     /** @var \Wandu\Foundation\Contracts\DefinitionInterface */
-    protected $config;
+    protected $definition;
 
-    public function __construct(DefinitionInterface $config)
+    public function __construct(DefinitionInterface $definition)
     {
-        $this->config = $config;
+        $this->definition = $definition;
     }
 
     /**
@@ -23,7 +25,10 @@ class ConsoleKernel implements KernelInterface
      */
     public function boot(ContainerInterface $app)
     {
-        $this->config->providers($app);
+        $app->instance(Config::class, new Config($this->definition->configs()));
+        $app->alias(ConfigInterface::class, Config::class);
+        $app->alias('config', Config::class);
+        $this->definition->providers($app);
     }
 
     /**
@@ -39,7 +44,7 @@ class ConsoleKernel implements KernelInterface
             )
         );
 
-        $this->config->commands($dispatcher);
+        $this->definition->commands($dispatcher);
         $dispatcher->execute();
         return $symfonyApplication->run();
     }

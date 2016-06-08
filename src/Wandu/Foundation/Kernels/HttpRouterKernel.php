@@ -4,6 +4,7 @@ namespace Wandu\Foundation\Kernels;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Throwable;
+use Wandu\Config\Config;
 use Wandu\Config\Contracts\ConfigInterface;
 use Wandu\DI\ContainerInterface;
 use Wandu\Foundation\Bridges\WhoopsToPsr7;
@@ -13,7 +14,6 @@ use Wandu\Foundation\Contracts\KernelInterface;
 use Wandu\Http\Exception\AbstractHttpException;
 use Wandu\Http\Exception\HttpMethodNotAllowedException;
 use Wandu\Http\Exception\HttpNotFoundException;
-use Wandu\Http\Psr\Factory\ResponseFactory;
 use Wandu\Http\Psr\Factory\ServerRequestFactory;
 use Wandu\Http\Psr\Sender\ResponseSender;
 use Wandu\Http\Psr\Stream\StringStream;
@@ -25,14 +25,14 @@ use Wandu\Router\Middleware\Responsify;
 class HttpRouterKernel implements KernelInterface
 {
     /** @var \Wandu\Foundation\Contracts\DefinitionInterface */
-    private $config;
+    private $definition;
 
     /**
-     * @param \Wandu\Foundation\Contracts\DefinitionInterface $config
+     * @param \Wandu\Foundation\Contracts\DefinitionInterface $definition
      */
-    public function __construct(DefinitionInterface $config)
+    public function __construct(DefinitionInterface $definition)
     {
-        $this->config = $config;
+        $this->definition = $definition;
     }
 
     /**
@@ -40,7 +40,10 @@ class HttpRouterKernel implements KernelInterface
      */
     public function boot(ContainerInterface $app)
     {
-        $this->config->providers($app);
+        $app->instance(Config::class, new Config($this->definition->configs()));
+        $app->alias(ConfigInterface::class, Config::class);
+        $app->alias('config', Config::class);
+        $this->definition->providers($app);
     }
 
     /**
@@ -99,7 +102,7 @@ class HttpRouterKernel implements KernelInterface
      */
     protected function dispatch(Dispatcher $dispatcher, ServerRequestInterface $request)
     {
-        $dispatcher = $dispatcher->withRoutes($this->config);
+        $dispatcher = $dispatcher->withRoutes($this->definition);
         try {
             return $dispatcher->dispatch($request);
         } catch (RouteNotFoundException $exception) {
