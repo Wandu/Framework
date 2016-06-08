@@ -1,51 +1,39 @@
 <?php
 namespace Wandu\Database\Console;
 
-class MigrateRunCommand extends MigrateCommandAbstract
+class MigrateRunCommand extends AbstractMigrateCommand
 {
     /** @var string */
     protected $description = 'Run targeted migrate.';
     
     /** @var array */
     protected $arguments = [
-        'target' => 'the migrate target file for the migration',
+        'id' => 'the migrate id for the migration',
     ];
     
     public function execute()
     {
-        $target = $this->input->getArgument('target');
-        if (!preg_match('/^\d{6}_\d{6}$/', $target)) {
-            $this->output->writeln("<error>Error</error> invalid target string. it must be like 000000_000000.");
+        $id = $this->input->getArgument('id');
+        if (!preg_match('/^\d{6}_\d{6}$/', $id)) {
+            $this->output->writeln("<error>Error</error> invalid migration id. it must be like 000000_000000.");
             return -1;
         }
-        $history = $this->getHistory();
-        if (in_array($target, $history)) {
-            $this->output->writeln("<error>Error</error> this {$target} is already run.");
+        $history = $this->getAppliedIds();
+        if (in_array($id, $history)) {
+            $this->output->writeln("<error>Error</error> this {$id} is already applied.");
             return -1;
         }
-        $migrationFile = $this->getMigrationFile($target);
-        if (!$migrationFile) {
-            $this->output->writeln("<error>Error</error> there is no migration named {$target}.");
+        $fileName = $this->getFileNameFromId($id);
+        if (!$fileName) {
+            $this->output->writeln("<error>Error</error> there is no migration id \"{$id}\".");
             return -1;
         }
         
-        require $this->path . '/' . $migrationFile;
-        $className = str_replace('.php', '', str_replace($target . '_', '', $migrationFile));
+        require $this->path . '/' . $fileName;
+        $migrationName = $this->getMigrationNameFromFileName($fileName);
         
-        call_user_func([new $className($this->manager), 'up']);
+        call_user_func([new $migrationName($this->manager), 'up']);
         
-        $this->saveToHistory($target);
-    }
-
-    /**
-     * @param string $target
-     * @return string
-     */
-    protected function getMigrationFile($target)
-    {
-        foreach ($this->getAllMigrationFiles() as $file) {
-            if (strpos($file, $target . '_') === 0) return $file;
-        }
-        return null;
+        $this->saveToAppliedId($id);
     }
 }

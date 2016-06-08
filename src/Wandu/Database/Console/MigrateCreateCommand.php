@@ -1,7 +1,7 @@
 <?php
 namespace Wandu\Database\Console;
 
-class MigrateCreateCommand extends MigrateCommandAbstract
+class MigrateCreateCommand extends AbstractMigrateCommand
 {
     /** @var string */
     protected $description = 'Create a migration file.';

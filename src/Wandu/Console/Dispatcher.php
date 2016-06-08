@@ -4,6 +4,7 @@ namespace Wandu\Console;
 use Interop\Container\ContainerInterface;
 use Symfony\Component\Console\Application as SymfonyApplication;
 use Wandu\Console\Symfony\CommandProxy;
+use Wandu\DI\Exception\NullReferenceException;
 
 class Dispatcher
 {
@@ -35,9 +36,14 @@ class Dispatcher
     public function execute()
     {
         foreach ($this->commands as $name => $command) {
-            $this->application->add(
-                new CommandProxy($name, $this->container->get($command))
-            );
+            try {
+                $this->application->add(
+                    new CommandProxy($name, $this->container->get($command))
+                );
+            } catch (NullReferenceException $e) { // typo is continue
+                continue;
+            }
+            
         }
     }
 }

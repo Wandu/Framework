@@ -2,6 +2,7 @@
 namespace Wandu\Database\Console;
 
 use DirectoryIterator;
+use Illuminate\Database\Capsule\Manager;
 use Mockery;
 use PHPUnit_Framework_TestCase;
 use Symfony\Component\Console\Input\InputInterface;
@@ -44,7 +45,7 @@ class MigrateCreateCommandTest extends PHPUnit_Framework_TestCase
             return preg_match('/^1[0-9][0-1][0-9][0-3][0-9]_[0-2][0-9][0-5][0-9][0-5][0-9]$/', $item) === 1;
         }));
         
-        $command = (new MigrateCreateCommand(new Config([
+        $command = (new MigrateCreateCommand(Mockery::mock(Manager::class), new Config([
             'database' => [
                 'migration' => [
                     'path' => 'migrations'

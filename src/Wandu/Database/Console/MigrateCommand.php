@@ -1,7 +1,7 @@
 <?php
 namespace Wandu\Database\Console;
 
-class MigrateCommand extends MigrateCommandAbstract
+class MigrateCommand extends AbstractMigrateCommand
 {
     public function execute()
     {

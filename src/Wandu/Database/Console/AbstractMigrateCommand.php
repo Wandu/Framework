@@ -6,7 +6,7 @@ use Illuminate\Database\Capsule\Manager;
 use Wandu\Config\Contracts\ConfigInterface;
 use Wandu\Console\Command;
 
-abstract class MigrateCommandAbstract extends Command
+abstract class AbstractMigrateCommand extends Command
 {
     /** @var \Illuminate\Database\Capsule\Manager */
     protected $manager;
@@ -31,7 +31,7 @@ abstract class MigrateCommandAbstract extends Command
     /**
      * @return array
      */
-    protected function getHistory()
+    protected function getAppliedIds()
     {
         if (!file_exists($this->path . '/.migrations.json')) {
             file_put_contents($this->path . '/.migrations.json', json_encode([]));
@@ -42,9 +42,9 @@ abstract class MigrateCommandAbstract extends Command
     /**
      * @param string $target
      */
-    protected function saveToHistory($target)
+    protected function saveToAppliedId($target)
     {
-        $history = $this->getHistory();
+        $history = $this->getAppliedIds();
         $history[] = $target;
         sort($history);
         file_put_contents($this->path . '/.migrations.json', json_encode($history));
@@ -62,5 +62,35 @@ abstract class MigrateCommandAbstract extends Command
         }
         sort($files);
         return $files;
+    }
+
+    /**
+     * @param string $fileName
+     * @return string
+     */
+    protected function getMigrationIdFromFileName($fileName)
+    {
+        return substr($fileName, 0, 13);
+    }
+
+    /**
+     * @param string $fileName
+     * @return string
+     */
+    protected function getMigrationNameFromFileName($fileName)
+    {
+        return substr($fileName, 14, -4);
+    }
+    
+    /**
+     * @param string $id
+     * @return string
+     */
+    protected function getFileNameFromId($id)
+    {
+        foreach ($this->getAllMigrationFiles() as $file) {
+            if (strpos($file, $id . '_') === 0) return $file;
+        }
+        return null;
     }
 }
