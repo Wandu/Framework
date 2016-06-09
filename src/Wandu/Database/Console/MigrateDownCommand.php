@@ -3,16 +3,16 @@ namespace Wandu\Database\Console;
 
 use Wandu\Console\Exception\ConsoleException;
 
-class MigrateRunCommand extends AbstractMigrateCommand
+class MigrateDownCommand extends AbstractMigrateCommand
 {
     /** @var string */
-    protected $description = 'Run targeted migrate.';
-    
+    protected $description = 'Execute targeted rollback.';
+
     /** @var array */
     protected $arguments = [
         'id' => 'the migrate id for the migration',
     ];
-    
+
     public function execute()
     {
         $id = $this->input->getArgument('id');
@@ -20,11 +20,11 @@ class MigrateRunCommand extends AbstractMigrateCommand
             throw new ConsoleException("<error>Error</error> invalid migration id. it must be like 000000_000000.");
         }
         $history = $this->getAppliedIds();
-        if (in_array($id, $history)) {
-            throw new ConsoleException("<error>Error</error> this {$id} is already applied.");
+        if (!in_array($id, $history)) {
+            throw new ConsoleException("<error>Error</error> this {$id} is not already applied.");
         }
-        
-        $this->migrateById($id);
-        $this->output->writeln("<info>migrate</info> {$id}");
+
+        $this->rollbackById($id);
+        $this->output->writeln("<info>rollback</info> {$id}");
     }
 }

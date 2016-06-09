@@ -52,6 +52,20 @@ abstract class AbstractMigrateCommand extends Command
     }
 
     /**
+     * @param string $target
+     */
+    protected function removeFromAppliedId($target)
+    {
+        $history = [];
+        foreach ($this->getAppliedIds() as $id) {
+            if ($id === $target) continue;
+            $history[] = $id;
+        }
+        sort($history);
+        file_put_contents($this->path . '/.migrations.json', json_encode($history));
+    }
+
+    /**
      * @return array
      */
     protected function getAllMigrationFiles()
@@ -111,5 +125,23 @@ abstract class AbstractMigrateCommand extends Command
         call_user_func([new $migrationName($this->manager), 'up']);
 
         $this->saveToAppliedId($id);
+    }
+
+    /**
+     * @param string $id
+     */
+    protected function rollbackById($id)
+    {
+        $fileName = $this->getFileNameFromId($id);
+        if (!$fileName) {
+            throw new ConsoleException("<error>Error</error> there is no migration id \"{$id}\".");
+        }
+
+        require $this->path . '/' . $fileName;
+        $migrationName = $this->getMigrationNameFromFileName($fileName);
+
+        call_user_func([new $migrationName($this->manager), 'down']);
+
+        $this->removeFromAppliedId($id);
     }
 }

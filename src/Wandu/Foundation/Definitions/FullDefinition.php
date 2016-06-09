@@ -7,7 +7,9 @@ use Wandu\Bridges\Monolog\MonologServiceProvider;
 use Wandu\Console\Dispatcher;
 use Wandu\Database\Console\MigrateCommand;
 use Wandu\Database\Console\MigrateCreateCommand;
-use Wandu\Database\Console\MigrateRunCommand;
+use Wandu\Database\Console\MigrateDownCommand;
+use Wandu\Database\Console\MigrateRollbackCommand;
+use Wandu\Database\Console\MigrateUpCommand;
 use Wandu\Database\Console\MigrateStatusCommand;
 use Wandu\DI\ContainerInterface;
 use Wandu\Event\Commands\ListenCommand;
@@ -79,11 +81,15 @@ class FullDefinition implements DefinitionInterface
         $dispatcher->add('event:listen', ListenCommand::class);
         $dispatcher->add('event:ping', PingCommand::class);
 
-        $dispatcher->add('migrate', MigrateCommand::class);
-        $dispatcher->add('migrate:rollback', MigrateCommand::class);
+        // migrates
         $dispatcher->add('migrate:create', MigrateCreateCommand::class);
-        $dispatcher->add('migrate:run', MigrateRunCommand::class);
         $dispatcher->add('migrate:status', MigrateStatusCommand::class);
+
+        $dispatcher->add('migrate', MigrateCommand::class);
+        $dispatcher->add('migrate:rollback', MigrateRollbackCommand::class);
+
+        $dispatcher->add('migrate:up', MigrateUpCommand::class);
+        $dispatcher->add('migrate:down', MigrateDownCommand::class);
     }
 
     /**

@@ -28,7 +28,7 @@ class MigrateCommand extends AbstractMigrateCommand
         }
         
         if ($isNoMigration) {
-            $this->output->writeln("<comment>there is no migration.</comment>");
+            $this->output->writeln("<comment>there is no migration to migrate.</comment>");
         }
     }
 }
