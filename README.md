@@ -12,6 +12,29 @@ Wandu Framework
 
 Wandu is PHP7 Framework.
 
+## Installation
+
+```sh
+$ cd /your/project/path
+$ composer require wandu/framework
+$ vendor/bin/wandu install
+```
+
+then, there are 2 or 3 questions.
+
+```
+ install path? [/your/project/path]:
+ >
+
+ composer path? [/your/project/path/composer.json]:
+ >
+ 
+ app namespace? [Wandu\App]:
+ >
+```
+
+Ver-------------y Simple, isn't it?
+
 ## Index
 
 - [Wadnu DI](src/Wandu/DI) (Git Repository : [Wandu/DI](https://github.com/Wandu/DI))

@@ -63,7 +63,7 @@ class InstallCommand extends Command
         ];
         foreach ($directories as $directory) {
             if (!is_dir($basePath . $directory)) {
-                mkdir($basePath . '/public');
+                mkdir($basePath . $directory);
                 $this->output->writeln(" - create directory {$directory}");
             } else {
                 $this->output->writeln(" - already exists {$directory}");
