@@ -8,7 +8,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Wandu\Console\Command;
 use Wandu\Console\Exception\ConsoleException;
 
-class CommandProxy extends SymfonyCommand
+class CommandAdapter extends SymfonyCommand
 {
     /**
      * @param string $name

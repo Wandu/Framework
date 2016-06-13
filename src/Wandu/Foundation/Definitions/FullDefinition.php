@@ -4,6 +4,7 @@ namespace Wandu\Foundation\Definitions;
 use Wandu\Bridges\Eloquent\EloquentServiceProvider;
 use Wandu\Bridges\Latte\LatteServiceProvider;
 use Wandu\Bridges\Monolog\MonologServiceProvider;
+use Wandu\Console\Commands\PsyshCommand;
 use Wandu\Console\Dispatcher;
 use Wandu\Database\Console\MigrateCommand;
 use Wandu\Database\Console\MigrateCreateCommand;
@@ -78,6 +79,8 @@ class FullDefinition implements DefinitionInterface
      */
     public function commands(Dispatcher $dispatcher)
     {
+        $dispatcher->add('psysh', PsyshCommand::class);
+
         $dispatcher->add('event:listen', ListenCommand::class);
         $dispatcher->add('event:ping', PingCommand::class);
 

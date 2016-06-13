@@ -163,6 +163,8 @@ class UriTest extends PHPUnit_Framework_TestCase
         // As an example, if the value should include a slash ("/") not intended as
         // delimiter between path segments, that value MUST be passed in encoded
         // form (e.g., "%2F") to the instance.
+
+        // ref. https://bugs.php.net/bug.php?id=52923 (bug in osx terminal)
         $uri = new Uri('/hello/enwl dfk/-_-/한글');
         $this->assertSame('/hello/enwl%20dfk/-_-/%ED%95%9C%EA%B8%80', $uri->getPath());
     }
@@ -185,6 +187,8 @@ class UriTest extends PHPUnit_Framework_TestCase
         // As an example, if a value in a key/value pair of the query string should
         // include an ampersand ("&") not intended as a delimiter between values,
         // that value MUST be passed in encoded form (e.g., "%26") to the instance.
+
+        // ref. https://bugs.php.net/bug.php?id=52923 (bug in osx terminal)
         $uri = new Uri('http://blog.wani.kr?hello=world&한글=def');
         $this->assertSame('hello=world&%ED%95%9C%EA%B8%80=def', $uri->getQuery());
     }
@@ -203,6 +207,8 @@ class UriTest extends PHPUnit_Framework_TestCase
         // The value returned MUST be percent-encoded, but MUST NOT double-encode
         // any characters. To determine what characters to encode, please refer to
         // RFC 3986, Sections 2 and 3.5.
+        
+        // ref. https://bugs.php.net/bug.php?id=52923 (bug in osx terminal)
         $uri = new Uri('http://blog.wani.kr#한글은한글은');
         $this->assertSame('%ED%95%9C%EA%B8%80%EC%9D%80%ED%95%9C%EA%B8%80%EC%9D%80', $uri->getFragment());
     }

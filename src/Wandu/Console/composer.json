@@ -1,0 +1,24 @@
+{
+  "name": "wandu/console",
+  "license": "MIT",
+  "require": {
+    "php": ">=7.0.0",
+    "symfony/console": "^3.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Wandu\\Console\\": ""
+    }
+  },
+  "provide": {
+    "psr/http-message-implementation": "1.0"
+  },
+  "suggest": {
+    "psy/psysh": "for Psysh command"
+  },
+  "extra": {
+    "branch-alias": {
+      "dev-master": "3.0-dev"
+    }
+  }
+}

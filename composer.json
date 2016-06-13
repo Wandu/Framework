@@ -14,7 +14,8 @@
         "symfony/console": "^3.0",
         "monolog/monolog": "^1.19",
         "filp/whoops": "^2.1",
-        "illuminate/database": "^5.2"
+        "illuminate/database": "^5.2",
+        "psy/psysh": "^0.7.2"
     },
     "require-dev": {
         "phpunit/phpunit": "^5.3",
@@ -29,6 +30,7 @@
             "Publ\\": "src/Publ/"
         },
         "files" : [
+            "src/Wandu/Foundation/functions.php",
             "src/Wandu/Http/functions.php",
             "src/Wandu/View/functions.php"
         ]

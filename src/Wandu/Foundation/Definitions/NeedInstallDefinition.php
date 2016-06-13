@@ -1,7 +1,6 @@
 <?php
 namespace Wandu\Foundation\Definitions;
 
-use Wandu\Console\Commands\PsyshCommand;
 use Wandu\Console\Dispatcher;
 use Wandu\DI\ContainerInterface;
 use Wandu\Foundation\Contracts\DefinitionInterface;
@@ -31,7 +30,6 @@ class NeedInstallDefinition implements DefinitionInterface
     public function commands(Dispatcher $dispatcher)
     {
         $dispatcher->add('install', InstallCommand::class);
-        $dispatcher->add('psysh', PsyshCommand::class);
     }
 
     /**

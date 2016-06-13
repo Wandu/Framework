@@ -9,6 +9,9 @@
     "autoload": {
         "psr-4": {
             "Wandu\\Foundation\\": ""
-        }
+        },
+        "files" : [
+            "functions.php"
+        ]
     }
 }
