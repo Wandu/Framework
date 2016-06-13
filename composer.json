@@ -1,9 +1,15 @@
 {
     "name": "wandu/framework",
     "description": "Wandu Framework",
-    "keywords": ["wandu", "framework", "psr7"],
+    "keywords": [
+        "wandu",
+        "framework",
+        "psr7"
+    ],
     "license": "MIT",
-    "bin": ["bin/wandu"],
+    "bin": [
+        "bin/wandu"
+    ],
     "require": {
         "php": ">=7.0.0",
         "psr/http-message": "^1",
@@ -26,10 +32,9 @@
     },
     "autoload": {
         "psr-4": {
-            "Wandu\\": "src/Wandu/",
-            "Publ\\": "src/Publ/"
+            "Wandu\\": "src/Wandu/"
         },
-        "files" : [
+        "files": [
             "src/Wandu/Foundation/functions.php",
             "src/Wandu/Http/functions.php",
             "src/Wandu/View/functions.php"
