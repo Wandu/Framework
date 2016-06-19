@@ -1,9 +1,9 @@
 <?php
-use Wandu\Foundation\Definitions\FullDefinition;
+use Wandu\Foundation\Definitions\StandardDefinition;
 use Wandu\Router\Controllers\HelloWorldController;
 use Wandu\Router\Router;
 
-return new class extends FullDefinition
+return new class extends StandardDefinition
 {
     /**
      * {@inheritdoc}
@@ -18,7 +18,7 @@ return new class extends FullDefinition
                     'default' => [
                         'driver'    => 'mysql',
                         'host'      => 'localhost',
-                        'database'  => 'allbus',
+                        'database'  => 'wandu',
                         'username'  => 'root',
                         'password'  => 'root',
                         'charset'   => 'utf8mb4',
@@ -36,7 +36,7 @@ return new class extends FullDefinition
             'view' => [
                 'path' => 'views',
                 'cache' => 'cache/views',
-            ]
+            ],
         ];
     }
 

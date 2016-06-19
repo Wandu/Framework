@@ -10,20 +10,17 @@ use Wandu\Database\Console\MigrateCommand;
 use Wandu\Database\Console\MigrateCreateCommand;
 use Wandu\Database\Console\MigrateDownCommand;
 use Wandu\Database\Console\MigrateRollbackCommand;
-use Wandu\Database\Console\MigrateUpCommand;
 use Wandu\Database\Console\MigrateStatusCommand;
+use Wandu\Database\Console\MigrateUpCommand;
 use Wandu\DI\ContainerInterface;
-use Wandu\Event\Commands\ListenCommand;
-use Wandu\Event\Commands\PingCommand;
 use Wandu\Event\EventServiceProvider;
 use Wandu\Foundation\Contracts\DefinitionInterface;
 use Wandu\Foundation\KernelServiceProvider;
 use Wandu\Http\HttpServiceProvider;
-use Wandu\Q\BeanstalkdQueueServiceProvider;
 use Wandu\Router\Router;
 use Wandu\Router\RouterServiceProvider;
 
-class FullDefinition implements DefinitionInterface
+class StandardDefinition implements DefinitionInterface
 {
     /**
      * {@inheritdoc}
@@ -39,10 +36,9 @@ class FullDefinition implements DefinitionInterface
     public function providers(ContainerInterface $app)
     {
         $app->register(new KernelServiceProvider());
-        $app->register(new HttpServiceProvider()); // HttpRouterKernel
-        $app->register(new RouterServiceProvider()); // HttpRouterKernel
+        $app->register(new HttpServiceProvider());
+        $app->register(new RouterServiceProvider());
         $app->register(new EventServiceProvider());
-        $app->register(new BeanstalkdQueueServiceProvider());
         $app->register(new MonologServiceProvider());
         $app->register(new EloquentServiceProvider());
         $app->register(new LatteServiceProvider());
@@ -54,9 +50,6 @@ class FullDefinition implements DefinitionInterface
     public function commands(Dispatcher $dispatcher)
     {
         $dispatcher->add('psysh', PsyshCommand::class);
-
-        $dispatcher->add('event:listen', ListenCommand::class);
-        $dispatcher->add('event:ping', PingCommand::class);
 
         // migrates
         $dispatcher->add('migrate:create', MigrateCreateCommand::class);

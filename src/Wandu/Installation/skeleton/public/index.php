@@ -1,6 +1,6 @@
 <?php
 use Wandu\Foundation\Application;
-use Wandu\Foundation\Definitions\FullDefinition;
+use Wandu\Foundation\Definitions\StandardDefinition;
 use Wandu\Foundation\Kernels\HttpRouterKernel;
 
 if (is_file(__DIR__ . '/../vendor/autoload.php')) {
@@ -20,7 +20,7 @@ $defininitionPath = dirname(__DIR__) . '/.wandu.php';
 if (file_exists($defininitionPath)) {
     $definition = require $defininitionPath;
 } else {
-    $definition = new FullDefinition();
+    $definition = new StandardDefinition();
 }
 
 $app = new Application(new HttpRouterKernel($definition));
