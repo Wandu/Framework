@@ -2,6 +2,9 @@
 namespace Wandu\Installation\Commands;
 
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\Process\PhpExecutableFinder;
+use Symfony\Component\Process\Process;
+use Symfony\Component\Process\ProcessUtils;
 use Wandu\Console\Command;
 use Wandu\Console\Reader;
 
@@ -45,8 +48,23 @@ class InstallCommand extends Command
         
         // set composer
         $this->saveAutoloadToComposer($appNamespace, $composerFile);
+        
+        // run composer
+        $this->runDumpAutoload($composerFile);
 
         $this->output->writeln("<info>Install Complete!</info>");
+    }
+    
+    protected function runDumpAutoload($composerFile)
+    {
+        $basePath = dirname($composerFile);
+        if (file_exists($basePath . '/composer.phar')) {
+            $binary = ProcessUtils::escapeArgument((new PhpExecutableFinder)->find(false));
+            $composer = "{$binary} composer.phar";
+        } else {
+            $composer = 'composer';
+        }
+        (new Process("{$composer} dump-autoload", $basePath))->run();
     }
     
     protected function copyBaseFiles($basePath)
