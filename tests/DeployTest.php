@@ -7,7 +7,7 @@ use PHPUnit_Framework_TestCase;
 class DeployTest extends PHPUnit_Framework_TestCase
 {
     /** @var string */
-    protected $basePath = __DIR__ . '/../../';
+    protected $basePath = __DIR__ . '/../';
     
     /** @var string */
     protected $rootJsonFiles = 'composer.json';

@@ -1,12 +1,15 @@
 <?php
 namespace Wandu\Installation\Commands;
 
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Process\PhpExecutableFinder;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Process\ProcessUtils;
 use Wandu\Console\Command;
 use Wandu\Console\Reader;
+use Wandu\Installation\SkeletonBuilder;
 
 class InstallCommand extends Command
 {
@@ -27,34 +30,43 @@ class InstallCommand extends Command
         $this->reader = $reader;
     }
 
+    /**
+     * {@inheritdoc}
+     */
+    public function withIO(InputInterface $input, OutputInterface $output)
+    {
+        $this->io = new SymfonyStyle($input, $output);
+        return parent::withIO($input, $output);
+    }
+
     public function execute()
     {
-        // make io
-        $this->io = new SymfonyStyle($this->input, $this->output);
-        
-        $this->output->writeln('Hello, <info>Welcome to Wandu Framework!</info>');
-        
-        $basePath = $this->getBasePath();
-        $composerFile = $this->getComposerFilePath($basePath);
-
-        if (file_exists($basePath . '/.wandu.php')) {
+        if (file_exists(WANDU_PATH . '/.wandu.php')) {
             throw new \RuntimeException('already installed. if you want to re-install, remove the ".wandu.php" file!');
         }
-        
+
+        $this->output->writeln('Hello, <info>Welcome to Wandu Framework!</info>');
+
+        $composerFile = WANDU_PATH . '/composer.json';
+
+        $appBasePath = $this->getAppBasePath();
         $appNamespace = $this->getAppNamespace();
 
-        // copy files!
-        $this->copyBaseFiles($basePath);
-        
+        $installer = new SkeletonBuilder($appBasePath);
+        $installer->install([
+            'namespace' => $appNamespace,
+            'path' => str_replace(WANDU_PATH, '', $appBasePath),
+        ]);
+
         // set composer
         $this->saveAutoloadToComposer($appNamespace, $composerFile);
-        
+
         // run composer
         $this->runDumpAutoload($composerFile);
 
         $this->output->writeln("<info>Install Complete!</info>");
     }
-    
+
     protected function runDumpAutoload($composerFile)
     {
         $basePath = dirname($composerFile);
@@ -66,42 +78,7 @@ class InstallCommand extends Command
         }
         (new Process("{$composer} dump-autoload", $basePath))->run();
     }
-    
-    protected function copyBaseFiles($basePath)
-    {
-        $this->output->writeln("copy files... ");
 
-        $directories = [
-            '/public',
-            '/views',
-            '/app',
-            '/migrations',
-            '/cache',
-            '/cache/views',
-        ];
-        foreach ($directories as $directory) {
-            if (!is_dir($basePath . $directory)) {
-                mkdir($basePath . $directory);
-                $this->output->writeln(" - create directory {$directory}");
-            } else {
-                $this->output->writeln(" - already exists {$directory}");
-            }
-        }
-
-        $skeletonbDir = dirname(__DIR__) . '/skeleton';
-
-        /** @var \SplFileInfo $file */
-        $iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($skeletonbDir));
-        foreach ($iterator as $file) {
-            if ($file->isDir()) continue;
-            $target = str_replace($skeletonbDir, '', $file->getRealPath());
-            $this->output->writeln(" - create file {$target}");
-            copy($file->getRealPath(), $basePath . $target);
-        }
-
-        $this->output->writeln("<info>ok</info>");
-    }
-    
     protected function saveAutoloadToComposer($appNamespace, $composerFile)
     {
         $this->output->write("save autoload setting to composer... ");
@@ -113,7 +90,7 @@ class InstallCommand extends Command
                 $composerJson = [];
             }
         }
-        
+
         if (!isset($composerJson['autoload'])) {
             $composerJson['autoload'] = [];
         }
@@ -127,7 +104,10 @@ class InstallCommand extends Command
         );
         $this->output->writeln("<info>ok</info>");
     }
-    
+
+    /**
+     * @return string
+     */
     protected function getAppNamespace()
     {
         return $this->io->ask('app namespace?', 'Wandu\\App', function ($namespace) {
@@ -135,9 +115,12 @@ class InstallCommand extends Command
         });
     }
 
-    protected function getBasePath()
+    /**
+     * @return string
+     */
+    protected function getAppBasePath()
     {
-        return $this->io->ask('install path?', getcwd(), function ($path) {
+        return $this->io->ask('install path?', WANDU_PATH, function ($path) {
             if ($path[0] === '~') {
                 if (!function_exists('posix_getuid')) {
                     throw new \InvalidArgumentException('cannot use tilde(~) character in your php enviroment.');
@@ -146,30 +129,9 @@ class InstallCommand extends Command
                 $path = str_replace('~', $info['dir'], $path);
             }
             if ($path[0] !== '/') {
-                $path = getcwd() . "/{$path}";
+                $path = WANDU_PATH . "/{$path}";
             }
             return rtrim($path, '/');
         });
-    }
-
-    protected function getComposerFilePath($basePath)
-    {
-        $composerFile = $basePath . '/composer.json';
-        if (!file_exists($composerFile)) {
-            $composerFile = $this->io->ask('composer path?', $basePath . '/composer.json', function ($path) {
-                if ($path[0] === '~') {
-                    if (!function_exists('posix_getuid')) {
-                        throw new \InvalidArgumentException('cannot use tilde(~) character in your php enviroment.');
-                    }
-                    $info = posix_getpwuid(posix_getuid());
-                    $path = str_replace('~', $info['dir'], $path);
-                }
-                if ($path[0] !== '/') {
-                    $path = getcwd() . "/{$path}";
-                }
-                return rtrim($path, '/');
-            });
-        }
-        return $composerFile;
     }
 }
