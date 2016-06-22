@@ -11,7 +11,7 @@ if (is_file(__DIR__ . '/../vendor/autoload.php')) {
     define('WANDU_PATH', realpath(__DIR__ . '/../../../..'));
 } else {
     header('HTTP/1.1 500 Internal Server Error');
-    echo "need to run composer install.";
+    echo "cannot find autoload.php. you may run composer install.";
     exit;
 }
 require_once WANDU_PATH . '/vendor/autoload.php';
