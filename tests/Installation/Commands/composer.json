@@ -1,7 +1,7 @@
 {
     "repositories": [
         {
-            "type": "path",
+            "type": "vcs",
             "url": "../../../.."
         }
     ],
