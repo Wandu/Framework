@@ -16,14 +16,14 @@ return [
             ],
         ],
         'migration' => [
-            'path' => '%%path%%/migrations',
+            'path' => '%%path%%migrations',
         ],
     ],
     'log' => [
         'path' => null,
     ],
     'view' => [
-        'path' => '%%path%%/views',
-        'cache' => '%%path%%/cache/views',
+        'path' => '%%path%%views',
+        'cache' => '%%path%%cache/views',
     ],
 ];

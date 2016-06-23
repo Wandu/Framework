@@ -8,7 +8,7 @@ use Symfony\Component\Process\PhpExecutableFinder;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Process\ProcessUtils;
 use Wandu\Console\Command;
-use Wandu\Console\Reader;
+use Wandu\DI\ContainerInterface;
 use Wandu\Installation\SkeletonBuilder;
 
 class InstallCommand extends Command
@@ -16,18 +16,15 @@ class InstallCommand extends Command
     /** @var string */
     protected $description = "Install <comment>Wandu Framework</comment> to your project directory.";
 
-    /** @var \Wandu\Console\Reader */
-    protected $reader;
-    
     /** @var \Symfony\Component\Console\Style\SymfonyStyle */
     protected $io;
     
-    /**
-     * @param \Wandu\Console\Reader $reader
-     */
-    public function __construct(Reader $reader)
+    /** @var string */
+    protected $basePath;
+    
+    public function __construct(ContainerInterface $container)
     {
-        $this->reader = $reader;
+        $this->basePath = $container['base_path'];
     }
 
     /**
@@ -41,25 +38,32 @@ class InstallCommand extends Command
 
     public function execute()
     {
-        if (file_exists(WANDU_PATH . '/.wandu.php')) {
+        if (file_exists($this->basePath . '/.wandu.php')) {
             throw new \RuntimeException('already installed. if you want to re-install, remove the ".wandu.php" file!');
         }
 
         $this->output->writeln('Hello, <info>Welcome to Wandu Framework!</info>');
 
-        $composerFile = WANDU_PATH . '/composer.json';
+        $composerFile = $this->basePath . '/composer.json';
 
         $appBasePath = $this->getAppBasePath();
         $appNamespace = $this->getAppNamespace();
 
         $installer = new SkeletonBuilder($appBasePath);
-        $installer->install([
+        $path = str_replace($this->basePath, '', $appBasePath);
+        $path = ltrim($path ? $path . '/' : '', '/');
+        $installer->build([
             'namespace' => $appNamespace,
-            'path' => str_replace(WANDU_PATH, '', $appBasePath),
+            'path' => $path,
         ]);
 
+        if ($appBasePath !== $this->basePath) {
+            rename($appBasePath . '/.wandu.config.php', $this->basePath . '/.wandu.config.php');
+            rename($appBasePath . '/.wandu.php', $this->basePath . '/.wandu.php');
+        }
+
         // set composer
-        $this->saveAutoloadToComposer($appNamespace, $composerFile);
+        $this->saveAutoloadToComposer($appNamespace, $composerFile, $path);
 
         // run composer
         $this->runDumpAutoload($composerFile);
@@ -79,7 +83,7 @@ class InstallCommand extends Command
         (new Process("{$composer} dump-autoload", $basePath))->run();
     }
 
-    protected function saveAutoloadToComposer($appNamespace, $composerFile)
+    protected function saveAutoloadToComposer($appNamespace, $composerFile, $path = '')
     {
         $this->output->write("save autoload setting to composer... ");
 
@@ -97,7 +101,7 @@ class InstallCommand extends Command
         if (!isset($composerJson['autoload']['psr-4'])) {
             $composerJson['autoload']['psr-4'] = [];
         }
-        $composerJson['autoload']['psr-4'][$appNamespace . '\\'] = 'app/';
+        $composerJson['autoload']['psr-4'][$appNamespace . '\\'] = $path . 'app/';
         file_put_contents(
             $composerFile,
             json_encode($composerJson, JSON_UNESCAPED_SLASHES|JSON_PRETTY_PRINT) . "\n"
@@ -120,18 +124,17 @@ class InstallCommand extends Command
      */
     protected function getAppBasePath()
     {
-        return $this->io->ask('install path?', WANDU_PATH, function ($path) {
-            if ($path[0] === '~') {
-                if (!function_exists('posix_getuid')) {
-                    throw new \InvalidArgumentException('cannot use tilde(~) character in your php enviroment.');
-                }
-                $info = posix_getpwuid(posix_getuid());
-                $path = str_replace('~', $info['dir'], $path);
+        $appBasePath = $this->io->ask('install path?', $this->basePath);
+        if ($appBasePath[0] === '~') {
+            if (!function_exists('posix_getuid')) {
+                throw new \InvalidArgumentException('cannot use tilde(~) character in your php enviroment.');
             }
-            if ($path[0] !== '/') {
-                $path = WANDU_PATH . "/{$path}";
-            }
-            return rtrim($path, '/');
-        });
+            $info = posix_getpwuid(posix_getuid());
+            $appBasePath = str_replace('~', $info['dir'], $appBasePath);
+        }
+        if ($appBasePath[0] !== '/') {
+            $appBasePath = $this->basePath . "/{$appBasePath}";
+        }
+        return rtrim($appBasePath, '/');
     }
 }

@@ -4,14 +4,15 @@ use Wandu\Foundation\Application;
 use Wandu\Foundation\Definitions\NeedInstallDefinition;
 use Wandu\Foundation\Kernels\ConsoleKernel;
 
-if (is_file(__DIR__ . '/../vendor/autoload.php')) {
+if (is_file(__DIR__ . '/../vendor/autoload.php')) { // in /bin/wandu
     define('WANDU_PATH', realpath(__DIR__ . '/..'));
-} elseif (is_file(__DIR__ . '/../../../../vendor/autoload.php')) {
+} elseif (is_file(__DIR__ . '/../../../../vendor/autoload.php')) { // in /vendor/wandu/framework/bin/wandu
     define('WANDU_PATH', realpath(__DIR__ . '/../../../..'));
-} elseif (is_file(__DIR__ . '/../../vendor/autoload.php')) {
-    define('WANDU_PATH', realpath(__DIR__ . '/../../../..'));
+} elseif (is_file(__DIR__ . '/../../vendor/autoload.php')) { // in /vendor/bin/wandu
+    define('WANDU_PATH', realpath(__DIR__ . '/../..'));
 } else {
-    define('WANDU_PATH', getcwd());
+    echo "cannot find autoload.php. you may run composer install.\n";
+    exit(-1);
 }
 require_once WANDU_PATH . '/vendor/autoload.php';
 

@@ -1,0 +1,11 @@
+{
+    "repositories": [
+        {
+            "type": "path",
+            "url": "../../../.."
+        }
+    ],
+    "require": {
+        "wandu/framework": "dev-develop"
+    }
+}
