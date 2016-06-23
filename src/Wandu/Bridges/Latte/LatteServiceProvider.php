@@ -3,6 +3,7 @@ namespace Wandu\Bridges\Latte;
 
 use Wandu\DI\ContainerInterface;
 use Wandu\DI\ServiceProviderInterface;
+use Wandu\Foundation;
 use Wandu\View\Contracts\RenderInterface;
 
 class LatteServiceProvider implements ServiceProviderInterface
@@ -14,8 +15,8 @@ class LatteServiceProvider implements ServiceProviderInterface
     {
         $app->closure(RenderInterface::class, function ($app) {
             return new LatteView(
-                $app['config']->get('view.path'),
-                $app['config']->get('view.cache')
+                Foundation\path($app['config']->get('view.path')),
+                Foundation\path($app['config']->get('view.cache'))
             );
         });
     }

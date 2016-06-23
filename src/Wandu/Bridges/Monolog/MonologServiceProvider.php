@@ -6,6 +6,7 @@ use Monolog\Logger;
 use Psr\Log\LoggerInterface;
 use Wandu\DI\ContainerInterface;
 use Wandu\DI\ServiceProviderInterface;
+use Wandu\Foundation;
 
 class MonologServiceProvider implements ServiceProviderInterface
 {
@@ -14,7 +15,9 @@ class MonologServiceProvider implements ServiceProviderInterface
         $app->closure(Logger::class, function (ContainerInterface $app) {
             $logger = new Logger('wandu');
             if ($app['config']->get('log.path')) {
-                $logger->pushHandler(new StreamHandler($app['config']->get('log.path')));
+                $logger->pushHandler(new StreamHandler(
+                    Foundation\path($app['config']->get('log.path'))
+                ));
             }
             return $logger;
         });

@@ -8,4 +8,13 @@ namespace Wandu\Foundation
     {
         return Application::$app;
     }
+
+    /**
+     * @param string $path
+     * @return string
+     */
+    function path($path)
+    {
+        return app()->get('base_path') . '/' . $path;
+    }
 }

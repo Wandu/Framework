@@ -23,6 +23,7 @@ class Application extends Container
         parent::__construct();
         $this->instance(KernelInterface::class, $this->kernel = $kernel);
         $this->alias('kernel', KernelInterface::class);
+        $this->setAsGlobal();
     }
 
     /**
@@ -31,7 +32,6 @@ class Application extends Container
     public function boot()
     {
         $this->kernel->boot($this);
-        $this->setAsGlobal();
         parent::boot();
         return $this;
     }

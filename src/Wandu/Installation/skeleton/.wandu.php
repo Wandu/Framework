@@ -1,7 +1,8 @@
 <?php
 use Wandu\Foundation\Definitions\StandardDefinition;
-use Wandu\Router\Controllers\HelloWorldController;
 use Wandu\Router\Router;
+
+use %%namespace%%\Controllers\HelloWorldController;
 
 return new class extends StandardDefinition
 {
