@@ -20,20 +20,21 @@ $ composer require wandu/framework
 $ vendor/bin/wandu install
 ```
 
-then, there are 2 or 3 questions.
+then, there are 2 questions.
 
 ```
  install path? [/your/project/path]:
  >
 
- composer path? [/your/project/path/composer.json]:
- >
- 
  app namespace? [Wandu\App]:
  >
 ```
 
 Ver-------------y Simple, isn't it?
+
+## Websites
+
+- [wandu.github.io](https://wandu.github.io)
 
 ## Index
 
@@ -41,6 +42,3 @@ Ver-------------y Simple, isn't it?
 - [Wandu Router](src/Wandu/Router) (Git Repository : [Wandu/Router](https://github.com/Wandu/Router))
 - [Wandu Http](src/Wandu/Http) (Git Repository : [Wandu/Http](https://github.com/Wandu/Http))
 
-## Ref.
-
-- http://stackoverflow.com/questions/1683531/how-to-import-existing-git-repository-into-another
