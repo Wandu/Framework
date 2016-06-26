@@ -7,3 +7,11 @@ composer.lock
 
 # test stub files
 /tests/Installation/Commands/project
+
+# local installed
+/app
+/public
+/migrations
+/views
+/.wandu.php
+/.wandu.config.php
