@@ -34,7 +34,7 @@ class {$name} extends Migration
      */
     public function migrate(Builder \$schema)
     {
-        \$schema->table('{articles}', function (Blueprint \$table) {
+        \$schema->create('{articles}', function (Blueprint \$table) {
             \$table->bigIncrements('id');
             \$table->timestamps();
         });
