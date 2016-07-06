@@ -104,10 +104,9 @@ class Container implements ContainerInterface
     }
 
     /**
-     * @param string $name
-     * @return mixed
+     * {@inheritdoc}
      */
-    public function getRawItem($name)
+    public function containee($name)
     {
         if (!array_key_exists($name, $this->containees)) {
             if (class_exists($name)) {
@@ -116,8 +115,16 @@ class Container implements ContainerInterface
                 throw new NullReferenceException($name);
             }
         }
-        // 여기에 cache 들어가야 함. for singleton..
-        return $this->containees[$name]->get();
+        return $this->containees[$name];
+    }
+    
+    /**
+     * @param string $name
+     * @return mixed
+     */
+    public function getRawItem($name)
+    {
+        return $this->containee($name)->get();
     }
     
     /**
@@ -261,9 +268,11 @@ class Container implements ContainerInterface
      */
     public function create($class, array $arguments = [])
     {
-//        if (count($arguments)) {
-//            return $this->with($arguments)->create($class);
-//        }
+        $seqArguments = $this->getSeqArray($arguments);
+        $assocArguments = $this->getAssocArray($arguments);
+        if (count($assocArguments)) {
+            return $this->with($assocArguments)->create($class, $seqArguments);
+        }
         $reflectionClass = new ReflectionClass($class);
         $reflectionMethod = $reflectionClass->getConstructor();
         if ($reflectionMethod) {
@@ -285,9 +294,14 @@ class Container implements ContainerInterface
      */
     public function call(callable $callee, array $arguments = [])
     {
+        $seqArguments = $this->getSeqArray($arguments);
+        $assocArguments = $this->getAssocArray($arguments);
+        if (count($assocArguments)) {
+            return $this->with($assocArguments)->call($callee, $seqArguments);
+        }
         return call_user_func_array(
             $callee,
-            $this->getParameters(new ReflectionCallable($callee), $arguments)
+            $this->getParameters(new ReflectionCallable($callee), $seqArguments)
         );
     }
 
@@ -381,31 +395,25 @@ class Container implements ContainerInterface
     protected function getParameters(ReflectionFunctionAbstract $reflectionFunction, array $arguments)
     {
         $parametersToReturn = [];
-        $parameters = $this->getOnlySeqArray($arguments);
+        $parameters = $arguments;
         foreach ($reflectionFunction->getParameters() as $param) {
             // if parameter doesn't have type hint,
-            // 1.1. search in arguments by param name
             // 1.2. insert remain arguments
             // 1.3. if has default value, insert default value.
             // 1.4. exception
 
             // if parameter has type hint,
-            // 2.1. search in arguments by param name ( == 1.1)
             // 2.2. search in arguments by class name
             // 2.3. search in container by class name
             // 2.4. if has default value, insert default vlue. ( == 1.3)
             // 2.5. exception ( == 1.4)a
 
-            // 1.1, 2.1
             $paramName = $param->getName();
-            if (isset($arguments[$paramName])) {
-                $parametersToReturn[] = $arguments[$paramName];
-                continue;
-            }
             try {
-                if ($paramClassReflection = $param->getClass()) { // 2.*
+                $paramClass = $param->getClass();
+                if ($paramClass) { // 2.*
                     // 2.2
-                    $paramClassName = $paramClassReflection->getName();
+                    $paramClassName = $paramClass->getName();
                     if (isset($arguments[$paramClassName])) {
                         $parametersToReturn[] = $arguments[$paramClassName];
                         continue;
@@ -440,12 +448,27 @@ class Container implements ContainerInterface
      * @param array $array
      * @return array
      */
-    protected function getOnlySeqArray(array $array)
+    protected function getSeqArray(array $array)
     {
         $arrayToReturn = [];
         foreach ($array as $key => $item) {
             if (is_int($key)) {
                 $arrayToReturn[] = $item;
+            }
+        }
+        return $arrayToReturn;
+    }
+
+    /**
+     * @param array $array
+     * @return array
+     */
+    protected function getAssocArray(array $array)
+    {
+        $arrayToReturn = [];
+        foreach ($array as $key => $item) {
+            if (!is_int($key)) {
+                $arrayToReturn[$key] = $item;
             }
         }
         return $arrayToReturn;

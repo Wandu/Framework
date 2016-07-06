@@ -3,6 +3,7 @@ namespace Wandu\DI;
 
 use ArrayAccess;
 use ArrayObject;
+use Psr\Http\Message\ServerRequestInterface;
 use Wandu\DI\Exception\CannotResolveException;
 use Wandu\DI\Stub\Resolve\AutoResolvedDepend;
 use Wandu\DI\Stub\Resolve\CallExample;
@@ -10,6 +11,8 @@ use Wandu\DI\Stub\Resolve\CreateNormalExample;
 use Wandu\DI\Stub\Resolve\CreateWithArrayExample;
 use Wandu\DI\Stub\Resolve\DependInterface;
 use Wandu\DI\Stub\Resolve\ReplacedDepend;
+use Wandu\Http\Parameters\ParsedBody;
+use Wandu\Http\Psr\ServerRequest;
 
 class ResolveTest extends TestCase
 {
@@ -87,7 +90,7 @@ class ResolveTest extends TestCase
 
         $created = $this->container->create(CreateWithArrayExample::class, [
             ['config' => 'config string!'],
-            'depend' => new ReplacedDepend(), // key => value mean use this
+            DependInterface::class => new ReplacedDepend(), // key => value mean use this
         ]);
 
         $this->assertInstanceOf(CreateWithArrayExample::class, $created);
@@ -158,11 +161,11 @@ class ResolveTest extends TestCase
         $this->assertEquals([null], $this->container->call($callback));
         $this->assertEquals([1, 2], $this->container->call($callback, [1, 2]));
         $this->assertEquals(
-            ['foo!', 1, 2],
+            [1, 2],
             $this->container->call($callback, ['foo' => 'foo!', 1, 2,])
         );
         $this->assertEquals(
-            ['foo!', 1, 2],
+            [1, 2],
             $this->container->call($callback, [1, 2, 'foo' => 'foo!'])
         );
 
@@ -174,7 +177,7 @@ class ResolveTest extends TestCase
         $this->assertEquals([null, 2], $this->container->call($callback, [null, 2]));
         $this->assertEquals([1, 2], $this->container->call($callback, [1, 2]));
         $this->assertEquals(
-            ['foo!', 1, 2],
+            [1, 2],
             $this->container->call($callback, [1, 2, 'foo' => 'foo!'])
         );
 
@@ -188,7 +191,7 @@ class ResolveTest extends TestCase
         // instantly insert!
         $param = new ArrayObject();
         $this->assertEquals(
-            [$param, 1, 2, 3],
+            [null, 1, 2, 3],
             $this->container->call($callback, [1, 2, 3, 'foo' => $param])
         );
         $this->assertEquals(
@@ -216,6 +219,23 @@ class ResolveTest extends TestCase
             $this->assertEquals('unknown', $e->getParameter());
             $this->assertEquals(StubResolveException1Depth::class, $e->getClass());
         }
+    }
+    
+    public function testCascadeResolve()
+    {
+        $count = 0;
+        
+        $request = new ServerRequest();
+        $request = $request->withParsedBody(['abc' => 'def']);
+        
+        $this->container->call(function (ServerRequestInterface $req, ParsedBody $parsedBody) use (&$count, $request) {
+            $this->assertSame($request, $req);
+            $count++;
+        }, [
+            ServerRequestInterface::class => $request,
+        ]);
+        
+        $this->assertEquals(1, $count);
     }
 }
 
