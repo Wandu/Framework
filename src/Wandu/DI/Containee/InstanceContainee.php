@@ -28,9 +28,6 @@ class InstanceContainee extends ContaineeAbstract
         $this->frozen = true;
         if (!isset($this->caching)) {
             $this->caching = $this->source;
-            if ($this->wireEnabled) {
-                $this->container->inject($this->caching);
-            }
         }
         if ($this->factoryEnabled) {
             return clone $this->caching;

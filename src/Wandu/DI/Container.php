@@ -21,7 +21,7 @@ use Wandu\Reflection\ReflectionCallable;
 
 class Container implements ContainerInterface
 {
-    /** @var \Wandu\DI\ContaineeInterface[] */
+    /** @var \Wandu\DI\Containee\ContaineeAbstract[] */
     protected $containees = [];
     
     /** @var \Wandu\DI\ServiceProviderInterface[] */
@@ -104,9 +104,10 @@ class Container implements ContainerInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @param string $name
+     * @return mixed
      */
-    public function get($name)
+    public function getRawItem($name)
     {
         if (!array_key_exists($name, $this->containees)) {
             if (class_exists($name)) {
@@ -115,7 +116,20 @@ class Container implements ContainerInterface
                 throw new NullReferenceException($name);
             }
         }
-        $instance = $this->containees[$name]->get();
+        // 여기에 cache 들어가야 함. for singleton..
+        return $this->containees[$name]->get();
+    }
+    
+    /**
+     * {@inheritdoc}
+     */
+    public function get($name)
+    {
+        $instance = $this->getRawItem($name);
+        if ($this->containees[$name]->isWireEnabled()) {
+           $this->inject($instance);
+        }
+
         foreach ($this->getExtenders($name) as $extender) {
             $instance = $extender->__invoke($instance);
         }
@@ -230,10 +244,26 @@ class Container implements ContainerInterface
     }
 
     /**
+     * @param array $arguments
+     * @return \Wandu\DI\Container
+     */
+    public function with(array $arguments = [])
+    {
+        $new = clone $this;
+        foreach ($arguments as $name => $argument) {
+            $new->instance($name, $argument);
+        }
+        return $new;
+    }
+    
+    /**
      * {@inheritdoc}
      */
     public function create($class, array $arguments = [])
     {
+//        if (count($arguments)) {
+//            return $this->with($arguments)->create($class);
+//        }
         $reflectionClass = new ReflectionClass($class);
         $reflectionMethod = $reflectionClass->getConstructor();
         if ($reflectionMethod) {
@@ -293,7 +323,7 @@ class Container implements ContainerInterface
                 // 2.3
                 if ($this->hasAutowiredFromDocComment($docComment)) {
                     if ($this->has($propertyClassName)) {
-                        $this->injectProperty($property, $object, $this->get($propertyClassName));
+                        $this->injectProperty($property, $object, $this->getRawItem($propertyClassName));
                         continue;
                     } else {
                         throw new CannotInjectException($propertyClassName, $property->getName());

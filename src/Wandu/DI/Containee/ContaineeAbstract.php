@@ -21,20 +21,20 @@ abstract class ContaineeAbstract implements ContaineeInterface
     protected $frozen = false;
 
     /**
-     * @return bool
-     */
-    public function isFrozen()
-    {
-        return $this->frozen;
-    }
-
-    /**
      * {@inheritdoc}
      */
     public function freeze()
     {
         $this->frozen = true;
         return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isFrozen()
+    {
+        return $this->frozen;
     }
 
     /**
@@ -47,11 +47,27 @@ abstract class ContaineeAbstract implements ContaineeInterface
     }
 
     /**
+     * @return boolean
+     */
+    public function isFactoryEnabled()
+    {
+        return $this->factoryEnabled;
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function wire($enabled = true)
     {
         $this->wireEnabled = $enabled;
         return $this;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function isWireEnabled()
+    {
+        return $this->wireEnabled;
     }
 }

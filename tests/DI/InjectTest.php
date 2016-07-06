@@ -99,4 +99,49 @@ class InjectTest extends TestCase
         $example = $this->container->get(AutoInjectExample::class);
         $this->assertInstanceOf(DependInterface::class, $example->getSomething());
     }
+    
+    public function testEachInject()
+    {
+        $container = new Container();
+        
+        $container->bind(TestEachInject1::class)->wire(true);
+        $container->bind(TestEachInject2::class)->wire(true);
+
+        $item1 = $container->get(TestEachInject1::class);
+        $item2 = $container->get(TestEachInject2::class);
+
+        $this->assertInstanceOf(TestEachInject1::class, $item1);
+        $this->assertInstanceOf(TestEachInject2::class, $item2);
+
+        $this->assertInstanceOf(TestEachInject2::class, $item1->getItem());
+        $this->assertInstanceOf(TestEachInject1::class, $item2->getItem());
+    }
+}
+
+class TestEachInject1
+{
+    /**
+     * @Autowired
+     * @var \Wandu\DI\TestEachInject2
+     */
+    protected $item;
+    
+    public function getItem()
+    {
+        return $this->item;
+    }
+}
+
+class TestEachInject2
+{
+    /**
+     * @Autowired
+     * @var \Wandu\DI\TestEachInject1
+     */
+    protected $item;
+    
+    public function getItem()
+    {
+        return $this->item;
+    }
 }

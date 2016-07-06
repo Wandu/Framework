@@ -26,16 +26,10 @@ class ClosureContainee extends ContaineeAbstract
         $this->frozen = true;
         if ($this->factoryEnabled) {
             $object = $this->handler->__invoke($this->container);
-            if ($this->wireEnabled) {
-                $this->container->inject($object);
-            }
             return $object;
         }
         if (!isset($this->caching)) {
             $object = $this->handler->__invoke($this->container);
-            if ($this->wireEnabled) {
-                $this->container->inject($object);
-            }
             $this->caching = $object;
         }
         return $this->caching;

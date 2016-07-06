@@ -22,17 +22,11 @@ class BindContainee extends ContaineeAbstract
     {
         if ($this->factoryEnabled) {
             $object = $this->container->create($this->className);
-            if ($this->wireEnabled) {
-                $this->container->inject($object);
-            }
             return $object;
         }
         $this->frozen = true;
         if (!isset($this->caching)) {
             $object = $this->container->create($this->className);
-            if ($this->wireEnabled) {
-                $this->container->inject($object);
-            }
             $this->caching = $object;
         }
         return $this->caching;
