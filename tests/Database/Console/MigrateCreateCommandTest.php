@@ -9,9 +9,6 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Wandu\Config\Config;
 
-/**
- * @runTestsInSeparateProcesses
- */
 class MigrateCreateCommandTest extends PHPUnit_Framework_TestCase
 {
     public function setUp()

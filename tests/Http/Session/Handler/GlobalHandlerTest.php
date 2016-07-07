@@ -3,9 +3,6 @@ namespace Wandu\Http\Session\Handler;
 
 use Wandu\Http\Session\HandlerTestCase;
 
-/**
- * @runTestsInSeparateProcesses
- */
 class GlobalHandlerTest extends HandlerTestCase
 {
     public function setUp()
