@@ -115,6 +115,13 @@ class InjectTest extends TestCase
 
         $this->assertInstanceOf(TestEachInject2::class, $item1->getItem());
         $this->assertInstanceOf(TestEachInject1::class, $item2->getItem());
+        
+        // very important!
+        $this->assertSame($item1, $item2->getItem());
+        $this->assertSame($item2, $item1->getItem());
+
+        $this->assertSame($item1, $item1->getItem()->getItem());
+        $this->assertSame($item2, $item2->getItem()->getItem());
     }
 }
 

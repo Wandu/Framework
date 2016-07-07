@@ -4,11 +4,10 @@ namespace Wandu\DI;
 use Closure;
 use Interop\Container\ContainerInterface as InteropContainerInterface;
 use ReflectionClass;
+use ReflectionException;
 use ReflectionFunctionAbstract;
 use ReflectionObject;
 use ReflectionProperty;
-use ReflectionException;
-use Wandu\DI\Containee\AliasContainee;
 use Wandu\DI\Containee\BindContainee;
 use Wandu\DI\Containee\ClosureContainee;
 use Wandu\DI\Containee\InstanceContainee;
@@ -37,9 +36,9 @@ class Container implements ContainerInterface
     {
         $this->instance(Container::class, $this)->freeze();
 
-        $this->alias(ContainerInterface::class, Container::class)->freeze();
-        $this->alias(InteropContainerInterface::class, Container::class)->freeze();
-        $this->alias('container', Container::class)->freeze();
+        $this->instance(ContainerInterface::class, $this)->freeze();
+        $this->instance(InteropContainerInterface::class, $this)->freeze();
+        $this->instance('container', $this)->freeze();
     }
 
     /**
@@ -191,7 +190,9 @@ class Container implements ContainerInterface
             $this->indexOfAliases[$origin] = [];
         }
         $this->indexOfAliases[$origin][] = $name;
-        return $this->containees[$name] = new AliasContainee($name, $origin, $this);
+        return $this->closure($name, function (ContainerInterface $container) use ($origin) {
+            return $container->get($origin);
+        })->factory(true);
     }
 
     /**

@@ -84,28 +84,31 @@ class ContainerChainTest extends TestCase
 
     public function testBindFactory()
     {
-        $this->container->bind(DependInterface::class, AutoResolvedDepend::class);
+        $container = new Container();
+        
+        $container->bind(DependInterface::class, AutoResolvedDepend::class);
 
         // all same
-        $object1 = $this->container[DependInterface::class];
-        $this->assertSame($object1, $this->container[DependInterface::class]);
-        $this->assertSame($object1, $this->container[DependInterface::class]);
-        $this->assertSame($object1, $this->container[DependInterface::class]);
+        $object1 = $container[DependInterface::class];
+        $this->assertSame($object1, $container[DependInterface::class]);
+        $this->assertSame($object1, $container[DependInterface::class]);
+        $this->assertSame($object1, $container[DependInterface::class]);
 
-        $this->container = new Container();
+        // reset
+        $container = new Container();
         
-        $this->container
+        $container
             ->bind(DependInterface::class, AutoResolvedDepend::class)
             ->factory(true);
-        $object2 = $this->container[DependInterface::class];
+        $object2 = $container[DependInterface::class];
 
         // all not same
-        $object2_1 = $this->container[DependInterface::class];
+        $object2_1 = $container[DependInterface::class];
 
         $this->assertNotSame($object2, $object2_1);
         $this->assertEquals($object2, $object2_1);
 
-        $object2_2 = $this->container[DependInterface::class];
+        $object2_2 = $container[DependInterface::class];
 
         $this->assertNotSame($object2, $object2_2);
         $this->assertEquals($object2, $object2_2);

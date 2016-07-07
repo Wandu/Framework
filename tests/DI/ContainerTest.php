@@ -1,6 +1,7 @@
 <?php
 namespace Wandu\DI;
 
+use Interop\Container\ContainerInterface as PsrContainer;
 use Mockery;
 use Wandu\DI\Exception\CannotChangeException;
 use Wandu\DI\Exception\NullReferenceException;
@@ -12,6 +13,16 @@ use Wandu\DI\Stub\XmlRenderer;
 
 class ContainerTest extends TestCase
 {
+    public function testConstruct()
+    {
+        $container = new Container();
+
+        $this->assertSame($container, $container->get('container'));
+        $this->assertSame($container, $container->get(Container::class));
+        $this->assertSame($container, $container->get(ContainerInterface::class));
+        $this->assertSame($container, $container->get(PsrContainer::class));
+    }
+    
     public function testHas()
     {
         $this->container->instance(Renderable::class, new XmlRenderer);
