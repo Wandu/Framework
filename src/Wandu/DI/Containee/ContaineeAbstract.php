@@ -2,6 +2,7 @@
 namespace Wandu\DI\Containee;
 
 use Wandu\DI\ContaineeInterface;
+use Wandu\DI\ContainerInterface;
 
 abstract class ContaineeAbstract implements ContaineeInterface
 {
@@ -67,4 +68,10 @@ abstract class ContaineeAbstract implements ContaineeInterface
     {
         return $this->wireEnabled;
     }
+
+    /**
+     * @param \Wandu\DI\ContainerInterface $container
+     * @return mixed
+     */
+    abstract public function get(ContainerInterface $container);
 }

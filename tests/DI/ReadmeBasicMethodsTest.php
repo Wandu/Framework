@@ -1,9 +1,9 @@
 <?php
 namespace Wandu\DI;
 
-use Mockery;
+use PHPUnit_Framework_TestCase;
 
-class ReadmeBasicMethodsTest extends TestCase
+class ReadmeBasicMethodsTest extends PHPUnit_Framework_TestCase
 {
     public function testSimpleExample()
     {

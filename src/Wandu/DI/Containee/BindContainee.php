@@ -5,31 +5,29 @@ use Wandu\DI\ContainerInterface;
 
 class BindContainee extends ContaineeAbstract
 {
-    /** @var object */
-    protected $caching;
-
+    /** @var string */
+    protected $className;
+    
     /**
-     * @param $className
-     * @param \Wandu\DI\ContainerInterface $container
+     * @param string $className
      */
-    public function __construct($className, ContainerInterface $container)
+    public function __construct($className)
     {
         $this->className = $className;
-        $this->container = $container;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function get()
+    public function get(ContainerInterface $container)
     {
         if ($this->factoryEnabled) {
-            $object = $this->container->create($this->className);
+            $object = $container->create($this->className);
             return $object;
         }
         $this->frozen = true;
         if (!isset($this->caching)) {
-            $object = $this->container->create($this->className);
+            $object = $container->create($this->className);
             $this->caching = $object;
         }
         return $this->caching;

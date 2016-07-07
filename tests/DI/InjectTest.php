@@ -1,30 +1,32 @@
 <?php
 namespace Wandu\DI;
 
-use Mockery;
 use Wandu\DI\Exception\CannotInjectException;
 use Wandu\DI\Stub\Inject\AutoInjectExample;
 use Wandu\DI\Stub\Resolve\AutoResolvedDepend;
 use Wandu\DI\Stub\Resolve\DependInterface;
+use PHPUnit_Framework_TestCase;
 
-class InjectTest extends TestCase
+class InjectTest extends PHPUnit_Framework_TestCase
 {
     public function testDirectInjectByPropertyName()
     {
+        $container = new Container();
+
         $example = new AutoInjectExample();
 
         $this->assertNull($example->getSomething()); // null
         $this->assertNull($example->getOtherthing()); // null
 
         // inject object
-        $this->container->inject($example, [
+        $container->inject($example, [
             'something' => $something = new AutoResolvedDepend(),
         ]);
 
         $this->assertSame($something, $example->getSomething()); // same
 
         // inject scalar
-        $this->container->inject($example, [
+        $container->inject($example, [
             'something' => null, // Autowired always has some value..
             'otherthing' => 12341234
         ]);
@@ -34,9 +36,11 @@ class InjectTest extends TestCase
 
     public function testDirectInjectByDocClassName()
     {
+        $container = new Container();
+
         $example = new AutoInjectExample();
 
-        $this->container->inject($example, [
+        $container->inject($example, [
             DependInterface::class => $something = new AutoResolvedDepend(),
         ]);
 
@@ -45,10 +49,12 @@ class InjectTest extends TestCase
 
     public function testAutoInjectWithFail()
     {
+        $container = new Container();
+
         $example = new AutoInjectExample();
 
         try {
-            $this->container->inject($example);
+            $container->inject($example);
             $this->fail();
         } catch (CannotInjectException $e) {
             $this->assertEquals(DependInterface::class, $e->getClass());
@@ -58,12 +64,14 @@ class InjectTest extends TestCase
 
     public function testAutoInjectWithSuccess()
     {
-        $this->container->instance(DependInterface::class, $something1 = new AutoResolvedDepend);
+        $container = new Container();
+
+        $container->instance(DependInterface::class, $something1 = new AutoResolvedDepend);
 
         $example = new AutoInjectExample();
         $this->assertNull($example->getSomething());
 
-        $this->container->inject($example);
+        $container->inject($example);
 
         // inject success!
         $this->assertSame($something1, $example->getSomething());
@@ -71,12 +79,14 @@ class InjectTest extends TestCase
 
     public function testAutoInjectWithDirectInject()
     {
-        $this->container->instance(DependInterface::class, $something1 = new AutoResolvedDepend);
+        $container = new Container();
+
+        $container->instance(DependInterface::class, $something1 = new AutoResolvedDepend);
 
         $example = new AutoInjectExample();
         $this->assertNull($example->getSomething());
 
-        $this->container->inject($example, [
+        $container->inject($example, [
             'something' => $something2 = new AutoResolvedDepend(), // this prority bigger than auto resolve's.
         ]);
 
@@ -87,16 +97,18 @@ class InjectTest extends TestCase
 
     public function testAutoWiring()
     {
-        $this->container->bind(DependInterface::class, AutoResolvedDepend::class);
-        $this->container->bind(AutoInjectExample::class)->wire(true);
+        $container = new Container();
 
-        $this->assertInstanceOf(AutoInjectExample::class, $this->container->get(AutoInjectExample::class));
+        $container->bind(DependInterface::class, AutoResolvedDepend::class);
+        $container->bind(AutoInjectExample::class)->wire(true);
+
+        $this->assertInstanceOf(AutoInjectExample::class, $container->get(AutoInjectExample::class));
         $this->assertSame(
-            $this->container->get(AutoInjectExample::class),
-            $this->container->get(AutoInjectExample::class)
+            $container->get(AutoInjectExample::class),
+            $container->get(AutoInjectExample::class)
         );
 
-        $example = $this->container->get(AutoInjectExample::class);
+        $example = $container->get(AutoInjectExample::class);
         $this->assertInstanceOf(DependInterface::class, $example->getSomething());
     }
     

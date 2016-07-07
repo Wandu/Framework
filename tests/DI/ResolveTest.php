@@ -13,21 +13,24 @@ use Wandu\DI\Stub\Resolve\DependInterface;
 use Wandu\DI\Stub\Resolve\ReplacedDepend;
 use Wandu\Http\Parameters\ParsedBody;
 use Wandu\Http\Psr\ServerRequest;
+use PHPUnit_Framework_TestCase;
 
-class ResolveTest extends TestCase
+class ResolveTest extends PHPUnit_Framework_TestCase
 {
     public function testBind()
     {
-        $this->container->bind(DependInterface::class, AutoResolvedDepend::class);
+        $container = new Container();
+
+        $container->bind(DependInterface::class, AutoResolvedDepend::class);
 
         $this->assertInstanceOf(
             AutoResolvedDepend::class,
-            $instance1 = $this->container->get(AutoResolvedDepend::class)
+            $instance1 = $container->get(AutoResolvedDepend::class)
         );
 
         $this->assertInstanceOf(
             AutoResolvedDepend::class,
-            $instance2 = $this->container->get(DependInterface::class)
+            $instance2 = $container->get(DependInterface::class)
         );
         
         $this->assertSame($instance1, $instance2);
@@ -35,8 +38,10 @@ class ResolveTest extends TestCase
 
     public function testCreateFail()
     {
+        $container = new Container();
+
         try {
-            $this->container->create(CreateNormalExample::class);
+            $container->create(CreateNormalExample::class);
             $this->fail();
         } catch (CannotResolveException $e) {
             $this->assertEquals(CreateNormalExample::class, $e->getClass());
@@ -45,25 +50,29 @@ class ResolveTest extends TestCase
     
     public function testCreateSuccess()
     {
-        $this->container->bind(DependInterface::class, AutoResolvedDepend::class);
+        $container = new Container();
+
+        $container->bind(DependInterface::class, AutoResolvedDepend::class);
 
         $this->assertInstanceOf(
             CreateNormalExample::class,
-            $this->container->create(CreateNormalExample::class)
+            $container->create(CreateNormalExample::class)
         );
 
         $this->assertInstanceOf(
             AutoResolvedDepend::class,
-            $this->container->create(CreateNormalExample::class)->getDepend()
+            $container->create(CreateNormalExample::class)->getDepend()
         );
     }
 
     public function testCreateFailBecauseOfTypeHint()
     {
-        $this->container->bind(DependInterface::class, AutoResolvedDepend::class);
+        $container = new Container();
+
+        $container->bind(DependInterface::class, AutoResolvedDepend::class);
 
         try {
-            $this->container->create(CreateWithArrayExample::class);
+            $container->create(CreateWithArrayExample::class);
             $this->fail();
         } catch (CannotResolveException $e) {
             $this->assertEquals(CreateWithArrayExample::class, $e->getClass());
@@ -72,9 +81,11 @@ class ResolveTest extends TestCase
 
     public function testCreateWithArguments()
     {
-        $this->container->bind(DependInterface::class, AutoResolvedDepend::class);
+        $container = new Container();
 
-        $created = $this->container->create(CreateWithArrayExample::class, [
+        $container->bind(DependInterface::class, AutoResolvedDepend::class);
+
+        $created = $container->create(CreateWithArrayExample::class, [
             ['config' => 'config string!'],
         ]);
 
@@ -86,9 +97,11 @@ class ResolveTest extends TestCase
 
     public function testCreateWithOtherDepend()
     {
-        $this->container->bind(DependInterface::class, AutoResolvedDepend::class);
+        $container = new Container();
 
-        $created = $this->container->create(CreateWithArrayExample::class, [
+        $container->bind(DependInterface::class, AutoResolvedDepend::class);
+
+        $created = $container->create(CreateWithArrayExample::class, [
             ['config' => 'config string!'],
             DependInterface::class => new ReplacedDepend(), // key => value mean use this
         ]);
@@ -104,7 +117,9 @@ class ResolveTest extends TestCase
      */
     public function testCall()
     {
-        $this->container->bind(DependInterface::class, AutoResolvedDepend::class);
+        $container = new Container();
+
+        $container->bind(DependInterface::class, AutoResolvedDepend::class);
 
         function stub(DependInterface $dep)
         {
@@ -112,100 +127,104 @@ class ResolveTest extends TestCase
         }
 
         // closure
-        $this->assertEquals('call closure', $this->container->call(function (DependInterface $dep) {
+        $this->assertEquals('call closure', $container->call(function (DependInterface $dep) {
             return 'call closure';
         }));
 
         // function
-        $this->assertEquals('call function', $this->container->call(__NAMESPACE__ . '\\stub'));
+        $this->assertEquals('call function', $container->call(__NAMESPACE__ . '\\stub'));
 
         // static method
         $this->assertEquals(
             'static method',
-            $this->container->call(CallExample::class . '::staticMethod')
+            $container->call(CallExample::class . '::staticMethod')
         );
 
         // array of static
         $this->assertEquals(
             'static method',
-            $this->container->call([CallExample::class, 'staticMethod'])
+            $container->call([CallExample::class, 'staticMethod'])
         );
 
         // array of method
         $this->assertEquals(
             'instance method',
-            $this->container->call([new CallExample, 'instanceMethod'])
+            $container->call([new CallExample, 'instanceMethod'])
         );
 
         // invoker
         $this->assertEquals(
             'invoke',
-            $this->container->call(new CallExample())
+            $container->call(new CallExample())
         );
     }
 
     public function testCallWithParams()
     {
+        $container = new Container();
+
         $callback = function () {
             return func_get_args();
         };
 
-        $this->assertEquals([], $this->container->call($callback));
-        $this->assertEquals([1, 2], $this->container->call($callback, [1, 2]));
-        $this->assertEquals([1, 2], $this->container->call($callback, [1, 2, 'foo' => 'foo string']));
+        $this->assertEquals([], $container->call($callback));
+        $this->assertEquals([1, 2], $container->call($callback, [1, 2]));
+        $this->assertEquals([1, 2], $container->call($callback, [1, 2, 'foo' => 'foo string']));
 
         $callback = function ($foo = null) {
             return func_get_args();
         };
 
-        $this->assertEquals([null], $this->container->call($callback));
-        $this->assertEquals([1, 2], $this->container->call($callback, [1, 2]));
+        $this->assertEquals([null], $container->call($callback));
+        $this->assertEquals([1, 2], $container->call($callback, [1, 2]));
         $this->assertEquals(
             [1, 2],
-            $this->container->call($callback, ['foo' => 'foo!', 1, 2,])
+            $container->call($callback, ['foo' => 'foo!', 1, 2,])
         );
         $this->assertEquals(
             [1, 2],
-            $this->container->call($callback, [1, 2, 'foo' => 'foo!'])
+            $container->call($callback, [1, 2, 'foo' => 'foo!'])
         );
 
         $callback = function ($foo = 'default', $bar = null) {
             return func_get_args();
         };
 
-        $this->assertEquals(['default', null], $this->container->call($callback));
-        $this->assertEquals([null, 2], $this->container->call($callback, [null, 2]));
-        $this->assertEquals([1, 2], $this->container->call($callback, [1, 2]));
+        $this->assertEquals(['default', null], $container->call($callback));
+        $this->assertEquals([null, 2], $container->call($callback, [null, 2]));
+        $this->assertEquals([1, 2], $container->call($callback, [1, 2]));
         $this->assertEquals(
             [1, 2],
-            $this->container->call($callback, [1, 2, 'foo' => 'foo!'])
+            $container->call($callback, [1, 2, 'foo' => 'foo!'])
         );
 
         $callback = function (ArrayAccess $foo = null) {
             return func_get_args();
         };
 
-        $this->assertEquals([null], $this->container->call($callback));
-        $this->assertEquals([null, 1, 2], $this->container->call($callback, [1, 2]));
+        $this->assertEquals([null], $container->call($callback));
+        $this->assertEquals([null, 1, 2], $container->call($callback, [1, 2]));
 
         // instantly insert!
         $param = new ArrayObject();
         $this->assertEquals(
             [null, 1, 2, 3],
-            $this->container->call($callback, [1, 2, 3, 'foo' => $param])
+            $container->call($callback, [1, 2, 3, 'foo' => $param])
         );
         $this->assertEquals(
             [$param, 1, 2, 3],
-            $this->container->call($callback, [1, 2, 3, ArrayAccess::class => $param])
+            $container->call($callback, [1, 2, 3, ArrayAccess::class => $param])
         );
 
-        $this->assertFalse($this->container->has(ArrayAccess::class));
+        $this->assertFalse($container->has(ArrayAccess::class));
     }
     
     public function testResolveException()
     {
+        $container = new Container();
+
         try {
-            $this->container->get(StubResolveException1Depth::class);
+            $container->get(StubResolveException1Depth::class);
             $this->fail();
         } catch (CannotResolveException $e) {
             $this->assertEquals('unknown', $e->getParameter());
@@ -213,7 +232,7 @@ class ResolveTest extends TestCase
         }
 
         try {
-            $this->container->get(StubResolveException2Depth::class);
+            $container->get(StubResolveException2Depth::class);
             $this->fail();
         } catch (CannotResolveException $e) {
             $this->assertEquals('unknown', $e->getParameter());
@@ -223,12 +242,14 @@ class ResolveTest extends TestCase
     
     public function testCascadeResolve()
     {
+        $container = new Container();
+
         $count = 0;
         
         $request = new ServerRequest();
         $request = $request->withParsedBody(['abc' => 'def']);
         
-        $this->container->call(function (ServerRequestInterface $req, ParsedBody $parsedBody) use (&$count, $request) {
+        $container->call(function (ServerRequestInterface $req, ParsedBody $parsedBody) use (&$count, $request) {
             $this->assertSame($request, $req);
             $count++;
         }, [

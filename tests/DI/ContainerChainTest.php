@@ -1,22 +1,24 @@
 <?php
 namespace Wandu\DI;
 
-use Mockery;
 use stdClass;
 use Wandu\DI\Exception\CannotChangeException;
 use Wandu\DI\Stub\Resolve\AutoResolvedDepend;
 use Wandu\DI\Stub\Resolve\DependInterface;
+use PHPUnit_Framework_TestCase;
 
-class ContainerChainTest extends TestCase
+class ContainerChainTest extends PHPUnit_Framework_TestCase
 {
     public function testFreeze()
     {
-        $this->container->instance('obj1', new stdClass);
-        $this->container->destroy('obj1');
+        $container = new Container();
+        
+        $container->instance('obj1', new stdClass);
+        $container->destroy('obj1');
         
         try {
-            $this->container->instance('obj2', new stdClass)->freeze();
-            $this->container->destroy('obj2');
+            $container->instance('obj2', new stdClass)->freeze();
+            $container->destroy('obj2');
             $this->fail();
         } catch (CannotChangeException $e) {
         }
@@ -24,25 +26,27 @@ class ContainerChainTest extends TestCase
 
     public function testInstanceFactory()
     {
+        $container = new Container();
+
         $object1 = new stdClass();
-        $this->container->instance('obj1', $object1);
+        $container->instance('obj1', $object1);
         
         // all same
-        $this->assertSame($object1, $this->container['obj1']);
-        $this->assertSame($object1, $this->container['obj1']);
-        $this->assertSame($object1, $this->container['obj1']);
+        $this->assertSame($object1, $container['obj1']);
+        $this->assertSame($object1, $container['obj1']);
+        $this->assertSame($object1, $container['obj1']);
 
 
         $object2 = new stdClass();
-        $this->container->instance('obj2', $object2)->factory();
+        $container->instance('obj2', $object2)->factory();
 
         // all not same
-        $object2_1 = $this->container['obj2'];
+        $object2_1 = $container['obj2'];
 
         $this->assertNotSame($object2, $object2_1);
         $this->assertEquals($object2, $object2_1);
         
-        $object2_2 = $this->container['obj2'];
+        $object2_2 = $container['obj2'];
 
         $this->assertNotSame($object2, $object2_2);
         $this->assertEquals($object2, $object2_2);
@@ -52,29 +56,31 @@ class ContainerChainTest extends TestCase
 
     public function testClosureFactory()
     {
-        $this->container->closure('obj1', function () {
+        $container = new Container();
+
+        $container->closure('obj1', function () {
             return new stdClass();
         });
 
         // all same
-        $object1 = $this->container['obj1'];
-        $this->assertSame($object1, $this->container['obj1']);
-        $this->assertSame($object1, $this->container['obj1']);
-        $this->assertSame($object1, $this->container['obj1']);
+        $object1 = $container['obj1'];
+        $this->assertSame($object1, $container['obj1']);
+        $this->assertSame($object1, $container['obj1']);
+        $this->assertSame($object1, $container['obj1']);
 
 
-        $this->container->closure('obj2', function () {
+        $container->closure('obj2', function () {
             return new stdClass();
         })->factory(true);
-        $object2 = $this->container['obj2'];
+        $object2 = $container['obj2'];
 
         // all not same
-        $object2_1 = $this->container['obj2'];
+        $object2_1 = $container['obj2'];
 
         $this->assertNotSame($object2, $object2_1);
         $this->assertEquals($object2, $object2_1);
 
-        $object2_2 = $this->container['obj2'];
+        $object2_2 = $container['obj2'];
 
         $this->assertNotSame($object2, $object2_2);
         $this->assertEquals($object2, $object2_2);

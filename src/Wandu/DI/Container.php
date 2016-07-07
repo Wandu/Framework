@@ -70,7 +70,7 @@ class Container implements ContainerInterface
      */
     public function offsetSet($name, $value)
     {
-        $this->instance($name, $value);
+        $this->set($name, $value);
     }
 
     /**
@@ -125,7 +125,7 @@ class Container implements ContainerInterface
      */
     public function getRawItem($name)
     {
-        return $this->containee($name)->get();
+        return $this->containee($name)->get($this);
     }
     
     /**
@@ -163,14 +163,24 @@ class Container implements ContainerInterface
         }
         return $extenders;
     }
-    
+
+    /**
+     * {@inheritdoc}
+     */
+    public function set($name, $value)
+    {
+        if (!($value instanceof ContaineeInterface)) {
+            $value = new InstanceContainee($value);
+        }
+        return $this->addContainee($name, $value);
+    }
+
     /**
      * {@inheritdoc}
      */
     public function instance($name, $value)
     {
-        $this->destroy($name);
-        return $this->containees[$name] = new InstanceContainee($value, $this);
+        return $this->addContainee($name, new InstanceContainee($value));
     }
 
     /**
@@ -178,8 +188,7 @@ class Container implements ContainerInterface
      */
     public function closure($name, callable $handler)
     {
-        $this->destroy($name);
-        return $this->containees[$name] = new ClosureContainee($handler, $this);
+        return $this->addContainee($name, new ClosureContainee($handler));
     }
 
     /**
@@ -187,7 +196,6 @@ class Container implements ContainerInterface
      */
     public function alias($name, $origin)
     {
-        $this->destroy($name);
         if (!array_key_exists($origin, $this->indexOfAliases)) {
             $this->indexOfAliases[$origin] = [];
         }
@@ -202,14 +210,22 @@ class Container implements ContainerInterface
      */
     public function bind($name, $class = null)
     {
-        $this->destroy($name);
         if (isset($class)) {
-            $this->destroy($class);
-            $containee = $this->containees[$name] = new BindContainee($class, $this);
             $this->alias($class, $name);
-            return $containee;
+            return $this->addContainee($name, new BindContainee($class));
         }
-        return $this->containees[$name] = new BindContainee($name, $this);
+        return $this->addContainee($name, new BindContainee($name));
+    }
+    
+    /**
+     * @param string $name
+     * @param \Wandu\DI\ContaineeInterface $containee
+     * @return \Wandu\DI\ContaineeInterface
+     */
+    protected function addContainee($name, ContaineeInterface $containee)
+    {
+        $this->destroy($name);
+        return $this->containees[$name] = $containee;
     }
 
     /**
@@ -252,8 +268,7 @@ class Container implements ContainerInterface
     }
 
     /**
-     * @param array $arguments
-     * @return \Wandu\DI\Container
+     * {@inheritdoc}
      */
     public function with(array $arguments = [])
     {

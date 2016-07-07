@@ -2,6 +2,7 @@
 namespace Wandu\DI;
 
 use Interop\Container\ContainerInterface as InteropContainer;
+use Wandu\DI\Containee\ClosureContainee;
 use Wandu\DI\Exception\CannotChangeException;
 use Wandu\DI\Exception\NullReferenceException;
 use Wandu\DI\Stub\HttpController;
@@ -51,14 +52,16 @@ class ContainerTest extends PHPUnit_Framework_TestCase
         $this->assertFalse(isset($container['null']));
     }
 
-    public function testInstance()
+    public function testSet()
     {
         $container = new Container();
+        $xml = new XmlRenderer();
+        $json = new JsonRenderer();
+        
+        $container->set('xml', $xml);
 
-        $container->instance('xml', $xml = new XmlRenderer());
-
-        // "instance" map to offsetSet
-        $container['json'] = $json = new JsonRenderer();
+        // "set" map to offsetSet
+        $container['json'] = $json;
 
         $this->assertSame($xml, $container->get('xml'));
         $this->assertSame($json, $container->get('json'));
@@ -66,6 +69,36 @@ class ContainerTest extends PHPUnit_Framework_TestCase
         // "get" map to offsetGet
         $this->assertSame($xml, $container['xml']);
         $this->assertSame($json, $container['json']);
+    }
+
+    public function testSetWithContainee()
+    {
+        $container = new Container();
+
+        $container->set('xml', new ClosureContainee(function () {
+            return new XmlREnderer();
+        }));
+
+        // "set" map to offsetSet
+        $container['json'] = new ClosureContainee(function () {
+            return new JsonRenderer();
+        });
+
+        $this->assertInstanceOf(XmlRenderer::class, $container->get('xml'));
+        $this->assertInstanceOf(JsonRenderer::class, $container->get('json'));
+    }
+
+    public function testInstance()
+    {
+        $container = new Container();
+        $xml = new XmlRenderer();
+        
+        $container->instance('xml', $xml);
+
+        $this->assertSame($xml, $container->get('xml'));
+
+        // "get" map to offsetGet
+        $this->assertSame($xml, $container['xml']);
     }
 
     public function testClosure()

@@ -21,6 +21,13 @@ interface ContainerInterface extends ArrayAccess, InteropContainerInterface
     public function get($name);
 
     /**
+     * @param string $name
+     * @param mixed $value
+     * @return \Wandu\DI\ContaineeInterface
+     */
+    public function set($name, $value);
+
+    /**
      * @param string ...$name
      */
     public function destroy(...$names);
@@ -64,6 +71,12 @@ interface ContainerInterface extends ArrayAccess, InteropContainerInterface
      * @return \Wandu\DI\ContaineeInterface
      */
     public function containee($name);
+
+    /**
+     * @param array $arguments
+     * @return \Wandu\DI\ContainerInterface
+     */
+    public function with(array $arguments = []);
 
     /**
      * @param string $name

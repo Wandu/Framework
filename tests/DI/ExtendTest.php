@@ -1,88 +1,93 @@
 <?php
 namespace Wandu\DI;
 
-use ArrayObject;
-use Mockery;
-use Wandu\DI\Exception\NullReferenceException;
 use Wandu\DI\Stub\JsonRenderer;
 use Wandu\DI\Stub\XmlRenderer;
+use PHPUnit_Framework_TestCase;
 
-class ExtendTest extends TestCase
+class ExtendTest extends PHPUnit_Framework_TestCase
 {
     public function testInstanceExtend()
     {
-        $this->container->instance('instance', $renderer = new XmlRenderer());
-        $this->container->extend('instance', function ($item) {
+        $container = new Container();
+        
+        $container->instance('instance', $renderer = new XmlRenderer());
+        $container->extend('instance', function ($item) {
             $item->contents = 'instance contents';
             return $item;
         });
 
         // extended
-        $this->assertEquals('instance contents', $this->container['instance']->contents);
+        $this->assertEquals('instance contents', $container['instance']->contents);
 
         // and equal :-)
-        $this->assertSame($renderer, $this->container['instance']);
+        $this->assertSame($renderer, $container['instance']);
     }
 
     public function testClosureExtned()
     {
-        $this->container->closure('closure', function () {
+        $container = new Container();
+
+        $container->closure('closure', function () {
             return new JsonRenderer();
         });
-        $this->container->extend('closure', function ($item) {
+        $container->extend('closure', function ($item) {
             $item->contents = 'closure contents';
             return $item;
         });
 
         // extended
-        $this->assertEquals('closure contents', $this->container['closure']->contents);
+        $this->assertEquals('closure contents', $container['closure']->contents);
 
-        $this->assertSame($this->container['closure'], $this->container['closure']);
+        $this->assertSame($container['closure'], $container['closure']);
     }
 
     public function testAliasExtend()
     {
-        $this->container = new Container();
-        $this->container->instance('xml', $renderer = new XmlRenderer);
+        $container = new Container();
+        
+        $container->instance('xml', $renderer = new XmlRenderer);
 
-        $this->container->alias('xml.alias', 'xml');
-        $this->container->alias('xml.other.alias', 'xml.alias');
+        $container->alias('xml.alias', 'xml');
+        $container->alias('xml.other.alias', 'xml.alias');
 
-        $this->container->extend('xml.other.alias', function ($item) {
+        $container->extend('xml.other.alias', function ($item) {
             $item->contents = 'alias contents';
             return $item;
         });
 
-        $this->assertEquals('alias contents', $this->container['xml']->contents);
+        $this->assertEquals('alias contents', $container['xml']->contents);
 
         // and equal :-)
-        $this->assertSame($renderer, $this->container['xml.other.alias']);
+        $this->assertSame($renderer, $container['xml.other.alias']);
     }
 
     public function testAliasExtendPropagation()
     {
-        $this->container = new Container();
+        $container = new Container();
 
         // extend first,,
-        $this->container->extend('xml.other.alias', function ($item) {
+        $container->extend('xml.other.alias', function ($item) {
             $item->contents = 'alias contents';
             return $item;
         });
 
-        $this->container->instance('xml', $renderer = new XmlRenderer);
+        $container->instance('xml', $renderer = new XmlRenderer);
 
-        $this->container->alias('xml.alias', 'xml');
-        $this->container->alias('xml.other.alias', 'xml.alias');
+        $container->alias('xml.alias', 'xml');
+        $container->alias('xml.other.alias', 'xml.alias');
         
-        $this->assertEquals('alias contents', $this->container['xml']->contents);
+        $this->assertEquals('alias contents', $container['xml']->contents);
 
         // and equal :-)
-        $this->assertSame($renderer, $this->container['xml.other.alias']);
+        $this->assertSame($renderer, $container['xml.other.alias']);
     }
 
     public function testExtendUnknown()
     {
-        $this->container->extend('unknown', function ($item) {
+        $container = new Container();
+
+        $container->extend('unknown', function ($item) {
             return $item .' extended..';
         });
     }

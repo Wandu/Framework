@@ -4,36 +4,48 @@ namespace Wandu\DI;
 use Mockery;
 use Wandu\DI\Stub\ServiceProvider\BootProvider;
 use Wandu\DI\Stub\ServiceProvider\ProviderCheckable;
+use PHPUnit_Framework_TestCase;
 
-class ServiceProviderTest extends TestCase
+class ServiceProviderTest extends PHPUnit_Framework_TestCase
 {
+    public function tearDown()
+    {
+        Mockery::close();
+    }
+    
     public function testRegister()
     {
-        $mockProvider = Mockery::mock(ServiceProviderInterface::class);
-        $mockProvider->shouldReceive('register')->once()->with($this->container);
+        $container = new Container();
 
-        $this->container->register($mockProvider);
+        $mockProvider = Mockery::mock(ServiceProviderInterface::class);
+        $mockProvider->shouldReceive('register')->once()->with($container);
+
+        $container->register($mockProvider);
     }
 
     public function testOnlyRegister()
     {
+        $container = new Container();
+
         $mockery = Mockery::mock(ProviderCheckable::class);
 
         $mockery->shouldReceive('register')->once();
         $mockery->shouldReceive('boot')->never();
 
-        $this->container->instance('mockery', $mockery);
-        $this->container->register(new BootProvider());
+        $container->instance('mockery', $mockery);
+        $container->register(new BootProvider());
     }
 
     public function testRegisterAndBoot()
     {
+        $container = new Container();
+
         $mockery = Mockery::mock(ProviderCheckable::class);
         $mockery->shouldReceive('register')->once();
         $mockery->shouldReceive('boot')->once();
 
-        $this->container->instance('mockery', $mockery);
-        $this->container->register(new BootProvider());
-        $this->container->boot();
+        $container->instance('mockery', $mockery);
+        $container->register(new BootProvider());
+        $container->boot();
     }
 }

@@ -10,18 +10,16 @@ class InstanceContainee extends ContaineeAbstract
     
     /**
      * @param mixed $source
-     * @param \Wandu\DI\ContainerInterface $container
      */
-    public function __construct($source, ContainerInterface $container)
+    public function __construct($source)
     {
         $this->source = $source;
-        $this->container = $container;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function get()
+    public function get(ContainerInterface $container)
     {
         $this->frozen = true;
         if (!isset($this->caching)) {
