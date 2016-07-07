@@ -21,9 +21,9 @@ interface ContainerInterface extends ArrayAccess, InteropContainerInterface
     public function get($name);
 
     /**
-     * @param string $name
+     * @param string ...$name
      */
-    public function destroy($name);
+    public function destroy(...$names);
 
     /**
      * @param string $name
@@ -40,10 +40,10 @@ interface ContainerInterface extends ArrayAccess, InteropContainerInterface
 
     /**
      * @param string $name
-     * @param \Closure $handler
+     * @param callable $handler
      * @return \Wandu\DI\ContaineeInterface
      */
-    public function closure($name, Closure $handler);
+    public function closure($name, callable $handler);
 
     /**
      * @param string|array $name

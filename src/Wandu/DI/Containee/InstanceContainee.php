@@ -9,13 +9,11 @@ class InstanceContainee extends ContaineeAbstract
     protected $source;
     
     /**
-     * @param string $name
      * @param mixed $source
      * @param \Wandu\DI\ContainerInterface $container
      */
-    public function __construct($name, $source, ContainerInterface $container)
+    public function __construct($source, ContainerInterface $container)
     {
-        $this->name = $name;
         $this->source = $source;
         $this->container = $container;
     }

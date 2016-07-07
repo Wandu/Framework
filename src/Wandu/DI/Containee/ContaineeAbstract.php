@@ -5,9 +5,6 @@ use Wandu\DI\ContaineeInterface;
 
 abstract class ContaineeAbstract implements ContaineeInterface
 {
-    /** @var string */
-    protected $name;
-    
     /** @var mixed */
     protected $caching;
     

@@ -1,8 +1,7 @@
 <?php
 namespace Wandu\DI;
 
-use Interop\Container\ContainerInterface as PsrContainer;
-use Mockery;
+use Interop\Container\ContainerInterface as InteropContainer;
 use Wandu\DI\Exception\CannotChangeException;
 use Wandu\DI\Exception\NullReferenceException;
 use Wandu\DI\Stub\HttpController;
@@ -10,8 +9,9 @@ use Wandu\DI\Stub\JsonRenderer;
 use Wandu\DI\Stub\Renderable;
 use Wandu\DI\Stub\ServerAccessible;
 use Wandu\DI\Stub\XmlRenderer;
+use PHPUnit_Framework_TestCase;
 
-class ContainerTest extends TestCase
+class ContainerTest extends PHPUnit_Framework_TestCase
 {
     public function testConstruct()
     {
@@ -20,133 +20,170 @@ class ContainerTest extends TestCase
         $this->assertSame($container, $container->get('container'));
         $this->assertSame($container, $container->get(Container::class));
         $this->assertSame($container, $container->get(ContainerInterface::class));
-        $this->assertSame($container, $container->get(PsrContainer::class));
+        $this->assertSame($container, $container->get(InteropContainer::class));
     }
-    
+
     public function testHas()
     {
-        $this->container->instance(Renderable::class, new XmlRenderer);
+        $container = new Container();
 
-        $this->assertFalse($this->container->has(ServerAccessible::class));
-        $this->assertTrue($this->container->has(Renderable::class));
+        $container->instance(Renderable::class, new XmlRenderer);
 
-        // has map to offsetExists
-        $this->assertFalse(isset($this->container[ServerAccessible::class]));
-        $this->assertTrue(isset($this->container[Renderable::class]));
+        $this->assertTrue($container->has(Renderable::class)); // set by instance
+        $this->assertFalse($container->has(ServerAccessible::class)); // interface false
+        $this->assertTrue($container->has(JsonRenderer::class)); // class true
+
+        // "has" map to offsetExists
+        $this->assertTrue(isset($container[Renderable::class]));
+        $this->assertFalse(isset($container[ServerAccessible::class]));
+        $this->assertTrue(isset($container[JsonRenderer::class]));
+    }
+
+    public function testHasNull()
+    {
+        $container = new Container();
+
+        $container->instance('null', null);
+
+        $this->assertTrue($container->has('null'));
+
+        // "has" map to offsetExists but except null.
+        $this->assertFalse(isset($container['null']));
     }
 
     public function testInstance()
     {
-        $this->container->instance('xml', $xml = new XmlRenderer());
+        $container = new Container();
 
-        // instance map to offsetSet
-        $this->container['json'] = $json = new JsonRenderer();
+        $container->instance('xml', $xml = new XmlRenderer());
 
-        $this->assertSame($xml, $this->container->get('xml'));
-        $this->assertSame($json, $this->container->get('json'));
+        // "instance" map to offsetSet
+        $container['json'] = $json = new JsonRenderer();
 
-        // get map to offsetGet
-        $this->assertSame($xml, $this->container['xml']);
-        $this->assertSame($json, $this->container['json']);
+        $this->assertSame($xml, $container->get('xml'));
+        $this->assertSame($json, $container->get('json'));
+
+        // "get" map to offsetGet
+        $this->assertSame($xml, $container['xml']);
+        $this->assertSame($json, $container['json']);
     }
 
     public function testClosure()
     {
-        $this->container->instance(Renderable::class, $renderer = new XmlRenderer());
+        $container = new Container();
 
-        $this->container->closure(HttpController::class, function ($app) {
-            return new HttpController(
-                $app[Renderable::class],
-                [
-                    'username' => 'username string',
-                    'password' => 'password string',
-                ]
-            );
+        $container->instance(Renderable::class, $renderer = new XmlRenderer());
+        $container->closure(HttpController::class, function ($app) {
+            return new HttpController($app[Renderable::class], [
+                'username' => 'username string',
+                'password' => 'password string',
+            ]);
         });
 
-        $this->assertInstanceOf(
-            HttpController::class,
-            $this->container[HttpController::class]
-        );
-        $this->assertSame(
-            $this->container[HttpController::class],
-            $this->container[HttpController::class]
-        );
-        $this->assertSame($renderer, $this->container[HttpController::class]->getRenderer());
+        $this->assertInstanceOf(HttpController::class, $container[HttpController::class]);
+        $this->assertSame($container[HttpController::class], $container[HttpController::class]);
+        $this->assertSame($renderer, $container[HttpController::class]->getRenderer());
         $this->assertEquals([
             'username' => 'username string',
             'password' => 'password string',
-        ], $this->container[HttpController::class]->getConfig());
+        ], $container[HttpController::class]->getConfig());
     }
 
     public function testAlias()
     {
-        $this->container->instance(Renderable::class, $foo = new XmlRenderer);
+        $container = new Container();
+        $renderer = new XmlRenderer;
 
-        $this->container->alias('myalias', Renderable::class);
-        $this->container->alias('otheralias', 'myalias');
+        $container->instance(Renderable::class, $renderer);
 
-        $this->assertSame($foo, $this->container[Renderable::class]);
-        $this->assertSame($foo, $this->container['myalias']);
-        $this->assertSame($foo, $this->container['otheralias']);
+        $container->alias('myalias', Renderable::class);
+        $container->alias('otheralias', 'myalias');
+
+        $this->assertSame($renderer, $container[Renderable::class]);
+        $this->assertSame($renderer, $container['myalias']);
+        $this->assertSame($renderer, $container['otheralias']);
     }
 
-    public function testGet()
+    public function testGetByCreate()
     {
-        $controller = $this->container->get(JsonRenderer::class);
+        $container = new Container();
+
+        $controller = $container->get(JsonRenderer::class);
         $this->assertInstanceOf(JsonRenderer::class, $controller);
-    }
-
-    public function testDestroy()
-    {
-        $this->container->instance('xml', $xml = new XmlRenderer());
-
-        $this->assertTrue($this->container->has('xml'));
-
-        $this->container->destroy('xml');
-        
-        $this->assertFalse($this->container->has('xml'));
     }
 
     public function testGetFail()
     {
+        $container = new Container();
+
         try {
-            $this->container->get('unknown');
+            $container->get('unknown');
             $this->fail();
         } catch (NullReferenceException $exception) {
             $this->assertEquals('unknown', $exception->getClass());
         }
     }
 
+    public function testDestroy()
+    {
+        $container = new Container();
+
+        $container->instance('xml', new XmlRenderer());
+
+        $this->assertTrue($container->has('xml'));
+
+        $container->destroy('xml');
+
+        $this->assertFalse($container->has('xml'));
+    }
+
+    public function testDestroyMany()
+    {
+        $container = new Container();
+
+        $container->instance('xml1', new XmlRenderer());
+        $container->instance('xml2', new XmlRenderer());
+
+        $this->assertTrue($container->has('xml1'));
+        $this->assertTrue($container->has('xml2'));
+
+        $container->destroy('xml1', 'xml2');
+
+        $this->assertFalse($container->has('xml1'));
+        $this->assertFalse($container->has('xml2'));
+    }
+
     public function testFrozen()
     {
-        $this->container->instance('instance', 'instance string');
-        $this->container->closure('closure', function () {
+        $container = new Container();
+
+        $container->instance('instance', 'instance string');
+        $container->closure('closure', function () {
             return 'closure string';
         });
-        $this->container->alias('alias', 'closure');
+        $container->alias('alias', 'closure');
 
         // all change
-        $this->container->instance('instance', 'instance string changed');
-        $this->container->closure('closure', function () {
+        $container->instance('instance', 'instance string changed');
+        $container->closure('closure', function () {
             return 'closure string changed';
         });
-        $this->container->alias('alias', 'instance');
+        $container->alias('alias', 'instance');
 
-        // call, that frozen all values.
-        $this->container->get('instance');
-        $this->container->get('closure');
-        $this->container->get('alias');
+        // call, then it freeze all values.
+        $container->get('instance');
+        $container->get('closure');
+        $container->get('alias');
 
         // now cannot change
         try {
-            $this->container->instance('instance', 'instance string changed 2');
+            $container->instance('instance', 'instance string changed 2');
             $this->fail();
         } catch (CannotChangeException $exception) {
             $this->assertEquals('It cannot be changed; instance', $exception->getMessage());
         }
         try {
-            $this->container->closure('closure', function () {
+            $container->closure('closure', function () {
                 return 'closure string change 2';
             });
             $this->fail();
@@ -154,7 +191,7 @@ class ContainerTest extends TestCase
             $this->assertEquals('It cannot be changed; closure', $exception->getMessage());
         }
         try {
-            $this->container->alias('alias', 'closure');
+            $container->alias('alias', 'closure');
             $this->fail();
         } catch (CannotChangeException $exception) {
             $this->assertEquals('It cannot be changed; alias', $exception->getMessage());
@@ -162,19 +199,19 @@ class ContainerTest extends TestCase
 
         // also cannot remove
         try {
-            $this->container->offsetUnset('instance');
+            $container->offsetUnset('instance');
             $this->fail();
         } catch (CannotChangeException $exception) {
             $this->assertEquals('It cannot be changed; instance', $exception->getMessage());
         }
         try {
-            $this->container->offsetUnset('closure');
+            $container->offsetUnset('closure');
             $this->fail();
         } catch (CannotChangeException $exception) {
             $this->assertEquals('It cannot be changed; closure', $exception->getMessage());
         }
         try {
-            $this->container->offsetUnset('alias');
+            $container->offsetUnset('alias');
             $this->fail();
         } catch (CannotChangeException $exception) {
             $this->assertEquals('It cannot be changed; alias', $exception->getMessage());

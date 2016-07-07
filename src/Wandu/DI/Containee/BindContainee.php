@@ -7,10 +7,13 @@ class BindContainee extends ContaineeAbstract
 {
     /** @var object */
     protected $caching;
-    
-    public function __construct($name, $className, ContainerInterface $container)
+
+    /**
+     * @param $className
+     * @param \Wandu\DI\ContainerInterface $container
+     */
+    public function __construct($className, ContainerInterface $container)
     {
-        $this->name = $name;
         $this->className = $className;
         $this->container = $container;
     }

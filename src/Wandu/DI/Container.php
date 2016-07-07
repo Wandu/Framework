@@ -54,7 +54,7 @@ class Container implements ContainerInterface
      */
     public function offsetExists($name)
     {
-        return $this->has($name);
+        return $this->has($name) && $this->get($name) !== null;
     }
 
     /**
@@ -92,14 +92,16 @@ class Container implements ContainerInterface
     /**
      * {@inheritdoc}
      */
-    public function destroy($name)
+    public function destroy(...$names)
     {
-        if (array_key_exists($name, $this->containees)) {
-            if ($this->containees[$name]->isFrozen()) {
-                throw new CannotChangeException($name);
+        foreach ($names as $name) {
+            if (array_key_exists($name, $this->containees)) {
+                if ($this->containees[$name]->isFrozen()) {
+                    throw new CannotChangeException($name);
+                }
             }
+            unset($this->containees[$name]);
         }
-        unset($this->containees[$name]);
     }
 
     /**
@@ -168,16 +170,16 @@ class Container implements ContainerInterface
     public function instance($name, $value)
     {
         $this->destroy($name);
-        return $this->containees[$name] = new InstanceContainee($name, $value, $this);
+        return $this->containees[$name] = new InstanceContainee($value, $this);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function closure($name, Closure $handler)
+    public function closure($name, callable $handler)
     {
         $this->destroy($name);
-        return $this->containees[$name] = new ClosureContainee($name, $handler, $this);
+        return $this->containees[$name] = new ClosureContainee($handler, $this);
     }
 
     /**
@@ -191,7 +193,7 @@ class Container implements ContainerInterface
         }
         $this->indexOfAliases[$origin][] = $name;
         return $this->closure($name, function (ContainerInterface $container) use ($origin) {
-            return $container->get($origin);
+            return $container->get($origin); // proxy
         })->factory(true);
     }
 
@@ -201,15 +203,13 @@ class Container implements ContainerInterface
     public function bind($name, $class = null)
     {
         $this->destroy($name);
-        $this->destroy($class);
-        if (!isset($class)) {
-            $class = $name;
+        if (isset($class)) {
+            $this->destroy($class);
+            $containee = $this->containees[$name] = new BindContainee($class, $this);
+            $this->alias($class, $name);
+            return $containee;
         }
-        $containee = $this->containees[$class] = new BindContainee($name, $class, $this);
-        if ($name !== $class) {
-            $this->alias($name, $class);
-        }
-        return $containee;
+        return $this->containees[$name] = new BindContainee($name, $this);
     }
 
     /**
