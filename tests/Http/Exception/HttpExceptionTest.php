@@ -6,75 +6,76 @@ use PHPUnit_Framework_TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Wandu\Http\Psr\Stream\StringStream;
 use RuntimeException;
+use function Wandu\Http\response;
 
 class HttpExceptionTest extends PHPUnit_Framework_TestCase
 {
     public function testGetDefaultValues()
     {
-        $httpException = new HttpException();
+        $httpException = new InternalServerErrorException();
 
         $this->assertSame(500, $httpException->getStatusCode());
         $this->assertSame("Internal Server Error", $httpException->getReasonPhrase());
-
-
-        $httpException = new HttpException(500, "Hello World?");
+        
+        $response = response()->create('Hello World?');
+        $httpException = new InternalServerErrorException($response);
 
         $this->assertSame(500, $httpException->getStatusCode());
-        $this->assertSame("Hello World?", $httpException->getReasonPhrase());
+        $this->assertSame("Hello World?", $httpException->getBody()->__toString());
     }
 
     public function testCannotCallWithMethods()
     {
-        $httpException = new HttpException();
+        $httpException = new InternalServerErrorException();
 
         try {
             $httpException->withBody(new StringStream());
             $this->fail();
         } catch (RuntimeException $e) {
-            $this->assertEquals('cannot change body in HttpException.', $e->getMessage());
+            $this->assertEquals('cannot change body in Wandu\Http\Exception\InternalServerErrorException.', $e->getMessage());
         }
 
         try {
             $httpException->withHeader('content-type', 'application/json');
             $this->fail();
         } catch (RuntimeException $e) {
-            $this->assertEquals('cannot change header in HttpException.', $e->getMessage());
+            $this->assertEquals('cannot change header in Wandu\Http\Exception\InternalServerErrorException.', $e->getMessage());
         }
 
         try {
             $httpException->withAddedHeader('content-type', 'application/json');
             $this->fail();
         } catch (RuntimeException $e) {
-            $this->assertEquals('cannot change header in HttpException.', $e->getMessage());
+            $this->assertEquals('cannot change header in Wandu\Http\Exception\InternalServerErrorException.', $e->getMessage());
         }
 
         try {
             $httpException->withoutHeader('content-type');
             $this->fail();
         } catch (RuntimeException $e) {
-            $this->assertEquals('cannot change header in HttpException.', $e->getMessage());
+            $this->assertEquals('cannot change header in Wandu\Http\Exception\InternalServerErrorException.', $e->getMessage());
         }
 
         try {
             $httpException->withProtocolVersion('2.0');
             $this->fail();
         } catch (RuntimeException $e) {
-            $this->assertEquals('cannot change protocolVersion in HttpException.', $e->getMessage());
+            $this->assertEquals('cannot change protocolVersion in Wandu\Http\Exception\InternalServerErrorException.', $e->getMessage());
         }
 
         try {
             $httpException->withStatus(404, 'what..');
             $this->fail();
         } catch (RuntimeException $e) {
-            $this->assertEquals('cannot change status in HttpException.', $e->getMessage());
+            $this->assertEquals('cannot change status in Wandu\Http\Exception\InternalServerErrorException.', $e->getMessage());
         }
     }
 
-    public function testToRespose()
+    public function testGetResposeByDefault()
     {
-        $httpException = new HttpException();
+        $httpException = new InternalServerErrorException();
 
-        $response = $httpException->toResponse();
+        $response = $httpException->getResponse();
 
         $this->assertInstanceOf(ResponseInterface::class, $response);
 
@@ -83,23 +84,28 @@ class HttpExceptionTest extends PHPUnit_Framework_TestCase
         $this->assertNull($response->getBody());
         $this->assertSame('1.1', $response->getProtocolVersion());
         $this->assertEquals([], $response->getHeaders());
+    }
 
-
-
-        $httpException = new HttpException(
-            400,
-            'other reason-phrase',
-            new StringStream(),
-            ['content-type' => 'application/json'],
-            '1.0'
+    public function testGetRespose()
+    {
+        $httpException = new InternalServerErrorException(
+            new \Wandu\Http\Psr\Response(
+                400,
+                new StringStream(),
+                ['content-type' => 'application/json'],
+                'other reason-phrase',
+                '1.0'             
+            )
         );
 
-        $response = $httpException->toResponse();
+        $response = $httpException->getResponse();
 
         $this->assertInstanceOf(ResponseInterface::class, $response);
 
-        $this->assertSame(400, $response->getStatusCode());
-        $this->assertSame('other reason-phrase', $response->getReasonPhrase());
+        // it must be 500. because name is InternelServerErrorException
+        $this->assertSame(500, $response->getStatusCode());
+        $this->assertSame('Internal Server Error', $response->getReasonPhrase());
+        
         $this->assertInstanceOf(StringStream::class, $response->getBody());
         $this->assertSame('1.0', $response->getProtocolVersion());
         $this->assertEquals(['content-type' => 'application/json'], $response->getHeaders());
