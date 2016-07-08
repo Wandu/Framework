@@ -165,7 +165,8 @@ class InstallCommandTest extends PHPUnit_Framework_TestCase
 
         $command->execute();
 
-        $process = new Process('vendor/bin/wandu', __DIR__ . '/project');
+        // vendor/bin/wandu -> php vendor/bin/wandu (on ci not working.)
+        $process = new Process('php vendor/bin/wandu', __DIR__ . '/project');
         $process->run();
 
         $this->assertTrue(
