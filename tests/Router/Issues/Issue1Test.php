@@ -1,11 +1,14 @@
 <?php
 namespace Wandu\Router\Issues;
 
+use Closure;
 use Mockery;
+use Psr\Http\Message\ServerRequestInterface;
 use Wandu\Router\ClassLoader\DefaultLoader;
+use Wandu\Router\Contracts\MiddlewareInterface;
+use Wandu\Router\Responsifier\WanduResponsifier;
 use Wandu\Router\Route;
 use Wandu\Router\Stubs\AuthController;
-use Wandu\Router\Stubs\CookieMiddleware;
 use Wandu\Router\TestCase;
 
 class Issue1Test extends TestCase
@@ -21,12 +24,33 @@ class Issue1Test extends TestCase
             ->with('cookie', ['name' => 'wan2land'])->andReturn($changedRequest);
 
         $route = new Route(AuthController::class, 'login', [
-            CookieMiddleware::class
+            TestIssue1Middleware::class
         ]);
 
+        $response = $route->execute($request, new DefaultLoader(), new WanduResponsifier());
         $this->assertEquals(
             'login@Auth, cookie={"name":"wan2land"}',
-            $route->execute($request, new DefaultLoader())
+            $response->getBody()->__toString()
         );
+    }
+}
+
+class TestIssue1Middleware implements MiddlewareInterface
+{
+    /**
+     * {@inheritdoc}
+     */
+    public function __invoke(ServerRequestInterface $request, Closure $next)
+    {
+        $request = $request->withAttribute('cookie', ['name' => 'wan2land']);
+        return $next($request);
+    }
+}
+
+class TestIssue1Controller
+{
+    public function login(ServerRequestInterface $request)
+    {
+        return "login@Auth, cookie=" . json_encode($request->getAttribute('cookie', []));
     }
 }

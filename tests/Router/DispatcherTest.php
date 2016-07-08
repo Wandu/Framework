@@ -3,6 +3,7 @@ namespace Wandu\Router;
 
 use Mockery;
 use Wandu\Router\ClassLoader\DefaultLoader;
+use Wandu\Router\Contracts\RoutesInterface;
 use Wandu\Router\Exception\MethodNotAllowedException;
 use Wandu\Router\Stubs\AdminController;
 use Wandu\Router\Stubs\AuthSuccessMiddleware;
@@ -23,7 +24,7 @@ class DispatcherTest extends TestCase
 
         $this->assertEquals(
             '[GET] index@Home',
-            $dispatcher->dispatch($this->createRequest('GET', '/'))
+            $dispatcher->dispatch($this->createRequest('GET', '/'))->getBody()->__toString()
         );
     }
 
@@ -41,11 +42,11 @@ class DispatcherTest extends TestCase
 
         $this->assertEquals(
             '[GET] index@Admin',
-            $dispatcher->dispatch($this->createRequest('GET', '/admin'))
+            $dispatcher->dispatch($this->createRequest('GET', '/admin'))->getBody()->__toString()
         );
         $this->assertEquals(
             '[POST] action@Admin',
-            $dispatcher->dispatch($this->createRequest('POST', '/admin'))
+            $dispatcher->dispatch($this->createRequest('POST', '/admin'))->getBody()->__toString()
         );
 
         foreach (['PUT', 'DELETE', 'OPTIONS', 'PATCH'] as $method) {
@@ -72,11 +73,11 @@ class DispatcherTest extends TestCase
 
         $this->assertEquals(
             '[GET] index@Admin',
-            $dispatcher->dispatch($this->createRequest('GET', '/admin/index'))
+            $dispatcher->dispatch($this->createRequest('GET', '/admin/index'))->getBody()->__toString()
         );
         $this->assertEquals(
             '[GET] action@Admin',
-            $dispatcher->dispatch($this->createRequest('GET', '/admin/action'))
+            $dispatcher->dispatch($this->createRequest('GET', '/admin/action'))->getBody()->__toString()
         );
     }
 
@@ -98,7 +99,7 @@ class DispatcherTest extends TestCase
 
         $this->assertEquals(
             '[GET] users/37@Admin',
-            $dispatcher->dispatch($request)
+            $dispatcher->dispatch($request)->getBody()->__toString()
         );
     }
 
@@ -124,17 +125,17 @@ class DispatcherTest extends TestCase
 
         $this->assertEquals(
             '[GET] index@Home',
-            $dispatcher->dispatch($this->createRequest('GET', '/'))
+            $dispatcher->dispatch($this->createRequest('GET', '/'))->getBody()->__toString()
         );
 
         $this->assertEquals(
             '[GET] auth success; [GET] index@Admin',
-            $dispatcher->dispatch($this->createRequest('GET', '/admin'))
+            $dispatcher->dispatch($this->createRequest('GET', '/admin'))->getBody()->__toString()
         );
 
         $this->assertEquals(
             '[POST] auth success; [POST] action@Admin',
-            $dispatcher->dispatch($this->createRequest('POST', '/admin'))
+            $dispatcher->dispatch($this->createRequest('POST', '/admin'))->getBody()->__toString()
         );
 
         $request = $this->createRequest('GET', '/admin/users/81');
@@ -143,7 +144,7 @@ class DispatcherTest extends TestCase
 
         $this->assertEquals(
             '[GET] auth success; [GET] users/81@Admin',
-            $dispatcher->dispatch($request)
+            $dispatcher->dispatch($request)->getBody()->__toString()
         );
     }
 
@@ -166,17 +167,17 @@ class DispatcherTest extends TestCase
 
         $this->assertEquals(
             '[GET] index@Home',
-            $dispatcher->dispatch($this->createRequest('GET', '/'))
+            $dispatcher->dispatch($this->createRequest('GET', '/'))->getBody()->__toString()
         );
 
         $this->assertEquals(
             '[GET] index@Admin',
-            $dispatcher->dispatch($this->createRequest('GET', '/admin'))
+            $dispatcher->dispatch($this->createRequest('GET', '/admin'))->getBody()->__toString()
         );
 
         $this->assertEquals(
             '[POST] action@Admin',
-            $dispatcher->dispatch($this->createRequest('POST', '/admin'))
+            $dispatcher->dispatch($this->createRequest('POST', '/admin'))->getBody()->__toString()
         );
 
         $request = $this->createRequest('GET', '/admin/users/81');
@@ -185,7 +186,7 @@ class DispatcherTest extends TestCase
 
         $this->assertEquals(
             '[GET] users/81@Admin',
-            $dispatcher->dispatch($request)
+            $dispatcher->dispatch($request)->getBody()->__toString()
         );
     }
 

@@ -6,7 +6,7 @@ use Wandu\Router\ClassLoader\DefaultLoader;
 use Wandu\Router\Dispatcher;
 use Wandu\Router\Exception\HandlerNotFoundException;
 use Wandu\Router\Router;
-use Wandu\Router\RoutesInterface;
+use Wandu\Router\Contracts\RoutesInterface;
 use Wandu\Router\Stubs\HomeController;
 use Wandu\Router\TestCase;
 
