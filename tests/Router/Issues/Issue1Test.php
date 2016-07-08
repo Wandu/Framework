@@ -8,7 +8,6 @@ use Wandu\Router\ClassLoader\DefaultLoader;
 use Wandu\Router\Contracts\MiddlewareInterface;
 use Wandu\Router\Responsifier\WanduResponsifier;
 use Wandu\Router\Route;
-use Wandu\Router\Stubs\AuthController;
 use Wandu\Router\TestCase;
 
 class Issue1Test extends TestCase
@@ -23,13 +22,13 @@ class Issue1Test extends TestCase
         $request->shouldReceive('withAttribute')->once()
             ->with('cookie', ['name' => 'wan2land'])->andReturn($changedRequest);
 
-        $route = new Route(AuthController::class, 'login', [
+        $route = new Route(TestIssue1Controller::class, 'login', [
             TestIssue1Middleware::class
         ]);
 
         $response = $route->execute($request, new DefaultLoader(), new WanduResponsifier());
         $this->assertEquals(
-            'login@Auth, cookie={"name":"wan2land"}',
+            'login@Issue1, cookie={"name":"wan2land"}',
             $response->getBody()->__toString()
         );
     }
@@ -51,6 +50,6 @@ class TestIssue1Controller
 {
     public function login(ServerRequestInterface $request)
     {
-        return "login@Auth, cookie=" . json_encode($request->getAttribute('cookie', []));
+        return "login@Issue1, cookie=" . json_encode($request->getAttribute('cookie', []));
     }
 }

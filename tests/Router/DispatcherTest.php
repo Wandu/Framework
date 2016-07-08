@@ -1,14 +1,14 @@
 <?php
 namespace Wandu\Router;
 
+use Closure;
 use Mockery;
+use Psr\Http\Message\ServerRequestInterface;
+use Wandu\Http\Psr\Stream\StringStream;
 use Wandu\Router\ClassLoader\DefaultLoader;
+use Wandu\Router\Contracts\MiddlewareInterface;
 use Wandu\Router\Contracts\RoutesInterface;
 use Wandu\Router\Exception\MethodNotAllowedException;
-use Wandu\Router\Responsifier\WanduResponsifier;
-use Wandu\Router\Stubs\AdminController;
-use Wandu\Router\Stubs\AuthSuccessMiddleware;
-use Wandu\Router\Stubs\HomeController;
 
 class DispatcherTest extends TestCase
 {
@@ -20,7 +20,7 @@ class DispatcherTest extends TestCase
             new class implements RoutesInterface
             {
                 public function routes(Router $router) {
-                    $router->createRoute(['GET'], '/', HomeController::class);
+                    $router->createRoute(['GET'], '/', TestDispatcherHomeController::class);
                 }
             }
         );
@@ -39,8 +39,8 @@ class DispatcherTest extends TestCase
             new class implements RoutesInterface
             {
                 public function routes(Router $router) {
-                    $router->createRoute(['GET'], '/admin', AdminController::class, 'index');
-                    $router->createRoute(['POST'], '/admin', AdminController::class, 'action');
+                    $router->createRoute(['GET'], '/admin', TestDispatcherAdminController::class, 'index');
+                    $router->createRoute(['POST'], '/admin', TestDispatcherAdminController::class, 'action');
                 }
             }
         );
@@ -72,8 +72,8 @@ class DispatcherTest extends TestCase
             {
                 public function routes(Router $router)
                 {
-                    $router->createRoute(['GET'], '/admin/index', AdminController::class, 'index');
-                    $router->createRoute(['GET'], '/admin/action', AdminController::class, 'action');
+                    $router->createRoute(['GET'], '/admin/index', TestDispatcherAdminController::class, 'index');
+                    $router->createRoute(['GET'], '/admin/action', TestDispatcherAdminController::class, 'action');
                 }
             }
         );
@@ -97,7 +97,7 @@ class DispatcherTest extends TestCase
             {
                 public function routes(Router $router)
                 {
-                    $router->createRoute(['GET'], '/admin/users/{user}', AdminController::class, 'users');
+                    $router->createRoute(['GET'], '/admin/users/{user}', TestDispatcherAdminController::class, 'users');
                 }
             }
         );
@@ -121,14 +121,14 @@ class DispatcherTest extends TestCase
             {
                 public function routes(Router $router)
                 {
-                    $router->createRoute(['GET'], '/', HomeController::class, 'index');
+                    $router->createRoute(['GET'], '/', TestDispatcherHomeController::class, 'index');
                     $router->group([
                         'prefix' => '/admin',
-                        'middleware' => [AuthSuccessMiddleware::class],
+                        'middleware' => [TestDispatcherMiddleware::class],
                     ], function (Router $router) {
-                        $router->createRoute(['GET'], '/', AdminController::class, 'index');
-                        $router->createRoute(['POST'], '/', AdminController::class, 'action');
-                        $router->createRoute(['GET'], '/users/{user}', AdminController::class, 'users');
+                        $router->createRoute(['GET'], '/', TestDispatcherAdminController::class, 'index');
+                        $router->createRoute(['POST'], '/', TestDispatcherAdminController::class, 'action');
+                        $router->createRoute(['GET'], '/users/{user}', TestDispatcherAdminController::class, 'users');
                     });
                 }
             }
@@ -168,11 +168,11 @@ class DispatcherTest extends TestCase
             {
                 public function routes(Router $router)
                 {
-                    $router->createRoute(['GET'], '/', HomeController::class, 'index');
+                    $router->createRoute(['GET'], '/', TestDispatcherHomeController::class, 'index');
                     $router->prefix('/admin', function (Router $router) {
-                        $router->createRoute(['GET'], '/', AdminController::class, 'index');
-                        $router->createRoute(['POST'], '/', AdminController::class, 'action');
-                        $router->createRoute(['GET'], '/users/{user}', AdminController::class, 'users');
+                        $router->createRoute(['GET'], '/', TestDispatcherAdminController::class, 'index');
+                        $router->createRoute(['POST'], '/', TestDispatcherAdminController::class, 'action');
+                        $router->createRoute(['GET'], '/users/{user}', TestDispatcherAdminController::class, 'users');
                     });
                 }
             }
@@ -212,10 +212,10 @@ class DispatcherTest extends TestCase
             {
                 public function routes(Router $router)
                 {
-                    $router->middlewares([AuthSuccessMiddleware::class], function (Router $router) {
-                        $router->createRoute(['GET'], '/admin', AdminController::class, 'index');
-                        $router->createRoute(['POST'], '/admin', AdminController::class, 'action');
-                        $router->createRoute(['GET'], '/admin/users/{user}', AdminController::class, 'users');
+                    $router->middlewares([TestDispatcherMiddleware::class], function (Router $router) {
+                        $router->createRoute(['GET'], '/admin', TestDispatcherAdminController::class, 'index');
+                        $router->createRoute(['POST'], '/admin', TestDispatcherAdminController::class, 'action');
+                        $router->createRoute(['GET'], '/admin/users/{user}', TestDispatcherAdminController::class, 'users');
                     });
                 }
             }
@@ -248,7 +248,7 @@ class DispatcherTest extends TestCase
             {
                 public function routes(Router $router)
                 {
-                    $router->createRoute(['PUT'], '/', HomeController::class);
+                    $router->createRoute(['PUT'], '/', TestDispatcherHomeController::class);
                 }
             }
         );
@@ -278,7 +278,7 @@ class DispatcherTest extends TestCase
             {
                 public function routes(Router $router)
                 {
-                    $router->createRoute(['PUT'], '/', HomeController::class);
+                    $router->createRoute(['PUT'], '/', TestDispatcherHomeController::class);
                 }
             }
         );
@@ -295,5 +295,46 @@ class DispatcherTest extends TestCase
             '[PUT] index@Home',
             $dispatcher->dispatch($request)->getBody()->__toString()
         );
+    }
+}
+
+class TestDispatcherHomeController
+{
+    public function index(ServerRequestInterface $request)
+    {
+        return "[{$request->getMethod()}] index@Home";
+    }
+}
+
+class TestDispatcherAdminController
+{
+    public function index(ServerRequestInterface $request)
+    {
+        return "[{$request->getMethod()}] index@Admin";
+    }
+
+    public function action(ServerRequestInterface $request)
+    {
+        return "[{$request->getMethod()}] action@Admin";
+    }
+
+    public function users(ServerRequestInterface $request)
+    {
+        return "[{$request->getMethod()}] users/{$request->getAttribute('user')}@Admin";
+    }
+}
+
+class TestDispatcherMiddleware implements MiddlewareInterface
+{
+    /**
+     * {@inheritdoc}
+     */
+    public function __invoke(ServerRequestInterface $request, Closure $next)
+    {
+        /** @var \Psr\Http\Message\ResponseInterface $response */
+        $response = $next($request);
+        $message = "[{$request->getMethod()}] auth success; " . $response->getBody()->__toString();
+
+        return $response->withBody(new StringStream($message));
     }
 }

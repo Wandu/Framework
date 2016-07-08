@@ -7,7 +7,6 @@ use Wandu\Router\Dispatcher;
 use Wandu\Router\Exception\HandlerNotFoundException;
 use Wandu\Router\Router;
 use Wandu\Router\Contracts\RoutesInterface;
-use Wandu\Router\Stubs\HomeController;
 use Wandu\Router\TestCase;
 
 class Issue2Test extends TestCase
@@ -19,7 +18,7 @@ class Issue2Test extends TestCase
             {
                 public function routes(Router $router)
                 {
-                    $router->createRoute(['GET'], '/', HomeController::class, 'wrong');
+                    $router->createRoute(['GET'], '/', TestIssue2Controller::class, 'wrong');
                 }
             }
         );
@@ -29,9 +28,13 @@ class Issue2Test extends TestCase
             $this->fail();
         } catch (HandlerNotFoundException $exception) {
             $this->assertEquals(
-                '"Wandu\Router\Stubs\HomeController::wrong" is not found.',
+                '"Wandu\Router\Issues\TestIssue2Controller::wrong" is not found.',
                 $exception->getMessage()
             );
         }
     }
+}
+
+class TestIssue2Controller
+{
 }

@@ -2,9 +2,9 @@
 namespace Wandu\Router;
 
 use Mockery;
+use Psr\Http\Message\ServerRequestInterface;
 use Wandu\Router\Contracts\RoutesInterface;
 use Wandu\Router\Exception\MethodNotAllowedException;
-use Wandu\Router\Stubs\HomeController;
 
 class ShortRouteMethods extends TestCase
 {
@@ -14,7 +14,7 @@ class ShortRouteMethods extends TestCase
             new class implements RoutesInterface
             {
                 public function routes(Router $router) {
-                    $router->get('/', HomeController::class, 'index');
+                    $router->get('/', TestShortRouteMethodController::class, 'index');
                 }
             }
         );
@@ -44,7 +44,7 @@ class ShortRouteMethods extends TestCase
             {
                 public function routes(Router $router)
                 {
-                    $router->post('/', HomeController::class, 'index');
+                    $router->post('/', TestShortRouteMethodController::class, 'index');
                 }
             }
         );
@@ -74,7 +74,7 @@ class ShortRouteMethods extends TestCase
             {
                 public function routes(Router $router)
                 {
-                    $router->put('/', HomeController::class, 'index');
+                    $router->put('/', TestShortRouteMethodController::class, 'index');
                 }
             }
         );
@@ -105,7 +105,7 @@ class ShortRouteMethods extends TestCase
                 public function routes(Router $router)
                 {
 
-                    $router->delete('/', HomeController::class, 'index');
+                    $router->delete('/', TestShortRouteMethodController::class, 'index');
                 }
             }
         );
@@ -135,7 +135,7 @@ class ShortRouteMethods extends TestCase
             {
                 public function routes(Router $router)
                 {
-                    $router->options('/', HomeController::class, 'index');
+                    $router->options('/', TestShortRouteMethodController::class, 'index');
                 }
             }
         );
@@ -164,7 +164,7 @@ class ShortRouteMethods extends TestCase
             new class implements RoutesInterface
             {
                 public function routes(Router $router) {
-                    $router->patch('/', HomeController::class, 'index');
+                    $router->patch('/', TestShortRouteMethodController::class, 'index');
                 }
             }
         );
@@ -194,7 +194,7 @@ class ShortRouteMethods extends TestCase
             {
                 public function routes(Router $router)
                 {
-                    $router->any('/', HomeController::class, 'index');
+                    $router->any('/', TestShortRouteMethodController::class, 'index');
                 }
             }
         );
@@ -205,5 +205,14 @@ class ShortRouteMethods extends TestCase
                 $this->createRequest($method, '/')
             )->getBody()->__toString());
         }
+    }
+}
+
+
+class TestShortRouteMethodController
+{
+    public function index(ServerRequestInterface $request)
+    {
+        return "[{$request->getMethod()}] index@Home";
     }
 }

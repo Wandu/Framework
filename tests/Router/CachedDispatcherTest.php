@@ -2,10 +2,8 @@
 namespace Wandu\Router;
 
 use Mockery;
-use Wandu\Router\ClassLoader\DefaultLoader;
+use Psr\Http\Message\ServerRequestInterface;
 use Wandu\Router\Contracts\RoutesInterface;
-use Wandu\Router\Responsifier\WanduResponsifier;
-use Wandu\Router\Stubs\AdminController;
 
 class CachedDispatcherTest extends TestCase
 {
@@ -26,7 +24,7 @@ class CachedDispatcherTest extends TestCase
                 public function routes(Router $router)
                 {
                     $this->loadCount++;
-                    $router->get('admin', AdminController::class, 'index');
+                    $router->get('admin', TestCachedDispatcherController::class, 'index');
                 }
             }
         );
@@ -53,7 +51,7 @@ class CachedDispatcherTest extends TestCase
                 public function routes(Router $router)
                 {
                     $this->loadCount++;
-                    $router->get('admin', AdminController::class, 'index');
+                    $router->get('admin', TestCachedDispatcherController::class, 'index');
                 }
             }
         );
@@ -80,7 +78,7 @@ class CachedDispatcherTest extends TestCase
                 public function routes(Router $router)
                 {
                     $this->loadCount++;
-                    $router->get('admin', AdminController::class, 'index');
+                    $router->get('admin', TestCachedDispatcherController::class, 'index');
                 }
             }
         );
@@ -91,5 +89,23 @@ class CachedDispatcherTest extends TestCase
         $dispatcher->dispatch($this->createRequest('GET', '/admin'));
 
         $this->assertEquals(2, $routes->loadCount);
+    }
+}
+
+class TestCachedDispatcherController
+{
+    public function index(ServerRequestInterface $request)
+    {
+        return "[{$request->getMethod()}] index@Admin";
+    }
+
+    public function action(ServerRequestInterface $request)
+    {
+        return "[{$request->getMethod()}] action@Admin";
+    }
+
+    public function users(ServerRequestInterface $request)
+    {
+        return "[{$request->getMethod()}] users/{$request->getAttribute('user')}@Admin";
     }
 }
