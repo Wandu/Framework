@@ -1,5 +1,7 @@
 <?php
-namespace Wandu\Router;
+namespace Wandu\Router\Contracts;
+
+use Wandu\Router\Router;
 
 interface RoutesInterface
 {

@@ -1,14 +1,15 @@
 <?php
 namespace Wandu\Router\Contracts;
 
+use Closure;
 use Psr\Http\Message\ServerRequestInterface;
 
 interface MiddlewareInterface
 {
     /**
-     * @param ServerRequestInterface $request
-     * @param callable $next
-     * @return mixed
+     * @param \Psr\Http\Message\ServerRequestInterface $request
+     * @param \Closure $next
+     * @return \Psr\Http\Message\ResponseInterface
      */
-    public function handle(ServerRequestInterface $request, callable $next);
+    public function __invoke(ServerRequestInterface $request, Closure $next);
 }

@@ -1,42 +1,18 @@
 <?php
-namespace Wandu\Router\Middleware;
+namespace Wandu\Router\Responsifier;
 
-use Closure;
 use Generator;
 use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
 use RuntimeException;
-use Wandu\Http\Psr\Factory\ResponseFactory;
+use Wandu\Router\Contracts\ResponsifierInterface;
+use function Wandu\Http\response;
 
-class Responsify
+class WanduResponsifier implements ResponsifierInterface
 {
-    /** @var \Wandu\Http\Psr\Factory\ResponseFactory */
-    protected $factory;
-
     /**
-     * @param \Wandu\Http\Psr\Factory\ResponseFactory $factory
+     * {@inheritdoc}
      */
-    public function __construct(ResponseFactory $factory)
-    {
-        $this->factory = $factory;
-    }
-
-    /**
-     * @param \Psr\Http\Message\ServerRequestInterface $request
-     * @param \Closure $next
-     * @return \Psr\Http\Message\ResponseInterface|string
-     * @throws \RuntimeException
-     */
-    public function handle(ServerRequestInterface $request, Closure $next)
-    {
-        return $this->castToResponseInterface($next($request));
-    }
-
-    /**
-     * @param mixed $response
-     * @return \Psr\Http\Message\ResponseInterface
-     */
-    protected function castToResponseInterface($response)
+    public function responsify($response)
     {
         if ($response instanceof ResponseInterface) {
             return $response;
@@ -47,7 +23,7 @@ class Responsify
         while (is_callable($response)) {
             $nextResponse = call_user_func($response);
             if ($nextResponse instanceof Generator) {
-                return $this->factory->generator($response);
+                return response()->generator($response);
             }
             $response = $nextResponse;
         }
@@ -58,10 +34,10 @@ class Responsify
             } elseif ($response === false) {
                 $response = 'false';
             }
-            return $this->factory->create((string)$response);
+            return response()->create((string)$response);
         }
         if (is_array($response) || is_object($response)) {
-            return $this->factory->json($response);
+            return response()->json($response);
         }
         if (is_resource($response)) {
             if ('stream' === get_resource_type($response)) {
@@ -72,7 +48,7 @@ class Responsify
                     while (!feof($response)) {
                         $contents .= fread($response, 1024);
                     }
-                    return $this->factory->create($contents);
+                    return response()->create($contents);
                 }
             }
         }
