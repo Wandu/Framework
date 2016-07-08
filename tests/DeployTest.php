@@ -36,8 +36,18 @@ class DeployTest extends PHPUnit_Framework_TestCase
 
     public function testPhpVersions()
     {
-        $composer = $this->getJsonFromFile($this->rootJsonFiles);
-        $requirePhpVersion = $composer['require']['php'];
+        $mainRequires = $this->getJsonFromFile($this->rootJsonFiles)['require'];
+        
+        foreach (array_merge($this->jsonFiles, [$this->rootJsonFiles]) as $jsonFile) {
+            $subComposer = $this->getJsonFromFile($jsonFile);
+            $subRequires = $subComposer['require'];
+            $subName = $subComposer['name'];
+            foreach ($subRequires as $name => $version) {
+                if (strpos($name, 'wandu/') === 0) continue;
+                $this->assertArrayHasKey($name, $mainRequires);
+                $this->assertEquals($mainRequires[$name], $version, "File: {$jsonFile} -> {$name}");
+            }
+        }
     }
     
     protected function getJsonFromFile($file)

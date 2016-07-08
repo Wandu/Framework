@@ -168,7 +168,11 @@ class InstallCommandTest extends PHPUnit_Framework_TestCase
         $process = new Process('vendor/bin/wandu', __DIR__ . '/project');
         $process->run();
 
-        $this->assertTrue($process->isSuccessful()); // it always success...
+        $this->assertTrue(
+            $process->isSuccessful(),
+            $process->getOutput() . "\n",
+            $process->getErrorOutput()
+        ); // it always success...
 
         $this->assertFileExists(__DIR__ . '/project/.wandu.php'); // it always in this
         $this->assertFileExists(__DIR__ . '/project/.wandu.config.php'); // it always in this
