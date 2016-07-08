@@ -1,8 +1,13 @@
 <?php
 namespace Wandu\Router;
 
+use Generator;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use RuntimeException;
 use Wandu\Router\Contracts\ClassLoaderInterface;
+use function Wandu\Http\response;
+use Wandu\Router\Contracts\ResponsifierInterface;
 
 class Route
 {
@@ -42,31 +47,16 @@ class Route
 
     /**
      * @param \Psr\Http\Message\ServerRequestInterface $request
-     * @param \Wandu\Router\Contracts\ClassLoaderInterface $loader
-     * @return mixed
+     * @param \Wandu\Router\Contracts\ClassLoaderInterface|null $loader
+     * @param \Wandu\Router\Contracts\ResponsifierInterface|null $responsifier
+     * @return \Psr\Http\Message\ResponseInterface
      */
-    public function execute(ServerRequestInterface $request, ClassLoaderInterface $loader)
-    {
-        return $this->dispatch($request, $loader, $this->middlewares);
-    }
-
-    /**
-     * @param \Psr\Http\Message\ServerRequestInterface $request
-     * @param \Wandu\Router\Contracts\ClassLoaderInterface $loader
-     * @param array $middlewares
-     * @return mixed
-     */
-    protected function dispatch(ServerRequestInterface $request, ClassLoaderInterface $loader, array $middlewares)
-    {
-        if (count($middlewares)) {
-            $middleware = array_shift($middlewares);
-            return call_user_func([
-                $loader->create($middleware), 'handle'
-            ], $request, function (ServerRequestInterface $request) use ($loader, $middlewares) {
-                return $this->dispatch($request, $loader, $middlewares);
-            });
-        }
-        $controllerClass = $loader->create($this->className);
-        return $loader->call($request, $controllerClass, $this->methodName);
+    public function execute(
+        ServerRequestInterface $request,
+        ClassLoaderInterface $loader = null,
+        ResponsifierInterface $responsifier = null
+    ) {
+        $pipeline = new RouteExecutor($loader, $responsifier);
+        return $pipeline->execute($request, $this->className, $this->methodName, $this->middlewares);
     }
 }

@@ -19,6 +19,7 @@
         }
     },
     "suggest": {
-        "wandu/http": "PSR-7 implementation"
+        "wandu/di": "for Wandu Class Loader",
+        "wandu/http": "for Wandu Responsifier"
     }
 }

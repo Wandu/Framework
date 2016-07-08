@@ -3,6 +3,8 @@ namespace Wandu\Router;
 
 use Mockery;
 use Wandu\Router\ClassLoader\DefaultLoader;
+use Wandu\Router\Contracts\RoutesInterface;
+use Wandu\Router\Responsifier\WanduResponsifier;
 use Wandu\Router\Stubs\AdminController;
 
 class CachedDispatcherTest extends TestCase
@@ -14,7 +16,7 @@ class CachedDispatcherTest extends TestCase
 
     public function testDispatchWithNonCache()
     {
-        $dispatcher = new Dispatcher(new DefaultLoader());
+        $dispatcher = $this->createDispatcher();
 
         $dispatcher = $dispatcher->withRoutes(
             $routes = new class implements RoutesInterface
@@ -38,7 +40,7 @@ class CachedDispatcherTest extends TestCase
 
     public function testDispatchWithCache()
     {
-        $dispatcher = new Dispatcher(new DefaultLoader(), [
+        $dispatcher = $this->createDispatcher([
             'cache_enabled' => true,
             'cache_file' => __DIR__ . '/router.cache.php',
         ]);
@@ -65,12 +67,11 @@ class CachedDispatcherTest extends TestCase
 
     public function testFlush()
     {
-        $dispatcher = new Dispatcher(new DefaultLoader(), [
+        $dispatcher = $this->createDispatcher([
             'cache_enabled' => true,
             'cache_file' => __DIR__ . '/router.cache.php',
         ]);
-
-        $loadCount = 0;
+        
         $dispatcher = $dispatcher->withRoutes(
             $routes = new class implements RoutesInterface
             {

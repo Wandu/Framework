@@ -4,9 +4,11 @@ namespace Wandu\Router\Middleware;
 use Closure;
 use Psr\Http\Message\ServerRequestInterface;
 use Wandu\Http\Cookie\CookieJarFactory;
+use Wandu\Http\Exception\AbstractHttpException;
 use Wandu\Http\Session\SessionFactory;
+use Wandu\Router\Contracts\MiddlewareInterface;
 
-class Sessionify
+class Sessionify implements MiddlewareInterface
 {
     /** @var \Wandu\Http\Cookie\CookieJarFactory */
     protected $cookieJarFactory;
@@ -27,11 +29,9 @@ class Sessionify
     }
 
     /**
-     * @param \Psr\Http\Message\ServerRequestInterface $request
-     * @param \Closure $next
-     * @return \Psr\Http\Message\ResponseInterface
+     * {@inheritdoc}
      */
-    public function handle(ServerRequestInterface $request, Closure $next)
+    public function __invoke(ServerRequestInterface $request, Closure $next)
     {
         $cookieJar = $this->cookieJarFactory->fromServerRequest($request);
         $session = $this->sessionFactory->fromCookieJar($cookieJar);
@@ -41,7 +41,14 @@ class Sessionify
             ->withAttribute('session', $session);
 
         // run next
-        $response = $next($request);
+        try {
+            $response = $next($request);
+        } catch (AbstractHttpException $exception) {
+            $response = $exception->getResponse();
+            $this->sessionFactory->toCookieJar($session, $cookieJar);
+            $exception->setResponse($this->cookieJarFactory->toResponse($cookieJar, $response));
+            throw $exception;
+        }
 
         $this->sessionFactory->toCookieJar($session, $cookieJar);
         return $this->cookieJarFactory->toResponse($cookieJar, $response);

@@ -5,6 +5,7 @@ use Mockery;
 use Wandu\Router\ClassLoader\DefaultLoader;
 use Wandu\Router\Contracts\RoutesInterface;
 use Wandu\Router\Exception\MethodNotAllowedException;
+use Wandu\Router\Responsifier\WanduResponsifier;
 use Wandu\Router\Stubs\AdminController;
 use Wandu\Router\Stubs\AuthSuccessMiddleware;
 use Wandu\Router\Stubs\HomeController;
@@ -13,7 +14,9 @@ class DispatcherTest extends TestCase
 {
     public function testSimpleDispatcher()
     {
-        $dispatcher = (new Dispatcher(new DefaultLoader()))->withRoutes(
+        $dispatcher = $this->createDispatcher();
+
+        $dispatcher = $dispatcher->withRoutes(
             new class implements RoutesInterface
             {
                 public function routes(Router $router) {
@@ -30,7 +33,9 @@ class DispatcherTest extends TestCase
 
     public function testDispatchMethod()
     {
-        $dispatcher = (new Dispatcher(new DefaultLoader()))->withRoutes(
+        $dispatcher = $this->createDispatcher();
+
+        $dispatcher = $dispatcher->withRoutes(
             new class implements RoutesInterface
             {
                 public function routes(Router $router) {
@@ -60,7 +65,9 @@ class DispatcherTest extends TestCase
 
     public function testDispatchMatchingUri()
     {
-        $dispatcher = (new Dispatcher(new DefaultLoader()))->withRoutes(
+        $dispatcher = $this->createDispatcher();
+
+        $dispatcher = $dispatcher->withRoutes(
             new class implements RoutesInterface
             {
                 public function routes(Router $router)
@@ -83,7 +90,9 @@ class DispatcherTest extends TestCase
 
     public function testDispatchMatchingRegExpUri()
     {
-        $dispatcher = (new Dispatcher(new DefaultLoader()))->withRoutes(
+        $dispatcher = $this->createDispatcher();
+
+        $dispatcher = $dispatcher->withRoutes(
             new class implements RoutesInterface
             {
                 public function routes(Router $router)
@@ -105,7 +114,9 @@ class DispatcherTest extends TestCase
 
     public function testGroup()
     {
-        $dispatcher = (new Dispatcher(new DefaultLoader()))->withRoutes(
+        $dispatcher = $this->createDispatcher();
+
+        $dispatcher = $dispatcher->withRoutes(
             new class implements RoutesInterface
             {
                 public function routes(Router $router)
@@ -150,7 +161,9 @@ class DispatcherTest extends TestCase
 
     public function testPrefix()
     {
-        $dispatcher = (new Dispatcher(new DefaultLoader()))->withRoutes(
+        $dispatcher = $this->createDispatcher();
+
+        $dispatcher = $dispatcher->withRoutes(
             new class implements RoutesInterface
             {
                 public function routes(Router $router)
@@ -192,7 +205,9 @@ class DispatcherTest extends TestCase
 
     public function testMiddlewares()
     {
-        $dispatcher = (new Dispatcher(new DefaultLoader()))->withRoutes(
+        $dispatcher = $this->createDispatcher();
+
+        $dispatcher = $dispatcher->withRoutes(
             new class implements RoutesInterface
             {
                 public function routes(Router $router)
@@ -208,12 +223,12 @@ class DispatcherTest extends TestCase
 
         $this->assertEquals(
             '[GET] auth success; [GET] index@Admin',
-            $dispatcher->dispatch($this->createRequest('GET', '/admin'))
+            $dispatcher->dispatch($this->createRequest('GET', '/admin'))->getBody()->__toString()
         );
 
         $this->assertEquals(
             '[POST] auth success; [POST] action@Admin',
-            $dispatcher->dispatch($this->createRequest('POST', '/admin'))
+            $dispatcher->dispatch($this->createRequest('POST', '/admin'))->getBody()->__toString()
         );
 
         $request = $this->createRequest('GET', '/admin/users/83');
@@ -222,7 +237,7 @@ class DispatcherTest extends TestCase
 
         $this->assertEquals(
             '[GET] auth success; [GET] users/83@Admin',
-            $dispatcher->dispatch($request)
+            $dispatcher->dispatch($request)->getBody()->__toString()
         );
     }
 
@@ -255,9 +270,10 @@ class DispatcherTest extends TestCase
 
     public function testVirtualMethodEnabled()
     {
-        $dispatcher = (new Dispatcher(new DefaultLoader(), [
+        $dispatcher = $this->createDispatcher([
             'virtual_method_enabled' => true,
-        ]))->withRoutes(
+        ]);
+        $dispatcher = $dispatcher->withRoutes(
             new class implements RoutesInterface
             {
                 public function routes(Router $router)
@@ -277,7 +293,7 @@ class DispatcherTest extends TestCase
 
         $this->assertEquals(
             '[PUT] index@Home',
-            $dispatcher->dispatch($request)
+            $dispatcher->dispatch($request)->getBody()->__toString()
         );
     }
 }

@@ -4,41 +4,52 @@ namespace Wandu\Router;
 use FastRoute\Dispatcher as FastDispatcher;
 use FastRoute\Dispatcher\GroupCountBased as GCBDispatcher;
 use Psr\Http\Message\ServerRequestInterface;
+use Wandu\Router\ClassLoader\DefaultLoader;
 use Wandu\Router\Contracts\ClassLoaderInterface;
+use Wandu\Router\Contracts\ResponsifierInterface;
+use Wandu\Router\Contracts\RoutesInterface;
 use Wandu\Router\Exception\MethodNotAllowedException;
 use Wandu\Router\Exception\RouteNotFoundException;
+use Wandu\Router\Responsifier\NullResponsifier;
 
 class Dispatcher
 {
     /** @var \Wandu\Router\Contracts\ClassLoaderInterface */
     protected $classLoader;
 
-    /** @var \Wandu\Router\RoutesInterface */
+    /** @var \Wandu\Router\Responsifier\NullResponsifier */
+    protected $responsifier;
+    
+    /** @var \Wandu\Router\Configuration */
+    protected $config;
+    
+    /** @var \Wandu\Router\Contracts\RoutesInterface */
     protected $routes;
 
     /**
-     * @param \Wandu\Router\Contracts\ClassLoaderInterface $loader
-     * @param array $config
+     * @param \Wandu\Router\Contracts\ClassLoaderInterface|null $loader
+     * @param \Wandu\Router\Contracts\ResponsifierInterface|null $responsifier
+     * @param \Wandu\Router\Configuration|null $config
      */
-    public function __construct(ClassLoaderInterface $loader, array $config = [])
-    {
+    public function __construct(
+        ClassLoaderInterface $loader = null,
+        ResponsifierInterface $responsifier = null,
+        Configuration $config = null
+    ) {
         $this->classLoader = $loader;
-        $this->config = $config + [
-            'virtual_method_enabled' => false,
-            'cache_enabled' => false,
-            'cache_file' => null,
-        ];
+        $this->responsifier = $responsifier;
+        $this->config = $config ?: new Configuration([]);
     }
 
     public function flush()
     {
-        if ($this->config['cache_enabled']) {
-            @unlink($this->config['cache_file']);
+        if ($this->config->isCacheEnabled()) {
+            @unlink($this->config->getCacheFile());
         }
     }
 
     /**
-     * @param \Wandu\Router\RoutesInterface $routes
+     * @param \Wandu\Router\Contracts\RoutesInterface $routes
      * @return \Wandu\Router\Dispatcher
      */
     public function withRoutes(RoutesInterface $routes)
@@ -50,13 +61,13 @@ class Dispatcher
 
     /**
      * @param \Psr\Http\Message\ServerRequestInterface $request
-     * @return mixed
+     * @return \Psr\Http\Message\ResponseInterface
      */
     public function dispatch(ServerRequestInterface $request)
     {
-        $cacheEnabled = $this->config['cache_enabled'];
+        $cacheEnabled = $this->config->isCacheEnabled();
 
-        $cacheFile = $this->config['cache_file'];
+        $cacheFile = $this->config->getCacheFile();
         if ($cacheEnabled && file_exists($cacheFile)) {
             $cacheData = require $cacheFile;
             $dispatchData = $cacheData['dispatch_data'];
@@ -83,7 +94,7 @@ class Dispatcher
         foreach ($routeInfo[2] as $key => $value) {
             $request = $request->withAttribute($key, $value);
         }
-        return $routes[$routeInfo[1]]->execute($request, $this->classLoader);
+        return $routes[$routeInfo[1]]->execute($request, $this->classLoader, $this->responsifier);
     }
 
     /**
@@ -92,7 +103,7 @@ class Dispatcher
      */
     protected function applyVirtualMethod(ServerRequestInterface $request)
     {
-        if (!$this->config['virtual_method_enabled']) {
+        if (!$this->config->isVirtualMethodEnabled()) {
             return $request;
         }
         $parsedBody = $request->getParsedBody();

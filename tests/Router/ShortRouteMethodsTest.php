@@ -2,7 +2,7 @@
 namespace Wandu\Router;
 
 use Mockery;
-use Wandu\Router\ClassLoader\DefaultLoader;
+use Wandu\Router\Contracts\RoutesInterface;
 use Wandu\Router\Exception\MethodNotAllowedException;
 use Wandu\Router\Stubs\HomeController;
 
@@ -10,7 +10,7 @@ class ShortRouteMethods extends TestCase
 {
     public function testGet()
     {
-        $dispatcher = (new Dispatcher(new DefaultLoader()))->withRoutes(
+        $dispatcher = $this->createDispatcher()->withRoutes(
             new class implements RoutesInterface
             {
                 public function routes(Router $router) {
@@ -23,7 +23,7 @@ class ShortRouteMethods extends TestCase
         foreach (['GET', 'HEAD'] as $method) {
             $this->assertEquals("[{$method}] index@Home", $dispatcher->dispatch(
                 $this->createRequest($method, '/')
-            ));
+            )->getBody()->__toString());
         }
         // fail
         foreach (['POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'] as $method) {
@@ -39,7 +39,7 @@ class ShortRouteMethods extends TestCase
 
     public function testPost()
     {
-        $dispatcher = (new Dispatcher(new DefaultLoader()))->withRoutes(
+        $dispatcher = $this->createDispatcher()->withRoutes(
             new class implements RoutesInterface
             {
                 public function routes(Router $router)
@@ -53,7 +53,7 @@ class ShortRouteMethods extends TestCase
         foreach (['POST'] as $method) {
             $this->assertEquals("[{$method}] index@Home", $dispatcher->dispatch(
                 $this->createRequest($method, '/')
-            ));
+            )->getBody()->__toString());
         }
         // fail
         foreach (['GET', 'HEAD', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'] as $method) {
@@ -69,7 +69,7 @@ class ShortRouteMethods extends TestCase
 
     public function testPut()
     {
-        $dispatcher = (new Dispatcher(new DefaultLoader()))->withRoutes(
+        $dispatcher = $this->createDispatcher()->withRoutes(
             new class implements RoutesInterface
             {
                 public function routes(Router $router)
@@ -83,7 +83,7 @@ class ShortRouteMethods extends TestCase
         foreach (['PUT'] as $method) {
             $this->assertEquals("[{$method}] index@Home", $dispatcher->dispatch(
                 $this->createRequest($method, '/')
-            ));
+            )->getBody()->__toString());
         }
         // fail
         foreach (['GET', 'HEAD', 'POST', 'DELETE', 'OPTIONS', 'PATCH'] as $method) {
@@ -99,7 +99,7 @@ class ShortRouteMethods extends TestCase
 
     public function testDelete()
     {
-        $dispatcher = (new Dispatcher(new DefaultLoader()))->withRoutes(
+        $dispatcher = $this->createDispatcher()->withRoutes(
             new class implements RoutesInterface
             {
                 public function routes(Router $router)
@@ -114,7 +114,7 @@ class ShortRouteMethods extends TestCase
         foreach (['DELETE'] as $method) {
             $this->assertEquals("[{$method}] index@Home", $dispatcher->dispatch(
                 $this->createRequest($method, '/')
-            ));
+            )->getBody()->__toString());
         }
         // fail
         foreach (['GET', 'HEAD', 'POST', 'PUT', 'OPTIONS', 'PATCH'] as $method) {
@@ -130,7 +130,7 @@ class ShortRouteMethods extends TestCase
 
     public function testOptions()
     {
-        $dispatcher = (new Dispatcher(new DefaultLoader()))->withRoutes(
+        $dispatcher = $this->createDispatcher()->withRoutes(
             new class implements RoutesInterface
             {
                 public function routes(Router $router)
@@ -144,7 +144,7 @@ class ShortRouteMethods extends TestCase
         foreach (['OPTIONS'] as $method) {
             $this->assertEquals("[{$method}] index@Home", $dispatcher->dispatch(
                 $this->createRequest($method, '/')
-            ));
+            )->getBody()->__toString());
         }
         // fail
         foreach (['GET', 'HEAD', 'POST', 'PUT', 'DELETE', 'PATCH'] as $method) {
@@ -160,7 +160,7 @@ class ShortRouteMethods extends TestCase
 
     public function testPatch()
     {
-        $dispatcher = (new Dispatcher(new DefaultLoader()))->withRoutes(
+        $dispatcher = $this->createDispatcher()->withRoutes(
             new class implements RoutesInterface
             {
                 public function routes(Router $router) {
@@ -173,7 +173,7 @@ class ShortRouteMethods extends TestCase
         foreach (['PATCH'] as $method) {
             $this->assertEquals("[{$method}] index@Home", $dispatcher->dispatch(
                 $this->createRequest($method, '/')
-            ));
+            )->getBody()->__toString());
         }
         // fail
         foreach (['GET', 'HEAD', 'POST', 'PUT', 'DELETE', 'OPTIONS'] as $method) {
@@ -189,7 +189,7 @@ class ShortRouteMethods extends TestCase
 
     public function testAny()
     {
-        $dispatcher = (new Dispatcher(new DefaultLoader()))->withRoutes(
+        $dispatcher = $this->createDispatcher()->withRoutes(
             new class implements RoutesInterface
             {
                 public function routes(Router $router)
@@ -203,7 +203,7 @@ class ShortRouteMethods extends TestCase
         foreach (['GET', 'HEAD', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'] as $method) {
             $this->assertEquals("[{$method}] index@Home", $dispatcher->dispatch(
                 $this->createRequest($method, '/')
-            ));
+            )->getBody()->__toString());
         }
     }
 }
