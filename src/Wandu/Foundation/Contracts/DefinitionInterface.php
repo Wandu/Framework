@@ -4,7 +4,7 @@ namespace Wandu\Foundation\Contracts;
 use Wandu\Console\Dispatcher;
 use Wandu\DI\ContainerInterface;
 use Wandu\Router\Router;
-use Wandu\Router\RoutesInterface;
+use Wandu\Router\Contracts\RoutesInterface;
 
 interface DefinitionInterface extends RoutesInterface
 {
