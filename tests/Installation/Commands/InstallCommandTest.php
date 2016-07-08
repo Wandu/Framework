@@ -170,7 +170,7 @@ class InstallCommandTest extends PHPUnit_Framework_TestCase
 
         $this->assertTrue(
             $process->isSuccessful(),
-            $process->getOutput() . "\n",
+            $process->getOutput() . "\n" .
             $process->getErrorOutput()
         ); // it always success...
 
