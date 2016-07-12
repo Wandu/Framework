@@ -13,7 +13,7 @@ class ServerRequestFactoryTest extends PHPUnit_Framework_TestCase
     public function setUp()
     {
         $mockFileFactory = Mockery::mock(UploadedFileFactory::class);
-        $mockFileFactory->shouldReceive('fromFiles')->andReturn([]);
+        $mockFileFactory->shouldReceive('createFromFiles')->andReturn([]);
 
         $this->factory = new ServerRequestFactory($mockFileFactory);
     }

@@ -69,8 +69,8 @@ class ServerRequestTest extends PHPUnit_Framework_TestCase
                 'page' => 1,
                 'order' => false
             ],
-            ['profileImage' => $mockFile],
             ['id' => 'wan2land'],
+            ['profileImage' => $mockFile],
             ['status' => 'join'],
             'GET',
             $mockUri,
@@ -102,7 +102,7 @@ class ServerRequestTest extends PHPUnit_Framework_TestCase
     public function testConstructWithFail()
     {
         try {
-            new ServerRequest([], [], [], ['hello' => ['world' => new \stdClass()]]);
+            new ServerRequest([], [], [], [], ['hello' => ['world' => new \stdClass()]]);
             $this->fail();
         } catch (InvalidArgumentException $e) {
             $this->assertEquals(
