@@ -169,16 +169,16 @@ class InstallCommandTest extends PHPUnit_Framework_TestCase
         $process = new Process('php vendor/wandu/framework/bin/wandu', __DIR__ . '/project');
         $process->run();
 
-        echo "project...\n";
-        foreach (new \DirectoryIterator(__DIR__ . '/project') as $file) {
-            echo $file->getFilename(), "\n";
-        }
-        echo "project/bin...\n";
+        echo "11...\n";
         foreach (new \DirectoryIterator(__DIR__ . '/project/vendor') as $file) {
             echo $file->getFilename(), "\n";
         }
-        echo "project/bin...\n";
-        foreach (new \DirectoryIterator(__DIR__ . '/project/vendor/bin') as $file) {
+        echo "22...\n";
+        foreach (new \DirectoryIterator(__DIR__ . '/project/vendor/wandu') as $file) {
+            echo $file->getFilename(), "\n";
+        }
+        echo "33...\n";
+        foreach (new \DirectoryIterator(__DIR__ . '/project/vendor/wandu/framework') as $file) {
             echo $file->getFilename(), "\n";
         }
 
