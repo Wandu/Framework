@@ -5,7 +5,6 @@ use Mockery;
 use PHPUnit_Framework_TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Wandu\Http\Psr\Stream\StringStream;
-use RuntimeException;
 use function Wandu\Http\response;
 
 class HttpExceptionTest extends PHPUnit_Framework_TestCase
@@ -24,51 +23,54 @@ class HttpExceptionTest extends PHPUnit_Framework_TestCase
         $this->assertSame("Hello World?", $httpException->getBody()->__toString());
     }
 
-    public function testCannotCallWithMethods()
+    public function testWithMethods()
     {
         $httpException = new InternalServerErrorException();
 
-        try {
-            $httpException->withBody(new StringStream());
-            $this->fail();
-        } catch (RuntimeException $e) {
-            $this->assertEquals('cannot change body in Wandu\Http\Exception\InternalServerErrorException.', $e->getMessage());
-        }
+        // withBody
+        $stream = new StringStream();
+        $clonedException = $httpException->withBody($stream);
+        
+        $this->assertNotInstanceOf(InternalServerErrorException::class, $clonedException);
+        $this->assertInstanceOf(HttpException::class, $clonedException);
+        $this->assertSame($stream, $clonedException->getBody());
 
-        try {
-            $httpException->withHeader('content-type', 'application/json');
-            $this->fail();
-        } catch (RuntimeException $e) {
-            $this->assertEquals('cannot change header in Wandu\Http\Exception\InternalServerErrorException.', $e->getMessage());
-        }
+        // withHeader
+        $clonedException = $httpException->withHeader('content-type', 'application/json');
 
-        try {
-            $httpException->withAddedHeader('content-type', 'application/json');
-            $this->fail();
-        } catch (RuntimeException $e) {
-            $this->assertEquals('cannot change header in Wandu\Http\Exception\InternalServerErrorException.', $e->getMessage());
-        }
+        $this->assertNotInstanceOf(InternalServerErrorException::class, $clonedException);
+        $this->assertInstanceOf(HttpException::class, $clonedException);
+        $this->assertSame('application/json', $clonedException->getHeaderLine('Content-Type'));
+        
+        // withAddedHeader
+        $clonedException = $httpException->withAddedHeader('content-type', 'application/json');
+        $this->assertNotInstanceOf(InternalServerErrorException::class, $clonedException);
+        $this->assertInstanceOf(HttpException::class, $clonedException);
+        $this->assertSame('application/json', $clonedException->getHeaderLine('Content-Type'));
+        
+        // withoutHeader
+        $clonedException = $httpException
+            ->withHeader('content-type', 'application/json')
+            ->withoutHeader('content-type');
 
-        try {
-            $httpException->withoutHeader('content-type');
-            $this->fail();
-        } catch (RuntimeException $e) {
-            $this->assertEquals('cannot change header in Wandu\Http\Exception\InternalServerErrorException.', $e->getMessage());
-        }
+        $this->assertNotInstanceOf(InternalServerErrorException::class, $clonedException);
+        $this->assertInstanceOf(HttpException::class, $clonedException);
+        $this->assertSame('', $clonedException->getHeaderLine('Content-Type'));
+        
+        
+        // withProtocolVersion
+        $clonedException = $httpException->withProtocolVersion('2.0');
+        $this->assertNotInstanceOf(InternalServerErrorException::class, $clonedException);
+        $this->assertInstanceOf(HttpException::class, $clonedException);
+        $this->assertSame('2.0', $clonedException->getProtocolVersion('Content-Type'));
 
-        try {
-            $httpException->withProtocolVersion('2.0');
-            $this->fail();
-        } catch (RuntimeException $e) {
-            $this->assertEquals('cannot change protocolVersion in Wandu\Http\Exception\InternalServerErrorException.', $e->getMessage());
-        }
 
-        try {
-            $httpException->withStatus(404, 'what..');
-            $this->fail();
-        } catch (RuntimeException $e) {
-            $this->assertEquals('cannot change status in Wandu\Http\Exception\InternalServerErrorException.', $e->getMessage());
-        }
+        // withStatus
+        $clonedException = $httpException->withStatus(404, 'what..');
+        $this->assertNotInstanceOf(InternalServerErrorException::class, $clonedException);
+        $this->assertInstanceOf(HttpException::class, $clonedException);
+        $this->assertSame(404, $clonedException->getStatusCode());
+        $this->assertSame('what..', $clonedException->getReasonPhrase());
     }
 
     public function testGetResposeByDefault()

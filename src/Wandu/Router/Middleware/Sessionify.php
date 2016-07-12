@@ -4,7 +4,7 @@ namespace Wandu\Router\Middleware;
 use Closure;
 use Psr\Http\Message\ServerRequestInterface;
 use Wandu\Http\Cookie\CookieJarFactory;
-use Wandu\Http\Exception\AbstractHttpException;
+use Wandu\Http\Exception\HttpException;
 use Wandu\Http\Session\SessionFactory;
 use Wandu\Router\Contracts\MiddlewareInterface;
 
@@ -43,7 +43,7 @@ class Sessionify implements MiddlewareInterface
         // run next
         try {
             $response = $next($request);
-        } catch (AbstractHttpException $exception) {
+        } catch (HttpException $exception) {
             $response = $exception->getResponse();
             $this->sessionFactory->toCookieJar($session, $cookieJar);
             $exception->setResponse($this->cookieJarFactory->toResponse($cookieJar, $response));

@@ -3,9 +3,8 @@ namespace Wandu\Foundation\Error;
 
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
-use Wandu\Foundation\Contracts\HttpErrorHandlerInterface;
 use Throwable;
-use Wandu\Http\Exception\AbstractHttpException;
+use Wandu\Foundation\Contracts\HttpErrorHandlerInterface;
 use Wandu\Http\Exception\HttpException;
 
 class DefaultHttpErrorHandler implements HttpErrorHandlerInterface
@@ -26,10 +25,7 @@ class DefaultHttpErrorHandler implements HttpErrorHandlerInterface
         $statusCode = 500;
         $reasonPhrase = 'Internal Server Error';
         $attributes = [];
-        if (
-            $exception instanceof HttpException ||
-            $exception instanceof AbstractHttpException
-        ) {
+        if ($exception instanceof HttpException) {
             if ($exception->getBody()) {
                 return $exception;
             }

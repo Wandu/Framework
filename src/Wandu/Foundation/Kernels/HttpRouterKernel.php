@@ -11,16 +11,15 @@ use Wandu\Foundation\Bridges\WhoopsToPsr7;
 use Wandu\Foundation\Contracts\DefinitionInterface;
 use Wandu\Foundation\Contracts\HttpErrorHandlerInterface;
 use Wandu\Foundation\Contracts\KernelInterface;
-use Wandu\Http\Exception\AbstractHttpException;
-use Wandu\Http\Exception\HttpMethodNotAllowedException;
-use Wandu\Http\Exception\HttpNotFoundException;
+use Wandu\Http\Exception\HttpException;
+use Wandu\Http\Exception\MethodNotAllowedException;
+use Wandu\Http\Exception\NotFoundException;
 use Wandu\Http\Psr\Factory\ServerRequestFactory;
 use Wandu\Http\Psr\Sender\ResponseSender;
 use Wandu\Http\Psr\Stream\StringStream;
 use Wandu\Router\Dispatcher;
 use Wandu\Router\Exception\MethodNotAllowedException as RouteMethodException;
 use Wandu\Router\Exception\RouteNotFoundException;
-use Wandu\Router\Middleware\Responsify;
 
 class HttpRouterKernel implements KernelInterface
 {
@@ -59,7 +58,7 @@ class HttpRouterKernel implements KernelInterface
 
         try {
             $response = $this->dispatch($app->get(Dispatcher::class), $request);
-        } catch (AbstractHttpException $exception) {
+        } catch (HttpException $exception) {
             /* @var \Wandu\Foundation\Contracts\HttpErrorHandlerInterface $handler */
             $handler = $app->get(HttpErrorHandlerInterface::class);
             $response = $handler->handle($request, $exception);
@@ -80,25 +79,18 @@ class HttpRouterKernel implements KernelInterface
             }
         }
 
-        // apply responsify
-        if (!($response instanceof ResponseInterface)) {
-            $response = $app[Responsify::class]->handle($request, function () use ($response) {
-                return $response;
-            });
-        }
-
         /* @var \Wandu\Http\Psr\Sender\ResponseSender $sender */
         $sender = $app->get(ResponseSender::class);
         $sender->sendToGlobal($response);
         return 0;
     }
-    
+
     /**
      * @param \Wandu\Router\Dispatcher $dispatcher
      * @param \Psr\Http\Message\ServerRequestInterface $request
-     * @return mixed
-     * @throws \Wandu\Http\Exception\HttpMethodNotAllowedException
-     * @throws \Wandu\Http\Exception\HttpNotFoundException
+     * @return \Psr\Http\Message\ResponseInterface
+     * @throws \Wandu\Http\Exception\MethodNotAllowedException
+     * @throws \Wandu\Http\Exception\NotFoundException
      */
     protected function dispatch(Dispatcher $dispatcher, ServerRequestInterface $request)
     {
@@ -106,9 +98,9 @@ class HttpRouterKernel implements KernelInterface
         try {
             return $dispatcher->dispatch($request);
         } catch (RouteNotFoundException $exception) {
-            throw new HttpNotFoundException();
+            throw new NotFoundException();
         } catch (RouteMethodException $exception) {
-            throw new HttpMethodNotAllowedException();
+            throw new MethodNotAllowedException();
         }
     }
 }
