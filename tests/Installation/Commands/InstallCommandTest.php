@@ -174,6 +174,10 @@ class InstallCommandTest extends PHPUnit_Framework_TestCase
             echo $file->getFilename(), "\n";
         }
         echo "project/bin...\n";
+        foreach (new \DirectoryIterator(__DIR__ . '/project/vendor') as $file) {
+            echo $file->getFilename(), "\n";
+        }
+        echo "project/bin...\n";
         foreach (new \DirectoryIterator(__DIR__ . '/project/vendor/bin') as $file) {
             echo $file->getFilename(), "\n";
         }
