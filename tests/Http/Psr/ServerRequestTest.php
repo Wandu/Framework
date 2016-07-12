@@ -64,12 +64,12 @@ class ServerRequestTest extends PHPUnit_Framework_TestCase
                 'REQUEST_TIME_FLOAT' => 1431675149.3160019,
                 'REQUEST_TIME' => 1431675149,
             ],
-            ['PHPSESSID' => '32eo4tk9dcaacb2f3hqg0s6s54'],
             [
                 'page' => 1,
                 'order' => false
             ],
             ['id' => 'wan2land'],
+            ['PHPSESSID' => '32eo4tk9dcaacb2f3hqg0s6s54'],
             ['profileImage' => $mockFile],
             ['status' => 'join'],
             'GET',
