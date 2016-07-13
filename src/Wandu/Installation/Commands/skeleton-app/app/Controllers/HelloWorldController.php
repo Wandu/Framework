@@ -1,5 +1,5 @@
 <?php
-namespace %%namespace%%\Controllers;
+namespace ___NAMESPACE___\Controllers;
 
 use Wandu\View;
 

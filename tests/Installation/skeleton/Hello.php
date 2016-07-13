@@ -1,9 +1,9 @@
 <?php
-namespace %%namespace%%;
+namespace ___NAMESPACE___;
 
 class Hello
 {
-    public function get%%controller%%()
+    public function get___controller30___()
     {
         return 'user';
     }

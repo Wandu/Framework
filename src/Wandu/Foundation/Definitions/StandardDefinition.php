@@ -15,7 +15,6 @@ use Wandu\Database\Console\MigrateUpCommand;
 use Wandu\DI\ContainerInterface;
 use Wandu\Event\EventServiceProvider;
 use Wandu\Foundation\Contracts\DefinitionInterface;
-use Wandu\Foundation\KernelServiceProvider;
 use Wandu\Http\HttpServiceProvider;
 use Wandu\Router\Router;
 use Wandu\Router\RouterServiceProvider;
@@ -35,7 +34,6 @@ class StandardDefinition implements DefinitionInterface
      */
     public function providers(ContainerInterface $app)
     {
-        $app->register(new KernelServiceProvider());
         $app->register(new HttpServiceProvider());
         $app->register(new RouterServiceProvider());
         $app->register(new EventServiceProvider());

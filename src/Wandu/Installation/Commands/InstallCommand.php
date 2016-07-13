@@ -9,6 +9,7 @@ use Symfony\Component\Process\Process;
 use Symfony\Component\Process\ProcessUtils;
 use Wandu\Console\Command;
 use Wandu\DI\ContainerInterface;
+use Wandu\Installation\Replacers\OriginReplacer;
 use Wandu\Installation\SkeletonBuilder;
 
 class InstallCommand extends Command
@@ -49,18 +50,21 @@ class InstallCommand extends Command
         $appBasePath = $this->getAppBasePath();
         $appNamespace = $this->getAppNamespace();
 
-        $installer = new SkeletonBuilder($appBasePath);
+        $installer = new SkeletonBuilder($appBasePath, __DIR__ . '/skeleton-app');
         $path = str_replace($this->basePath, '', $appBasePath);
         $path = ltrim($path ? $path . '/' : '', '/');
         $installer->build([
-            'namespace' => $appNamespace,
-            'path' => $path,
+            '___NAMESPACE___' => $appNamespace,
+            '{path}' => $path,
+            '%%origin%%' => new OriginReplacer(),
         ]);
 
-        if ($appBasePath !== $this->basePath) {
-            rename($appBasePath . '/.wandu.config.php', $this->basePath . '/.wandu.config.php');
-            rename($appBasePath . '/.wandu.php', $this->basePath . '/.wandu.php');
-        }
+        $baseInstaller = new SkeletonBuilder($this->basePath, __DIR__ . '/skeleton-root');
+        $baseInstaller->build([
+            '___NAMESPACE___' => $appNamespace,
+            '{path}' => $path,
+            '%%origin%%' => new OriginReplacer(),
+        ]);
 
         // set composer
         $this->saveAutoloadToComposer($appNamespace, $composerFile, $path);
