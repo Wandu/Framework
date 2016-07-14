@@ -1,16 +1,14 @@
 <?php
 namespace Wandu\Router;
 
+use Closure;
 use FastRoute\Dispatcher as FastDispatcher;
 use FastRoute\Dispatcher\GroupCountBased as GCBDispatcher;
 use Psr\Http\Message\ServerRequestInterface;
-use Wandu\Router\ClassLoader\DefaultLoader;
 use Wandu\Router\Contracts\ClassLoaderInterface;
 use Wandu\Router\Contracts\ResponsifierInterface;
-use Wandu\Router\Contracts\RoutesInterface;
 use Wandu\Router\Exception\MethodNotAllowedException;
 use Wandu\Router\Exception\RouteNotFoundException;
-use Wandu\Router\Responsifier\NullResponsifier;
 
 class Dispatcher
 {
@@ -23,7 +21,7 @@ class Dispatcher
     /** @var \Wandu\Router\Configuration */
     protected $config;
     
-    /** @var \Wandu\Router\Contracts\RoutesInterface */
+    /** @var \Closure */
     protected $routes;
 
     /**
@@ -49,10 +47,10 @@ class Dispatcher
     }
 
     /**
-     * @param \Wandu\Router\Contracts\RoutesInterface $routes
+     * @param \Closure $routes
      * @return \Wandu\Router\Dispatcher
      */
-    public function withRoutes(RoutesInterface $routes)
+    public function withRoutes(Closure $routes)
     {
         $inst = clone $this;
         $inst->routes = $routes;
@@ -73,7 +71,7 @@ class Dispatcher
             $dispatchData = $cacheData['dispatch_data'];
             $routes = $cacheData['routes'];
         } else {
-            $this->routes->routes($router = new Router);
+            $this->routes->__invoke($router = new Router);
             $dispatchData = $router->getCollector()->getData();
             $routes = $router->getRoutes();
         }

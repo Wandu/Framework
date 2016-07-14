@@ -2,7 +2,7 @@
     "name": "wandu/config",
     "license": "MIT",
     "require": {
-        "php": ">=7.0.0"
+        "php": ">=5.6"
     },
     "autoload": {
         "psr-4": {

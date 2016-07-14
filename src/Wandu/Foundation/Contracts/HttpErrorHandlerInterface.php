@@ -8,8 +8,8 @@ interface HttpErrorHandlerInterface
 {
     /**
      * @param \Psr\Http\Message\ServerRequestInterface $request
-     * @param \Throwable $exception
+     * @param \Throwable|\Exception $exception
      * @return \Psr\Http\Message\ResponseInterface
      */
-    public function handle(ServerRequestInterface $request, Throwable $exception);
+    public function handle(ServerRequestInterface $request, $exception);
 }

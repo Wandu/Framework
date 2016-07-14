@@ -3,7 +3,6 @@ namespace Wandu\Router;
 
 use Mockery;
 use Psr\Http\Message\ServerRequestInterface;
-use Wandu\Router\Contracts\RoutesInterface;
 
 class CachedDispatcherTest extends TestCase
 {
@@ -16,24 +15,17 @@ class CachedDispatcherTest extends TestCase
     {
         $dispatcher = $this->createDispatcher();
 
-        $dispatcher = $dispatcher->withRoutes(
-            $routes = new class implements RoutesInterface
-            {
-                public $loadCount = 0;
-
-                public function routes(Router $router)
-                {
-                    $this->loadCount++;
-                    $router->get('admin', TestCachedDispatcherController::class, 'index');
-                }
-            }
-        );
+        $count = 0;
+        $dispatcher = $dispatcher->withRoutes(function (Router $router) use (&$count) {
+            $count++;
+            $router->get('admin', TestCachedDispatcherController::class, 'index');
+        });
 
         $dispatcher->dispatch($this->createRequest('GET', '/admin'));
         $dispatcher->dispatch($this->createRequest('GET', '/admin'));
         $dispatcher->dispatch($this->createRequest('GET', '/admin'));
 
-        $this->assertEquals(3, $routes->loadCount);
+        $this->assertEquals(3, $count);
     }
 
     public function testDispatchWithCache()
@@ -43,24 +35,17 @@ class CachedDispatcherTest extends TestCase
             'cache_file' => __DIR__ . '/router.cache.php',
         ]);
 
-        $dispatcher = $dispatcher->withRoutes(
-            $routes = new class implements RoutesInterface
-            {
-                public $loadCount = 0;
-
-                public function routes(Router $router)
-                {
-                    $this->loadCount++;
-                    $router->get('admin', TestCachedDispatcherController::class, 'index');
-                }
-            }
-        );
+        $count = 0;
+        $dispatcher = $dispatcher->withRoutes(function (Router $router) use (&$count) {
+            $count++;
+            $router->get('admin', TestCachedDispatcherController::class, 'index');
+        });
 
         $dispatcher->dispatch($this->createRequest('GET', '/admin'));
         $dispatcher->dispatch($this->createRequest('GET', '/admin'));
         $dispatcher->dispatch($this->createRequest('GET', '/admin'));
 
-        $this->assertEquals(1, $routes->loadCount);
+        $this->assertEquals(1, $count);
     }
 
     public function testFlush()
@@ -69,26 +54,19 @@ class CachedDispatcherTest extends TestCase
             'cache_enabled' => true,
             'cache_file' => __DIR__ . '/router.cache.php',
         ]);
-        
-        $dispatcher = $dispatcher->withRoutes(
-            $routes = new class implements RoutesInterface
-            {
-                public $loadCount = 0;
 
-                public function routes(Router $router)
-                {
-                    $this->loadCount++;
-                    $router->get('admin', TestCachedDispatcherController::class, 'index');
-                }
-            }
-        );
+        $count = 0;
+        $dispatcher = $dispatcher->withRoutes(function (Router $router) use (&$count) {
+            $count++;
+            $router->get('admin', TestCachedDispatcherController::class, 'index');
+        });
 
         $dispatcher->dispatch($this->createRequest('GET', '/admin'));
         $dispatcher->dispatch($this->createRequest('GET', '/admin'));
         $dispatcher->flush();
         $dispatcher->dispatch($this->createRequest('GET', '/admin'));
 
-        $this->assertEquals(2, $routes->loadCount);
+        $this->assertEquals(2, $count);
     }
 }
 

@@ -3,7 +3,7 @@
     "keywords": ["wandu", "foundation"],
     "license": "MIT",
     "require": {
-        "php": ">=7.0.0",
+        "php": ">=5.6",
         "filp/whoops": "^2.1",
         "wandu/di": "^3.0"
     },

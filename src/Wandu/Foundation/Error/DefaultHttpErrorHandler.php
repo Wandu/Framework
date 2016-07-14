@@ -3,24 +3,30 @@ namespace Wandu\Foundation\Error;
 
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
-use Throwable;
+use Wandu\Config\Contracts\ConfigInterface;
 use Wandu\Foundation\Contracts\HttpErrorHandlerInterface;
 use Wandu\Http\Exception\HttpException;
+use Whoops\Handler\JsonResponseHandler;
+use Whoops\Handler\PlainTextHandler;
+use Whoops\Handler\PrettyPageHandler;
+use Whoops\Run;
 
 class DefaultHttpErrorHandler implements HttpErrorHandlerInterface
 {
     /**
      * @param \Psr\Log\LoggerInterface $logger
+     * @param \Wandu\Config\Contracts\ConfigInterface $config
      */
-    public function __construct(LoggerInterface $logger)
+    public function __construct(LoggerInterface $logger, ConfigInterface $config)
     {
         $this->logger = $logger;
+        $this->config = $config;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function handle(ServerRequestInterface $request, Throwable $exception)
+    public function handle(ServerRequestInterface $request, $exception)
     {
         $statusCode = 500;
         $reasonPhrase = 'Internal Server Error';
@@ -35,6 +41,9 @@ class DefaultHttpErrorHandler implements HttpErrorHandlerInterface
 
             $this->logger->info($this->prettifyRequest($request));
             $this->logger->info($exception);
+        } elseif ($this->config->get('debug', true)) {
+            $whoops = $this->getWhoops($request);
+            return \Wandu\Http\create($whoops->handleException($exception), $statusCode);
         } else {
             $this->logger->error($this->prettifyRequest($request));
             $this->logger->error($exception);
@@ -74,5 +83,52 @@ class DefaultHttpErrorHandler implements HttpErrorHandlerInterface
         $contents .= "BODY\n";
         $contents .= "\"{$request->getBody()->__toString()}\"\n";
         return $contents;
+    }
+    
+    protected function getWhoops(ServerRequestInterface $request)
+    {
+        $whoops = new Run();
+
+        switch ($this->getAcceptType($request)) {
+            case 'html':
+                $whoops->pushHandler(new PrettyPageHandler());
+                break;
+            case 'json':
+                $whoops->pushHandler(new JsonResponseHandler());
+                break;
+            default:
+                $whoops->pushHandler(new PlainTextHandler());
+        }
+
+        $whoops->allowQuit(false);
+        $whoops->writeToOutput(false);
+        $whoops->sendHttpCode(false);
+
+        return $whoops;
+    }
+
+    /**
+     * @ref github.com/oscarotero/psr7-middlewares/blob/master/src/Middleware/FormatNegotiator.php
+     *
+     * @param \Psr\Http\Message\ServerRequestInterface $request
+     * @return string
+     */
+    protected function getAcceptType(ServerRequestInterface $request)
+    {
+        $accept = $request->getHeaderLine('Accept');
+        if (
+            strpos($accept, 'text/html') !== false ||
+            strpos($accept, 'application/xhtml+xml') !== false
+        ) {
+            return 'html';
+        }
+        if (
+            strpos($accept, 'application/json') !== false ||
+            strpos($accept, 'text/json') !== false ||
+            strpos($accept, 'application/x-json') !== false
+        ) {
+            return 'json';
+        }
+        return 'text';
     }
 }

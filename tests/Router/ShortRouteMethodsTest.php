@@ -3,21 +3,15 @@ namespace Wandu\Router;
 
 use Mockery;
 use Psr\Http\Message\ServerRequestInterface;
-use Wandu\Router\Contracts\RoutesInterface;
 use Wandu\Router\Exception\MethodNotAllowedException;
 
 class ShortRouteMethods extends TestCase
 {
     public function testGet()
     {
-        $dispatcher = $this->createDispatcher()->withRoutes(
-            new class implements RoutesInterface
-            {
-                public function routes(Router $router) {
-                    $router->get('/', TestShortRouteMethodController::class, 'index');
-                }
-            }
-        );
+        $dispatcher = $this->createDispatcher()->withRoutes(function (Router $router) {
+            $router->get('/', TestShortRouteMethodController::class, 'index');
+        });
 
         // success
         foreach (['GET', 'HEAD'] as $method) {
@@ -39,15 +33,9 @@ class ShortRouteMethods extends TestCase
 
     public function testPost()
     {
-        $dispatcher = $this->createDispatcher()->withRoutes(
-            new class implements RoutesInterface
-            {
-                public function routes(Router $router)
-                {
-                    $router->post('/', TestShortRouteMethodController::class, 'index');
-                }
-            }
-        );
+        $dispatcher = $this->createDispatcher()->withRoutes(function (Router $router) {
+            $router->post('/', TestShortRouteMethodController::class, 'index');
+        });
 
         // success
         foreach (['POST'] as $method) {
@@ -69,15 +57,9 @@ class ShortRouteMethods extends TestCase
 
     public function testPut()
     {
-        $dispatcher = $this->createDispatcher()->withRoutes(
-            new class implements RoutesInterface
-            {
-                public function routes(Router $router)
-                {
-                    $router->put('/', TestShortRouteMethodController::class, 'index');
-                }
-            }
-        );
+        $dispatcher = $this->createDispatcher()->withRoutes(function (Router $router) {
+            $router->put('/', TestShortRouteMethodController::class, 'index');
+        });
 
         // success
         foreach (['PUT'] as $method) {
@@ -99,16 +81,9 @@ class ShortRouteMethods extends TestCase
 
     public function testDelete()
     {
-        $dispatcher = $this->createDispatcher()->withRoutes(
-            new class implements RoutesInterface
-            {
-                public function routes(Router $router)
-                {
-
-                    $router->delete('/', TestShortRouteMethodController::class, 'index');
-                }
-            }
-        );
+        $dispatcher = $this->createDispatcher()->withRoutes(function (Router $router) {
+            $router->delete('/', TestShortRouteMethodController::class, 'index');
+        });
 
         // success
         foreach (['DELETE'] as $method) {
@@ -130,15 +105,9 @@ class ShortRouteMethods extends TestCase
 
     public function testOptions()
     {
-        $dispatcher = $this->createDispatcher()->withRoutes(
-            new class implements RoutesInterface
-            {
-                public function routes(Router $router)
-                {
-                    $router->options('/', TestShortRouteMethodController::class, 'index');
-                }
-            }
-        );
+        $dispatcher = $this->createDispatcher()->withRoutes(function (Router $router) {
+            $router->options('/', TestShortRouteMethodController::class, 'index');
+        });
 
         // success
         foreach (['OPTIONS'] as $method) {
@@ -160,14 +129,9 @@ class ShortRouteMethods extends TestCase
 
     public function testPatch()
     {
-        $dispatcher = $this->createDispatcher()->withRoutes(
-            new class implements RoutesInterface
-            {
-                public function routes(Router $router) {
-                    $router->patch('/', TestShortRouteMethodController::class, 'index');
-                }
-            }
-        );
+        $dispatcher = $this->createDispatcher()->withRoutes(function (Router $router) {
+            $router->patch('/', TestShortRouteMethodController::class, 'index');
+        });
 
         // success
         foreach (['PATCH'] as $method) {
@@ -189,15 +153,9 @@ class ShortRouteMethods extends TestCase
 
     public function testAny()
     {
-        $dispatcher = $this->createDispatcher()->withRoutes(
-            new class implements RoutesInterface
-            {
-                public function routes(Router $router)
-                {
-                    $router->any('/', TestShortRouteMethodController::class, 'index');
-                }
-            }
-        );
+        $dispatcher = $this->createDispatcher()->withRoutes(function (Router $router) {
+            $router->any('/', TestShortRouteMethodController::class, 'index');
+        });
 
         // success
         foreach (['GET', 'HEAD', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'] as $method) {

@@ -2,7 +2,7 @@
   "name": "wandu/console",
   "license": "MIT",
   "require": {
-    "php": ">=7.0.0",
+    "php": ">=5.6",
     "symfony/console": "^3.1"
   },
   "autoload": {
