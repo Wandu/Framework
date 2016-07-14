@@ -9,7 +9,7 @@ class StringReplacer implements ReplacerInterface
     /**
      * @param string $text
      */
-    public function __construct(string $text)
+    public function __construct($text)
     {
         $this->text = $text;
     }
@@ -17,7 +17,7 @@ class StringReplacer implements ReplacerInterface
     /**
      * {@inheritdoc}
      */
-    public function replace(string $contents, string $matcher, SplFileInfo $dest = null) :string
+    public function replace($contents, $matcher, SplFileInfo $dest = null)
     {
         return preg_replace("/{$matcher}/", $this->text, $contents);
     }

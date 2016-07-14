@@ -6,7 +6,7 @@ use Wandu\DI\ServiceProviderInterface;
 use Wandu\Foundation\Contracts\HttpErrorHandlerInterface;
 use Wandu\Foundation\Error\DefaultHttpErrorHandler;
 
-class KernelServiceProvider implements ServiceProviderInterface
+class ApplicationServiceProvider implements ServiceProviderInterface
 {
     public function register(ContainerInterface $app)
     {

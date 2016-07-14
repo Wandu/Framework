@@ -11,5 +11,5 @@ interface ReplacerInterface
      * @param \SplFileInfo $dest
      * @return string
      */
-    public function replace(string $contents, string $matcher, SplFileInfo $dest = null) :string;
+    public function replace($contents, $matcher, SplFileInfo $dest = null);
 }

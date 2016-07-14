@@ -53,18 +53,16 @@ class InstallCommand extends Command
         $installer = new SkeletonBuilder($appBasePath, __DIR__ . '/skeleton-app');
         $path = str_replace($this->basePath, '', $appBasePath);
         $path = ltrim($path ? $path . '/' : '', '/');
-        $installer->build([
+        
+        $replacers = [
             '___NAMESPACE___' => $appNamespace,
             '{path}' => $path,
             '%%origin%%' => new OriginReplacer(),
-        ]);
+        ];
+        $installer->build($replacers);
 
         $baseInstaller = new SkeletonBuilder($this->basePath, __DIR__ . '/skeleton-root');
-        $baseInstaller->build([
-            '___NAMESPACE___' => $appNamespace,
-            '{path}' => $path,
-            '%%origin%%' => new OriginReplacer(),
-        ]);
+        $baseInstaller->build($replacers);
 
         // set composer
         $this->saveAutoloadToComposer($appNamespace, $composerFile, $path);

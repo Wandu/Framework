@@ -17,7 +17,7 @@ class CallableReplacer implements ReplacerInterface
     /**
      * {@inheritdoc}
      */
-    public function replace(string $contents, string $matcher, SplFileInfo $dest = null) :string
+    public function replace($contents, $matcher, SplFileInfo $dest = null)
     {
         return preg_replace_callback("/{$matcher}/", $this->handler, $contents);
     }

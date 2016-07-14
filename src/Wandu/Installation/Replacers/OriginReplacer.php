@@ -9,7 +9,7 @@ class OriginReplacer implements ReplacerInterface
     /**
      * {@inheritdoc}
      */
-    public function replace(string $contents, string $matcher, SplFileInfo $file = null) :string
+    public function replace($contents, $matcher, SplFileInfo $file = null)
     {
         return preg_replace(
             "/{$matcher}/",
