@@ -18,6 +18,7 @@ use Wandu\Foundation\Contracts\DefinitionInterface;
 use Wandu\Http\HttpServiceProvider;
 use Wandu\Router\Router;
 use Wandu\Router\RouterServiceProvider;
+use Wandu\DateTime\DateTimeServiceProvider;
 
 class StandardDefinition implements DefinitionInterface
 {
@@ -40,6 +41,7 @@ class StandardDefinition implements DefinitionInterface
         $app->register(new MonologServiceProvider());
         $app->register(new EloquentServiceProvider());
         $app->register(new LatteServiceProvider());
+        $app->register(new DateTimeServiceProvider());
     }
 
     /**

@@ -4,6 +4,7 @@ namespace Wandu\Bridges\Eloquent;
 use Illuminate\Database\Capsule\Manager;
 use Wandu\DI\ContainerInterface;
 use Wandu\DI\ServiceProviderInterface;
+use function Wandu\Foundation\config;
 
 class EloquentServiceProvider implements ServiceProviderInterface
 {
@@ -14,7 +15,7 @@ class EloquentServiceProvider implements ServiceProviderInterface
     {
         $app->closure(Manager::class, function (ContainerInterface $app) {
             $capsule = new Manager;
-            foreach ($app['config']->get('database.connections', []) as $name => $connection) {
+            foreach (config('database.connections', []) as $name => $connection) {
                 $capsule->addConnection($connection, $name);
             }
             return $capsule;

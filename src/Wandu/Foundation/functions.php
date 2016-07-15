@@ -10,6 +10,16 @@ namespace Wandu\Foundation
     }
 
     /**
+     * @param string $name
+     * @param mixed $default
+     * @return mixed
+     */
+    function config($name, $default = null)
+    {
+        return app()->get('config')->get($name, $default);
+    }
+
+    /**
      * @param string $path
      * @return string
      */

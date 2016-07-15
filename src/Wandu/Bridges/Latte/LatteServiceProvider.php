@@ -5,6 +5,7 @@ use Wandu\DI\ContainerInterface;
 use Wandu\DI\ServiceProviderInterface;
 use Wandu\Foundation;
 use Wandu\View\Contracts\RenderInterface;
+use function Wandu\Foundation\config;
 
 class LatteServiceProvider implements ServiceProviderInterface
 {
@@ -15,8 +16,8 @@ class LatteServiceProvider implements ServiceProviderInterface
     {
         $app->closure(RenderInterface::class, function ($app) {
             return new LatteView(
-                Foundation\path($app['config']->get('view.path')),
-                Foundation\path($app['config']->get('view.cache'))
+                Foundation\path(config('view.path')),
+                Foundation\path(config('view.cache'))
             );
         });
     }
