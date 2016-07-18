@@ -1,7 +1,6 @@
 <?php
 namespace Wandu\Router;
 
-use Closure;
 use FastRoute\DataGenerator;
 use FastRoute\DataGenerator\GroupCountBased as GCBDataGenerator;
 use FastRoute\RouteCollector;
@@ -46,31 +45,21 @@ class Router
 
     /**
      * @param string $prefix
-     * @param \Closure $handler
+     * @param callable $handler
      */
-    public function prefix($prefix, Closure $handler)
+    public function prefix($prefix, callable $handler)
     {
         $beforePrefix = $this->prefix;
         $this->prefix = $beforePrefix . $prefix ?: '/';
-        $handler($this);
+        call_user_func($handler, $this);
         $this->prefix = $beforePrefix;
     }
 
     /**
-     * @deprecated use middleware
      * @param array|string $middlewares
-     * @param \Closure $handler
+     * @param callable $handler
      */
-    public function middlewares($middlewares, Closure $handler)
-    {
-        $this->middleware($middlewares, $handler);
-    }
-
-    /**
-     * @param array|string $middlewares
-     * @param \Closure $handler
-     */
-    public function middleware($middlewares, Closure $handler)
+    public function middleware($middlewares, callable $handler)
     {
         if (!is_array($middlewares)) {
             $middlewares = [$middlewares];
@@ -83,9 +72,9 @@ class Router
 
     /**
      * @param array $attributes
-     * @param \Closure $handler
+     * @param callable $handler
      */
-    public function group(array $attributes, Closure $handler)
+    public function group(array $attributes, callable $handler)
     {
         $beforePrefix = $this->prefix;
         $beforeMiddlewares = $this->middlewares;
