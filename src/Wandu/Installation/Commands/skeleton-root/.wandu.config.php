@@ -22,7 +22,7 @@ return [
     ],
     'session' => [
         'type' => 'file',
-        'path' => 'cache/sessions',
+        'path' => '{path}cache/sessions',
     ],
     'log' => [
         'path' => null,

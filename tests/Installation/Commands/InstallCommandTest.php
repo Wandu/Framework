@@ -61,12 +61,13 @@ class InstallCommandTest extends PHPUnit_Framework_TestCase
         // check composer
         $composer = json_decode(file_get_contents(__DIR__ . '/project/composer.json'), true);
         
-        $this->assertEquals([$appNamespace . '\\' => "app/"], $composer['autoload']['psr-4']);
+        $this->assertEquals([$appNamespace . '\\' => "src/"], $composer['autoload']['psr-4']);
         
         // check .wandu.config.php
         $this->assertEquals([
             'env' => 'develop',
             'debug' => true,
+            'timezone' => 'UTC',
             'database' => [
                 'connections' => [
                     'default' => [
@@ -83,6 +84,10 @@ class InstallCommandTest extends PHPUnit_Framework_TestCase
                 'migration' => [
                     'path' => 'migrations',
                 ],
+            ],
+            'session' => [
+                'type' => 'file',
+                'path' => 'cache/sessions',
             ],
             'log' => [
                 'path' => null,
@@ -111,12 +116,13 @@ class InstallCommandTest extends PHPUnit_Framework_TestCase
         // check composer
         $composer = json_decode(file_get_contents(__DIR__ . '/project/composer.json'), true);
 
-        $this->assertEquals([$appNamespace . '\\' => "wandu/app/"], $composer['autoload']['psr-4']);
+        $this->assertEquals([$appNamespace . '\\' => "wandu/src/"], $composer['autoload']['psr-4']);
 
         // check .wandu.config.php
         $this->assertEquals([
             'env' => 'develop',
             'debug' => true,
+            'timezone' => 'UTC',
             'database' => [
                 'connections' => [
                     'default' => [
@@ -133,6 +139,10 @@ class InstallCommandTest extends PHPUnit_Framework_TestCase
                 'migration' => [
                     'path' => 'wandu/migrations',
                 ],
+            ],
+            'session' => [
+                'type' => 'file',
+                'path' => 'wandu/cache/sessions',
             ],
             'log' => [
                 'path' => null,
