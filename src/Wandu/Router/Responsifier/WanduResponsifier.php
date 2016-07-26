@@ -22,9 +22,6 @@ class WanduResponsifier implements ResponsifierInterface
         }
         while (is_callable($response)) {
             $nextResponse = call_user_func($response);
-            if ($nextResponse instanceof Generator) {
-                return response()->generator($response);
-            }
             $response = $nextResponse;
         }
         // int, float, boolean, string
@@ -35,6 +32,9 @@ class WanduResponsifier implements ResponsifierInterface
                 $response = 'false';
             }
             return response()->create((string)$response);
+        }
+        if ($response instanceof Generator) {
+            return response()->generator($response);
         }
         if (is_array($response) || is_object($response)) {
             return response()->json($response);
@@ -52,6 +52,7 @@ class WanduResponsifier implements ResponsifierInterface
                 }
             }
         }
+
         throw new RuntimeException('Unsupported Type of Response.');
     }
 }

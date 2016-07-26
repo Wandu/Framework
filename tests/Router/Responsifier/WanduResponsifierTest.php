@@ -166,4 +166,20 @@ class WanduResponsifierTest extends PHPUnit_Framework_TestCase
         $this->assertInstanceOf(ResponseInterface::class, $response);
         $this->assertSame("0123456789", $response->getBody()->__toString());
     }
+
+    public function testYield()
+    {
+        $responsify = new WanduResponsifier();
+
+        $generator = function () {
+            for ($i = 0; $i < 10; $i++) {
+                yield $i;
+            }
+        };
+        
+        $response = $responsify->responsify($generator());
+
+        $this->assertInstanceOf(ResponseInterface::class, $response);
+        $this->assertSame("0123456789", $response->getBody()->__toString());
+    }
 }

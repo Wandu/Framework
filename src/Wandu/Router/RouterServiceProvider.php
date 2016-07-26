@@ -8,6 +8,7 @@ use Wandu\Router\Contracts\ClassLoaderInterface;
 use Wandu\Router\Contracts\ResponsifierInterface;
 use Wandu\Router\Responsifier\WanduResponsifier;
 use function Wandu\Foundation\config;
+use function Wandu\Foundation\path;
 
 class RouterServiceProvider implements  ServiceProviderInterface
 {
@@ -23,7 +24,7 @@ class RouterServiceProvider implements  ServiceProviderInterface
             return new Configuration([
                 'virtual_method_enabled' => true,
                 'cache_disabled' => config('router.cache_disabled', true),
-                'cache_file' => config('router.cache_file', null),
+                'cache_file' => path(config('router.cache_file', null)),
             ]);
         });
         $app->bind(Dispatcher::class);

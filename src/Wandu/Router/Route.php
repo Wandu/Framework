@@ -1,12 +1,8 @@
 <?php
 namespace Wandu\Router;
 
-use Generator;
-use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use RuntimeException;
 use Wandu\Router\Contracts\ClassLoaderInterface;
-use function Wandu\Http\response;
 use Wandu\Router\Contracts\ResponsifierInterface;
 
 class Route

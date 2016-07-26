@@ -6,7 +6,6 @@ use Wandu\Router\ClassLoader\DefaultLoader;
 use Wandu\Router\Contracts\ClassLoaderInterface;
 use Wandu\Router\Contracts\ResponsifierInterface;
 use Wandu\Router\Responsifier\NullResponsifier;
-use function Wandu\Http\response;
 
 class RouteExecutor
 {
