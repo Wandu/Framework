@@ -14,8 +14,8 @@ use Wandu\Foundation\Contracts\HttpErrorHandlerInterface;
 use Wandu\Foundation\Contracts\KernelInterface;
 use Wandu\Http\Exception\MethodNotAllowedException;
 use Wandu\Http\Exception\NotFoundException;
-use Wandu\Http\Psr\Factory\ServerRequestFactory;
-use Wandu\Http\Psr\Sender\ResponseSender;
+use Wandu\Http\Factory\ServerRequestFactory;
+use Wandu\Http\Sender\ResponseSender;
 use Wandu\Router\Dispatcher;
 use Wandu\Router\Exception\MethodNotAllowedException as RouteMethodException;
 use Wandu\Router\Exception\RouteNotFoundException;
@@ -81,7 +81,7 @@ class HttpRouterKernel implements KernelInterface
      */
     protected function sendToGlobal(ResponseInterface $response)
     {
-        /* @var \Wandu\Http\Psr\Sender\ResponseSender $sender */
+        /* @var \Wandu\Http\Sender\ResponseSender $sender */
         $sender = $this->app->get(ResponseSender::class);
         $sender->sendToGlobal($response);
         return 0;
