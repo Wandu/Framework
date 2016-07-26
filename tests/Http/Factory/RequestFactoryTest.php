@@ -1,5 +1,5 @@
 <?php
-namespace Wandu\Http\Psr\Factory;
+namespace Wandu\Http\Factory;
 
 use Mockery;
 use PHPUnit_Framework_TestCase;
@@ -7,7 +7,7 @@ use Psr\Http\Message\StreamInterface;
 
 class RequestFactoryTest extends PHPUnit_Framework_TestCase
 {
-    /** @var \Wandu\Http\Psr\Factory\RequestFactory */
+    /** @var \Wandu\Http\Factory\RequestFactory */
     protected $factory;
 
     public function setUp()

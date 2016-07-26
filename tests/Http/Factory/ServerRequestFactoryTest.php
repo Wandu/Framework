@@ -1,5 +1,5 @@
 <?php
-namespace Wandu\Http\Psr\Factory;
+namespace Wandu\Http\Factory;
 
 use Mockery;
 use PHPUnit_Framework_TestCase;
@@ -7,7 +7,7 @@ use Psr\Http\Message\StreamInterface;
 
 class ServerRequestFactoryTest extends PHPUnit_Framework_TestCase
 {
-    /** @var \Wandu\Http\Psr\Factory\ServerRequestFactory */
+    /** @var \Wandu\Http\Factory\ServerRequestFactory */
     protected $factory;
 
     public function setUp()
@@ -25,7 +25,7 @@ class ServerRequestFactoryTest extends PHPUnit_Framework_TestCase
 
     public function testGetUriFromHeader()
     {
-        $serverRequest = $this->factory->factory([
+        $serverRequest = $this->factory->create([
             'HTTP_HOST' => 'localhost:8002',
             'REQUEST_URI' => '/abk?sdnkf',
         ], [], [], [], []);
@@ -35,7 +35,7 @@ class ServerRequestFactoryTest extends PHPUnit_Framework_TestCase
 
     public function testGetUriFromServerVariable()
     {
-        $serverRequest = $this->factory->factory([
+        $serverRequest = $this->factory->create([
             'SERVER_NAME' => '0.0.0.0',
             'SERVER_PORT' => '8002',
             'REQUEST_URI' => '/abk?sdnkf',
@@ -46,7 +46,7 @@ class ServerRequestFactoryTest extends PHPUnit_Framework_TestCase
 
     public function testGetUriFromBoth()
     {
-        $serverRequest = $this->factory->factory([
+        $serverRequest = $this->factory->create([
             'HTTP_HOST' => 'localhost:8002', // more
             'SERVER_NAME' => '0.0.0.0',
             'SERVER_PORT' => '8002',
@@ -61,7 +61,7 @@ class ServerRequestFactoryTest extends PHPUnit_Framework_TestCase
         $body = Mockery::mock(StreamInterface::class);
         $body->shouldReceive('__toString')->andReturn('{"hello":[1,2,3,4,5]}');
 
-        $serverRequest = $this->factory->factory([
+        $serverRequest = $this->factory->create([
             'HTTP_CONTENT_TYPE' => 'application/json',
         ], [], [], [], [], $body);
 
@@ -75,7 +75,7 @@ class ServerRequestFactoryTest extends PHPUnit_Framework_TestCase
         $body = Mockery::mock(StreamInterface::class);
         $body->shouldReceive('__toString')->andReturn('{"hello":[1,2,3,4,5]}');
 
-        $serverRequest = $this->factory->factory([
+        $serverRequest = $this->factory->create([
             'HTTP_CONTENT_TYPE' => 'application/json;charset=UTF-8',
         ], [], [], [], [], $body);
 
@@ -100,7 +100,7 @@ Cookie: FOO=135050505050; BAR=1; PHPSESSID=djiar0p36a1nhrc3j6pd6r0gp3
 HTTP;
         $body = str_replace("\n", "\r\n", $body);
 
-        $request = $this->factory->fromSocketBody($body);
+        $request = $this->factory->createFromSocketBody($body);
 
         $this->assertEquals('1.1', $request->getProtocolVersion());
         $this->assertEquals('GET', $request->getMethod());
