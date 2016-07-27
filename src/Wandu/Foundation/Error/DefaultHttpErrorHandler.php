@@ -10,9 +10,17 @@ use Whoops\Handler\JsonResponseHandler;
 use Whoops\Handler\PlainTextHandler;
 use Whoops\Handler\PrettyPageHandler;
 use Whoops\Run;
+use function Wandu\Http\Response\create;
+use function Wandu\Http\Response\json;
 
 class DefaultHttpErrorHandler implements HttpErrorHandlerInterface
 {
+    /** @var \Psr\Log\LoggerInterface */
+    protected $logger;
+    
+    /** @var \Wandu\Config\Contracts\ConfigInterface */
+    protected $config;
+    
     /**
      * @param \Psr\Log\LoggerInterface $logger
      * @param \Wandu\Config\Contracts\ConfigInterface $config
@@ -28,42 +36,36 @@ class DefaultHttpErrorHandler implements HttpErrorHandlerInterface
      */
     public function handle(ServerRequestInterface $request, $exception)
     {
+        if ($exception instanceof HttpException) {
+            $this->logger->notice($this->prettifyRequest($request));
+            $this->logger->notice($exception);
+            return $exception;
+        }
+        if ($this->config->get('debug', true)) {
+            $whoops = $this->getWhoops($request);
+            return create($whoops->handleException($exception), 500);
+        }
+
         $statusCode = 500;
         $reasonPhrase = 'Internal Server Error';
-        $attributes = [];
-        if ($exception instanceof HttpException) {
-            if ($exception->getBody()) {
-                return $exception;
-            }
-            $statusCode = $exception->getStatusCode();
-            $reasonPhrase = $exception->getReasonPhrase();
-            $attributes = $exception->getAttributes();
 
-            $this->logger->info($this->prettifyRequest($request));
-            $this->logger->info($exception);
-        } elseif ($this->config->get('debug', true)) {
-            $whoops = $this->getWhoops($request);
-            return \Wandu\Http\create($whoops->handleException($exception), $statusCode);
-        } else {
-            $this->logger->error($this->prettifyRequest($request));
-            $this->logger->error($exception);
-        }
+        $this->logger->error($this->prettifyRequest($request));
+        $this->logger->error($exception);
+
         if ($this->isAjax($request)) {
-            return \Wandu\Http\json(array_merge([
+            return json([
                 'status' => $statusCode,
                 'reason' => $reasonPhrase,
-            ], $attributes), $statusCode);
+            ], $statusCode);
         }
-
-        // 에러화면에서는 어떤에러인지 메시지를 출력해서는 안된다.
-        return \Wandu\Http\create("{$statusCode} {$reasonPhrase}", $statusCode);
+        return create("{$statusCode} {$reasonPhrase}", $statusCode);
     }
 
     /**
      * @param \Psr\Http\Message\ServerRequestInterface $request
      * @return bool
      */
-    protected function isAjax(ServerREquestInterface $request)
+    protected function isAjax(ServerRequestInterface $request)
     {
         return $request->hasHeader('x-requested-with') &&
             $request->getHeaderLine('x-requested-with') === 'XMLHttpRequest';
@@ -80,8 +82,10 @@ class DefaultHttpErrorHandler implements HttpErrorHandlerInterface
         foreach ($request->getHeaders() as $name => $value) {
             $contents .= "    {$name} : {$request->getHeaderLine($name)}\n";
         }
-        $contents .= "BODY\n";
-        $contents .= "\"{$request->getBody()->__toString()}\"\n";
+        if ($body = $request->getBody()) {
+            $contents .= "BODY\n";
+            $contents .= "\"{$body->__toString()}\"\n";
+        }
         return $contents;
     }
     
