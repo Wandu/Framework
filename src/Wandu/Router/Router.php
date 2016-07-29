@@ -96,6 +96,14 @@ class Router
     }
 
     /**
+     * @param callable $handler
+     */
+    public function append(callable $handler)
+    {
+        $handler($this);
+    }
+
+    /**
      * @param array $methods
      * @param string $path
      * @param string $className
