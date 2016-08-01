@@ -26,7 +26,7 @@ class Config extends DotArray implements ConfigInterface
     public function set($name, $value)
     {
         if ($this->readOnly) {
-            throw new NotAllowedMethodException();
+            throw new NotAllowedMethodException(__FUNCTION__, __CLASS__);
         }
         return parent::set($name, $value);
     }
@@ -37,7 +37,7 @@ class Config extends DotArray implements ConfigInterface
     public function remove($name)
     {
         if ($this->readOnly) {
-            throw new NotAllowedMethodException();
+            throw new NotAllowedMethodException(__FUNCTION__, __CLASS__);
         }
         return parent::remove($name);
     }
