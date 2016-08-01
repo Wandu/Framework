@@ -9,6 +9,9 @@ use ___NAMESPACE___\Controllers\HelloWorldController;
 
 class ApplicationDefinition extends StandardDefinition
 {
+    /** @var array */
+    protected $configs;
+
     /**
      * @param array $configs
      */
