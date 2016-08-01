@@ -1,6 +1,8 @@
 <?php
 namespace Wandu\Http\Contracts;
 
+use Wandu\Support\Exception\CannotCallMethodException;
+
 trait ParameterInterfaceTestTrait
 {
     public function testGet()
@@ -92,7 +94,6 @@ trait ParameterInterfaceTestTrait
         $this->assertFalse($params->has('undefined'));
     }
 
-
     public function testGetMany()
     {
         $params = $this->param1;
@@ -134,5 +135,32 @@ trait ParameterInterfaceTestTrait
             ],
             $params->getMany(['string' => false, 'unknown' => false])
         );
+    }
+
+    public function testArrayAccess()
+    {
+        /** @var \Wandu\Http\Contracts\ParameterInterface $params */
+        $params = $this->param1;
+
+        $this->assertSame('string!', $params['string']);
+
+        $this->assertSame(null, $params['unknown']);
+        $this->assertSame('default', $params['unknown||default']);
+
+        $this->assertTrue(isset($params['string']));
+        $this->assertFalse(isset($params['unknown']));
+
+        try {
+            $params['string'] = 'string?';
+            $this->fail();
+        } catch (CannotCallMethodException $e) {
+            $this->assertEquals('offsetSet', $e->getMethodName());
+        }
+        try {
+            unset($params['string']);
+            $this->fail();
+        } catch (CannotCallMethodException $e) {
+            $this->assertEquals('offsetUnset', $e->getMethodName());
+        }
     }
 }
