@@ -61,7 +61,6 @@ class HttpRouterKernel implements KernelInterface
             set_exception_handler([$this, 'handleException']);
             set_error_handler([$this, 'handleError']);
             register_shutdown_function([$this, 'handleShutdown']);
-//            ini_set('error_reporting', 'OFF');
         }
         
         try {
@@ -114,6 +113,10 @@ class HttpRouterKernel implements KernelInterface
      */
     public function handleException($exception)
     {
+        // output buffer clean
+        while (ob_get_level() > 0) {
+            ob_end_clean();
+        }
         /* @var \Wandu\Foundation\Contracts\HttpErrorHandlerInterface $handler */
         $handler = $this->app->get(HttpErrorHandlerInterface::class);
         $this->sendToGlobal($handler->handle($this->request, $exception));
