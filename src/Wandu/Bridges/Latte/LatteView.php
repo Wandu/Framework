@@ -2,7 +2,6 @@
 namespace Wandu\Bridges\Latte;
 
 use Latte\Engine;
-use Latte\Loaders\FileLoader;
 use Wandu\View\Contracts\RenderInterface;
 use Wandu\View\FileNotFoundException;
 
@@ -18,16 +17,12 @@ class LatteView implements RenderInterface
     protected $values = [];
 
     /**
+     * @param \Latte\Engine $latte
      * @param string $basePath
-     * @param string $tempPath
      */
-    public function __construct($basePath, $tempPath = null)
+    public function __construct(Engine $latte, $basePath = '')
     {
-        $this->latte = new Engine();
-        $this->latte->setLoader(new FileLoader());
-        if ($tempPath) {
-            $this->latte->setTempDirectory($tempPath);
-        }
+        $this->latte = $latte;
         $this->basePath = $basePath;
     }
 
