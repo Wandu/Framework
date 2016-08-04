@@ -14,5 +14,10 @@
     "suggest": {
         "aws/aws-sdk-php": "for SQS queue",
         "pda/pheanstalk": "for Beanstalkd queue"
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "3.0-dev"
+        }
     }
 }

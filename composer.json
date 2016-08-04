@@ -34,8 +34,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Wandu\\": "src/Wandu/",
-            "Wandu\\App\\": "app/"
+            "Wandu\\": "src/Wandu/"
         },
         "files": [
             "src/Wandu/Foundation/functions.php",
@@ -45,22 +44,34 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Wandu\\": "tests/",
-            "Publ\\": "tests/Publ/"
+            "Wandu\\": "tests/"
         }
     },
     "replace": {
         "wandu/caster": "self.version",
         "wandu/compiler": "self.version",
+        "wandu/config": "self.version",
+        "wandu/console": "self.version",
+        "wandu/database": "self.version",
         "wandu/di": "self.version",
+        "wandu/event": "self.version",
+        "wandu/foundation": "self.version",
         "wandu/http": "self.version",
+        "wandu/installation": "self.version",
         "wandu/q": "self.version",
         "wandu/router": "self.version",
-        "wandu/tempy": "self.version"
+        "wandu/support": "self.version",
+        "wandu/validator": "self.version",
+        "wandu/view": "self.version"
     },
     "suggest": {
         "predis/predis": "for Redis session in Wandu/Http",
         "aws/aws-sdk-php": "for SQS queue in Wandu/Q",
         "pda/pheanstalk": "for Beanstalkd queue in Wandu/Q"
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "3.0-dev"
+        }
     }
 }
