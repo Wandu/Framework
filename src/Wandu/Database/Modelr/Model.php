@@ -1,5 +1,5 @@
 <?php
-namespace Wandu\Modelr;
+namespace Wandu\Database\Modelr;
 
 use ArrayAccess;
 

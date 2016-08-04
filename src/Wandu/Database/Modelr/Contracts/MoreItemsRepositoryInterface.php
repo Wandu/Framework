@@ -1,24 +1,24 @@
 <?php
-namespace Wandu\Modelr\Contracts;
+namespace Wandu\Database\Modelr\Contracts;
 
 interface MoreItemsRepositoryInterface extends RepositoryInterface
 {
     /**
-     * @return \Wandu\Modelr\Contracts\ModelInterface
+     * @return \Wandu\Database\Modelr\Contracts\ModelInterface
      */
     public function getFirstItem();
     
     /**
      * @param string $itemId
      * @param int $length
-     * @return \Wandu\Modelr\Contracts\CollectionInterface
+     * @return \Wandu\Database\Modelr\Contracts\CollectionInterface
      */
     public function getNextItems($itemId, $length = 10);
 
     /**
      * @param string $itemId
      * @param int $length
-     * @return \Wandu\Modelr\Contracts\CollectionInterface
+     * @return \Wandu\Database\Modelr\Contracts\CollectionInterface
      */
     public function getPrevItems($itemId, $length = 10);
 }

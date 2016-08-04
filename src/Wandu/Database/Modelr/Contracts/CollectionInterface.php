@@ -1,5 +1,5 @@
 <?php
-namespace Wandu\Modelr\Contracts;
+namespace Wandu\Database\Modelr\Contracts;
 
 interface CollectionInterface
 {
