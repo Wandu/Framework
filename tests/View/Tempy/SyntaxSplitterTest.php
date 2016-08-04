@@ -1,13 +1,13 @@
 <?php
-namespace Wandu\Tempy;
+namespace Wandu\View\Tempy;
 
 use Mockery;
 use PHPUnit_Framework_TestCase;
-use Wandu\Tempy\Exception\SyntaxException;
+use Wandu\View\Tempy\Exception\SyntaxException;
 
 class SyntaxSplitterTest extends PHPUnit_Framework_TestCase
 {
-    /** @var \Wandu\Tempy\SyntaxSplitter */
+    /** @var \Wandu\View\Tempy\SyntaxSplitter */
     protected $splitter;
 
     public function setUp()

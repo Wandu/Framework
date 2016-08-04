@@ -1,9 +1,9 @@
 <?php
-namespace Wandu\Tempy;
+namespace Wandu\View\Tempy;
 
-use Wandu\Tempy\Contracts\Renderable;
+use Wandu\View\Contracts\RenderInterface;
 
-class Renderer implements Renderable
+class Renderer implements RenderInterface
 {
     /** @var string */
     protected $path;
@@ -24,7 +24,12 @@ class Renderer implements Renderable
             ];
     }
 
-    public function render($name, array $values = [])
+    public function with(array $values = [])
+    {
+        // TODO: Implement with() method.
+    }
+
+    public function render($name, array $values = [], $basePath = null)
     {
 
     }

@@ -24,7 +24,7 @@ class DeployTest extends PHPUnit_Framework_TestCase
         'src/Wandu/Http/composer.json',
         'src/Wandu/Q/composer.json',
         'src/Wandu/Router/composer.json',
-        'src/Wandu/Tempy/composer.json',
+        'src/Wandu/View/composer.json',
     ];
     
     public function testIsJsonSyntaxOK()

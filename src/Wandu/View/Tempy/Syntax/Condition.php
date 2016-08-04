@@ -1,8 +1,8 @@
 <?php
-namespace Wandu\Tempy\Syntax;
+namespace Wandu\View\Tempy\Syntax;
 
-use Wandu\Tempy\Exception\SyntaxException;
-use Wandu\Tempy\Syntax;
+use Wandu\View\Tempy\Exception\SyntaxException;
+use Wandu\View\Tempy\Syntax;
 
 class Condition extends Syntax
 {

@@ -1,5 +1,5 @@
 <?php
-namespace Wandu\Tempy;
+namespace Wandu\View\Tempy;
 
 abstract class Syntax
 {

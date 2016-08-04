@@ -1,5 +1,5 @@
 <?php
-namespace Wandu\Tempy\Exception;
+namespace Wandu\View\Tempy\Exception;
 
 use RuntimeException;
 

@@ -1,8 +1,8 @@
 <?php
-namespace Wandu\Tempy;
+namespace Wandu\View\Tempy;
 
 use Wandu\Compiler\LexicalAnalyzer;
-use Wandu\Tempy\Exception\SyntaxException;
+use Wandu\View\Tempy\Exception\SyntaxException;
 
 class Parser
 {

@@ -1,12 +1,12 @@
 <?php
-namespace Wandu\Tempy;
+namespace Wandu\View\Tempy;
 
 use Mockery;
 use PHPUnit_Framework_TestCase;
 
 class ParserTest extends PHPUnit_Framework_TestCase
 {
-    /** @var \Wandu\Tempy\Parser */
+    /** @var \Wandu\View\Tempy\Parser */
     protected $parser;
 
     public function setUp()
