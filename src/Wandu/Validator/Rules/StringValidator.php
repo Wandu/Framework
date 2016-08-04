@@ -6,6 +6,9 @@ class StringValidator extends ValidatorAbstract
     const ERROR_TYPE = 'type.string';
     const ERROR_MESSAGE = 'it must be the string';
 
+    /**
+     * {@inheritdoc}
+     */
     public function validate($item)
     {
         return is_string($item);

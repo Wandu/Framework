@@ -15,7 +15,10 @@ class ArrayValidator extends ValidatorAbstract
 
     /** @var \Wandu\Validator\Contracts\ValidatorInterface[] */
     protected $attributes = [];
-    
+
+    /**
+     * @param array $attributes
+     */
     public function __construct(array $attributes = [])
     {
         foreach ($attributes as $name => $validator) {
@@ -25,6 +28,9 @@ class ArrayValidator extends ValidatorAbstract
         }
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function assert($item, $stopOnFail = false)
     {
         if (!is_array($item)) {
@@ -64,6 +70,9 @@ class ArrayValidator extends ValidatorAbstract
         }
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function validate($item)
     {
         if (!is_array($item)) {
