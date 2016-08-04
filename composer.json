@@ -39,7 +39,8 @@
         "files": [
             "src/Wandu/Foundation/functions.php",
             "src/Wandu/Http/functions.php",
-            "src/Wandu/View/functions.php"
+            "src/Wandu/View/functions.php",
+            "src/Wandu/Validator/functions.php"
         ]
     },
     "autoload-dev": {
