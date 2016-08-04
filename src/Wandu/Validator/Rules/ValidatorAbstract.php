@@ -12,7 +12,7 @@ abstract class ValidatorAbstract implements ValidatorInterface
     /**
      * {@inheritdoc}
      */
-    public function assert($item)
+    public function assert($item, $stopOnFail = false)
     {
         if (!$this->validate($item)) {
             throw $this->createException();

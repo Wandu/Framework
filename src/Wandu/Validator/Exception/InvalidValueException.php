@@ -32,37 +32,20 @@ class InvalidValueException extends RuntimeException
     }
 
     /**
-     * @param string $type
-     * @param string $message
+     * @param \Wandu\Validator\Exception\InvalidValueException $exception
      * @return self
      */
-    public function setError($type, $message)
+    public function insertException(InvalidValueException $exception)
     {
-        $this->exceptions[$type][] = $message;
+        $this->exceptions[] = $exception;
         return $this;
-    }
-    
-    /**
-     * @return array
-     */
-    public function getErrors()
-    {
-        return $this->exceptions;
     }
 
     /**
-     * @param string $type
-     * @param string $message
-     * @return bool
+     * @return \Wandu\Validator\Exception\InvalidValueException[]
      */
-    public function hasError($type, $message = null)
+    public function getExceptions()
     {
-        if (!array_key_exists($type, $this->exceptions) || count($this->exceptions[$type]) === 0) {
-            return false;
-        }
-        if ($message) {
-            return in_array($message, $this->exceptions[$type]);
-        }
-        return true;
+        return $this->exceptions;
     }
 }
