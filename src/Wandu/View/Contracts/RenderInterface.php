@@ -12,7 +12,8 @@ interface RenderInterface
     /**
      * @param string $template
      * @param array $attributes
+     * @param string $basePath
      * @return string
      */
-    public function render($template, array $attributes = []);
+    public function render($template, array $attributes = [], $basePath = null);
 }

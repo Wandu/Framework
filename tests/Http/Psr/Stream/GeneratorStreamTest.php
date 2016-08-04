@@ -12,11 +12,12 @@ class GeneratorStreamTest extends PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $this->stream = new GeneratorStream(function () {
+        $generator = function () {
             for ($i = 0; $i < 10; $i++) {
                 yield sprintf("%02d ", $i);
             }
-        });
+        };
+        $this->stream = new GeneratorStream($generator());
     }
 
     public function testWrite()

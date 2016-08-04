@@ -7,10 +7,11 @@ namespace Wandu\View {
     /**
      * @param string $template
      * @param array $attributes
+     * @param string $basePath
      * @return string
      */
-    function render($template, array $attributes = [])
+    function render($template, array $attributes = [], $basePath = null)
     {
-        return Application::$app[RenderInterface::class]->render($template, $attributes);
+        return Application::$app[RenderInterface::class]->render($template, $attributes, $basePath);
     }
 }

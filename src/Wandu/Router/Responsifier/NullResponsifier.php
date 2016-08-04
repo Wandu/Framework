@@ -4,7 +4,6 @@ namespace Wandu\Router\Responsifier;
 use Psr\Http\Message\ResponseInterface;
 use RuntimeException;
 use Wandu\Router\Contracts\ResponsifierInterface;
-use function Wandu\Http\response;
 
 class NullResponsifier implements ResponsifierInterface
 {

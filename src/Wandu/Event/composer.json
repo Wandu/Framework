@@ -13,5 +13,10 @@
     },
     "suggest": {
         "wandu/q": "for Queue Event"
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "3.0-dev"
+        }
     }
 }

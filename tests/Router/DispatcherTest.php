@@ -173,7 +173,7 @@ class DispatcherTest extends TestCase
         $dispatcher = $this->createDispatcher();
 
         $dispatcher = $dispatcher->withRoutes(function (Router $router) {
-            $router->middlewares([TestDispatcherMiddleware::class], function (Router $router) {
+            $router->middleware([TestDispatcherMiddleware::class], function (Router $router) {
                 $router->createRoute(['GET'], '/admin', TestDispatcherAdminController::class, 'index');
                 $router->createRoute(['POST'], '/admin', TestDispatcherAdminController::class, 'action');
                 $router->createRoute(['GET'], '/admin/users/{user}', TestDispatcherAdminController::class, 'users');

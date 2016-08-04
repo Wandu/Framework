@@ -4,8 +4,8 @@ namespace Wandu\Http\Issues;
 use Mockery;
 use PHPUnit_Framework_TestCase;
 use Psr\Http\Message\StreamInterface;
-use Wandu\Http\Psr\Factory\ServerRequestFactory;
-use Wandu\Http\Psr\Factory\UploadedFileFactory;
+use Wandu\Http\Factory\ServerRequestFactory;
+use Wandu\Http\Factory\UploadedFileFactory;
 
 class Issue9Test extends PHPUnit_Framework_TestCase
 {
@@ -58,7 +58,7 @@ class Issue9Test extends PHPUnit_Framework_TestCase
 
         // if method === post => php can parsed body!
         $posts = ($method === 'POST' && $contentType['type'] !== 'application/json') ? $contentType['expected'] : [];
-        $request = $factory->factory($servers, [], $posts, [], [], $body);
+        $request = $factory->create($servers, [], $posts, [], [], $body);
         $this->assertEquals($contentType['expected'], $request->getParsedBody());
     }
 }

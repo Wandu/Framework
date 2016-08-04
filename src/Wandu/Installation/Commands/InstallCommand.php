@@ -103,7 +103,7 @@ class InstallCommand extends Command
         if (!isset($composerJson['autoload']['psr-4'])) {
             $composerJson['autoload']['psr-4'] = [];
         }
-        $composerJson['autoload']['psr-4'][$appNamespace . '\\'] = $path . 'app/';
+        $composerJson['autoload']['psr-4'][$appNamespace . '\\'] = $path . 'src/';
         file_put_contents(
             $composerFile,
             json_encode($composerJson, JSON_UNESCAPED_SLASHES|JSON_PRETTY_PRINT) . "\n"

@@ -3,15 +3,15 @@ namespace Wandu\Http\Support;
 
 use Psr\Http\Message\ResponseInterface;
 use Wandu\Http\Exception\NotFoundException;
-use Wandu\Http\Psr\Factory\ServerRequestFactory;
-use Wandu\Http\Psr\Sender\ResponseSender;
+use Wandu\Http\Factory\ServerRequestFactory;
+use Wandu\Http\Sender\ResponseSender;
 
 class HttpServer
 {
-    /** @var \Wandu\Http\Psr\Factory\ServerRequestFactory */
+    /** @var \Wandu\Http\Factory\ServerRequestFactory */
     protected $requestFactory;
 
-    /** @var \Wandu\Http\Psr\Sender\ResponseSender */
+    /** @var \Wandu\Http\Sender\ResponseSender */
     protected $responseSender;
 
     public function __construct(ServerRequestFactory $requestFactory, ResponseSender $responseSender)

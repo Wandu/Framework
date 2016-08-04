@@ -1,8 +1,8 @@
 <?php
 namespace Wandu\Config\Exception;
 
-use RuntimeException;
+use Wandu\Support\Exception\CannotCallMethodException;
 
-class NotAllowedMethodException extends RuntimeException
+class NotAllowedMethodException extends CannotCallMethodException
 {
 }
