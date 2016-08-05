@@ -24,6 +24,22 @@ abstract class ValidatorAbstract implements ValidatorInterface
      */
     protected function createException()
     {
-        return new InvalidValueException(static::ERROR_TYPE, static::ERROR_MESSAGE);
+        return new InvalidValueException($this->getErrorType(), $this->getErrorMessage());
+    }
+
+    /**
+     * @return string
+     */
+    protected function getErrorType()
+    {
+        return static::ERROR_TYPE;
+    }
+
+    /**
+     * @return string
+     */
+    protected function getErrorMessage()
+    {
+        return static::ERROR_MESSAGE;
     }
 }

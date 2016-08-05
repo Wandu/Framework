@@ -3,7 +3,7 @@ namespace Wandu\Validator\Rules;
 
 class StringValidator extends ValidatorAbstract
 {
-    const ERROR_TYPE = 'type.string';
+    const ERROR_TYPE = 'string';
     const ERROR_MESSAGE = 'it must be the string';
 
     /**

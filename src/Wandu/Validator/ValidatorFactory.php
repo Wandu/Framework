@@ -2,9 +2,10 @@
 namespace Wandu\Validator;
 
 /**
- * @method \Wandu\Validator\Contracts\ValidatorInterface integer()
- * @method \Wandu\Validator\Contracts\ValidatorInterface array(array $attributes = [])
  * @method \Wandu\Validator\Rules\OptionalValidator optional(\Wandu\Validator\Contracts\ValidatorInterface $validator = null)
+ * @method \Wandu\Validator\Contracts\ValidatorInterface array(array $attributes = [])
+ * @method \Wandu\Validator\Contracts\ValidatorInterface integer()
+ * @method \Wandu\Validator\Contracts\ValidatorInterface string()
  */
 class ValidatorFactory
 {

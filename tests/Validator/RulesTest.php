@@ -8,134 +8,49 @@ class RulesTest extends PHPUnit_Framework_TestCase
 {
     public function testInteger()
     {
-        $this->assertTrue(validator()->integer()->validate(30));
-        $this->assertFalse(validator()->integer()->validate("30"));
+        validator()->integer()->assert(30);
+        $this->assertInvalidValueException(function () {
+            validator()->integer()->assert("30");
+        }, 'integer', 'it must be the integer');
+    }
+
+    public function testString()
+    {
+        validator()->string()->assert("30");
+        $this->assertInvalidValueException(function () {
+            validator()->string()->assert(30);
+        }, 'string', 'it must be the string');
     }
     
-    public function testArray()
+    public function testMin()
     {
-        $this->assertTrue(validator()->array()->validate([]));
-        $this->assertFalse(validator()->array()->validate("30"));
+        validator()->min(5)->assert(100);
+        validator()->min(5)->assert(6);
+        validator()->min(5)->assert(5);
+        $this->assertInvalidValueException(function () {
+            validator()->min(5)->assert(4);
+        }, 'min', 'it must be greater or equal than 5');
+    }
 
-        $this->assertTrue(validator()->array([
-            'age' => 'integer',
-        ])->validate(['age' => 30]));
+    public function testMax()
+    {
+        validator()->max(5)->assert(0);
+        validator()->max(5)->assert(4);
+        validator()->max(5)->assert(5);
 
-        // ignore other key 
-        $this->assertTrue(validator()->array([
-            'age' => 'integer',
-        ])->validate(['age' => 30, 'other' => 'other...']));
-
-        $this->assertFalse(validator()->array([
-            'age' => 'integer',
-        ])->validate(['age' => "age string"]));
-
-        $this->assertFalse(validator()->array([
-            'wrong' => 'integer',
-        ])->validate([]));
+        $this->assertInvalidValueException(function () {
+            validator()->max(5)->assert(6);
+        }, 'max', 'it must be less or equal than 5');
     }
     
-    public function testArrayWithAssertMethod()
+    protected function assertInvalidValueException(callable $closure, $type, $message)
     {
-        $arrayValidator = validator()->array(['name' => 'string', 'age' => 'integer',]);
-
-        // valid
-        $arrayValidator->assert([
-            'name' => 'wandu',
-            'age' => 30,
-        ]);
-
         try {
-            $arrayValidator->assert('string');
+            call_user_func($closure);
+            $this->fail();
         } catch (InvalidValueException $e) {
-            $this->assertEquals('type.array', $e->getType());
-        }
-
-        // assert
-        try {
-            $arrayValidator->assert([]);
-        } catch (InvalidValueException $e) {
-            $this->assertEquals('type.array.attributes', $e->getType());
-
-            $innerExceptions = $e->getExceptions();
-            $this->assertEquals(2, count($innerExceptions));
-            $this->assertEquals('type.string', $innerExceptions[0]->getType());
-            $this->assertEquals('type.integer', $innerExceptions[1]->getType());
-        }
-
-        // assert stop on fail
-        try {
-            $arrayValidator->assert([], true);
-        } catch (InvalidValueException $e) {
-            $this->assertEquals('type.array.attributes', $e->getType());
-
-            $innerExceptions = $e->getExceptions();
-            $this->assertEquals(0, count($innerExceptions));
-        }
-    }
-    
-    public function testOptional()
-    {
-        $validator = validator()->optional();
-        
-        $this->assertTrue($validator->validate(null));
-        $this->assertTrue($validator->validate(''));
-
-        $this->assertFalse($validator->validate('1'));
-        $this->assertFalse($validator->validate(false));
-        $this->assertFalse($validator->validate(0));
-    }
-
-    public function testOptionalWithOthers()
-    {
-        $validator = validator()->optional(validator()->integer());
-
-        $this->assertTrue($validator->validate(null));
-        $this->assertTrue($validator->validate(''));
-
-        $this->assertTrue($validator->validate(0)); // true
-        $this->assertTrue($validator->validate(111)); // true
-        
-        $this->assertFalse($validator->validate('1'));
-        $this->assertFalse($validator->validate(false));
-    }
-
-    public function testOptionalWithChaining()
-    {
-        $validator = validator()->optional()->integer();
-
-        $this->assertTrue($validator->validate(null));
-        $this->assertTrue($validator->validate(''));
-
-        $this->assertTrue($validator->validate(0)); // true
-        $this->assertTrue($validator->validate(111)); // true
-
-        $this->assertFalse($validator->validate('1'));
-        $this->assertFalse($validator->validate(false));
-    }
-
-    public function testOptionalAssert()
-    {
-        $validator = validator()->optional()->integer();
-
-        $validator->assert(null);
-        $validator->assert(10);
-        
-        try {
-            $validator->assert('30');
-        } catch (InvalidValueException $e) {
-            $this->assertEquals('optional', $e->getType());
-
-            $innerExceptions = $e->getExceptions();
-            $this->assertEquals(1, count($innerExceptions));
-            $this->assertEquals('type.integer', $innerExceptions[0]->getType());
-        }
-
-        try {
-            $validator->assert('30', true);
-        } catch (InvalidValueException $e) {
-            $this->assertEquals('optional', $e->getType());
-            $this->assertEquals(0, count($e->getExceptions()));
+            $this->assertEquals($type, $e->getType());
+            $this->assertEquals($message, $e->getMessage());
         }
     }
 }

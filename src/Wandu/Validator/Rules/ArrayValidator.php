@@ -7,10 +7,10 @@ use function Wandu\Validator\validator;
 
 class ArrayValidator extends ValidatorAbstract
 {
-    const ERROR_TYPE = 'type.array';
+    const ERROR_TYPE = 'array';
     const ERROR_MESSAGE = 'it must be the array';
     
-    const ATTRIBUTES_ERROR_TYPE = 'type.array.attributes';
+    const ATTRIBUTES_ERROR_TYPE = 'array.attributes';
     const ATTRIBUTES_ERROR_MESSAGE = 'it is array, but attributes are wrong';
 
     /** @var \Wandu\Validator\Contracts\ValidatorInterface[] */
