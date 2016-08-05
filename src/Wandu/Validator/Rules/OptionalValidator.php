@@ -10,6 +10,10 @@ use function Wandu\Validator\validator;
  * @method \Wandu\Validator\Contracts\ValidatorInterface array(array $attributes = [])
  * @method \Wandu\Validator\Contracts\ValidatorInterface integer()
  * @method \Wandu\Validator\Contracts\ValidatorInterface string()
+ * @method \Wandu\Validator\Contracts\ValidatorInterface min(int $min)
+ * @method \Wandu\Validator\Contracts\ValidatorInterface max(int $max)
+ * @method \Wandu\Validator\Contracts\ValidatorInterface lengthMin(int $min)
+ * @method \Wandu\Validator\Contracts\ValidatorInterface lengthMax(int $max)
  */
 class OptionalValidator extends ValidatorAbstract
 {

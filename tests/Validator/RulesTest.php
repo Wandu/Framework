@@ -27,8 +27,17 @@ class RulesTest extends PHPUnit_Framework_TestCase
         validator()->min(5)->assert(100);
         validator()->min(5)->assert(6);
         validator()->min(5)->assert(5);
+
+        validator()->min(5)->assert('100');
+        validator()->min(5)->assert('6');
+        validator()->min(5)->assert('5');
+
         $this->assertInvalidValueException(function () {
             validator()->min(5)->assert(4);
+        }, 'min', 'it must be greater or equal than 5');
+
+        $this->assertInvalidValueException(function () {
+            validator()->min(5)->assert('4');
         }, 'min', 'it must be greater or equal than 5');
     }
 
@@ -38,11 +47,57 @@ class RulesTest extends PHPUnit_Framework_TestCase
         validator()->max(5)->assert(4);
         validator()->max(5)->assert(5);
 
+        validator()->max(5)->assert('0');
+        validator()->max(5)->assert('4');
+        validator()->max(5)->assert('5');
+
         $this->assertInvalidValueException(function () {
             validator()->max(5)->assert(6);
         }, 'max', 'it must be less or equal than 5');
+
+        $this->assertInvalidValueException(function () {
+            validator()->max(5)->assert('6');
+        }, 'max', 'it must be less or equal than 5');
     }
-    
+
+    public function testLengthMin()
+    {
+        validator()->lengthMin(5)->assert('aaaaaaa');
+        validator()->lengthMin(5)->assert('aaaaaa');
+        validator()->lengthMin(5)->assert('aaaaa');
+
+        validator()->lengthMin(5)->assert(1111111);
+        validator()->lengthMin(5)->assert(111111);
+        validator()->lengthMin(5)->assert(11111);
+
+        $this->assertInvalidValueException(function () {
+            validator()->lengthMin(5)->assert('aaaa');
+        }, 'length_min', 'it must be greater or equal than 5');
+
+        $this->assertInvalidValueException(function () {
+            validator()->lengthMin(5)->assert(1111);
+        }, 'length_min', 'it must be greater or equal than 5');
+    }
+
+    public function testLengthMax()
+    {
+        validator()->lengthMax(5)->assert('');
+        validator()->lengthMax(5)->assert('aaaa');
+        validator()->lengthMax(5)->assert('aaaaa');
+
+        validator()->lengthMax(5)->assert(1);
+        validator()->lengthMax(5)->assert(1111);
+        validator()->lengthMax(5)->assert(11111);
+
+        $this->assertInvalidValueException(function () {
+            validator()->lengthMax(5)->assert('aaaaaa');
+        }, 'length_max', 'it must be less or equal than 5');
+
+        $this->assertInvalidValueException(function () {
+            validator()->lengthMax(5)->assert(111111);
+        }, 'length_max', 'it must be less or equal than 5');
+    }
+
     protected function assertInvalidValueException(callable $closure, $type, $message)
     {
         try {
