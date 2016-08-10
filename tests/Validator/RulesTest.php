@@ -1,25 +1,26 @@
 <?php
 namespace Wandu\Validator;
 
-use PHPUnit_Framework_TestCase;
-use Wandu\Validator\Exception\InvalidValueException;
-
-class RulesTest extends PHPUnit_Framework_TestCase
+class RulesTest extends ValidatorTestCase
 {
     public function testInteger()
     {
         validator()->integer()->assert(30);
         $this->assertInvalidValueException(function () {
             validator()->integer()->assert("30");
-        }, 'integer', 'it must be the integer');
+        }, [
+            'integer' => ['it must be the integer'],
+        ]);
     }
 
     public function testString()
     {
-        validator()->string()->assert("30");
+        validator()->string()->assert('30');
         $this->assertInvalidValueException(function () {
             validator()->string()->assert(30);
-        }, 'string', 'it must be the string');
+        }, [
+            'string' => ['it must be the string'],
+        ]);
     }
     
     public function testMin()
@@ -34,11 +35,15 @@ class RulesTest extends PHPUnit_Framework_TestCase
 
         $this->assertInvalidValueException(function () {
             validator()->min(5)->assert(4);
-        }, 'min', 'it must be greater or equal than 5');
+        }, [
+            'min' => ['it must be greater or equal than 5'],
+        ]);
 
         $this->assertInvalidValueException(function () {
             validator()->min(5)->assert('4');
-        }, 'min', 'it must be greater or equal than 5');
+        }, [
+            'min' => ['it must be greater or equal than 5'],
+        ]);
     }
 
     public function testMax()
@@ -53,11 +58,15 @@ class RulesTest extends PHPUnit_Framework_TestCase
 
         $this->assertInvalidValueException(function () {
             validator()->max(5)->assert(6);
-        }, 'max', 'it must be less or equal than 5');
+        }, [
+            'max' => ['it must be less or equal than 5'],
+        ]);
 
         $this->assertInvalidValueException(function () {
             validator()->max(5)->assert('6');
-        }, 'max', 'it must be less or equal than 5');
+        }, [
+            'max' => ['it must be less or equal than 5'],
+        ]);
     }
 
     public function testLengthMin()
@@ -72,11 +81,15 @@ class RulesTest extends PHPUnit_Framework_TestCase
 
         $this->assertInvalidValueException(function () {
             validator()->lengthMin(5)->assert('aaaa');
-        }, 'length_min', 'it must be greater or equal than 5');
+        }, [
+            'length_min' => ['it must be greater or equal than 5'],
+        ]);
 
         $this->assertInvalidValueException(function () {
             validator()->lengthMin(5)->assert(1111);
-        }, 'length_min', 'it must be greater or equal than 5');
+        }, [
+            'length_min' => ['it must be greater or equal than 5'],
+        ]);
     }
 
     public function testLengthMax()
@@ -91,21 +104,14 @@ class RulesTest extends PHPUnit_Framework_TestCase
 
         $this->assertInvalidValueException(function () {
             validator()->lengthMax(5)->assert('aaaaaa');
-        }, 'length_max', 'it must be less or equal than 5');
+        }, [
+            'length_max' => ['it must be less or equal than 5'],
+        ]);
 
         $this->assertInvalidValueException(function () {
             validator()->lengthMax(5)->assert(111111);
-        }, 'length_max', 'it must be less or equal than 5');
-    }
-
-    protected function assertInvalidValueException(callable $closure, $type, $message)
-    {
-        try {
-            call_user_func($closure);
-            $this->fail();
-        } catch (InvalidValueException $e) {
-            $this->assertEquals($type, $e->getType());
-            $this->assertEquals($message, $e->getMessage());
-        }
+        }, [
+            'length_max' => ['it must be less or equal than 5'],
+        ]);
     }
 }

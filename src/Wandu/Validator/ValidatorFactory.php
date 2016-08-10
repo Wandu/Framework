@@ -1,8 +1,11 @@
 <?php
 namespace Wandu\Validator;
 
+use Predis\Pipeline\Pipeline;
+use Wandu\Validator\Rules\PipelineValidator;
+
 /**
- * @method \Wandu\Validator\Rules\OptionalValidator optional(\Wandu\Validator\Contracts\ValidatorInterface $validator = null)
+ * @method \Wandu\Validator\Contracts\ValidatorInterface optional(\Wandu\Validator\Contracts\ValidatorInterface $validator = null)
  * @method \Wandu\Validator\Contracts\ValidatorInterface array(array $attributes = [])
  * @method \Wandu\Validator\Contracts\ValidatorInterface integer()
  * @method \Wandu\Validator\Contracts\ValidatorInterface string()
@@ -14,7 +17,7 @@ namespace Wandu\Validator;
 class ValidatorFactory
 {
     /** @var array */
-    private static $instances = [];
+    private $instances = [];
 
     /**
      * @param string $name
@@ -27,11 +30,19 @@ class ValidatorFactory
             $className = $this->getClassName($name);
             return new $className(...$arguments);
         }
-        if (!array_key_exists($name, static::$instances)) {
+        if (!array_key_exists($name, $this->instances)) {
             $className = $this->getClassName($name);
-            static::$instances[$name] = new $className();
+            $this->instances[$name] = new $className();
         }
-        return static::$instances[$name];
+        return $this->instances[$name];
+    }
+
+    /**
+     * @return \Wandu\Validator\Rules\PipelineValidator
+     */
+    public function pipeline()
+    {
+        return new PipelineValidator();
     }
 
     /**

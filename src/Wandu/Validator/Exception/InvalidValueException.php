@@ -5,47 +5,48 @@ use RuntimeException;
 
 class InvalidValueException extends RuntimeException
 {
-    /** @var \Wandu\Validator\Exception\InvalidValueException[] */
-    protected $exceptions = [];
-    
-    /** @var string */
-    protected $type;
+    /** @var array */
+    protected $messages;
 
     /**
      * @param string $type
      * @param string $message
-     * @param \Wandu\Validator\Exception\InvalidValueException[] $exceptions
      */
-    public function __construct($type, $message = '', array $exceptions = [])
+    public function __construct($type = null, $message = '')
     {
-        $this->type = $type;
-        $this->message = $message;
-        $this->exceptions = $exceptions;
+        parent::__construct('invalid value');
+        if ($type) {
+            $this->setMessage($type, $message);
+        }
     }
 
     /**
-     * @return string
+     * @param string $type
+     * @param string $message
      */
-    public function getType()
+    public function setMessage($type, $message)
     {
-        return $this->type;
+        $this->messages[$type][] = $message;
     }
 
     /**
-     * @param \Wandu\Validator\Exception\InvalidValueException $exception
-     * @return self
+     * @param array $messages
      */
-    public function insertException(InvalidValueException $exception)
+    public function setMessages(array $messages)
     {
-        $this->exceptions[] = $exception;
-        return $this;
+        foreach ($messages as $key => $message) {
+            $this->messages[$key] = array_merge(
+                isset($this->messages[$key]) ? $this->messages[$key] : [],
+                $message
+            );
+        }
     }
 
     /**
-     * @return \Wandu\Validator\Exception\InvalidValueException[]
+     * @return array
      */
-    public function getExceptions()
+    public function getMessages()
     {
-        return $this->exceptions;
+        return $this->messages;
     }
 }

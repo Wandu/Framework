@@ -9,14 +9,42 @@ abstract class ValidatorAbstract implements ValidatorInterface
     const ERROR_TYPE = 'unknown';
     const ERROR_MESSAGE = 'something wrong';
 
+    /** @var string */
+    protected $name;
+
+    /**
+     * @param string $name
+     * @return static
+     */
+    public function withName($name)
+    {
+        $new = clone $this;
+        $new->name = $name;
+        return $new;
+    }
+    
+    /**
+     * @param mixed $item
+     * @return bool
+     */
+    abstract function test($item);
+    
     /**
      * {@inheritdoc}
      */
-    public function assert($item, $stopOnFail = false)
+    public function assert($item)
     {
-        if (!$this->validate($item)) {
+        if (!$this->test($item)) {
             throw $this->createException();
         }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function validate($item)
+    {
+        return $this->test($item);
     }
 
     /**
@@ -32,7 +60,7 @@ abstract class ValidatorAbstract implements ValidatorInterface
      */
     protected function getErrorType()
     {
-        return static::ERROR_TYPE;
+        return (isset($this->name) ? "{$this->name}:" : '') . static::ERROR_TYPE;
     }
 
     /**
@@ -40,6 +68,16 @@ abstract class ValidatorAbstract implements ValidatorInterface
      */
     protected function getErrorMessage()
     {
-        return static::ERROR_MESSAGE;
+        $message = str_replace(
+            '{{name}}',
+            isset($this->name) ? $this->name : 'it',
+            static::ERROR_MESSAGE
+        );
+        foreach (get_object_vars($this) as $key => $value) {
+            if (is_scalar($value)) {
+                $message = str_replace('{{' . $key . '}}', $value, $message);
+            }
+        }
+        return $message;
     }
 }

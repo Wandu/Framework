@@ -4,7 +4,7 @@ namespace Wandu\Validator\Rules;
 class MaxValidator extends ValidatorAbstract
 {
     const ERROR_TYPE = 'max';
-    const ERROR_MESSAGE = 'it must be less or equal than {{max}}';
+    const ERROR_MESSAGE = '{{name}} must be less or equal than {{max}}';
 
     /** @var int */
     protected $max;
@@ -20,16 +20,8 @@ class MaxValidator extends ValidatorAbstract
     /**
      * {@inheritdoc}
      */
-    public function validate($item)
+    public function test($item)
     {
         return $item <= $this->max;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function getErrorMessage()
-    {
-        return str_replace('{{max}}', $this->max, static::ERROR_MESSAGE);
     }
 }

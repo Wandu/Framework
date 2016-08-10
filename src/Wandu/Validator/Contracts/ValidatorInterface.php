@@ -5,10 +5,9 @@ interface ValidatorInterface
 {
     /**
      * @param mixed $item
-     * @param bool $stopOnFail
      * @throw \Exception
      */
-    public function assert($item, $stopOnFail = false);
+    public function assert($item);
     
     /**
      * @param mixed $item

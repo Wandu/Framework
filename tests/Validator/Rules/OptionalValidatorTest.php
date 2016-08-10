@@ -1,13 +1,36 @@
 <?php
 namespace Wandu\Validator\Rules;
 
-use PHPUnit_Framework_TestCase;
-use Wandu\Validator\Exception\InvalidValueException;
+use Wandu\Validator\ValidatorTestCase;
 use function Wandu\Validator\validator;
 
-class OptionalValidatorTest extends PHPUnit_Framework_TestCase
+class OptionalValidatorTest extends ValidatorTestCase
 {
-    public function testOptional()
+    public function testOptionalAssert()
+    {
+        $validator = validator()->optional();
+
+        $validator->assert(null);
+        $validator->assert('');
+
+        $this->assertInvalidValueException(function () use ($validator) {
+            $validator->assert('1');
+        }, [
+            'optional' => ['it must be null or empty string'],
+        ]);
+        $this->assertInvalidValueException(function () use ($validator) {
+            $validator->assert(false);
+        }, [
+            'optional' => ['it must be null or empty string'],
+        ]);
+        $this->assertInvalidValueException(function () use ($validator) {
+            $validator->assert(0);
+        }, [
+            'optional' => ['it must be null or empty string'],
+        ]);
+    }
+
+    public function testOptionalValidate()
     {
         $validator = validator()->optional();
 
@@ -19,56 +42,39 @@ class OptionalValidatorTest extends PHPUnit_Framework_TestCase
         $this->assertFalse($validator->validate(0));
     }
 
-    public function testOptionalWithOthers()
+    public function testNextAssert()
+    {
+        $validator = validator()->optional(validator()->integer());
+
+        $validator->assert(null);
+        $validator->assert('');
+        
+        $validator->assert(0);
+        $validator->assert(111);
+
+        $this->assertInvalidValueException(function () use ($validator) {
+            $validator->assert('1');
+        }, [
+            'integer' => ['it must be the integer'],
+        ]);
+        $this->assertInvalidValueException(function () use ($validator) {
+            $validator->assert(false);
+        }, [
+            'integer' => ['it must be the integer'],
+        ]);
+    }
+
+    public function testNextValidate()
     {
         $validator = validator()->optional(validator()->integer());
 
         $this->assertTrue($validator->validate(null));
         $this->assertTrue($validator->validate(''));
 
-        $this->assertTrue($validator->validate(0)); // true
-        $this->assertTrue($validator->validate(111)); // true
-
+        $this->assertTrue($validator->validate(0));
+        $this->assertTrue($validator->validate(111));
+        
         $this->assertFalse($validator->validate('1'));
         $this->assertFalse($validator->validate(false));
-    }
-
-    public function testOptionalWithChaining()
-    {
-        $validator = validator()->optional()->integer();
-
-        $this->assertTrue($validator->validate(null));
-        $this->assertTrue($validator->validate(''));
-
-        $this->assertTrue($validator->validate(0)); // true
-        $this->assertTrue($validator->validate(111)); // true
-
-        $this->assertFalse($validator->validate('1'));
-        $this->assertFalse($validator->validate(false));
-    }
-
-    public function testOptionalAssert()
-    {
-        $validator = validator()->optional()->integer();
-
-        $validator->assert(null);
-        $validator->assert(10);
-
-        try {
-            $validator->assert('30');
-        } catch (InvalidValueException $e) {
-            $this->assertEquals('optional', $e->getType());
-
-            $innerExceptions = $e->getExceptions();
-            $this->assertEquals(1, count($innerExceptions));
-            $this->assertEquals('type.integer', $innerExceptions[0]->getType());
-        }
-
-        try {
-            $validator->assert('30', true);
-        } catch (InvalidValueException $e) {
-            $this->assertEquals('optional', $e->getType());
-            $this->assertEquals(0, count($e->getExceptions()));
-        }
     }
 }

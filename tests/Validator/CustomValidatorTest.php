@@ -1,37 +1,47 @@
 <?php
 namespace Wandu\Validator;
 
-use PHPUnit_Framework_TestCase;
-use Wandu\Validator\Exception\InvalidValueException;
 use Wandu\Validator\Rules\ValidatorAbstract;
 
-class CustomValidatorTest extends PHPUnit_Framework_TestCase
+class CustomValidatorTest extends ValidatorTestCase
 {
     public function testValidate()
     {
-        $validator = new TestCustomValidator();
+        $validator = new TestOverTenValidator();
 
-        $this->assertTrue($validator->validate(111));
-        $this->assertFalse($validator->validate(112));
-        
-        $validator->assert(111);
-        
-        try {
-            $validator->assert(112);
-        } catch (InvalidValueException $e) {
-            $this->assertEquals('test.custom', $e->getType());
-            $this->assertEquals('it must be 111', $e->getMessage());
-        }
+        $validator->assert(11);
+        $this->assertInvalidValueException(function () use ($validator) {
+            $validator->assert(10);
+        }, [
+            'test.custom' => ['it must be larger than 10'],
+        ]);
     }
+//    
+//    public function testValidateWithOthers()
+//    {
+//        $validator = new TestOverTenValidator();
+//        $validator = $validator->max(20);
+//
+//        $this->assertInvalidValueException(function () use ($validator) {
+//            $validator->assert(10);
+//        }, [
+//            'test.custom' => ['it must be larger than 10'],
+//        ]);
+//        $this->assertInvalidValueException(function () use ($validator) {
+//            $validator->assert(21);
+//        }, [
+//            'max' => ['it must be less or equal than 20'],
+//        ]);
+//    }
 }
 
-class TestCustomValidator extends ValidatorAbstract
+class TestOverTenValidator extends ValidatorAbstract
 {
     const ERROR_TYPE = 'test.custom';
-    const ERROR_MESSAGE = 'it must be 111';
+    const ERROR_MESSAGE = 'it must be larger than 10';
     
-    public function validate($item)
+    public function test($item)
     {
-        return $item === 111;
+        return $item > 10;
     }
 }

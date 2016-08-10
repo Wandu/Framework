@@ -4,7 +4,7 @@ namespace Wandu\Validator\Rules;
 class MinValidator extends ValidatorAbstract
 {
     const ERROR_TYPE = 'min';
-    const ERROR_MESSAGE = 'it must be greater or equal than {{min}}';
+    const ERROR_MESSAGE = '{{name}} must be greater or equal than {{min}}';
 
     /** @var int */
     protected $min;
@@ -20,16 +20,8 @@ class MinValidator extends ValidatorAbstract
     /**
      * {@inheritdoc}
      */
-    public function validate($item)
+    public function test($item)
     {
         return $item >= $this->min;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function getErrorMessage()
-    {
-        return str_replace('{{min}}', $this->min, static::ERROR_MESSAGE);
     }
 }

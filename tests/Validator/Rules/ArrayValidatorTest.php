@@ -1,11 +1,10 @@
 <?php
 namespace Wandu\Validator\Rules;
 
-use PHPUnit_Framework_TestCase;
-use Wandu\Validator\Exception\InvalidValueException;
+use Wandu\Validator\ValidatorTestCase;
 use function Wandu\Validator\validator;
 
-class ArrayValidatorTest extends PHPUnit_Framework_TestCase
+class ArrayValidatorTest extends ValidatorTestCase
 {
     public function testValidate()
     {
@@ -40,33 +39,28 @@ class ArrayValidatorTest extends PHPUnit_Framework_TestCase
             'age' => 30,
         ]);
 
-        try {
+        $this->assertInvalidValueException(function () use ($validator) {
             $validator->assert('string');
-        } catch (InvalidValueException $e) {
-            $this->assertEquals('array', $e->getType());
-        }
+        }, [
+            'array' => ['it must be the array'],
+            'name:string' => ['name must be the string'],
+            'age:integer' => ['age must be the integer'],
+        ]);
 
-        // assert
-        try {
+        $this->assertInvalidValueException(function () use ($validator) {
             $validator->assert([]);
-        } catch (InvalidValueException $e) {
-            $this->assertEquals('array.attributes', $e->getType());
+        }, [
+            'name:string' => ['name must be the string'],
+            'age:integer' => ['age must be the integer'],
+        ]);
 
-            $innerExceptions = $e->getExceptions();
-            $this->assertEquals(2, count($innerExceptions));
-            $this->assertEquals('string', $innerExceptions[0]->getType());
-            $this->assertEquals('integer', $innerExceptions[1]->getType());
-        }
-
-        // assert stop on fail
-        try {
-            $validator->assert([], true);
-        } catch (InvalidValueException $e) {
-            $this->assertEquals('array.attributes', $e->getType());
-
-            $innerExceptions = $e->getExceptions();
-            $this->assertEquals(0, count($innerExceptions));
-        }
+        $this->assertInvalidValueException(function () use ($validator) {
+            $validator->assert([
+                'age' => 30
+            ]);
+        }, [
+            'name:string' => ['name must be the string'],
+        ]);
     }
     
     public function testAssertArrayOfArray()
@@ -86,30 +80,34 @@ class ArrayValidatorTest extends PHPUnit_Framework_TestCase
                 'age' => 38
             ],
         ]);
-        
-        try {
-            $validator->assert([]);
-        } catch (InvalidValueException $e) {
-            $innerExceptions = $e->getExceptions();
-            $this->assertEquals(2, count($innerExceptions));
-            $this->assertEquals('string', $innerExceptions[0]->getType());
-            $this->assertEquals('array', $innerExceptions[1]->getType());
-        }
 
-        try {
+        $this->assertInvalidValueException(function () use ($validator) {
+            $validator->assert('string');
+        }, [
+            'array' => ['it must be the array'],
+            'name:string' => ['name must be the string'],
+            'company:array' => ['company must be the array'],
+            'company.name:string' => ['company.name must be the string'],
+            'company.age:integer' => ['company.age must be the integer'],
+        ]);
+
+        $this->assertInvalidValueException(function () use ($validator) {
+            $validator->assert([]);
+        }, [
+            'name:string' => ['name must be the string'],
+            'company:array' => ['company must be the array'],
+            'company.name:string' => ['company.name must be the string'],
+            'company.age:integer' => ['company.age must be the integer'],
+        ]);
+
+        $this->assertInvalidValueException(function () use ($validator) {
             $validator->assert([
                 'company' => [],
             ]);
-        } catch (InvalidValueException $e) {
-            $innerExceptions = $e->getExceptions();
-            $this->assertEquals(2, count($innerExceptions));
-            $this->assertEquals('string', $innerExceptions[0]->getType());
-            $this->assertEquals('array.attributes', $innerExceptions[1]->getType());
-            
-            $innerInnerExceptions = $innerExceptions[1]->getExceptions();
-            $this->assertEquals(2, count($innerInnerExceptions));
-            $this->assertEquals('string', $innerInnerExceptions[0]->getType());
-            $this->assertEquals('integer', $innerInnerExceptions[1]->getType());
-        }
+        }, [
+            'name:string' => ['name must be the string'],
+            'company.name:string' => ['company.name must be the string'],
+            'company.age:integer' => ['company.age must be the integer'],
+        ]);
     }
 }

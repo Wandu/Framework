@@ -8,10 +8,10 @@ use function Wandu\Validator\validator;
 class ArrayValidator extends ValidatorAbstract
 {
     const ERROR_TYPE = 'array';
-    const ERROR_MESSAGE = 'it must be the array';
+    const ERROR_MESSAGE = '{{name}} must be the array';
     
     const ATTRIBUTES_ERROR_TYPE = 'array.attributes';
-    const ATTRIBUTES_ERROR_MESSAGE = 'it is array, but attributes are wrong';
+    const ATTRIBUTES_ERROR_MESSAGE = '{{name}} is array, but attributes are wrong';
 
     /** @var \Wandu\Validator\Contracts\ValidatorInterface[] */
     protected $attributes = [];
@@ -22,51 +22,48 @@ class ArrayValidator extends ValidatorAbstract
     public function __construct(array $attributes = [])
     {
         foreach ($attributes as $name => $validator) {
-            $this->attributes[$name] = ($validator instanceof ValidatorInterface)
-                ? $validator
-                : validator()->__call($validator);
+            if (!($validator instanceof ValidatorInterface)) {
+                $validator = validator()->__call($validator);
+            }
+            $this->attributes[$name] = $validator;
         }
     }
 
     /**
      * {@inheritdoc}
      */
-    public function assert($item, $stopOnFail = false)
+    function test($item)
     {
-        if (!is_array($item)) {
-            throw $this->createException();
-        }
-        if ($stopOnFail) {
-            return $this->assertStopOnFail();
-        }
+        return is_array($item);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function assert($item)
+    {
+        /** @var \Wandu\Validator\Exception\InvalidValueException[] $exceptions */
         $exceptions = [];
+        if (!$this->test($item)) {
+            $exceptions[] = $this->createException();
+        }
         foreach ($this->attributes as $name => $validator) {
             try {
+                if ($validator instanceof ValidatorAbstract) {
+                    $prefix = isset($this->name) ? "{$this->name}." : '';
+                    $validator = $validator->withName($prefix . $name);
+                }
                 $validator->assert(isset($item[$name]) ? $item[$name] : null);
             } catch (InvalidValueException $e) {
                 $exceptions[] = $e;
             }
         }
         if (count($exceptions)) {
-            throw new InvalidValueException(
-                static::ATTRIBUTES_ERROR_TYPE,
-                static::ATTRIBUTES_ERROR_MESSAGE,
-                $exceptions
-            );
-        }
-    }
-    
-    public function assertStopOnFail()
-    {
-        try {
-            foreach ($this->attributes as $name => $validator) {
-                $validator->assert(isset($item[$name]) ? $item[$name] : null);
+            $baseException = $exceptions[0];
+            for ($i = 1, $length = count($exceptions); $i < $length; $i++) {
+                $baseException->setMessages($exceptions[$i]->getMessages());
             }
-        } catch (InvalidValueException $e) {
-            throw new InvalidValueException(
-                static::ATTRIBUTES_ERROR_TYPE,
-                static::ATTRIBUTES_ERROR_MESSAGE
-            );
+            throw $baseException;
         }
     }
 
@@ -75,7 +72,7 @@ class ArrayValidator extends ValidatorAbstract
      */
     public function validate($item)
     {
-        if (!is_array($item)) {
+        if (!$this->test($item)) {
             return false;
         }
         foreach ($this->attributes as $name => $validator) {

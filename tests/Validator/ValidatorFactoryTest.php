@@ -11,24 +11,20 @@ class ValidatorFactoryTest extends PHPUnit_Framework_TestCase
         
         // singleton
         $this->assertSame($factory->integer(), $factory->integer());
-
-        $this->assertSame(validator()->integer(), $factory->integer()); // use static
+        $this->assertSame($factory->string(), $factory->string());
+        
+        // new creation : this is not singleton because it has parameter
+        $this->assertNotSame($factory->min(5), $factory->min(5));
+        $this->assertNotSame($factory->pipeline(), $factory->pipeline());
     }
     
-    public function testSingletonViaHelper()
+    public function testFactoryViaHelper()
     {
         $this->assertInstanceOf(ValidatorFactory::class, validator());
 
         // singleton
         $this->assertSame(validator(), validator());
         $this->assertSame(validator()->integer(), validator()->integer());
-    }
-    
-    public function testFactoryViaHelper()
-    {
-        $this->assertSame(validator()->array(), validator()->array());
-
-        // this is not singleton because it has parameter
-        $this->assertNotSame(validator()->array([]), validator()->array());
+        $this->assertSame(validator()->string(), validator()->string());
     }
 }
