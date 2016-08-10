@@ -13,6 +13,7 @@ use Wandu\Validator\Rules\PipelineValidator;
  * @method \Wandu\Validator\Contracts\ValidatorInterface max(int $max)
  * @method \Wandu\Validator\Contracts\ValidatorInterface lengthMin(int $min)
  * @method \Wandu\Validator\Contracts\ValidatorInterface lengthMax(int $max)
+ * @method \Wandu\Validator\Contracts\ValidatorInterface not(\Wandu\Validator\Contracts\ValidatorInterface $validator)
  */
 class ValidatorFactory
 {

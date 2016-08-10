@@ -8,6 +8,7 @@ abstract class ValidatorAbstract implements ValidatorInterface
 {
     const ERROR_TYPE = 'unknown';
     const ERROR_MESSAGE = 'something wrong';
+    const ERROR_NOT_MESSAGE = 'something wrong';
 
     /** @var string */
     protected $name;
@@ -58,7 +59,7 @@ abstract class ValidatorAbstract implements ValidatorInterface
     /**
      * @return string
      */
-    protected function getErrorType()
+    public function getErrorType()
     {
         return (isset($this->name) ? "{$this->name}:" : '') . static::ERROR_TYPE;
     }
@@ -66,12 +67,30 @@ abstract class ValidatorAbstract implements ValidatorInterface
     /**
      * @return string
      */
-    protected function getErrorMessage()
+    public function getErrorMessage()
     {
         $message = str_replace(
             '{{name}}',
             isset($this->name) ? $this->name : 'it',
             static::ERROR_MESSAGE
+        );
+        foreach (get_object_vars($this) as $key => $value) {
+            if (is_scalar($value)) {
+                $message = str_replace('{{' . $key . '}}', $value, $message);
+            }
+        }
+        return $message;
+    }
+
+    /**
+     * @return string
+     */
+    public function getErrorNotMessage()
+    {
+        $message = str_replace(
+            '{{name}}',
+            isset($this->name) ? $this->name : 'it',
+            static::ERROR_NOT_MESSAGE
         );
         foreach (get_object_vars($this) as $key => $value) {
             if (is_scalar($value)) {
