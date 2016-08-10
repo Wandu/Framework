@@ -27,13 +27,28 @@ class PipelineValidator implements ValidatorInterface
     {
         $this->validators = $validators;
     }
-    
+
+    /**
+     * @param string $name
+     * @param array $arguments
+     * @return \Wandu\Validator\Rules\PipelineValidator
+     */
     public function __call($name, array $arguments = [])
     {
-        $this->validators[] = validator()->__call($name, $arguments);
+        $this->push(validator()->__call($name, $arguments));
         return $this;
     }
 
+    /**
+     * @param \Wandu\Validator\Contracts\ValidatorInterface $validator
+     * @return \Wandu\Validator\Rules\PipelineValidator
+     */
+    public function push(ValidatorInterface $validator)
+    {
+        $this->validators[] = $validator;
+        return $this;
+    }
+    
     /**
      * {@inheritdoc}
      */

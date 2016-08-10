@@ -16,23 +16,22 @@ class CustomValidatorTest extends ValidatorTestCase
             'test.custom' => ['it must be larger than 10'],
         ]);
     }
-//    
-//    public function testValidateWithOthers()
-//    {
-//        $validator = new TestOverTenValidator();
-//        $validator = $validator->max(20);
-//
-//        $this->assertInvalidValueException(function () use ($validator) {
-//            $validator->assert(10);
-//        }, [
-//            'test.custom' => ['it must be larger than 10'],
-//        ]);
-//        $this->assertInvalidValueException(function () use ($validator) {
-//            $validator->assert(21);
-//        }, [
-//            'max' => ['it must be less or equal than 20'],
-//        ]);
-//    }
+    
+    public function testValidateWithOthers()
+    {
+        $validator = validator()->pipeline()->max(20)->push(new TestOverTenValidator());
+
+        $this->assertInvalidValueException(function () use ($validator) {
+            $validator->assert(10);
+        }, [
+            'test.custom' => ['it must be larger than 10'],
+        ]);
+        $this->assertInvalidValueException(function () use ($validator) {
+            $validator->assert(21);
+        }, [
+            'max' => ['it must be less or equal than 20'],
+        ]);
+    }
 }
 
 class TestOverTenValidator extends ValidatorAbstract
