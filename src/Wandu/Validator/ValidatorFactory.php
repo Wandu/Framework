@@ -2,6 +2,7 @@
 namespace Wandu\Validator;
 
 use Predis\Pipeline\Pipeline;
+use Wandu\Validator\Contracts\ValidatorInterface;
 use Wandu\Validator\Rules\PipelineValidator;
 
 /**
@@ -44,6 +45,75 @@ class ValidatorFactory
     public function pipeline()
     {
         return new PipelineValidator();
+    }
+
+    /**
+     * @param $attributes
+     * @return \Wandu\Validator\Contracts\ValidatorInterface
+     */
+    public function from($attributes)
+    {
+        if ($attributes instanceof ValidatorInterface) {
+            return $attributes;
+        }
+        if (is_array($attributes)) {
+            return $this->array($attributes);
+        }
+        if (is_object($attributes)) {
+            return $this->object($attributes);
+        }
+        $attributes = explode('|', $attributes);
+        if (count($attributes) === 1) {
+            $attribute = $attributes[0];
+            $attribute = trim($attribute, ": \t\n\r\0\x0B");
+            if (!$attribute) {
+                return null;
+            }
+            list($method, $params) = $this->getMethodAndParams($attribute);
+            return $this->__call($this->underscoreToCamelCase($method), $params);
+        }
+        // if count bigger than 1, need pipeline.
+        $pipeline = validator()->pipeline();
+        foreach ($attributes as $attribute) {
+            $attribute = trim($attribute, ": \t\n\r\0\x0B");
+            if (!$attribute) {
+                continue;
+            }
+            list($method, $params) = $this->getMethodAndParams($attribute);
+            $pipeline->__call($this->underscoreToCamelCase($method), $params);
+        }
+        return $pipeline;
+    }
+    
+    protected function getMethodAndParams($pattern)
+    {
+        if (false === $pivot = strpos($pattern, ':')) {
+            return [$pattern, []]; // "simple"
+        }
+        $method = substr($pattern, 0, $pivot);
+        $params = array_reduce(
+            explode(',', substr($pattern, $pivot + 1)),
+            function ($carry, $value) {
+                $value = trim($value);
+                if ($value) {
+                    $carry[] = $value;
+                }
+                return $carry;
+            },
+            []
+        );
+        return [$method, $params];
+    }
+
+    /**
+     * @param string $text
+     * @return string
+     */
+    protected function underscoreToCamelCase($text)
+    {
+        $text = str_replace(' ', '', ucwords(str_replace('_', ' ', $text)));
+        $text[0] = strtolower($text[0]);
+        return $text;
     }
 
     /**

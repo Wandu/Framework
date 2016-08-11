@@ -67,10 +67,10 @@ class ArrayValidatorTest extends ValidatorTestCase
     {
         $validator = validator()->array([
             'name' => 'string',
-            'company' => validator()->array([
+            'company' => [
                 'name' => 'string',
                 'age' => 'integer',
-            ])
+            ],
         ]);
         
         $validator->assert([

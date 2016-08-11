@@ -1,7 +1,6 @@
 <?php
 namespace Wandu\Validator\Rules;
 
-use Wandu\Validator\Contracts\ValidatorInterface;
 use Wandu\Validator\Exception\InvalidValueException;
 use function Wandu\Validator\validator;
 
@@ -10,9 +9,6 @@ class ArrayValidator extends ValidatorAbstract
     const ERROR_TYPE = 'array';
     const ERROR_MESSAGE = '{{name}} must be the array';
     
-    const ATTRIBUTES_ERROR_TYPE = 'array.attributes';
-    const ATTRIBUTES_ERROR_MESSAGE = '{{name}} is array, but attributes are wrong';
-
     /** @var \Wandu\Validator\Contracts\ValidatorInterface[] */
     protected $attributes = [];
 
@@ -22,10 +18,7 @@ class ArrayValidator extends ValidatorAbstract
     public function __construct(array $attributes = [])
     {
         foreach ($attributes as $name => $validator) {
-            if (!($validator instanceof ValidatorInterface)) {
-                $validator = validator()->__call($validator);
-            }
-            $this->attributes[$name] = $validator;
+            $this->attributes[$name] = validator()->from($validator);
         }
     }
 
