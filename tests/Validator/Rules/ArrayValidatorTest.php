@@ -42,16 +42,16 @@ class ArrayValidatorTest extends ValidatorTestCase
         $this->assertInvalidValueException(function () use ($validator) {
             $validator->assert('string');
         }, [
-            'array' => ['it must be the array'],
-            'name:string' => ['name must be the string'],
-            'age:integer' => ['age must be the integer'],
+            'array',
+            'exists@name',
+            'exists@age',
         ]);
 
         $this->assertInvalidValueException(function () use ($validator) {
             $validator->assert([]);
         }, [
-            'name:string' => ['name must be the string'],
-            'age:integer' => ['age must be the integer'],
+            'exists@name',
+            'exists@age',
         ]);
 
         $this->assertInvalidValueException(function () use ($validator) {
@@ -59,7 +59,7 @@ class ArrayValidatorTest extends ValidatorTestCase
                 'age' => 30
             ]);
         }, [
-            'name:string' => ['name must be the string'],
+            'exists@name',
         ]);
     }
     
@@ -84,20 +84,16 @@ class ArrayValidatorTest extends ValidatorTestCase
         $this->assertInvalidValueException(function () use ($validator) {
             $validator->assert('string');
         }, [
-            'array' => ['it must be the array'],
-            'name:string' => ['name must be the string'],
-            'company:array' => ['company must be the array'],
-            'company.name:string' => ['company.name must be the string'],
-            'company.age:integer' => ['company.age must be the integer'],
+            'array',
+            'exists@name',
+            'exists@company',
         ]);
 
         $this->assertInvalidValueException(function () use ($validator) {
             $validator->assert([]);
         }, [
-            'name:string' => ['name must be the string'],
-            'company:array' => ['company must be the array'],
-            'company.name:string' => ['company.name must be the string'],
-            'company.age:integer' => ['company.age must be the integer'],
+            'exists@name',
+            'exists@company',
         ]);
 
         $this->assertInvalidValueException(function () use ($validator) {
@@ -105,9 +101,9 @@ class ArrayValidatorTest extends ValidatorTestCase
                 'company' => [],
             ]);
         }, [
-            'name:string' => ['name must be the string'],
-            'company.name:string' => ['company.name must be the string'],
-            'company.age:integer' => ['company.age must be the integer'],
+            'exists@name',
+            'exists@company.name',
+            'exists@company.age',
         ]);
     }
 }

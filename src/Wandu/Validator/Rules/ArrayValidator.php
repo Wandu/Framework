@@ -7,7 +7,6 @@ use function Wandu\Validator\validator;
 class ArrayValidator extends ValidatorAbstract
 {
     const ERROR_TYPE = 'array';
-    const ERROR_MESSAGE = '{{name}} must be the array';
     
     /** @var \Wandu\Validator\Contracts\ValidatorInterface[] */
     protected $attributes = [];
@@ -42,11 +41,14 @@ class ArrayValidator extends ValidatorAbstract
         }
         foreach ($this->attributes as $name => $validator) {
             try {
+                $prefix = isset($this->name) ? "{$this->name}." : '';
                 if ($validator instanceof ValidatorAbstract) {
-                    $prefix = isset($this->name) ? "{$this->name}." : '';
                     $validator = $validator->withName($prefix . $name);
                 }
-                $validator->assert(isset($item[$name]) ? $item[$name] : null);
+                if (!is_array($item) || !array_key_exists($name, $item)) {
+                    throw new InvalidValueException('exists@' . $prefix . $name);
+                }
+                $validator->assert($item[$name]);
             } catch (InvalidValueException $e) {
                 $exceptions[] = $e;
             }
@@ -54,7 +56,7 @@ class ArrayValidator extends ValidatorAbstract
         if (count($exceptions)) {
             $baseException = $exceptions[0];
             for ($i = 1, $length = count($exceptions); $i < $length; $i++) {
-                $baseException->setMessages($exceptions[$i]->getMessages());
+                $baseException->appendTypes($exceptions[$i]->getTypes());
             }
             throw $baseException;
         }

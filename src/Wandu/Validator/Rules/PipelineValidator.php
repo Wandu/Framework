@@ -7,6 +7,7 @@ use function Wandu\Validator\validator;
 
 /**
  * @method \Wandu\Validator\Rules\PipelineValidator optional(\Wandu\Validator\Contracts\ValidatorInterface $validator = null)
+ * @method \Wandu\Validator\Rules\PipelineValidator not(\Wandu\Validator\Contracts\ValidatorInterface $validator)
  * @method \Wandu\Validator\Rules\PipelineValidator array(array $attributes = [])
  * @method \Wandu\Validator\Rules\PipelineValidator integer()
  * @method \Wandu\Validator\Rules\PipelineValidator string()
@@ -54,6 +55,7 @@ class PipelineValidator implements ValidatorInterface
      */
     public function assert($item)
     {
+        /** @var \Wandu\Validator\Exception\InvalidValueException[] $exceptions */
         $exceptions = [];
         foreach ($this->validators as $validator) {
             try {
@@ -65,7 +67,7 @@ class PipelineValidator implements ValidatorInterface
         if (count($exceptions)) {
             $baseException = $exceptions[0];
             for ($i = 1, $length = count($exceptions); $i < $length; $i++) {
-                $baseException->setMessages($exceptions[$i]->getMessages());
+                $baseException->appendTypes($exceptions[$i]->getTypes());
             }
             throw $baseException;
         }

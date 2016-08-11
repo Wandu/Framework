@@ -7,7 +7,6 @@ use Wandu\Validator\Exception\InvalidValueException;
 class NotValidator extends ValidatorAbstract
 {
     const ERROR_TYPE = 'not';
-    const ERROR_MESSAGE = '';
 
     /** @var \Wandu\Validator\Contracts\ValidatorInterface */
     protected $next;
@@ -39,12 +38,11 @@ class NotValidator extends ValidatorAbstract
             return;
         }
         $errorType = ValidatorAbstract::ERROR_TYPE;
-        $errorMessage = ValidatorAbstract::ERROR_NOT_MESSAGE;
         if ($this->next instanceof ValidatorAbstract) {
             $errorType = $this->next->getErrorType();
-            $errorMessage = $this->next->getErrorNotMessage();
         }
-        throw new InvalidValueException('not.' . $errorType, $errorMessage);
+        $suffix = isset($this->name) ? '@' . $this->name : '';
+        throw new InvalidValueException('not.' . $errorType . $suffix);
     }
 
     /**

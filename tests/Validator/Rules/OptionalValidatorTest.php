@@ -16,17 +16,17 @@ class OptionalValidatorTest extends ValidatorTestCase
         $this->assertInvalidValueException(function () use ($validator) {
             $validator->assert('1');
         }, [
-            'optional' => ['it must be null or empty string'],
+            'optional',
         ]);
         $this->assertInvalidValueException(function () use ($validator) {
             $validator->assert(false);
         }, [
-            'optional' => ['it must be null or empty string'],
+            'optional',
         ]);
         $this->assertInvalidValueException(function () use ($validator) {
             $validator->assert(0);
         }, [
-            'optional' => ['it must be null or empty string'],
+            'optional',
         ]);
     }
 
@@ -55,12 +55,12 @@ class OptionalValidatorTest extends ValidatorTestCase
         $this->assertInvalidValueException(function () use ($validator) {
             $validator->assert('1');
         }, [
-            'integer' => ['it must be the integer'],
+            'integer',
         ]);
         $this->assertInvalidValueException(function () use ($validator) {
             $validator->assert(false);
         }, [
-            'integer' => ['it must be the integer'],
+            'integer',
         ]);
     }
 

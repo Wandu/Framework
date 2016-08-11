@@ -7,8 +7,6 @@ use Wandu\Validator\Exception\InvalidValueException;
 abstract class ValidatorAbstract implements ValidatorInterface
 {
     const ERROR_TYPE = 'unknown';
-    const ERROR_MESSAGE = 'something wrong';
-    const ERROR_NOT_MESSAGE = 'something wrong';
 
     /** @var string */
     protected $name;
@@ -53,7 +51,7 @@ abstract class ValidatorAbstract implements ValidatorInterface
      */
     protected function createException()
     {
-        return new InvalidValueException($this->getErrorType(), $this->getErrorMessage());
+        return new InvalidValueException($this->getErrorType());
     }
 
     /**
@@ -61,42 +59,13 @@ abstract class ValidatorAbstract implements ValidatorInterface
      */
     public function getErrorType()
     {
-        return (isset($this->name) ? "{$this->name}:" : '') . static::ERROR_TYPE;
-    }
-
-    /**
-     * @return string
-     */
-    public function getErrorMessage()
-    {
-        $message = str_replace(
-            '{{name}}',
-            isset($this->name) ? $this->name : 'it',
-            static::ERROR_MESSAGE
-        );
+        $suffix = isset($this->name) ? '@' . $this->name : '';
+        $type = static::ERROR_TYPE . $suffix;
         foreach (get_object_vars($this) as $key => $value) {
             if (is_scalar($value)) {
-                $message = str_replace('{{' . $key . '}}', $value, $message);
+                $type = str_replace('{{' . $key . '}}', $value, $type);
             }
         }
-        return $message;
-    }
-
-    /**
-     * @return string
-     */
-    public function getErrorNotMessage()
-    {
-        $message = str_replace(
-            '{{name}}',
-            isset($this->name) ? $this->name : 'it',
-            static::ERROR_NOT_MESSAGE
-        );
-        foreach (get_object_vars($this) as $key => $value) {
-            if (is_scalar($value)) {
-                $message = str_replace('{{' . $key . '}}', $value, $message);
-            }
-        }
-        return $message;
+        return $type;
     }
 }

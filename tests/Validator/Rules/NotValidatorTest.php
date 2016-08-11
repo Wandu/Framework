@@ -16,12 +16,36 @@ class NotValidatorTest extends ValidatorTestCase
         $this->assertInvalidValueException(function () use ($validator) {
             $validator->assert(0);
         }, [
-            'not.integer' => ['it must be not the integer'],
+            'not.integer',
         ]);
         $this->assertInvalidValueException(function () use ($validator) {
             $validator->assert(111);
         }, [
-            'not.integer' => ['it must be not the integer'],
+            'not.integer',
+        ]);
+    }
+
+    public function testAssertWithArray()
+    {
+        $validator = validator()->array([
+            'age' => validator()->not(validator()->string()),
+        ]);
+
+        $validator->assert([
+            'age' => 30
+        ]);
+
+//        $this->assertInvalidValueException(function () use ($validator) {
+//            $validator->assert([]);
+//        }, [
+//            'not.integer',
+//        ]);
+        $this->assertInvalidValueException(function () use ($validator) {
+            $validator->assert([
+                'age' => 'string',
+            ]);
+        }, [
+            'not.string@age',
         ]);
     }
 

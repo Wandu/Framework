@@ -3,8 +3,7 @@ namespace Wandu\Validator\Rules;
 
 class LengthMaxValidator extends ValidatorAbstract
 {
-    const ERROR_TYPE = 'length_max';
-    const ERROR_MESSAGE = '{{name}} must be less or equal than {{max}}';
+    const ERROR_TYPE = 'length_max:{{max}}';
 
     /** @var int */
     protected $max;
@@ -22,6 +21,9 @@ class LengthMaxValidator extends ValidatorAbstract
      */
     public function test($item)
     {
+        if (is_array($item)) {
+            return count($item) <= $this->max;
+        }
         return mb_strlen($item, 'utf-8') <= $this->max;
     }
 }

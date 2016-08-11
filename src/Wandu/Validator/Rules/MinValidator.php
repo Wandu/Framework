@@ -3,8 +3,7 @@ namespace Wandu\Validator\Rules;
 
 class MinValidator extends ValidatorAbstract
 {
-    const ERROR_TYPE = 'min';
-    const ERROR_MESSAGE = '{{name}} must be greater or equal than {{min}}';
+    const ERROR_TYPE = 'min:{{min}}';
 
     /** @var int */
     protected $min;

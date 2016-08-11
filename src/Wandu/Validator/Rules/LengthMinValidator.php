@@ -3,8 +3,7 @@ namespace Wandu\Validator\Rules;
 
 class LengthMinValidator extends ValidatorAbstract
 {
-    const ERROR_TYPE = 'length_min';
-    const ERROR_MESSAGE = '{{name}} must be greater or equal than {{min}}';
+    const ERROR_TYPE = 'length_min:{{min}}';
 
     /** @var int */
     protected $min;
@@ -22,6 +21,9 @@ class LengthMinValidator extends ValidatorAbstract
      */
     public function test($item)
     {
+        if (is_array($item)) {
+            return count($item) >= $this->min;
+        }
         return mb_strlen($item, 'utf-8') >= $this->min;
     }
 }

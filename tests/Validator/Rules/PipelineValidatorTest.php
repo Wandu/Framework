@@ -19,13 +19,13 @@ class PipelineValidatorTest extends ValidatorTestCase
         $this->assertInvalidValueException(function () use ($validator) {
             $validator->assert(9);
         }, [
-            'min' => ['it must be greater or equal than 10'],
+            'min:10',
         ]);
 
         $this->assertInvalidValueException(function () use ($validator) {
             $validator->assert(101);
         }, [
-            'max' => ['it must be less or equal than 100'],
+            'max:100',
         ]);
     }
 
@@ -39,10 +39,8 @@ class PipelineValidatorTest extends ValidatorTestCase
         $this->assertInvalidValueException(function () use ($validator) {
             $validator->assert(9);
         }, [
-            'min' => [
-                'it must be greater or equal than 10',
-                'it must be greater or equal than 30',
-            ],
+            'min:10',
+            'min:30',
         ]);
     }
 }

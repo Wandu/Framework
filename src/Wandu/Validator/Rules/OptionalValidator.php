@@ -7,7 +7,6 @@ use Wandu\Validator\Exception\InvalidValueException;
 class OptionalValidator extends ValidatorAbstract
 {
     const ERROR_TYPE = 'optional';
-    const ERROR_MESSAGE = '{{name}} must be null or empty string';
 
     /** @var \Wandu\Validator\Contracts\ValidatorInterface */
     protected $next;

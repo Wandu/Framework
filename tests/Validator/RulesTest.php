@@ -9,7 +9,7 @@ class RulesTest extends ValidatorTestCase
         $this->assertInvalidValueException(function () {
             validator()->integer()->assert("30");
         }, [
-            'integer' => ['it must be the integer'],
+            'integer',
         ]);
     }
 
@@ -19,7 +19,7 @@ class RulesTest extends ValidatorTestCase
         $this->assertInvalidValueException(function () {
             validator()->string()->assert(30);
         }, [
-            'string' => ['it must be the string'],
+            'string',
         ]);
     }
     
@@ -36,13 +36,13 @@ class RulesTest extends ValidatorTestCase
         $this->assertInvalidValueException(function () {
             validator()->min(5)->assert(4);
         }, [
-            'min' => ['it must be greater or equal than 5'],
+            'min:5',
         ]);
 
         $this->assertInvalidValueException(function () {
             validator()->min(5)->assert('4');
         }, [
-            'min' => ['it must be greater or equal than 5'],
+            'min:5',
         ]);
     }
 
@@ -59,13 +59,13 @@ class RulesTest extends ValidatorTestCase
         $this->assertInvalidValueException(function () {
             validator()->max(5)->assert(6);
         }, [
-            'max' => ['it must be less or equal than 5'],
+            'max:5',
         ]);
 
         $this->assertInvalidValueException(function () {
             validator()->max(5)->assert('6');
         }, [
-            'max' => ['it must be less or equal than 5'],
+            'max:5',
         ]);
     }
 
@@ -79,16 +79,26 @@ class RulesTest extends ValidatorTestCase
         validator()->lengthMin(5)->assert(111111);
         validator()->lengthMin(5)->assert(11111);
 
+        validator()->lengthMin(5)->assert([1, 2, 3, 4, 5, 6, 7, ]);
+        validator()->lengthMin(5)->assert([1, 2, 3, 4, 5, 6, ]);
+        validator()->lengthMin(5)->assert([1, 2, 3, 4, 5, ]);
+
         $this->assertInvalidValueException(function () {
             validator()->lengthMin(5)->assert('aaaa');
         }, [
-            'length_min' => ['it must be greater or equal than 5'],
+            'length_min:5',
         ]);
 
         $this->assertInvalidValueException(function () {
             validator()->lengthMin(5)->assert(1111);
         }, [
-            'length_min' => ['it must be greater or equal than 5'],
+            'length_min:5',
+        ]);
+
+        $this->assertInvalidValueException(function () {
+            validator()->lengthMin(5)->assert([1, 2, 3, 4, ]);
+        }, [
+            'length_min:5',
         ]);
     }
 
@@ -102,16 +112,26 @@ class RulesTest extends ValidatorTestCase
         validator()->lengthMax(5)->assert(1111);
         validator()->lengthMax(5)->assert(11111);
 
+        validator()->lengthMax(5)->assert([1, ]);
+        validator()->lengthMax(5)->assert([1, 2, 3, 4, ]);
+        validator()->lengthMax(5)->assert([1, 2, 3, 4, 5, ]);
+
         $this->assertInvalidValueException(function () {
             validator()->lengthMax(5)->assert('aaaaaa');
         }, [
-            'length_max' => ['it must be less or equal than 5'],
+            'length_max:5',
         ]);
 
         $this->assertInvalidValueException(function () {
             validator()->lengthMax(5)->assert(111111);
         }, [
-            'length_max' => ['it must be less or equal than 5'],
+            'length_max:5',
+        ]);
+
+        $this->assertInvalidValueException(function () {
+            validator()->lengthMax(5)->assert([1, 2, 3, 4, 5, 6, ]);
+        }, [
+            'length_max:5',
         ]);
     }
 }

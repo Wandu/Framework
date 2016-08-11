@@ -82,4 +82,48 @@ class ValidatorFactoryTest extends PHPUnit_Framework_TestCase
             ]
         ]));
     }
+    
+    public function testCreateNot()
+    {
+        $this->assertEquals(
+            validator()->not(validator()->min(20)),
+            validator()->from('!min:20')
+        );
+        
+        $this->assertEquals(validator()->array([
+            'username' => validator()->pipeline()->string()->lengthMax(30),
+            'license' => validator()->array([
+                'expired_at' => validator()->pipeline()->integer()->not(validator()->min(20)),
+            ]),
+        ]), validator()->from([
+            'username' => 'string|length_max:30',
+            'license' => [
+                'expired_at' => 'integer|!min:20',
+            ]
+        ]));
+    }
+
+    public function testCreateOptional()
+    {
+        $this->assertEquals(
+            validator()->not(validator()->optional(validator()->min(20))),
+            validator()->from('!min?:20')
+        );
+
+        $this->assertEquals(validator()->array([
+            'username' => validator()->pipeline()->not(
+                validator()->optional(
+                    validator()->string()
+                )
+            )->lengthMax(30),
+            'license' => validator()->array([
+                'expired_at' => validator()->pipeline()->optional(validator()->integer())->not(validator()->min(20)),
+            ]),
+        ]), validator()->from([
+            'username' => '!string?|length_max:30',
+            'license' => [
+                'expired_at' => 'integer?|!min:20',
+            ]
+        ]));
+    }
 }

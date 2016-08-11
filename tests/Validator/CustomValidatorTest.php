@@ -13,7 +13,7 @@ class CustomValidatorTest extends ValidatorTestCase
         $this->assertInvalidValueException(function () use ($validator) {
             $validator->assert(10);
         }, [
-            'test.custom' => ['it must be larger than 10'],
+            'test_custom:hello',
         ]);
     }
     
@@ -24,20 +24,21 @@ class CustomValidatorTest extends ValidatorTestCase
         $this->assertInvalidValueException(function () use ($validator) {
             $validator->assert(10);
         }, [
-            'test.custom' => ['it must be larger than 10'],
+            'test_custom:hello',
         ]);
         $this->assertInvalidValueException(function () use ($validator) {
             $validator->assert(21);
         }, [
-            'max' => ['it must be less or equal than 20'],
+            'max:20',
         ]);
     }
 }
 
 class TestOverTenValidator extends ValidatorAbstract
 {
-    const ERROR_TYPE = 'test.custom';
-    const ERROR_MESSAGE = 'it must be larger than 10';
+    const ERROR_TYPE = 'test_custom:{{something}}';
+    
+    protected $something = "hello";
     
     public function test($item)
     {

@@ -3,8 +3,7 @@ namespace Wandu\Validator\Rules;
 
 class MaxValidator extends ValidatorAbstract
 {
-    const ERROR_TYPE = 'max';
-    const ERROR_MESSAGE = '{{name}} must be less or equal than {{max}}';
+    const ERROR_TYPE = 'max:{{max}}';
 
     /** @var int */
     protected $max;

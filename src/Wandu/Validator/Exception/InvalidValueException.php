@@ -6,47 +6,40 @@ use RuntimeException;
 class InvalidValueException extends RuntimeException
 {
     /** @var array */
-    protected $messages;
+    protected $types;
 
     /**
      * @param string $type
-     * @param string $message
      */
-    public function __construct($type = null, $message = '')
+    public function __construct($type = null)
     {
-        parent::__construct('invalid value');
+        parent::__construct('invalid value.');
         if ($type) {
-            $this->setMessage($type, $message);
+            $this->appendType($type);
         }
     }
 
     /**
      * @param string $type
-     * @param string $message
      */
-    public function setMessage($type, $message)
+    public function appendType($type)
     {
-        $this->messages[$type][] = $message;
+        $this->types[] = $type;
     }
 
     /**
-     * @param array $messages
+     * @param array $types
      */
-    public function setMessages(array $messages)
+    public function appendTypes(array $types = [])
     {
-        foreach ($messages as $key => $message) {
-            $this->messages[$key] = array_merge(
-                isset($this->messages[$key]) ? $this->messages[$key] : [],
-                $message
-            );
-        }
+        $this->types = array_merge($this->types, $types);
     }
 
     /**
      * @return array
      */
-    public function getMessages()
+    public function getTypes()
     {
-        return $this->messages;
+        return $this->types;
     }
 }
