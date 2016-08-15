@@ -4,20 +4,20 @@ namespace Wandu\Validator\Rules;
 use Wandu\Validator\Exception\InvalidValueException;
 use function Wandu\Validator\validator;
 
-class ArrayValidator extends ValidatorAbstract
+class ObjectValidator extends ValidatorAbstract
 {
-    const ERROR_TYPE = 'array';
-    
+    const ERROR_TYPE = 'object';
+
     /** @var \Wandu\Validator\Contracts\ValidatorInterface[] */
-    protected $attributes = [];
+    protected $properties = [];
 
     /**
-     * @param array $attributes
+     * @param array $properties
      */
-    public function __construct(array $attributes = [])
+    public function __construct(array $properties = [])
     {
-        foreach ($attributes as $name => $validator) {
-            $this->attributes[$name] = validator()->from($validator);
+        foreach ($properties as $name => $validator) {
+            $this->properties[$name] = validator()->from($validator);
         }
     }
 
@@ -26,7 +26,7 @@ class ArrayValidator extends ValidatorAbstract
      */
     function test($item)
     {
-        return is_array($item);
+        return is_object($item);
     }
 
     /**
@@ -39,16 +39,16 @@ class ArrayValidator extends ValidatorAbstract
         if (!$this->test($item)) {
             $exceptions[] = $this->createException();
         }
-        foreach ($this->attributes as $name => $validator) {
+        foreach ($this->properties as $name => $validator) {
             try {
                 $prefix = isset($this->name) ? "{$this->name}." : '';
                 if ($validator instanceof ValidatorAbstract) {
                     $validator = $validator->withName($prefix . $name);
                 }
-                if (!is_array($item) || !array_key_exists($name, $item)) {
+                if (!is_object($item) || !object_get($item, $name)) {
                     throw new InvalidValueException('exists@' . $prefix . $name);
                 }
-                $validator->assert($item[$name]);
+                $validator->assert(object_get($item, $name));
             } catch (InvalidValueException $e) {
                 $exceptions[] = $e;
             }
@@ -70,11 +70,11 @@ class ArrayValidator extends ValidatorAbstract
         if (!$this->test($item)) {
             return false;
         }
-        foreach ($this->attributes as $name => $validator) {
-            if (!is_array($item) || !array_key_exists($name, $item)) {
+        foreach ($this->properties as $name => $validator) {
+            if (!is_object($item) || !object_get($item, $name)) {
                 return false;
             }
-            if (!$validator->validate($item[$name])) {
+            if (!$validator->validate(object_get($item, $name))) {
                 return false;
             }
         }

@@ -1,7 +1,6 @@
 <?php
 namespace Wandu\Validator;
 
-use Predis\Pipeline\Pipeline;
 use Wandu\Validator\Contracts\ValidatorInterface;
 use Wandu\Validator\Exception\ValidatorNotFoundException;
 use Wandu\Validator\Rules\PipelineValidator;
@@ -10,6 +9,7 @@ use Wandu\Validator\Rules\PipelineValidator;
  * @method \Wandu\Validator\Contracts\ValidatorInterface optional(\Wandu\Validator\Contracts\ValidatorInterface $validator = null)
  * @method \Wandu\Validator\Contracts\ValidatorInterface not(\Wandu\Validator\Contracts\ValidatorInterface $validator)
  * @method \Wandu\Validator\Contracts\ValidatorInterface array(array $attributes = [])
+ * @method \Wandu\Validator\Contracts\ValidatorInterface object(array $properties = [])
  * @method \Wandu\Validator\Contracts\ValidatorInterface integer()
  * @method \Wandu\Validator\Contracts\ValidatorInterface string()
  * @method \Wandu\Validator\Contracts\ValidatorInterface min(int $min)

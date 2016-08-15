@@ -9,6 +9,7 @@ use function Wandu\Validator\validator;
  * @method \Wandu\Validator\Rules\PipelineValidator optional(\Wandu\Validator\Contracts\ValidatorInterface $validator = null)
  * @method \Wandu\Validator\Rules\PipelineValidator not(\Wandu\Validator\Contracts\ValidatorInterface $validator)
  * @method \Wandu\Validator\Rules\PipelineValidator array(array $attributes = [])
+ * @method \Wandu\Validator\Rules\PipelineValidator object(array $properties = [])
  * @method \Wandu\Validator\Rules\PipelineValidator integer()
  * @method \Wandu\Validator\Rules\PipelineValidator string()
  * @method \Wandu\Validator\Rules\PipelineValidator min(int $min)

@@ -9,6 +9,7 @@ class ArrayValidatorTest extends ValidatorTestCase
     public function testValidate()
     {
         $this->assertTrue(validator()->array()->validate([]));
+        $this->assertFalse(validator()->array()->validate((object)[]));
         $this->assertFalse(validator()->array()->validate("30"));
 
         $this->assertTrue(validator()->array([
