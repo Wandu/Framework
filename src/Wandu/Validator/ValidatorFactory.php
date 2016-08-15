@@ -3,6 +3,7 @@ namespace Wandu\Validator;
 
 use Predis\Pipeline\Pipeline;
 use Wandu\Validator\Contracts\ValidatorInterface;
+use Wandu\Validator\Exception\ValidatorNotFoundException;
 use Wandu\Validator\Rules\PipelineValidator;
 
 /**
@@ -20,6 +21,11 @@ class ValidatorFactory
 {
     /** @var array */
     private $instances = [];
+    
+    /** @var array */
+    private $namespaces = [
+        __NAMESPACE__ . '\\Rules',
+    ];
 
     /**
      * @param string $name
@@ -46,6 +52,16 @@ class ValidatorFactory
     public function pipeline()
     {
         return new PipelineValidator();
+    }
+
+    /**
+     * @param $namespace
+     * @return static
+     */
+    public function register($namespace)
+    {
+        $this->namespaces[] = $namespace;
+        return $this;
     }
 
     /**
@@ -132,6 +148,12 @@ class ValidatorFactory
      */
     protected function getClassName($name)
     {
-        return __NAMESPACE__ . '\\Rules\\' . ucfirst($name) . 'Validator';
+        foreach (array_reverse($this->namespaces) as $baseNamespace) {
+            $className = $baseNamespace . '\\' . ucfirst($name) . 'Validator';
+            if (class_exists($className)) {
+                return $className;
+            }
+        }
+        throw new ValidatorNotFoundException($name);
     }
 }

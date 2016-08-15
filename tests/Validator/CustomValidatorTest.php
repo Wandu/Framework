@@ -1,6 +1,8 @@
 <?php
 namespace Wandu\Validator;
 
+use Wandu\Validator\Contracts\ValidatorInterface;
+use Wandu\Validator\Exception\ValidatorNotFoundException;
 use Wandu\Validator\Rules\ValidatorAbstract;
 
 class CustomValidatorTest extends ValidatorTestCase
@@ -31,6 +33,43 @@ class CustomValidatorTest extends ValidatorTestCase
         }, [
             'max:20',
         ]);
+    }
+
+    public function testRegisterBaseNamespace()
+    {
+        $factory = new ValidatorFactory();
+        try {
+            $factory->testOverTen();
+            $this->fail();
+        } catch (ValidatorNotFoundException $e) {
+            $this->assertEquals('testOverTen', $e->getName());
+        }
+        
+        $factory->register(__NAMESPACE__); // register
+
+        $factory->testOverTen();
+    }
+    
+    public function testOverrideValidator()
+    {
+        $factory = new ValidatorFactory();
+
+        $this->assertInstanceOf(Rules\MinValidator::class, $factory->min(5));
+        
+        $factory->register(__NAMESPACE__);
+
+        $this->assertInstanceOf(MinValidator::class, $factory->min(5));
+    }
+}
+
+class MinValidator implements ValidatorInterface
+{
+    public function assert($item)
+    {
+    }
+
+    public function validate($item)
+    {
     }
 }
 
