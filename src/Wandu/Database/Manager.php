@@ -1,7 +1,7 @@
 <?php
-namespace Wandu\Database\Modelr;
+namespace Wandu\Database;
 
-use Wandu\Database\Modelr\Contracts\ConnectorInterface;
+use Wandu\Database\Contracts\ConnectorInterface;
 
 class Manager
 {

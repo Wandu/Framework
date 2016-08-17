@@ -1,5 +1,6 @@
 {
     "name": "wandu/database",
+    "description": "generator friendly database library.",
     "license": "MIT",
     "require": {
         "php": ">=5.6"
