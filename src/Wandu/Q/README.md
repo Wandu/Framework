@@ -1,9 +1,16 @@
 Wandu Q
 ===
 
+[![Latest Stable Version](https://poser.pugx.org/wandu/q/v/stable.svg)](https://packagist.org/packages/wandu/q)
+[![Latest Unstable Version](https://poser.pugx.org/wandu/q/v/unstable.svg)](https://packagist.org/packages/wandu/q)
+[![Total Downloads](https://poser.pugx.org/wandu/q/downloads.svg)](https://packagist.org/packages/wandu/q)
+[![License](https://poser.pugx.org/wandu/q/license.svg)](https://packagist.org/packages/wandu/q)
+
 Very Simple Queue.
 
----
+## Websites
+
+- [wandu.github.io](https://wandu.github.io)
 
 ## Example
 

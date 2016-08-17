@@ -1,51 +1,13 @@
 Wandu Caster
 ===
 
+[![Latest Stable Version](https://poser.pugx.org/wandu/caster/v/stable.svg)](https://packagist.org/packages/wandu/caster)
+[![Latest Unstable Version](https://poser.pugx.org/wandu/caster/v/unstable.svg)](https://packagist.org/packages/wandu/caster)
+[![Total Downloads](https://poser.pugx.org/wandu/caster/downloads.svg)](https://packagist.org/packages/wandu/caster)
+[![License](https://poser.pugx.org/wandu/caster/license.svg)](https://packagist.org/packages/wandu/caster)
+
 Perfect Type Casting Library.
 
-## Usage
+## Websites
 
-```php
-$caster = new \Wandu\Caster\Caster;
-
-$caster->cast('10,20,30,40', 'int[]'); // return [10, 20, 30, 40];
-```
-
-## Support Cast Types
-
-**Plain**
-
-- `string`
-- `int`
-- `integer`
-- `num`
-- `number`
-- `float`
-- `double`
-- `bool`
-- `boolean`
-
-**Arrayble**
-
-- `string[]`
-- `int[]`
-- `integer[]`
-- `num[]`
-- `number[]`
-- `float[]`
-- `double[]`
-- `bool[]`
-- `boolean[]`
-
-**Nullable**
-
-- `string?`
-- `int?`
-- `integer?`
-- `num?`
-- `number?`
-- `float?`
-- `double?`
-- `bool?`
-- `boolean?`
-
+- [wandu.github.io](https://wandu.github.io)
