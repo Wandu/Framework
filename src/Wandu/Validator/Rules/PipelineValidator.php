@@ -16,6 +16,7 @@ use function Wandu\Validator\validator;
  * @method \Wandu\Validator\Rules\PipelineValidator max(int $max)
  * @method \Wandu\Validator\Rules\PipelineValidator lengthMin(int $min)
  * @method \Wandu\Validator\Rules\PipelineValidator lengthMax(int $max)
+ * @method \Wandu\Validator\Rules\PipelineValidator email(\Egulias\EmailValidator\Validation\EmailValidation $validation = null)
  */
 class PipelineValidator implements ValidatorInterface
 {
