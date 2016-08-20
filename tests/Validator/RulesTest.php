@@ -3,6 +3,28 @@ namespace Wandu\Validator;
 
 class RulesTest extends ValidatorTestCase
 {
+    public function testBoolean()
+    {
+        validator()->boolean()->assert(true);
+        validator()->boolean()->assert(false);
+
+        $this->assertInvalidValueException(function () {
+            validator()->boolean()->assert(30);
+        }, [
+            'boolean',
+        ]);
+        $this->assertInvalidValueException(function () {
+            validator()->boolean()->assert(30.0);
+        }, [
+            'boolean',
+        ]);
+        $this->assertInvalidValueException(function () {
+            validator()->boolean()->assert("30");
+        }, [
+            'boolean',
+        ]);
+    }
+
     public function testInteger()
     {
         validator()->integer()->assert(30);
@@ -11,6 +33,50 @@ class RulesTest extends ValidatorTestCase
         }, [
             'integer',
         ]);
+    }
+
+    public function testIntegerable()
+    {
+        validator()->integerable()->assert('30');
+        validator()->integerable()->assert(30);
+        validator()->integerable()->assert('-30');
+        validator()->integerable()->assert(-30);
+        validator()->integerable()->assert(0);
+        validator()->integerable()->assert('0');
+
+        $this->assertInvalidValueException(function () {
+            validator()->integerable()->assert(40.5);
+        }, ['integerable',]);
+        $this->assertInvalidValueException(function () {
+            validator()->integerable()->assert('40.5');
+        }, ['integerable',]);
+        $this->assertInvalidValueException(function () {
+            validator()->integerable()->assert(40.0);
+        }, ['integerable',]);
+        $this->assertInvalidValueException(function () {
+            validator()->integerable()->assert('40.0');
+        }, ['integerable',]);
+        $this->assertInvalidValueException(function () {
+            validator()->integerable()->assert(-40.0);
+        }, ['integerable',]);
+        $this->assertInvalidValueException(function () {
+            validator()->integerable()->assert('-40.0');
+        }, ['integerable',]);
+        $this->assertInvalidValueException(function () {
+            validator()->integerable()->assert(0.0);
+        }, ['integerable',]);
+        $this->assertInvalidValueException(function () {
+            validator()->integerable()->assert('0.0');
+        }, ['integerable',]);
+        $this->assertInvalidValueException(function () {
+            validator()->integerable()->assert('string');
+        }, ['integerable',]);
+        $this->assertInvalidValueException(function () {
+            validator()->integerable()->assert([]);
+        }, ['integerable',]);
+        $this->assertInvalidValueException(function () {
+            validator()->integerable()->assert(new \stdClass());
+        }, ['integerable',]);
     }
 
     public function testFloat()
@@ -30,6 +96,37 @@ class RulesTest extends ValidatorTestCase
         ]);
     }
 
+    public function testFloatable()
+    {
+        validator()->floatable()->assert('30');
+        validator()->floatable()->assert(30);
+        validator()->floatable()->assert('-30');
+        validator()->floatable()->assert(-30);
+        validator()->floatable()->assert(0);
+        validator()->floatable()->assert('0');
+
+        validator()->floatable()->assert('30.0');
+        validator()->floatable()->assert(30.0);
+        validator()->floatable()->assert('-30.0');
+        validator()->floatable()->assert(-30.0);
+        validator()->floatable()->assert('30.5');
+        validator()->floatable()->assert(30.5);
+        validator()->floatable()->assert('-30.5');
+        validator()->floatable()->assert(-30.5);
+        validator()->floatable()->assert(0.0);
+        validator()->floatable()->assert('0.0');
+
+        $this->assertInvalidValueException(function () {
+            validator()->floatable()->assert('string');
+        }, ['floatable',]);
+        $this->assertInvalidValueException(function () {
+            validator()->floatable()->assert([]);
+        }, ['floatable',]);
+        $this->assertInvalidValueException(function () {
+            validator()->floatable()->assert(new \stdClass());
+        }, ['floatable',]);
+    }
+
     public function testString()
     {
         validator()->string()->assert('30');
@@ -40,6 +137,26 @@ class RulesTest extends ValidatorTestCase
         ]);
     }
     
+    public function testStringable()
+    {
+        validator()->stringable()->assert('30');
+        validator()->stringable()->assert(30);
+        validator()->stringable()->assert(40.5);
+        validator()->stringable()->assert('string');
+        validator()->stringable()->assert('string');
+
+        $this->assertInvalidValueException(function () {
+            validator()->stringable()->assert([]);
+        }, [
+            'stringable',
+        ]);
+        $this->assertInvalidValueException(function () {
+            validator()->stringable()->assert(new \stdClass());
+        }, [
+            'stringable',
+        ]);
+    }
+
     public function testMin()
     {
         validator()->min(5)->assert(100);
