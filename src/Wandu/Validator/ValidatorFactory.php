@@ -3,7 +3,7 @@ namespace Wandu\Validator;
 
 use Wandu\Validator\Contracts\ValidatorInterface;
 use Wandu\Validator\Exception\ValidatorNotFoundException;
-use Wandu\Validator\Rules\PipelineValidator;
+use Wandu\Validator\Rules\AndValidator;
 
 /**
  * @method \Wandu\Validator\Contracts\ValidatorInterface optional(\Wandu\Validator\Contracts\ValidatorInterface $validator = null)
@@ -11,6 +11,7 @@ use Wandu\Validator\Rules\PipelineValidator;
  * @method \Wandu\Validator\Contracts\ValidatorInterface array(array $attributes = [])
  * @method \Wandu\Validator\Contracts\ValidatorInterface object(array $properties = [])
  * @method \Wandu\Validator\Contracts\ValidatorInterface integer()
+ * @method \Wandu\Validator\Contracts\ValidatorInterface and(array $validators = [])
  * @method \Wandu\Validator\Contracts\ValidatorInterface float()
  * @method \Wandu\Validator\Contracts\ValidatorInterface string()
  * @method \Wandu\Validator\Contracts\ValidatorInterface min(int $min)
@@ -48,15 +49,6 @@ class ValidatorFactory
     }
 
     /**
-     * return this always new instance, so do not use __call.
-     * @return \Wandu\Validator\Rules\PipelineValidator
-     */
-    public function pipeline()
-    {
-        return new PipelineValidator();
-    }
-
-    /**
      * @param $namespace
      * @return static
      */
@@ -81,18 +73,18 @@ class ValidatorFactory
         if (is_object($attributes)) {
             return $this->object($attributes);
         }
-        $attributes = explode('|', $attributes);
+        $attributes = explode('&&', $attributes);
         if (count($attributes) === 1) {
             return $this->createValidator($attributes[0]);
         }
         // if count bigger than 1, need pipeline.
-        $pipeline = validator()->pipeline();
+        $validators = [];
         foreach ($attributes as $attribute) {
             if ($validator = $this->createValidator($attribute)) {
-                $pipeline->push($validator);
+                $validators[] = $validator;
             }
         }
-        return $pipeline;
+        return validator()->and($validators);
     }
     
     protected function createValidator($attribute)

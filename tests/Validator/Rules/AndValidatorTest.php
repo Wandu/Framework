@@ -4,11 +4,22 @@ namespace Wandu\Validator\Rules;
 use Wandu\Validator\ValidatorTestCase;
 use function Wandu\Validator\validator;
 
-class PipelineValidatorTest extends ValidatorTestCase
+class AndValidatorTest extends ValidatorTestCase
 {
+    public function testNothingAnd()
+    {
+        $validator = validator()->and();
+
+        $validator->assert("always");
+        $validator->assert(true);
+    }
+    
     public function testMinAndMax()
     {
-        $validator = validator()->pipeline()->min(10)->max(100);
+        $validator = validator()->and([
+            validator()->min(10),
+            validator()->max(100),
+        ]);
 
         $validator->assert(10);
         $validator->assert(11);
@@ -31,7 +42,10 @@ class PipelineValidatorTest extends ValidatorTestCase
 
     public function testMinAndMin()
     {
-        $validator = validator()->pipeline()->min(10)->min(30);
+        $validator = validator()->and([
+            validator()->min(10),
+            validator()->min(30),
+        ]);
 
         $validator->assert(30);
         $validator->assert(31);
