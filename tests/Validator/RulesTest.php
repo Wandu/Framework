@@ -13,6 +13,23 @@ class RulesTest extends ValidatorTestCase
         ]);
     }
 
+    public function testFloat()
+    {
+        validator()->float()->assert(30.1);
+        validator()->float()->assert(30.0);
+
+        $this->assertInvalidValueException(function () {
+            validator()->float()->assert("30");
+        }, [
+            'float',
+        ]);
+        $this->assertInvalidValueException(function () {
+            validator()->float()->assert(30);
+        }, [
+            'float',
+        ]);
+    }
+
     public function testString()
     {
         validator()->string()->assert('30');

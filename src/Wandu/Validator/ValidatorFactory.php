@@ -11,6 +11,7 @@ use Wandu\Validator\Rules\PipelineValidator;
  * @method \Wandu\Validator\Contracts\ValidatorInterface array(array $attributes = [])
  * @method \Wandu\Validator\Contracts\ValidatorInterface object(array $properties = [])
  * @method \Wandu\Validator\Contracts\ValidatorInterface integer()
+ * @method \Wandu\Validator\Contracts\ValidatorInterface float()
  * @method \Wandu\Validator\Contracts\ValidatorInterface string()
  * @method \Wandu\Validator\Contracts\ValidatorInterface min(int $min)
  * @method \Wandu\Validator\Contracts\ValidatorInterface max(int $max)
