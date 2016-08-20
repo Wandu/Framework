@@ -12,6 +12,7 @@ use Wandu\Validator\Rules\AndValidator;
  * @method \Wandu\Validator\Contracts\ValidatorInterface object(array $properties = [])
  * @method \Wandu\Validator\Contracts\ValidatorInterface integer()
  * @method \Wandu\Validator\Contracts\ValidatorInterface and(array $validators = [])
+ * @method \Wandu\Validator\Contracts\ValidatorInterface or(array $validators = [])
  * @method \Wandu\Validator\Contracts\ValidatorInterface float()
  * @method \Wandu\Validator\Contracts\ValidatorInterface string()
  * @method \Wandu\Validator\Contracts\ValidatorInterface min(int $min)

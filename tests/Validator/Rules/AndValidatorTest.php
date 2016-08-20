@@ -6,12 +6,78 @@ use function Wandu\Validator\validator;
 
 class AndValidatorTest extends ValidatorTestCase
 {
-    public function testNothingAnd()
+    public function testValidate()
+    {
+        $validator = validator()->and();
+
+        static::assertTrue($validator->validate("always"));
+        static::assertTrue($validator->validate(true));
+
+        $validator = validator()->and([
+            validator()->alwaysTrue(),
+            validator()->alwaysTrue(),
+            validator()->alwaysTrue(),
+        ]);
+
+        static::assertTrue($validator->validate(null));
+
+        $validator = validator()->and([
+            validator()->alwaysFalse(),
+            validator()->alwaysTrue(),
+            validator()->alwaysTrue(),
+        ]);
+
+        static::assertFalse($validator->validate(null));
+
+        $validator = validator()->and([
+            validator()->alwaysFalse(),
+            validator()->alwaysFalse(),
+            validator()->alwaysFalse(),
+        ]);
+
+        static::assertFalse($validator->validate(null));
+    }
+
+    public function testAssert()
     {
         $validator = validator()->and();
 
         $validator->assert("always");
         $validator->assert(true);
+
+        $validator = validator()->and([
+            validator()->alwaysTrue(),
+            validator()->alwaysTrue(),
+            validator()->alwaysTrue(),
+        ]);
+
+        $validator->assert(null);
+
+        $validator = validator()->and([
+            validator()->alwaysFalse(),
+            validator()->alwaysTrue(),
+            validator()->alwaysTrue(),
+        ]);
+
+        $this->assertInvalidValueException(function () use ($validator) {
+            $validator->assert(null);
+        }, [
+            'always_false',
+        ]);
+
+        $validator = validator()->and([
+            validator()->alwaysFalse(),
+            validator()->alwaysFalse(),
+            validator()->alwaysFalse(),
+        ]);
+
+        $this->assertInvalidValueException(function () use ($validator) {
+            $validator->assert(null);
+        }, [
+            'always_false',
+            'always_false',
+            'always_false',
+        ]);
     }
     
     public function testMinAndMax()

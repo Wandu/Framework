@@ -6,7 +6,7 @@ use RuntimeException;
 class InvalidValueException extends RuntimeException
 {
     /** @var array */
-    protected $types;
+    protected $types = [];
 
     /**
      * @param string $type
