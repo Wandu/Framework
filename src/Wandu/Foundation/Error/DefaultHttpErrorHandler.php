@@ -6,6 +6,8 @@ use Psr\Log\LoggerInterface;
 use Wandu\Config\Contracts\ConfigInterface;
 use Wandu\Foundation\Contracts\HttpErrorHandlerInterface;
 use Wandu\Http\Exception\HttpException;
+use Wandu\Router\Exception\MethodNotAllowedException as RouteMethodException;
+use Wandu\Router\Exception\RouteNotFoundException;
 use Whoops\Handler\JsonResponseHandler;
 use Whoops\Handler\PlainTextHandler;
 use Whoops\Handler\PrettyPageHandler;
@@ -49,6 +51,14 @@ class DefaultHttpErrorHandler implements HttpErrorHandlerInterface
         $statusCode = 500;
         $reasonPhrase = 'Internal Server Error';
 
+        if ($exception instanceof RouteNotFoundException) {
+            $statusCode = 404;
+            $reasonPhrase = "Not Found";
+        } elseif ($exception instanceof RouteMethodException) {
+            $statusCode = 405;
+            $reasonPhrase = 'Method Not Allowed';
+        }
+        
         $this->logger->error($this->prettifyRequest($request));
         $this->logger->error($exception);
 

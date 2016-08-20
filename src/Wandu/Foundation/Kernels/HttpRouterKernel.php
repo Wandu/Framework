@@ -98,13 +98,7 @@ class HttpRouterKernel implements KernelInterface
         $dispatcher = $dispatcher->withRoutes(function (Router $router) {
             $this->definition->routes($router);
         });
-        try {
-            return $dispatcher->dispatch($request);
-        } catch (RouteNotFoundException $exception) {
-            throw new NotFoundException();
-        } catch (RouteMethodException $exception) {
-            throw new MethodNotAllowedException();
-        }
+        return $dispatcher->dispatch($request);
     }
 
     /**
