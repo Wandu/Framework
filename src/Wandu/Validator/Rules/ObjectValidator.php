@@ -7,6 +7,7 @@ use function Wandu\Validator\validator;
 class ObjectValidator extends ValidatorAbstract
 {
     const ERROR_TYPE = 'object';
+    const ERROR_PROPERTY_TYPE = 'object_property';
 
     /** @var \Wandu\Validator\Contracts\ValidatorInterface[] */
     protected $properties = [];
@@ -37,28 +38,20 @@ class ObjectValidator extends ValidatorAbstract
         /** @var \Wandu\Validator\Exception\InvalidValueException[] $exceptions */
         $exceptions = [];
         if (!$this->test($item)) {
-            $exceptions[] = $this->createException();
+            $exceptions['.'] = $this->createException();
         }
         foreach ($this->properties as $name => $validator) {
             try {
-                $prefix = isset($this->name) ? "{$this->name}." : '';
-                if ($validator instanceof ValidatorAbstract) {
-                    $validator = $validator->withName($prefix . $name);
-                }
-                if (!is_object($item) || !object_get($item, $name)) {
-                    throw new InvalidValueException('exists@' . $prefix . $name);
+                if (!is_object($item) || object_get($item, $name) === null) {
+                    throw new InvalidValueException(static::ERROR_PROPERTY_TYPE);
                 }
                 $validator->assert(object_get($item, $name));
             } catch (InvalidValueException $e) {
-                $exceptions[] = $e;
+                $exceptions[$name] = $e;
             }
         }
         if (count($exceptions)) {
-            $baseException = $exceptions[0];
-            for ($i = 1, $length = count($exceptions); $i < $length; $i++) {
-                $baseException->appendTypes($exceptions[$i]->getTypes());
-            }
-            throw $baseException;
+            throw InvalidValueException::merge($exceptions);
         }
     }
 
@@ -71,7 +64,7 @@ class ObjectValidator extends ValidatorAbstract
             return false;
         }
         foreach ($this->properties as $name => $validator) {
-            if (!is_object($item) || !object_get($item, $name)) {
+            if (!is_object($item) || object_get($item, $name) === null) {
                 return false;
             }
             if (!$validator->validate(object_get($item, $name))) {

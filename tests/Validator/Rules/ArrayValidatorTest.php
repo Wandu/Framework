@@ -44,15 +44,15 @@ class ArrayValidatorTest extends ValidatorTestCase
             $validator->assert('string');
         }, [
             'array',
-            'exists@name',
-            'exists@age',
+            'array_attribute@name',
+            'array_attribute@age',
         ]);
 
         $this->assertInvalidValueException(function () use ($validator) {
             $validator->assert([]);
         }, [
-            'exists@name',
-            'exists@age',
+            'array_attribute@name',
+            'array_attribute@age',
         ]);
 
         $this->assertInvalidValueException(function () use ($validator) {
@@ -60,7 +60,7 @@ class ArrayValidatorTest extends ValidatorTestCase
                 'age' => 30
             ]);
         }, [
-            'exists@name',
+            'array_attribute@name',
         ]);
     }
     
@@ -86,15 +86,15 @@ class ArrayValidatorTest extends ValidatorTestCase
             $validator->assert('string');
         }, [
             'array',
-            'exists@name',
-            'exists@company',
+            'array_attribute@name',
+            'array_attribute@company',
         ]);
 
         $this->assertInvalidValueException(function () use ($validator) {
             $validator->assert([]);
         }, [
-            'exists@name',
-            'exists@company',
+            'array_attribute@name',
+            'array_attribute@company',
         ]);
 
         $this->assertInvalidValueException(function () use ($validator) {
@@ -102,9 +102,24 @@ class ArrayValidatorTest extends ValidatorTestCase
                 'company' => [],
             ]);
         }, [
-            'exists@name',
-            'exists@company.name',
-            'exists@company.age',
+            'array_attribute@name',
+            'array_attribute@company.name',
+            'array_attribute@company.age',
+        ]);
+    }
+
+    public function testAssertAndValidatorOfArray()
+    {
+        $validator = validator()->array([
+            'name' => 'string&&length_min:5',
+        ]);
+
+        $this->assertInvalidValueException(function () use ($validator) {
+            $validator->assert([
+                'name' => '1234'
+            ]);
+        }, [
+            'length_min:5@name',
         ]);
     }
 }

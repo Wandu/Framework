@@ -9,6 +9,32 @@ class InvalidValueException extends RuntimeException
     protected $types = [];
 
     /**
+     * @param \Wandu\Validator\Exception\InvalidValueException[] $exceptions
+     * @return \Wandu\Validator\Exception\InvalidValueException
+     */
+    public static function merge(array $exceptions = [])
+    {
+        $baseException = new InvalidValueException();
+        foreach ($exceptions as $name => $exception) {
+            if ($name === '.') {
+                $baseException->appendTypes($exception->getTypes());
+            } else {
+                foreach ($exception->getTypes() as $type) {
+                    if (strpos($type, '@') === false) {
+                        // ex. "exists" => "exists@thisname"
+                        $baseException->appendType("{$type}@{$name}");
+                    } else {
+                        // ex. "exists@foo" => "exists@thisname.foo"
+                        list($type, $key) = explode('@', $type);
+                        $baseException->appendType("{$type}@{$name}.{$key}");
+                    }
+                }
+            }
+        }
+        return $baseException;
+    }
+    
+    /**
      * @param string $type
      */
     public function __construct($type = null)

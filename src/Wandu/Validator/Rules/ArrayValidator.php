@@ -7,6 +7,7 @@ use function Wandu\Validator\validator;
 class ArrayValidator extends ValidatorAbstract
 {
     const ERROR_TYPE = 'array';
+    const ERROR_ATTRIBUTE_TYPE = 'array_attribute';
     
     /** @var \Wandu\Validator\Contracts\ValidatorInterface[] */
     protected $attributes = [];
@@ -37,28 +38,20 @@ class ArrayValidator extends ValidatorAbstract
         /** @var \Wandu\Validator\Exception\InvalidValueException[] $exceptions */
         $exceptions = [];
         if (!$this->test($item)) {
-            $exceptions[] = $this->createException();
+            $exceptions['.'] = $this->createException();
         }
         foreach ($this->attributes as $name => $validator) {
             try {
-                $prefix = isset($this->name) ? "{$this->name}." : '';
-                if ($validator instanceof ValidatorAbstract) {
-                    $validator = $validator->withName($prefix . $name);
-                }
                 if (!is_array($item) || !array_key_exists($name, $item)) {
-                    throw new InvalidValueException('exists@' . $prefix . $name);
+                    throw new InvalidValueException(static::ERROR_ATTRIBUTE_TYPE);
                 }
                 $validator->assert($item[$name]);
             } catch (InvalidValueException $e) {
-                $exceptions[] = $e;
+                $exceptions[$name] = $e;
             }
         }
         if (count($exceptions)) {
-            $baseException = $exceptions[0];
-            for ($i = 1, $length = count($exceptions); $i < $length; $i++) {
-                $baseException->appendTypes($exceptions[$i]->getTypes());
-            }
-            throw $baseException;
+            throw InvalidValueException::merge($exceptions);
         }
     }
 
