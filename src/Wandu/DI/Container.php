@@ -312,8 +312,6 @@ class Container implements ContainerInterface
         if ($reflectionMethod) {
             try {
                 $parameters = $this->getParameters($reflectionMethod, $arguments);
-            } catch (CannotResolveException $e) {
-                throw $e;
             } catch (CannotFindParameterException $e) {
                 throw new CannotResolveException($class, $e->getParameter());
             }
@@ -333,10 +331,14 @@ class Container implements ContainerInterface
         if (count($assocArguments)) {
             return $this->with($assocArguments)->call($callee, $seqArguments);
         }
-        return call_user_func_array(
-            $callee,
-            $this->getParameters(new ReflectionCallable($callee), $seqArguments)
-        );
+        try {
+            return call_user_func_array(
+                $callee,
+                $this->getParameters(new ReflectionCallable($callee), $seqArguments)
+            );
+        } catch (CannotFindParameterException $e) {
+            throw new CannotResolveException(null, $e->getParameter());
+        }
     }
 
     /**
