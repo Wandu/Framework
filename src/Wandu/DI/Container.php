@@ -35,7 +35,21 @@ class Container implements ContainerInterface
     public function __construct()
     {
         $this->instance(Container::class, $this)->freeze();
+        $this->instance(ContainerInterface::class, $this)->freeze();
+        $this->instance(InteropContainerInterface::class, $this)->freeze();
+        $this->instance('container', $this)->freeze();
+    }
 
+    public function __clone()
+    {
+        // direct remove instance because of frozen
+        unset(
+            $this->containees[Container::class],
+            $this->containees[ContainerInterface::class],
+            $this->containees[InteropContainerInterface::class],
+            $this->containees['container']
+        );
+        $this->instance(Container::class, $this)->freeze();
         $this->instance(ContainerInterface::class, $this)->freeze();
         $this->instance(InteropContainerInterface::class, $this)->freeze();
         $this->instance('container', $this)->freeze();
@@ -284,8 +298,8 @@ class Container implements ContainerInterface
      */
     public function create($class, array $arguments = [])
     {
-        $seqArguments = $this->getSeqArray($arguments);
-        $assocArguments = $this->getAssocArray($arguments);
+        $seqArguments = static::getSeqArray($arguments);
+        $assocArguments = static::getAssocArray($arguments);
         if (count($assocArguments)) {
             return $this->with($assocArguments)->create($class, $seqArguments);
         }
@@ -310,8 +324,8 @@ class Container implements ContainerInterface
      */
     public function call(callable $callee, array $arguments = [])
     {
-        $seqArguments = $this->getSeqArray($arguments);
-        $assocArguments = $this->getAssocArray($arguments);
+        $seqArguments = static::getSeqArray($arguments);
+        $assocArguments = static::getAssocArray($arguments);
         if (count($assocArguments)) {
             return $this->with($assocArguments)->call($callee, $seqArguments);
         }
@@ -464,7 +478,7 @@ class Container implements ContainerInterface
      * @param array $array
      * @return array
      */
-    protected function getSeqArray(array $array)
+    protected static function getSeqArray(array $array)
     {
         $arrayToReturn = [];
         foreach ($array as $key => $item) {
@@ -479,7 +493,7 @@ class Container implements ContainerInterface
      * @param array $array
      * @return array
      */
-    protected function getAssocArray(array $array)
+    protected static function getAssocArray(array $array)
     {
         $arrayToReturn = [];
         foreach ($array as $key => $item) {
