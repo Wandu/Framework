@@ -288,7 +288,11 @@ class Container implements ContainerInterface
     {
         $new = clone $this;
         foreach ($arguments as $name => $argument) {
-            $new->instance($name, $argument);
+            if ($argument instanceof ContaineeInterface) {
+                $new->addContainee($name, $argument);
+            } else {
+                $new->instance($name, $argument);
+            }
         }
         return $new;
     }

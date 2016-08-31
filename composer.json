@@ -15,7 +15,7 @@
         "psr/http-message": "^1",
         "container-interop/container-interop": "^1.1",
         "nikic/fast-route": "^1",
-        "wandu/reflection": "^0.0.1",
+        "wandu/reflection": "^0.2",
         "wandu/fastelper": "^0.1.0",
         "symfony/console": "^3.1",
         "symfony/process": "^3.1",
