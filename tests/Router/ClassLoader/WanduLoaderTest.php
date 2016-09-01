@@ -71,17 +71,6 @@ class WanduLoaderTest extends PHPUnit_Framework_TestCase
             $loader->call($request, $instance, 'callFromMagicMethod')
         );
     }
-    
-    public function testQueryParamsAndParsedBody()
-    {
-        $loader = new WanduLoader(new Container());
-
-        $request = new ServerRequest();
-        $instance = new TestStubInLoader();
-
-        static::assertTrue($loader->call($request, $instance, 'equalQueryParams'));
-        static::assertTrue($loader->call($request, $instance, 'equalParsedBody'));
-    }
 
     public function testCookieAndSession()
     {
@@ -91,6 +80,16 @@ class WanduLoaderTest extends PHPUnit_Framework_TestCase
         $instance = new TestStubInLoader();
 
         // error
+        try {
+            $loader->call($request, $instance, 'equalQueryParams');
+            static::fail();
+        } catch (CannotResolveException $e) {
+        }
+        try {
+            $loader->call($request, $instance, 'equalParsedBody');
+            static::fail();
+        } catch (CannotResolveException $e) {
+        }
         try {
             $loader->call($request, $instance, 'equalCookie');
             static::fail();
@@ -102,11 +101,15 @@ class WanduLoaderTest extends PHPUnit_Framework_TestCase
         } catch (CannotResolveException $e) {
         }
 
+        $request = $request->withAttribute('query_params', new QueryParams());
+        $request = $request->withAttribute('parsed_body', new ParsedBody());
         $request = $request->withAttribute('cookie', new CookieJar([]));
         $request = $request->withAttribute('session', new Session('id', []));
 
         static::assertTrue($loader->call($request, $instance, 'equalCookie'));
         static::assertTrue($loader->call($request, $instance, 'equalSession'));
+        static::assertTrue($loader->call($request, $instance, 'equalQueryParams'));
+        static::assertTrue($loader->call($request, $instance, 'equalParsedBody'));
     }
 }
 

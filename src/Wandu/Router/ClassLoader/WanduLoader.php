@@ -2,7 +2,6 @@
 namespace Wandu\Router\ClassLoader;
 
 use Psr\Http\Message\ServerRequestInterface;
-use Wandu\DI\Containee\BindContainee;
 use Wandu\DI\ContainerInterface;
 use Wandu\Http\Attribute\LazyAttribute;
 use Wandu\Http\Contracts\CookieJarInterface;
@@ -52,19 +51,28 @@ class WanduLoader implements ClassLoaderInterface
         // instance container
         $container = $this->container->with(); // clone
 
-        $request = $request->withAttribute('parsed_body', new LazyAttribute(function () use ($container) {
-            return $container->get(ParsedBodyInterface::class);
-        }))->withAttribute('query_params', new LazyAttribute(function ()  use ($container) {
-            return $container->get(QueryParamsInterface::class);
-        }));
+        $this->bindParameter($container, $request);
+        $this->bindServerRequest($container, $request);
 
-        $container->instance(ServerRequest::class, $request);
-        $container->alias(ServerRequestInterface::class, ServerRequest::class);
-        $container->alias('request', ServerRequest::class);
+        return $container->call([$object, $methodName]);
+    }
 
-        $container->bind(QueryParamsInterface::class, QueryParams::class);
-        $container->bind(ParsedBodyInterface::class, ParsedBody::class);
-
+    /**
+     * @param \Wandu\DI\ContainerInterface $container
+     * @param \Psr\Http\Message\ServerRequestInterface $request
+     */
+    private function bindParameter(ContainerInterface $container, ServerRequestInterface $request)
+    {
+        if ($queryParams = $request->getAttribute('query_params')) {
+            $container->instance(QueryParams::class, $queryParams);
+            $container->alias(QueryParamsInterface::class, QueryParams::class);
+            $container->alias('query_params', QueryParams::class);
+        }
+        if ($parsedBody = $request->getAttribute('parsed_body')) {
+            $container->instance(ParsedBody::class, $parsedBody);
+            $container->alias(ParsedBodyInterface::class, ParsedBody::class);
+            $container->alias('parsed_body', ParsedBody::class);
+        }
         if ($cookie = $request->getAttribute('cookie')) {
             $container->instance(CookieJar::class, $cookie);
             $container->alias(CookieJarInterface::class, CookieJar::class);
@@ -75,6 +83,16 @@ class WanduLoader implements ClassLoaderInterface
             $container->alias(SessionInterface::class, Session::class);
             $container->alias('session', Session::class);
         }
-        return $container->call([$object, $methodName]);
+    }
+
+    /**
+     * @param \Wandu\DI\ContainerInterface $container
+     * @param \Psr\Http\Message\ServerRequestInterface $request
+     */
+    private function bindServerRequest(ContainerInterface $container, ServerRequestInterface $request)
+    {
+        $container->instance(ServerRequest::class, $request);
+        $container->alias(ServerRequestInterface::class, ServerRequest::class);
+        $container->alias('request', ServerRequest::class);
     }
 }
