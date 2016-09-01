@@ -20,11 +20,16 @@ namespace Wandu\Foundation
     }
 
     /**
-     * @param string $path
-     * @return string
+     * @param string|array $path
+     * @return string|array
      */
     function path($path)
     {
+        if (is_array($path)) {
+            return array_map(function ($path) {
+                return path($path);
+            }, $path);
+        }
         return app()->get('base_path') . '/' . $path;
     }
 }
