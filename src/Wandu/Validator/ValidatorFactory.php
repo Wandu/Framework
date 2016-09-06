@@ -3,7 +3,7 @@ namespace Wandu\Validator;
 
 use Wandu\Validator\Contracts\ValidatorInterface;
 use Wandu\Validator\Exception\ValidatorNotFoundException;
-use Wandu\Validator\Rules\AndValidator;
+use Wandu\Validator\Rules\ArrayValidator;
 
 /**
  * @method \Wandu\Validator\Contracts\ValidatorInterface optional(\Wandu\Validator\Contracts\ValidatorInterface $validator = null)
@@ -74,7 +74,7 @@ class ValidatorFactory
             return $attributes;
         }
         if (is_array($attributes)) {
-            return $this->array($attributes);
+            return new ArrayValidator($attributes);
         }
         if (is_object($attributes)) {
             return $this->object($attributes);
