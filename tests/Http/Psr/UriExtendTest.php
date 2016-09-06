@@ -132,80 +132,77 @@ class UriExtendTest extends PHPUnit_Framework_TestCase
      */
     public function testJoin($base, $target, $expected)
     {
-        $this->assertSame($expected, (new Uri($base))->join(new Uri($target))->__toString());
+        static::assertSame($expected, (new Uri($base))->join(new Uri($target))->__toString());
     }
 
     public function testGetQueryParams()
     {
         $url = new Uri('/hello?foo=30&bar=&baz');
-        $this->assertEquals('/hello?foo=30&bar=&baz', $url->__toString());
+        static::assertEquals('/hello?foo=30&bar=&baz', $url->__toString());
 
-        $this->assertTrue($url->hasQueryParam('foo'));
-        $this->assertFalse($url->hasQueryParam('bar'));
-        $this->assertFalse($url->hasQueryParam('baz'));
-        $this->assertFalse($url->hasQueryParam('qux'));
+        static::assertTrue($url->hasQueryParam('foo'));
+        static::assertFalse($url->hasQueryParam('bar'));
+        static::assertFalse($url->hasQueryParam('baz'));
+        static::assertFalse($url->hasQueryParam('qux'));
 
-        $this->assertSame('30', $url->getQueryParam('foo'));
-        $this->assertSame(null, $url->getQueryParam('bar'));
-        $this->assertSame(null, $url->getQueryParam('baz'));
-        $this->assertSame(null, $url->getQueryParam('qux'));
+        static::assertSame('30', $url->getQueryParam('foo'));
+        static::assertSame(null, $url->getQueryParam('bar'));
+        static::assertSame(null, $url->getQueryParam('baz'));
+        static::assertSame(null, $url->getQueryParam('qux'));
 
-        $this->assertSame('30', $url->getQueryParam('foo', 'default'));
-        $this->assertSame('default', $url->getQueryParam('bar', 'default'));
-        $this->assertSame('default', $url->getQueryParam('baz', 'default'));
-        $this->assertSame('default', $url->getQueryParam('qux', 'default'));
+        static::assertSame('30', $url->getQueryParam('foo', 'default'));
+        static::assertSame('default', $url->getQueryParam('bar', 'default'));
+        static::assertSame('default', $url->getQueryParam('baz', 'default'));
+        static::assertSame('default', $url->getQueryParam('qux', 'default'));
     }
 
     public function testGetQueryParamsStrict()
     {
-        $url = new Uri('/hello?foo=30&bar=&baz', true);
-        $this->assertEquals('/hello?foo=30&bar=&baz', $url->__toString());
+        $url = new Uri('/hello?foo=30&bar=&baz');
+        static::assertEquals('/hello?foo=30&bar=&baz', $url->__toString());
 
-        $this->assertTrue($url->hasQueryParam('foo'));
-        $this->assertTrue($url->hasQueryParam('bar'));
-        $this->assertTrue($url->hasQueryParam('baz'));
-        $this->assertFalse($url->hasQueryParam('qux'));
+        static::assertTrue($url->hasQueryParam('foo', true));
+        static::assertTrue($url->hasQueryParam('bar', true));
+        static::assertTrue($url->hasQueryParam('baz', true));
+        static::assertFalse($url->hasQueryParam('qux', true));
 
-        $this->assertSame('30', $url->getQueryParam('foo'));
-        $this->assertSame('', $url->getQueryParam('bar'));
-        $this->assertSame('', $url->getQueryParam('baz'));
-        $this->assertSame(null, $url->getQueryParam('qux'));
+        static::assertSame('30', $url->getQueryParam('foo', null, true));
+        static::assertSame('', $url->getQueryParam('bar', null, true));
+        static::assertSame('', $url->getQueryParam('baz', null, true));
+        static::assertSame(null, $url->getQueryParam('qux', null, true));
 
-        $this->assertSame('30', $url->getQueryParam('foo', 'default'));
-        $this->assertSame('', $url->getQueryParam('bar', 'default'));
-        $this->assertSame('', $url->getQueryParam('baz', 'default'));
-        $this->assertSame('default', $url->getQueryParam('qux', 'default'));
+        static::assertSame('30', $url->getQueryParam('foo', 'default', true));
+        static::assertSame('', $url->getQueryParam('bar', 'default', true));
+        static::assertSame('', $url->getQueryParam('baz', 'default', true));
+        static::assertSame('default', $url->getQueryParam('qux', 'default', true));
     }
 
     public function testWithQueryParams()
     {
         $url = new Uri('/hello?foo=30&bar=&baz');
 
-        $this->assertEquals('/hello?foo=30&bar=&baz', $url->__toString());
+        static::assertEquals('/hello?foo=30&bar=&baz', $url->__toString());
 
-        $this->assertEquals('/hello?foo=40', $url->withQueryParam('foo', 40)->__toString());
-        $this->assertEquals('/hello?foo=kkk+hhh', $url->withQueryParam('foo', 'kkk hhh')->__toString());
-        $this->assertEquals('/hello', $url->withQueryParam('foo', null)->__toString());
+        static::assertEquals('/hello?foo=40&bar=&baz=', $url->withQueryParam('foo', 40)->__toString());
+        static::assertEquals('/hello?foo=kkk+hhh&bar=&baz=', $url->withQueryParam('foo', 'kkk hhh')->__toString());
+        static::assertEquals('/hello?bar=&baz=', $url->withQueryParam('foo', null)->__toString());
 
-        $this->assertEquals('/hello', $url->withoutQueryParam('foo')->__toString());
-        $this->assertEquals('/hello?foo=30', $url->withoutQueryParam('bar')->__toString());
-    }
+        static::assertEquals('/hello?bar=&baz=', $url->withoutQueryParam('foo')->__toString());
+        static::assertEquals('/hello?foo=30&baz=', $url->withoutQueryParam('bar')->__toString());
 
-    public function testWithQueryParamsStrict()
-    {
-        $url = new Uri('/hello?foo=30&bar=&baz', true);
+        $url = new Uri('/hello?foo=30&bar=&baz');
 
-        $this->assertEquals('/hello?foo=30&bar=&baz', $url->__toString());
+        static::assertEquals('/hello?foo=30&bar=&baz', $url->__toString());
 
-        $this->assertEquals('/hello?foo=40&bar=&baz=', $url->withQueryParam('foo', 40)->__toString());
-        $this->assertEquals('/hello?bar=&baz=', $url->withQueryParam('foo', null)->__toString());
+        static::assertEquals('/hello?foo=40&bar=&baz=', $url->withQueryParam('foo', 40)->__toString());
+        static::assertEquals('/hello?bar=&baz=', $url->withQueryParam('foo', null)->__toString());
 
-        $this->assertEquals(
+        static::assertEquals(
             '/hello?foo=30&bar=&baz=&qux=40&quux=50',
             $url->withQueryParam('qux', 40)->withQueryParam('quux', 50)->__toString()
         );
 
-        $this->assertEquals('/hello?bar=&baz=', $url->withoutQueryParam('foo')->__toString());
-        $this->assertEquals('/hello?foo=30&baz=', $url->withoutQueryParam('bar')->__toString());
+        static::assertEquals('/hello?bar=&baz=', $url->withoutQueryParam('foo')->__toString());
+        static::assertEquals('/hello?foo=30&baz=', $url->withoutQueryParam('bar')->__toString());
     }
 }
