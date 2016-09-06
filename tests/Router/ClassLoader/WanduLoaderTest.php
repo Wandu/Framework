@@ -11,10 +11,12 @@ use Wandu\DI\Exception\CannotResolveException;
 use Wandu\Http\Contracts\CookieJarInterface;
 use Wandu\Http\Contracts\ParsedBodyInterface;
 use Wandu\Http\Contracts\QueryParamsInterface;
+use Wandu\Http\Contracts\ServerParamsInterface;
 use Wandu\Http\Contracts\SessionInterface;
 use Wandu\Http\Cookie\CookieJar;
 use Wandu\Http\Parameters\ParsedBody;
 use Wandu\Http\Parameters\QueryParams;
+use Wandu\Http\Parameters\ServerParams;
 use Wandu\Http\Psr\ServerRequest;
 use Wandu\Http\Session\Session;
 use Wandu\Router\Exception\HandlerNotFoundException;
@@ -101,6 +103,7 @@ class WanduLoaderTest extends PHPUnit_Framework_TestCase
         } catch (CannotResolveException $e) {
         }
 
+        $request = $request->withAttribute('server_params', new ServerParams($request));
         $request = $request->withAttribute('query_params', new QueryParams());
         $request = $request->withAttribute('parsed_body', new ParsedBody());
         $request = $request->withAttribute('cookie', new CookieJar([]));
@@ -108,6 +111,7 @@ class WanduLoaderTest extends PHPUnit_Framework_TestCase
 
         static::assertTrue($loader->call($request, $instance, 'equalCookie'));
         static::assertTrue($loader->call($request, $instance, 'equalSession'));
+        static::assertTrue($loader->call($request, $instance, 'equalServerParams'));
         static::assertTrue($loader->call($request, $instance, 'equalQueryParams'));
         static::assertTrue($loader->call($request, $instance, 'equalParsedBody'));
     }
@@ -133,6 +137,19 @@ class TestStubInLoader
     ) {
         return $queryParams === $queryParamsInterface
             && $queryParams === $request->getAttribute('query_params')
+            && $container->get('request') === $request
+            && $container->get(ServerRequest::class) === $request
+            && $container->get(ServerRequestInterface::class) === $request;
+    }
+
+    public function equalServerParams(
+        ServerParams $serverParams,
+        ServerParamsInterface $serverParamsInterface,
+        ServerRequestInterface $request,
+        ContainerInterface $container
+    ) {
+        return $serverParams === $serverParamsInterface
+            && $serverParams === $request->getAttribute('server_params')
             && $container->get('request') === $request
             && $container->get(ServerRequest::class) === $request
             && $container->get(ServerRequestInterface::class) === $request;

@@ -7,10 +7,12 @@ use Wandu\Http\Attribute\LazyAttribute;
 use Wandu\Http\Contracts\CookieJarInterface;
 use Wandu\Http\Contracts\ParsedBodyInterface;
 use Wandu\Http\Contracts\QueryParamsInterface;
+use Wandu\Http\Contracts\ServerParamsInterface;
 use Wandu\Http\Contracts\SessionInterface;
 use Wandu\Http\Cookie\CookieJar;
 use Wandu\Http\Parameters\ParsedBody;
 use Wandu\Http\Parameters\QueryParams;
+use Wandu\Http\Parameters\ServerParams;
 use Wandu\Http\Psr\ServerRequest;
 use Wandu\Http\Session\Session;
 use Wandu\Router\Contracts\ClassLoaderInterface;
@@ -63,6 +65,11 @@ class WanduLoader implements ClassLoaderInterface
      */
     private function bindParameter(ContainerInterface $container, ServerRequestInterface $request)
     {
+        if ($queryParams = $request->getAttribute('server_params')) {
+            $container->instance(ServerParams::class, $queryParams);
+            $container->alias(ServerParamsInterface::class, ServerParams::class);
+            $container->alias('server_params', ServerParams::class);
+        }
         if ($queryParams = $request->getAttribute('query_params')) {
             $container->instance(QueryParams::class, $queryParams);
             $container->alias(QueryParamsInterface::class, QueryParams::class);

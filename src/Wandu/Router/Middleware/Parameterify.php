@@ -6,6 +6,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Wandu\Http\Attribute\LazyAttribute;
 use Wandu\Http\Parameters\ParsedBody;
 use Wandu\Http\Parameters\QueryParams;
+use Wandu\Http\Parameters\ServerParams;
 use Wandu\Router\Contracts\MiddlewareInterface;
 
 class Parameterify implements MiddlewareInterface
@@ -16,6 +17,9 @@ class Parameterify implements MiddlewareInterface
     public function __invoke(ServerRequestInterface $request, Closure $next)
     {
         $request = $request
+            ->withAttribute('server_params', new LazyAttribute(function (ServerRequestInterface $request) {
+                return new ServerParams($request);
+            }))
             ->withAttribute('parsed_body', new LazyAttribute(function (ServerRequestInterface $request) {
                 return new ParsedBody($request);
             }))
