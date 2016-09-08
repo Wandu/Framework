@@ -23,7 +23,6 @@
         "filp/whoops": "^2.1",
         "illuminate/database": "^5.2",
         "psy/psysh": "^0.7.2",
-        "latte/latte": "^2.3",
         "egulias/email-validator": "~2.1"
     },
     "require-dev": {
@@ -31,7 +30,9 @@
         "mockery/mockery": "^0.9.4",
         "pda/pheanstalk": "^3.1",
         "aws/aws-sdk-php": "^3.18",
-        "predis/predis": "^1.0"
+        "predis/predis": "^1.0",
+        "latte/latte": "^2.3",
+        "twig/twig": "^1.24"
     },
     "autoload": {
         "psr-4": {
