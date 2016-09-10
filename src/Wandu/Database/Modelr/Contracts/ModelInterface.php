@@ -21,11 +21,8 @@ interface ModelInterface extends ArrayAccess
     public static function first(callable $handler = null);
 
     /**
-     * @param array $attributes
-     * @return static|static[]|\Wandu\Database\Modelr\Contracts\CollectionInterface
-     */
-    public static function hydrate(array $attributes = []);
-    
+     * @return \Wandu\Database\Query\QueryBuilder;
+     */    
     public static function query();
     
     public function save();

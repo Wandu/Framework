@@ -1,14 +1,36 @@
 <?php
 namespace Wandu\Database\Modelr\Traits;
 
+use Wandu\Database\Contracts\ConnectionInterface;
+
 trait ModelMethods
 {
+    /** @var \Wandu\Database\Contracts\ConnectionInterface */
+    protected static $connection;
+    
     /** @var array */
     protected static $defaults = [];
 
     /** @var array raw data from database */
     protected $attributes = [];
 
+    public static function getConnection()
+    {
+        
+        
+    }
+
+    /**
+     * @param \Wandu\Database\Contracts\ConnectionInterface $connection
+     * @return \Wandu\Database\Contracts\ConnectionInterface
+     */
+    public static function setConnection(ConnectionInterface $connection)
+    {
+        $oldConnection = static::$connection;
+        static::$connection = $connection;
+        return $oldConnection;
+    }
+    
     /**
      * @param callable $handler
      * @return static[]|\Wandu\Database\Modelr\Contracts\CollectionInterface
@@ -51,6 +73,11 @@ trait ModelMethods
         
     }
 
+    public function fill()
+    {
+        
+    }
+    
     /**
      * @param array $attributes
      */
