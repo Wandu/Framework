@@ -13,17 +13,25 @@ class MysqlConnection implements ConnectionInterface
     /** @var \PDO */
     protected $pdo;
 
-    /** @var string */
-    protected $prefix;
+    /** @var array */
+    protected $config;
 
     /**
      * @param \PDO $pdo
-     * @param string $prefix
+     * @param array $config
      */
-    public function __construct(PDO $pdo, $prefix = '')
+    public function __construct(PDO $pdo, array $config = [])
     {
         $this->pdo = $pdo;
-        $this->prefix = $prefix;
+        $this->config = $config;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function setConfig(array $config = [])
+    {
+        $this->config = array_merge($this->config, $config);
     }
 
     /**
@@ -31,7 +39,7 @@ class MysqlConnection implements ConnectionInterface
      */
     public function getPrefix()
     {
-        return $this->prefix;
+        return isset($this->config['prefix']) ? $this->config['prefix'] : '';
     }
 
     /**
@@ -39,7 +47,7 @@ class MysqlConnection implements ConnectionInterface
      */
     public function createQueryBuilder($table)
     {
-        return new QueryBuilder($this->prefix . $table);
+        return new QueryBuilder($this->getPrefix() . $table);
     }
 
     /**

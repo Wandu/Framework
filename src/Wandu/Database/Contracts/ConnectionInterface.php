@@ -4,6 +4,11 @@ namespace Wandu\Database\Contracts;
 interface ConnectionInterface
 {
     /**
+     * @param array $config
+     */
+    public function setConfig(array $config = []);
+    
+    /**
      * @return string
      */
     public function getPrefix();

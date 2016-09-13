@@ -12,6 +12,8 @@ class ModelTest extends PHPUnit_Framework_TestCase
     public function testSimpleSelectQuery()
     {
         
+        User::setConnection();
+        
         $users = User::all(function (QueryBuilder $builder) {
             return $builder->where(QueryBuilder::and());
         });
@@ -26,10 +28,11 @@ class ModelTest extends PHPUnit_Framework_TestCase
     }
 }
 
-class User implements ModelInterface 
+class User extends Model  
 {
-    use ModelMethods;
-    
     /** @var string */
-    protected $table = "users";
+    protected static $table = "users";
+    
+    /** @var array */
+    protected static $columns = [];
 }
