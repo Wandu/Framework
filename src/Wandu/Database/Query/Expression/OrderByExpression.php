@@ -48,7 +48,7 @@ class OrderByExpression implements ExpressionInterface
     /**
      * {@inheritdoc}
      */
-    public function __toString()
+    public function toSql()
     {
         if (count($this->orders) === 0) {
             return '';

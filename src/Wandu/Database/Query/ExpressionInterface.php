@@ -6,7 +6,7 @@ interface ExpressionInterface
     /**
      * @return string
      */
-    public function __toString();
+    public function toSql();
 
     /**
      * @return array

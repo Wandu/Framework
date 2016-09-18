@@ -2,6 +2,7 @@
 namespace Wandu\Database\Schema;
 
 use PHPUnit_Framework_TestCase;
+use Wandu\Database\Query\RawExpression;
 use Wandu\Database\Schema\Expression\ConstraintExpression;
 use Wandu\Database\Schema\Expression\CreateExpression;
 use Wandu\Database\Schema\Expression\ReferenceExpression;
@@ -42,7 +43,7 @@ CREATE TABLE IF NOT EXISTS `users` (
 ) ENGINE=MyISAM CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
 SQL
             ,
-            $builder->__toString()
+            $builder->toSql()
         );
     }
 
@@ -86,7 +87,7 @@ CREATE TABLE IF NOT EXISTS `articles` (
 )
 SQL
             ,
-            $builder->__toString()
+            $builder->toSql()
         );
     }
 }

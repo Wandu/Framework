@@ -86,14 +86,14 @@ class LogicalExpression implements ExpressionInterface
     /**
      * {@inheritdoc}
      */
-    public function __toString()
+    public function toSql()
     {
         $sql = '';
         foreach ($this->expressions as $index => $expression) {
             if ($index) {
                 $sql .= ' ' . $this->operators[$index] . ' ';
             }
-            $sql .= $expression->__toString();
+            $sql .= $expression->toSql();
         }
         if (count($this->expressions) > 1) {
             $sql = "(" . $sql . ")";

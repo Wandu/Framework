@@ -32,7 +32,7 @@ class SetExpression implements ExpressionInterface
     /**
      * {@inheritdoc}
      */
-    public function __toString()
+    public function toSql()
     {
         if (count($this->attributes)) {
             $columns = array_keys($this->attributes);

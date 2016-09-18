@@ -1,7 +1,7 @@
 <?php
 namespace Wandu\Database\Schema\Expression;
 
-use Wandu\Database\Schema\ExpressionInterface;
+use Wandu\Database\Query\ExpressionInterface;
 use Wandu\Database\Support\Attributes;
 use Wandu\Database\Support\Helper;
 
@@ -71,7 +71,7 @@ class ConstraintExpression implements ExpressionInterface
      * 
      * {@inheritdoc}
      */
-    public function __toString()
+    public function toSql()
     {
         $stringToReturn = '';
         $keyType = isset($this->attributes['key_type']) ? $this->attributes['key_type'] : static::KEY_TYPE_NONE;
@@ -99,11 +99,19 @@ class ConstraintExpression implements ExpressionInterface
         }
         $stringToReturn .= ' (' . Helper::arrayImplode(', ', $this->columns, '`', '`') .')';
         if ($keyType === static::KEY_TYPE_FOREIGN && isset($this->reference)) {
-            $referenceString = $this->reference->__toString();
+            $referenceString = $this->reference->toSql();
             if ($referenceString) {
                 $stringToReturn .= " {$referenceString}";
             }
         }
         return $stringToReturn;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getBindings()
+    {
+        return [];
     }
 }

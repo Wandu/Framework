@@ -42,7 +42,7 @@ class ComparisonExpression implements ExpressionInterface
     /**
      * {@inheritdoc}
      */
-    public function __toString()
+    public function toSql()
     {
         return "`{$this->name}` {$this->operator} ?";
     }

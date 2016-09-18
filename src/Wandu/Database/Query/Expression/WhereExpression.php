@@ -9,14 +9,14 @@ namespace Wandu\Database\Query\Expression;
  */
 class WhereExpression extends LogicalExpression
 {
-    public function __toString()
+    public function toSql()
     {
         $sql = '';
         foreach ($this->expressions as $index => $expression) {
             if ($index) {
                 $sql .= ' ' . $this->operators[$index] . ' ';
             }
-            $sql .= $expression->__toString();
+            $sql .= $expression->toSql();
         }
         return $sql ? 'WHERE '. $sql : '';
     }

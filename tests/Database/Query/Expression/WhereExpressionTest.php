@@ -9,7 +9,7 @@ class WhereExpressionTest extends PHPUnit_Framework_TestCase
     {
         $query = new WhereExpression();
         
-        static::assertEquals('', $query->__toString());
+        static::assertEquals('', $query->toSql());
         static::assertEquals([], $query->getBindings());
     }
 
@@ -18,19 +18,19 @@ class WhereExpressionTest extends PHPUnit_Framework_TestCase
         $query = new WhereExpression();
         $query->where('foo', '=', 'foo string');
 
-        static::assertEquals('WHERE `foo` = ?', $query->__toString());
+        static::assertEquals('WHERE `foo` = ?', $query->toSql());
         static::assertEquals(['foo string'], $query->getBindings());
 
         $query = new WhereExpression();
         $query->andWhere('foo', '=', 'foo string');
 
-        static::assertEquals('WHERE `foo` = ?', $query->__toString());
+        static::assertEquals('WHERE `foo` = ?', $query->toSql());
         static::assertEquals(['foo string'], $query->getBindings());
 
         $query = new WhereExpression();
         $query->orWhere('foo', '=', 'foo string');
 
-        static::assertEquals('WHERE `foo` = ?', $query->__toString());
+        static::assertEquals('WHERE `foo` = ?', $query->toSql());
         static::assertEquals(['foo string'], $query->getBindings());
     }
 
@@ -39,19 +39,19 @@ class WhereExpressionTest extends PHPUnit_Framework_TestCase
         $query = new WhereExpression();
         $query->where('foo', 'foo string');
 
-        static::assertEquals('WHERE `foo` = ?', $query->__toString());
+        static::assertEquals('WHERE `foo` = ?', $query->toSql());
         static::assertEquals(['foo string'], $query->getBindings());
 
         $query = new WhereExpression();
         $query->andWhere('foo', 'foo string');
 
-        static::assertEquals('WHERE `foo` = ?', $query->__toString());
+        static::assertEquals('WHERE `foo` = ?', $query->toSql());
         static::assertEquals(['foo string'], $query->getBindings());
 
         $query = new WhereExpression();
         $query->orWhere('foo', 'foo string');
 
-        static::assertEquals('WHERE `foo` = ?', $query->__toString());
+        static::assertEquals('WHERE `foo` = ?', $query->toSql());
         static::assertEquals(['foo string'], $query->getBindings());
     }
 
@@ -60,19 +60,19 @@ class WhereExpressionTest extends PHPUnit_Framework_TestCase
         $query = new WhereExpression();
         $query->where('foo', 'foo string')->andWhere('bar', '>', 'bar string');
 
-        static::assertEquals('WHERE `foo` = ? AND `bar` > ?', $query->__toString());
+        static::assertEquals('WHERE `foo` = ? AND `bar` > ?', $query->toSql());
         static::assertEquals(['foo string', 'bar string'], $query->getBindings());
 
         $query = new WhereExpression();
         $query->andWhere('foo', 'foo string')->orWhere('bar', '<', 'bar string');
 
-        static::assertEquals('WHERE `foo` = ? OR `bar` < ?', $query->__toString());
+        static::assertEquals('WHERE `foo` = ? OR `bar` < ?', $query->toSql());
         static::assertEquals(['foo string', 'bar string'], $query->getBindings());
 
         $query = new WhereExpression();
         $query->orWhere('foo', 'foo string')->where('bar', 'bar string');
 
-        static::assertEquals('WHERE `foo` = ? AND `bar` = ?', $query->__toString());
+        static::assertEquals('WHERE `foo` = ? AND `bar` = ?', $query->toSql());
         static::assertEquals(['foo string', 'bar string'], $query->getBindings());
     }
 
@@ -81,19 +81,19 @@ class WhereExpressionTest extends PHPUnit_Framework_TestCase
         $query = new WhereExpression();
         $query->where(['foo' => 'foo string', 'bar' => 'bar string']);
 
-        static::assertEquals('WHERE `foo` = ? AND `bar` = ?', $query->__toString());
+        static::assertEquals('WHERE `foo` = ? AND `bar` = ?', $query->toSql());
         static::assertEquals(['foo string', 'bar string'], $query->getBindings());
 
         $query = new WhereExpression();
         $query->where(['foo' => 'foo string', 'bar' => ['>' => 'bar string']]);
 
-        static::assertEquals('WHERE `foo` = ? AND `bar` > ?', $query->__toString());
+        static::assertEquals('WHERE `foo` = ? AND `bar` > ?', $query->toSql());
         static::assertEquals(['foo string', 'bar string'], $query->getBindings());
 
         $query = new WhereExpression();
         $query->orWhere(['foo' => 'foo string', 'bar' => ['>' => 'bar string11', '<' => 'bar string22']]);
 
-        static::assertEquals('WHERE `foo` = ? OR (`bar` > ? AND `bar` < ?)', $query->__toString());
+        static::assertEquals('WHERE `foo` = ? OR (`bar` > ? AND `bar` < ?)', $query->toSql());
         static::assertEquals(['foo string', 'bar string11', 'bar string22'], $query->getBindings());
     }
 
@@ -106,7 +106,7 @@ class WhereExpressionTest extends PHPUnit_Framework_TestCase
             return $query;
         })->where('other', '<', 30);
 
-        static::assertEquals('WHERE (`foo` = ? OR `bar` = ?) AND `other` < ?', $query->__toString());
+        static::assertEquals('WHERE (`foo` = ? OR `bar` = ?) AND `other` < ?', $query->toSql());
         static::assertEquals(['inner foo string', 'inner bar string', 30], $query->getBindings());
 
         $query = new WhereExpression();
@@ -119,7 +119,7 @@ class WhereExpressionTest extends PHPUnit_Framework_TestCase
             return $query;
         })->where('other', '<', 30);
 
-        static::assertEquals('WHERE (`foo` = ? OR (`bar1` = ? OR `bar2` = ?)) AND `other` < ?', $query->__toString());
+        static::assertEquals('WHERE (`foo` = ? OR (`bar1` = ? OR `bar2` = ?)) AND `other` < ?', $query->toSql());
         static::assertEquals(['inner foo string', 'inner bar1 string', 'inner bar2 string', 30], $query->getBindings());
     }
 }

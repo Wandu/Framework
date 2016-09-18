@@ -1,7 +1,7 @@
 <?php
 namespace Wandu\Database\Schema\Expression;
 
-use Wandu\Database\Schema\ExpressionInterface;
+use Wandu\Database\Query\ExpressionInterface;
 use Wandu\Database\Support\Attributes;
 use Wandu\Database\Support\Helper;
 
@@ -167,7 +167,7 @@ class ColumnExpression implements ExpressionInterface
     /**
      * {@inheritdoc}
      */
-    public function __toString()
+    public function toSql()
     {
         $stringToReturn = "`{$this->name}` " . $this->getTypeString();
         if (isset($this->attributes['nullable']) && $this->attributes['nullable']) {
@@ -178,7 +178,7 @@ class ColumnExpression implements ExpressionInterface
         if (isset($this->attributes['default'])) {
             $stringToReturn .= " DEFAULT ";
             if ($this->attributes['default'] instanceof ExpressionInterface) {
-                $stringToReturn .= $this->attributes['default']->__toString();
+                $stringToReturn .= $this->attributes['default']->toSql();
             } else {
                 $stringToReturn .= "'" . addslashes($this->attributes['default']) . "'";
             }
@@ -193,7 +193,7 @@ class ColumnExpression implements ExpressionInterface
             $stringToReturn .= ' PRIMARY KEY';
         }
         if (isset($this->reference)) {
-            $referenceString = $this->reference->__toString();
+            $referenceString = $this->reference->toSql();
             if ($referenceString) {
                 $stringToReturn .= " {$referenceString}";
             }
@@ -237,5 +237,13 @@ class ColumnExpression implements ExpressionInterface
             }
         }
         return $stringToReturn;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getBindings()
+    {
+        return [];
     }
 }

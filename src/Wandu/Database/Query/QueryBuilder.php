@@ -265,7 +265,7 @@ class QueryBuilder
         return array_reduce(static::$takeable[$this->type], function ($carry, $name) {
             /** @var \Wandu\Database\Query\ExpressionInterface $expression */
             $expression = $this->{$name};
-            if (isset($expression) && $sqlPart = $expression->__toString()) {
+            if (isset($expression) && $sqlPart = $expression->toSql()) {
                 return $carry . ' ' . $sqlPart;
             }
             return $carry;

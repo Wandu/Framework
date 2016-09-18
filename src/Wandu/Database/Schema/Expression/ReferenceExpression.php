@@ -1,7 +1,7 @@
 <?php
 namespace Wandu\Database\Schema\Expression;
 
-use Wandu\Database\Schema\ExpressionInterface;
+use Wandu\Database\Query\ExpressionInterface;
 use Wandu\Database\Support\Attributes;
 use Wandu\Database\Support\Helper;
 
@@ -48,7 +48,7 @@ class ReferenceExpression implements ExpressionInterface
     /**
      * {@inheritdoc}
      */
-    public function __toString()
+    public function toSql()
     {
         $sqlToReturn = "REFERENCES `{$this->table}`";
         $sqlToReturn .= '(' . Helper::arrayImplode(', ', $this->columns, '`', '`') . ')';
@@ -77,5 +77,13 @@ class ReferenceExpression implements ExpressionInterface
             }
         }
         return $sqlToReturn; 
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getBindings()
+    {
+        return [];
     }
 }

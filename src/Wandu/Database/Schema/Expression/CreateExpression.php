@@ -1,8 +1,7 @@
 <?php
 namespace Wandu\Database\Schema\Expression;
 
-use Wandu\Database\Schema\ExpressionInterface;
-use Wandu\Database\Schema\RawExpression;
+use Wandu\Database\Query\ExpressionInterface;
 use Wandu\Database\Support\Attributes;
 
 /**
@@ -33,10 +32,10 @@ class CreateExpression implements ExpressionInterface
     /** @var string */
     protected $table;
     
-    /** @var array|\Wandu\Database\Schema\ExpressionInterface[] */
+    /** @var array|\Wandu\Database\ExpressionInterface[] */
     protected $columns = [];
 
-    /** @var  array|\Wandu\Database\Schema\ExpressionInterface[] */
+    /** @var  array|\Wandu\Database\ExpressionInterface[] */
     protected $constraints = [];
     
     /** @var array */
@@ -358,10 +357,10 @@ class CreateExpression implements ExpressionInterface
     }
 
     /**
-     * @param string|\Wandu\Database\Schema\ExpressionInterface $name
+     * @param string|\Wandu\Database\ExpressionInterface $name
      * @param string $type
      * @param array $attributes
-     * @return \Wandu\Database\Schema\Expression\ColumnExpression|\Wandu\Database\Schema\ExpressionInterface
+     * @return \Wandu\Database\Schema\Expression\ColumnExpression|\Wandu\Database\ExpressionInterface
      */
     public function addColumn($name, $type = null, array $attributes = [])
     {
@@ -417,10 +416,10 @@ class CreateExpression implements ExpressionInterface
     }
     
     /**
-     * @param array|string|\Wandu\Database\Schema\ExpressionInterface $column
+     * @param array|string|\Wandu\Database\ExpressionInterface $column
      * @param string $name
      * @param array $attributes
-     * @return \Wandu\Database\Schema\Expression\ConstraintExpression|\Wandu\Database\Schema\ExpressionInterface
+     * @return \Wandu\Database\Schema\Expression\ConstraintExpression|\Wandu\Database\ExpressionInterface
      */
     public function addConstraint($column, $name = null, array $attributes = [])
     {
@@ -434,7 +433,7 @@ class CreateExpression implements ExpressionInterface
         );
     }
     
-    public function __toString()
+    public function toSql()
     {
         $sql = "CREATE TABLE";
         if (isset($this->attributes['if_not_exists'])) {
@@ -442,7 +441,7 @@ class CreateExpression implements ExpressionInterface
         }
         $sql .= " `{$this->table}` (\n  ";
         $sql .= implode(",\n  ", array_reduce(array_merge($this->columns, $this->constraints), function ($carry, ExpressionInterface $definition) {
-            $definitionAsString = $definition->__toString();
+            $definitionAsString = $definition->toSql();
             if ($definitionAsString) {
                 $carry[] = $definitionAsString;
             }
@@ -459,5 +458,13 @@ class CreateExpression implements ExpressionInterface
             $sql .= " COLLATE={$this->attributes['collation']}";
         }
         return $sql;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getBindings()
+    {
+        return [];
     }
 }

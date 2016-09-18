@@ -46,7 +46,7 @@ class LimitExpression implements ExpressionInterface
     /**
      * {@inheritdoc}
      */
-    public function __toString()
+    public function toSql()
     {
         if (!isset($this->take) && !isset($this->offset)) {
             return '';
