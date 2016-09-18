@@ -10,6 +10,7 @@ use Wandu\Database\Support\Helper;
  *
  * ColumnExpression:
  *     col_name column_definition
+ *     [FIRST | AFTER col_name ] ............. (for alter table)
  * 
  * column_definition:
  *     data_type [NOT NULL | NULL] [DEFAULT default_value]
@@ -65,6 +66,9 @@ use Wandu\Database\Support\Helper;
  * @method \Wandu\Database\Schema\Expression\ColumnExpression binary()
  * @method \Wandu\Database\Schema\Expression\ColumnExpression charset()
  * @method \Wandu\Database\Schema\Expression\ColumnExpression collation()
+ *
+ * @method \Wandu\Database\Schema\Expression\ColumnExpression first()
+ * @method \Wandu\Database\Schema\Expression\ColumnExpression after(string $column)
  */
 class ColumnExpression implements ExpressionInterface
 {
@@ -235,6 +239,12 @@ class ColumnExpression implements ExpressionInterface
             if (isset($this->attributes['collation'])) {
                 $stringToReturn .= " COLLATE {$this->attributes['collation']}";
             }
+        }
+        if (isset($this->attributes['first']) && $this->attributes['first']) {
+            $stringToReturn .= ' FIRST';
+        }
+        if (isset($this->attributes['after'])) {
+            $stringToReturn .= " AFTER `{$this->attributes['after']}`";
         }
         return $stringToReturn;
     }

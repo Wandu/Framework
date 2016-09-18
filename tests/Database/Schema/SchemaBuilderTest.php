@@ -90,4 +90,27 @@ SQL
             $builder->toSql()
         );
     }
+
+    public function testRename()
+    {
+        $builder = new SchemaBuilder();
+
+        static::assertEquals("RENAME TABLE `users` TO `other_users`", $builder->rename('users', 'other_users')->toSql());
+    }
+
+    public function testDrop()
+    {
+        $builder = new SchemaBuilder();
+
+        static::assertEquals("DROP TABLE IF EXISTS `users`", $builder->drop('users')->ifExists()->toSql());
+        static::assertEquals("DROP TABLE `users` RESTRICT", $builder->drop('users')->restrict()->toSql());
+        static::assertEquals("DROP TABLE `users` CASCADE", $builder->drop('users')->cascade()->toSql());
+    }
+
+    public function testTruncate()
+    {
+        $builder = new SchemaBuilder();
+
+        static::assertEquals("TRUNCATE TABLE `users`", $builder->truncate('users')->toSql());
+    }
 }
