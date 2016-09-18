@@ -2,7 +2,7 @@
 namespace Wandu\Database\Schema\Expression;
 
 use Wandu\Database\Schema\ExpressionInterface;
-use Wandu\Database\Schema\TableDefinition;
+use Wandu\Database\Schema\RawExpression;
 use Wandu\Database\Support\Attributes;
 
 /**
@@ -13,16 +13,8 @@ use Wandu\Database\Support\Attributes;
  *     [table_options]
  * 
  * create_definition:
- *     col_name column_definition
- *   | [CONSTRAINT [symbol]] PRIMARY KEY [index_type] (index_col_name,...)
- *         [index_option] ...
- *   | {INDEX|KEY} [index_name] [index_type] (index_col_name,...)
- *         [index_option] ...
- *   | [CONSTRAINT [symbol]] UNIQUE [INDEX|KEY]
- *         [index_name] [index_type] (index_col_name,...)
- *         [index_option] ...
- *   | [CONSTRAINT [symbol]] FOREIGN KEY
- *         [index_name] (index_col_name,...) reference_definition
+ *     ColumnExpression
+ *   | ConstraintExpression
  * 
  * table_option:
  *     ENGINE [=] engine_name
@@ -41,9 +33,12 @@ class CreateExpression implements ExpressionInterface
     /** @var string */
     protected $table;
     
-    /** @var array */
-    protected $columns;
+    /** @var array|\Wandu\Database\Schema\ExpressionInterface[] */
+    protected $columns = [];
 
+    /** @var  array|\Wandu\Database\Schema\ExpressionInterface[] */
+    protected $constraints = [];
+    
     /** @var array */
     protected $options;
 
@@ -363,14 +358,80 @@ class CreateExpression implements ExpressionInterface
     }
 
     /**
-     * @param string $name
+     * @param string|\Wandu\Database\Schema\ExpressionInterface $name
      * @param string $type
      * @param array $attributes
-     * @return \Wandu\Database\Schema\Expression\ColumnExpression
+     * @return \Wandu\Database\Schema\Expression\ColumnExpression|\Wandu\Database\Schema\ExpressionInterface
      */
-    public function addColumn($name, $type, array $attributes = [])
+    public function addColumn($name, $type = null, array $attributes = [])
     {
+        if ($name instanceof ExpressionInterface) {
+            return $this->columns[] = $name;
+        }
         return $this->columns[] = new ColumnExpression($name, $type, $attributes);
+    }
+
+    /**
+     * @param array|string $column
+     * @return \Wandu\Database\Schema\Expression\ConstraintExpression
+     */
+    public function primaryKey($column)
+    {
+        return $this->addConstraint($column, null, [
+            'key_type' => ConstraintExpression::KEY_TYPE_PRIMARY,
+        ]);
+    }
+
+    /**
+     * @param array|string $column
+     * @param string $name
+     * @return \Wandu\Database\Schema\Expression\ConstraintExpression
+     */
+    public function uniqueKey($column, $name = null)
+    {
+        return $this->addConstraint($column, $name, [
+            'key_type' => ConstraintExpression::KEY_TYPE_UNIQUE,
+        ]);
+    }
+
+    /**
+     * @param array|string $column
+     * @param string $name
+     * @return \Wandu\Database\Schema\Expression\ConstraintExpression
+     */
+    public function foreignKey($column, $name = null)
+    {
+        return $this->addConstraint($column, $name, [
+            'key_type' => ConstraintExpression::KEY_TYPE_FOREIGN,
+        ]);
+    }
+    
+    /**
+     * @param array|string $column
+     * @param string $name
+     * @return \Wandu\Database\Schema\Expression\ConstraintExpression
+     */
+    public function index($column, $name = null)
+    {
+        return $this->addConstraint($column, $name);
+    }
+    
+    /**
+     * @param array|string|\Wandu\Database\Schema\ExpressionInterface $column
+     * @param string $name
+     * @param array $attributes
+     * @return \Wandu\Database\Schema\Expression\ConstraintExpression|\Wandu\Database\Schema\ExpressionInterface
+     */
+    public function addConstraint($column, $name = null, array $attributes = [])
+    {
+        if ($column instanceof ExpressionInterface) {
+            return $this->constraints[] = $column;
+        }
+        return $this->constraints[] = new ConstraintExpression(
+            is_array($column) ? $column : [$column],
+            $name,
+            $attributes
+        );
     }
     
     public function __toString()
@@ -379,16 +440,15 @@ class CreateExpression implements ExpressionInterface
         if (isset($this->attributes['if_not_exists'])) {
             $sql .= ' IF NOT EXISTS';
         }
-        $sql .= " `{$this->table}` (";
-        $sql .= implode(', ', array_reduce($this->columns, function ($carry, $definition) {
-            if (is_string($definition) && $definition) {
-                $carry[] = $definition;
-            } elseif ($definition instanceof ExpressionInterface && $definitionAsString = $definition->__toString()) {
+        $sql .= " `{$this->table}` (\n  ";
+        $sql .= implode(",\n  ", array_reduce(array_merge($this->columns, $this->constraints), function ($carry, ExpressionInterface $definition) {
+            $definitionAsString = $definition->__toString();
+            if ($definitionAsString) {
                 $carry[] = $definitionAsString;
             }
             return $carry;
         }, []));
-        $sql .= ')';
+        $sql .= "\n)";
         if (isset($this->attributes['engine'])) {
             $sql .= " ENGINE={$this->attributes['engine']}";
         }

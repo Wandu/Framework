@@ -8,14 +8,13 @@ use Wandu\Database\Support\Helper;
 /**
  * @see http://dev.mysql.com/doc/refman/5.7/en/create-table.html
  *
- * create_definition:
+ * ColumnExpression:
  *     col_name column_definition
  * 
  * column_definition:
  *     data_type [NOT NULL | NULL] [DEFAULT default_value]
  *         [AUTO_INCREMENT] [UNIQUE [KEY] | [PRIMARY] KEY]
- *         [COLUMN_FORMAT {FIXED|DYNAMIC|DEFAULT}]
- *         [reference_definition]
+ *         [ReferenceExpression]
  * 
  * data_type:
  *     BIT[(length)]
@@ -35,36 +34,22 @@ use Wandu\Database\Support\Helper;
  *   | TIMESTAMP[(fsp)]
  *   | DATETIME[(fsp)]
  *   | YEAR
- *   | CHAR[(length)] [BINARY]
- *         [CHARACTER SET charset_name] [COLLATE collation_name]
- *   | VARCHAR(length) [BINARY]
- *         [CHARACTER SET charset_name] [COLLATE collation_name]
+ *   | CHAR[(length)] [BINARY] [CHARACTER SET charset_name] [COLLATE collation_name]
+ *   | VARCHAR(length) [BINARY] [CHARACTER SET charset_name] [COLLATE collation_name]
  *   | BINARY[(length)]
  *   | VARBINARY(length)
  *   | TINYBLOB
  *   | BLOB
  *   | MEDIUMBLOB
  *   | LONGBLOB
- *   | TINYTEXT [BINARY]
- *         [CHARACTER SET charset_name] [COLLATE collation_name]
- *   | TEXT [BINARY]
- *         [CHARACTER SET charset_name] [COLLATE collation_name]
- *   | MEDIUMTEXT [BINARY]
- *         [CHARACTER SET charset_name] [COLLATE collation_name]
- *   | LONGTEXT [BINARY]
- *         [CHARACTER SET charset_name] [COLLATE collation_name]
- *   | ENUM(value1,value2,value3,...)
- *         [CHARACTER SET charset_name] [COLLATE collation_name]
- *   | SET(value1,value2,value3,...)
- *         [CHARACTER SET charset_name] [COLLATE collation_name]
+ *   | TINYTEXT [BINARY] [CHARACTER SET charset_name] [COLLATE collation_name]
+ *   | TEXT [BINARY] [CHARACTER SET charset_name] [COLLATE collation_name]
+ *   | MEDIUMTEXT [BINARY] [CHARACTER SET charset_name] [COLLATE collation_name]
+ *   | LONGTEXT [BINARY] [CHARACTER SET charset_name] [COLLATE collation_name]
+ *   | ENUM(value1,value2,value3,...) [CHARACTER SET charset_name] [COLLATE collation_name]
+ *   | SET(value1,value2,value3,...) [CHARACTER SET charset_name] [COLLATE collation_name]
  *   | JSON
  *   | spatial_type
- * 
- * reference_definition:
- *     REFERENCES tbl_name (index_col_name,...)
- *         [MATCH FULL | MATCH PARTIAL | MATCH SIMPLE]
- *         [ON DELETE reference_option]
- *         [ON UPDATE reference_option]
  *
  * @method \Wandu\Database\Schema\Expression\ColumnExpression nullable()
  * @method \Wandu\Database\Schema\Expression\ColumnExpression default(mixed $value)
@@ -153,6 +138,9 @@ class ColumnExpression implements ExpressionInterface
 
     /** @var string */
     protected $type;
+    
+    /** @var \Wandu\Database\Schema\Expression\ReferenceExpression */
+    protected $reference;
 
     /**
      * @param string $name
@@ -166,6 +154,19 @@ class ColumnExpression implements ExpressionInterface
         $this->attributes = $attributes;
     }
 
+    /**
+     * @param string $table
+     * @param string|array $column
+     * @return \Wandu\Database\Schema\Expression\ReferenceExpression
+     */
+    public function reference($table, $column)
+    {
+        return $this->reference = new ReferenceExpression($table, is_array($column) ? $column : [$column]);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function __toString()
     {
         $stringToReturn = "`{$this->name}` " . $this->getTypeString();
@@ -190,6 +191,12 @@ class ColumnExpression implements ExpressionInterface
         }
         if (isset($this->attributes['primary'])) {
             $stringToReturn .= ' PRIMARY KEY';
+        }
+        if (isset($this->reference)) {
+            $referenceString = $this->reference->__toString();
+            if ($referenceString) {
+                $stringToReturn .= " {$referenceString}";
+            }
         }
         return $stringToReturn;
     }

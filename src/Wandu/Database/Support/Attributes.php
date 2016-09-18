@@ -13,7 +13,9 @@ trait Attributes
      */
     public function __call($name, array $arguments = [])
     {
-        $this->attributes[Helper::camelCaseToUnderscore($name)] = count($arguments) ? $arguments[0] : true;
+        $length = count($arguments);
+        $this->attributes[Helper::camelCaseToUnderscore($name)] =
+            $length ? $length === 1 ? $arguments[0] : $arguments : true;
         return $this;
     }
 
