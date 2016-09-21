@@ -5,8 +5,6 @@ use Wandu\Database\Query\ExpressionInterface;
 use Wandu\Database\Support\Attributes;
 
 /**
- * @see http://dev.mysql.com/doc/refman/5.7/en/create-table.html
- * 
  * CREATE TABLE [IF NOT EXISTS] $table
  *     (create_definition,...)
  *     [table_options]
@@ -20,6 +18,7 @@ use Wandu\Database\Support\Attributes;
  *   | [DEFAULT] CHARACTER SET [=] charset_name
  *   | [DEFAULT] COLLATE [=] collation_name
  *
+ * @see http://dev.mysql.com/doc/refman/5.7/en/create-table.html
  * @method \Wandu\Database\Schema\Expression\CreateExpression ifNotExists()
  * @method \Wandu\Database\Schema\Expression\CreateExpression engine(string $engine)
  * @method \Wandu\Database\Schema\Expression\CreateExpression charset(string $charset)
@@ -32,10 +31,10 @@ class CreateExpression implements ExpressionInterface
     /** @var string */
     protected $table;
     
-    /** @var array|\Wandu\Database\ExpressionInterface[] */
+    /** @var array|\Wandu\Database\Query\ExpressionInterface[] */
     protected $columns = [];
 
-    /** @var  array|\Wandu\Database\ExpressionInterface[] */
+    /** @var  array|\Wandu\Database\Query\ExpressionInterface[] */
     protected $constraints = [];
     
     /** @var array */
@@ -357,10 +356,10 @@ class CreateExpression implements ExpressionInterface
     }
 
     /**
-     * @param string|\Wandu\Database\ExpressionInterface $name
+     * @param string|\Wandu\Database\Query\ExpressionInterface $name
      * @param string $type
      * @param array $attributes
-     * @return \Wandu\Database\Schema\Expression\ColumnExpression|\Wandu\Database\ExpressionInterface
+     * @return \Wandu\Database\Schema\Expression\ColumnExpression|\Wandu\Database\Query\ExpressionInterface
      */
     public function addColumn($name, $type = null, array $attributes = [])
     {
@@ -416,10 +415,10 @@ class CreateExpression implements ExpressionInterface
     }
     
     /**
-     * @param array|string|\Wandu\Database\ExpressionInterface $column
+     * @param array|string|\Wandu\Database\Query\ExpressionInterface $column
      * @param string $name
      * @param array $attributes
-     * @return \Wandu\Database\Schema\Expression\ConstraintExpression|\Wandu\Database\ExpressionInterface
+     * @return \Wandu\Database\Schema\Expression\ConstraintExpression|\Wandu\Database\Query\ExpressionInterface
      */
     public function addConstraint($column, $name = null, array $attributes = [])
     {

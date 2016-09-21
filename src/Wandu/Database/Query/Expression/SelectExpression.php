@@ -16,7 +16,7 @@ class QueryBuilder
     const TYPE_DELETE = 1;
     const TYPE_UPDATE = 2;
     const TYPE_INSERT = 3;
-    
+
     /** @var array */
     protected static $takeable = [
         0 => ['where', 'orderBy', 'limit'],
@@ -27,19 +27,19 @@ class QueryBuilder
 
     /** @var string */
     protected $table;
-    
+
     /** @var int */
     protected $type = 0; // static::TYPE_SELECT
 
     /** @var array */
     protected $select = ['*'];
-    
+
     /** @var array */
     protected $insert = [];
-    
+
     /** @var \Wandu\Database\Query\Expression\SetExpression */
     protected $set;
-    
+
     /** @var \Wandu\Database\Query\Expression\WhereExpression */
     protected $where;
 
@@ -48,7 +48,7 @@ class QueryBuilder
 
     /** @var \Wandu\Database\Query\Expression\LimitExpression */
     protected $limit;
-    
+
     /**
      * @param string $table
      */
@@ -56,7 +56,7 @@ class QueryBuilder
     {
         $this->table = $table;
     }
-    
+
     /**
      * @param array|\Traversable $valuesToInsert
      * @return static
@@ -278,7 +278,7 @@ class QueryBuilder
         $columns = array_keys($insertParts[0]);
         $valueSqlPart = Helper::stringRepeat(', ', '?', count($columns), '(', ')');
         return "INSERT INTO `{$this->table}`(`". implode("`, `", array_values($columns)) . "`)" .
-            " VALUES ". Helper::stringRepeat(', ', $valueSqlPart, count($insertParts));
+        " VALUES ". Helper::stringRepeat(', ', $valueSqlPart, count($insertParts));
     }
 
     /**

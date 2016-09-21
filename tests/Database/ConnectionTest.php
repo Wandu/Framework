@@ -1,11 +1,13 @@
 <?php
 namespace Wandu\Database;
 
+use Doctrine\DBAL\Schema\Schema;
 use PDO;
 use PHPUnit_Framework_TestCase;
 use Wandu\Database\Connector\MysqlConnector;
 use Wandu\Database\Contracts\ConnectionInterface;
 use Wandu\Database\Query\QueryBuilder;
+use Wandu\Database\Schema\SchemaBuilder;
 
 class ConnectionTest extends PHPUnit_Framework_TestCase
 {
