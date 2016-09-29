@@ -8,20 +8,6 @@ abstract class ValidatorAbstract implements ValidatorInterface
 {
     const ERROR_TYPE = 'unknown';
 
-    /** @var string */
-    protected $name;
-
-    /**
-     * @param string $name
-     * @return static
-     */
-    public function withName($name)
-    {
-        $new = clone $this;
-        $new->name = $name;
-        return $new;
-    }
-    
     /**
      * @param mixed $item
      * @return bool
@@ -33,6 +19,7 @@ abstract class ValidatorAbstract implements ValidatorInterface
      */
     public function assert($item)
     {
+        if (!isset($item)) return;
         if (!$this->test($item)) {
             throw $this->createException();
         }
@@ -43,6 +30,7 @@ abstract class ValidatorAbstract implements ValidatorInterface
      */
     public function validate($item)
     {
+        if (!isset($item)) return true;
         return $this->test($item);
     }
 
@@ -57,10 +45,9 @@ abstract class ValidatorAbstract implements ValidatorInterface
     /**
      * @return string
      */
-    public function getErrorType()
+    protected function getErrorType()
     {
-        $suffix = isset($this->name) ? '@' . $this->name : '';
-        $type = static::ERROR_TYPE . $suffix;
+        $type = static::ERROR_TYPE;
         foreach (get_object_vars($this) as $key => $value) {
             if (is_scalar($value)) {
                 $type = str_replace('{{' . $key . '}}', $value, $type);

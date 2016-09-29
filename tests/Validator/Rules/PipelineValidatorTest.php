@@ -4,48 +4,48 @@ namespace Wandu\Validator\Rules;
 use Wandu\Validator\ValidatorTestCase;
 use function Wandu\Validator\validator;
 
-class AndValidatorTest extends ValidatorTestCase
+class PipelineValidatorTest extends ValidatorTestCase
 {
     public function testValidate()
     {
-        $validator = validator()->and();
+        $validator = validator()->pipeline();
 
         static::assertTrue($validator->validate("always"));
         static::assertTrue($validator->validate(true));
 
-        $validator = validator()->and([
+        $validator = validator()->pipeline([
             validator()->alwaysTrue(),
             validator()->alwaysTrue(),
             validator()->alwaysTrue(),
         ]);
 
-        static::assertTrue($validator->validate(null));
+        static::assertTrue($validator->validate(''));
 
-        $validator = validator()->and([
+        $validator = validator()->pipeline([
             validator()->alwaysFalse(),
             validator()->alwaysTrue(),
             validator()->alwaysTrue(),
         ]);
 
-        static::assertFalse($validator->validate(null));
+        static::assertFalse($validator->validate(''));
 
-        $validator = validator()->and([
+        $validator = validator()->pipeline([
             validator()->alwaysFalse(),
             validator()->alwaysFalse(),
             validator()->alwaysFalse(),
         ]);
 
-        static::assertFalse($validator->validate(null));
+        static::assertFalse($validator->validate(''));
     }
 
     public function testAssert()
     {
-        $validator = validator()->and();
+        $validator = validator()->pipeline();
 
         $validator->assert("always");
         $validator->assert(true);
 
-        $validator = validator()->and([
+        $validator = validator()->pipeline([
             validator()->alwaysTrue(),
             validator()->alwaysTrue(),
             validator()->alwaysTrue(),
@@ -53,26 +53,26 @@ class AndValidatorTest extends ValidatorTestCase
 
         $validator->assert(null);
 
-        $validator = validator()->and([
+        $validator = validator()->pipeline([
             validator()->alwaysFalse(),
             validator()->alwaysTrue(),
             validator()->alwaysTrue(),
         ]);
 
         $this->assertInvalidValueException(function () use ($validator) {
-            $validator->assert(null);
+            $validator->assert('');
         }, [
             'always_false',
         ]);
 
-        $validator = validator()->and([
+        $validator = validator()->pipeline([
             validator()->alwaysFalse(),
             validator()->alwaysFalse(),
             validator()->alwaysFalse(),
         ]);
 
         $this->assertInvalidValueException(function () use ($validator) {
-            $validator->assert(null);
+            $validator->assert('');
         }, [
             'always_false',
             'always_false',
@@ -82,7 +82,7 @@ class AndValidatorTest extends ValidatorTestCase
     
     public function testMinAndMax()
     {
-        $validator = validator()->and([
+        $validator = validator()->pipeline([
             validator()->min(10),
             validator()->max(100),
         ]);
@@ -108,7 +108,7 @@ class AndValidatorTest extends ValidatorTestCase
 
     public function testMinAndMin()
     {
-        $validator = validator()->and([
+        $validator = validator()->pipeline([
             validator()->min(10),
             validator()->min(30),
         ]);

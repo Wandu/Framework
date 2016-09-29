@@ -5,6 +5,8 @@ class RulesTest extends ValidatorTestCase
 {
     public function testBoolean()
     {
+        validator()->boolean()->assert(null); // null is always safe.
+        
         validator()->boolean()->assert(true);
         validator()->boolean()->assert(false);
 
@@ -27,6 +29,8 @@ class RulesTest extends ValidatorTestCase
 
     public function testInteger()
     {
+        validator()->integer()->assert(null); // null is always safe.
+
         validator()->integer()->assert(30);
         $this->assertInvalidValueException(function () {
             validator()->integer()->assert("30");
@@ -35,8 +39,30 @@ class RulesTest extends ValidatorTestCase
         ]);
     }
 
+    public function testNumeric()
+    {
+        validator()->numeric()->assert(null); // null is always safe.
+
+        validator()->numeric()->assert(30);
+        validator()->numeric()->assert("30");
+        validator()->numeric()->assert(0347123);
+        validator()->numeric()->assert("0347123");
+        validator()->numeric()->assert(0xfffff);
+        validator()->numeric()->assert('0xfffff');
+        validator()->numeric()->assert(30.33);
+        validator()->numeric()->assert('30.33');
+
+        $this->assertInvalidValueException(function () {
+            validator()->numeric()->assert("string");
+        }, [
+            'numeric',
+        ]);
+    }
+
     public function testIntegerable()
     {
+        validator()->integerable()->assert(null); // null is always safe.
+
         validator()->integerable()->assert('30');
         validator()->integerable()->assert(30);
         validator()->integerable()->assert('-30');
@@ -81,6 +107,8 @@ class RulesTest extends ValidatorTestCase
 
     public function testFloat()
     {
+        validator()->float()->assert(null); // null is always safe.
+
         validator()->float()->assert(30.1);
         validator()->float()->assert(30.0);
 
@@ -98,6 +126,8 @@ class RulesTest extends ValidatorTestCase
 
     public function testFloatable()
     {
+        validator()->floatable()->assert(null); // null is always safe.
+
         validator()->floatable()->assert('30');
         validator()->floatable()->assert(30);
         validator()->floatable()->assert('-30');
@@ -129,6 +159,8 @@ class RulesTest extends ValidatorTestCase
 
     public function testString()
     {
+        validator()->string()->assert(null); // null is always safe.
+
         validator()->string()->assert('30');
         $this->assertInvalidValueException(function () {
             validator()->string()->assert(30);
@@ -139,6 +171,8 @@ class RulesTest extends ValidatorTestCase
     
     public function testStringable()
     {
+        validator()->stringable()->assert(null); // null is always safe.
+
         validator()->stringable()->assert('30');
         validator()->stringable()->assert(30);
         validator()->stringable()->assert(40.5);
@@ -159,6 +193,8 @@ class RulesTest extends ValidatorTestCase
 
     public function testMin()
     {
+        validator()->min(5)->assert(null); // null is always safe.
+
         validator()->min(5)->assert(100);
         validator()->min(5)->assert(6);
         validator()->min(5)->assert(5);
@@ -182,6 +218,8 @@ class RulesTest extends ValidatorTestCase
 
     public function testMax()
     {
+        validator()->max(5)->assert(null); // null is always safe.
+
         validator()->max(5)->assert(0);
         validator()->max(5)->assert(4);
         validator()->max(5)->assert(5);
@@ -205,6 +243,8 @@ class RulesTest extends ValidatorTestCase
 
     public function testLengthMin()
     {
+        validator()->lengthMin(5)->assert(null); // null is always safe.
+
         validator()->lengthMin(5)->assert('aaaaaaa');
         validator()->lengthMin(5)->assert('aaaaaa');
         validator()->lengthMin(5)->assert('aaaaa');
@@ -238,6 +278,8 @@ class RulesTest extends ValidatorTestCase
 
     public function testLengthMax()
     {
+        validator()->lengthMax(5)->assert(null); // null is always safe.
+
         validator()->lengthMax(5)->assert('');
         validator()->lengthMax(5)->assert('aaaa');
         validator()->lengthMax(5)->assert('aaaaa');

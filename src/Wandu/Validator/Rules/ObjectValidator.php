@@ -1,6 +1,7 @@
 <?php
 namespace Wandu\Validator\Rules;
 
+use stdClass;
 use Wandu\Validator\Exception\InvalidValueException;
 use function Wandu\Validator\validator;
 
@@ -35,6 +36,7 @@ class ObjectValidator extends ValidatorAbstract
      */
     public function assert($item)
     {
+        if (!isset($item)) $item = new stdClass();
         /** @var \Wandu\Validator\Exception\InvalidValueException[] $exceptions */
         $exceptions = [];
         if (!$this->test($item)) {
@@ -42,10 +44,11 @@ class ObjectValidator extends ValidatorAbstract
         }
         foreach ($this->properties as $name => $validator) {
             try {
-                if (!is_object($item) || object_get($item, $name) === null) {
-                    throw new InvalidValueException(static::ERROR_PROPERTY_TYPE);
+                $value = null;
+                if (is_object($item)) {
+                    $value = object_get($item, $name);
                 }
-                $validator->assert(object_get($item, $name));
+                $validator->assert($value);
             } catch (InvalidValueException $e) {
                 $exceptions[$name] = $e;
             }
@@ -60,9 +63,9 @@ class ObjectValidator extends ValidatorAbstract
      */
     public function validate($item)
     {
-        if (!$this->test($item)) {
-            return false;
-        }
+        if (!isset($item)) $item = new stdClass();
+        if (!$this->test($item)) return false;
+
         foreach ($this->properties as $name => $validator) {
             if (!is_object($item) || object_get($item, $name) === null) {
                 return false;

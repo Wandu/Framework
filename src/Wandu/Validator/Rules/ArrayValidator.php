@@ -7,7 +7,6 @@ use function Wandu\Validator\validator;
 class ArrayValidator extends ValidatorAbstract
 {
     const ERROR_TYPE = 'array';
-    const ERROR_ATTRIBUTE_TYPE = 'array_attribute';
     
     /** @var \Wandu\Validator\Contracts\ValidatorInterface[] */
     protected $attributes = [];
@@ -35,6 +34,7 @@ class ArrayValidator extends ValidatorAbstract
      */
     public function assert($item)
     {
+        if (!isset($item)) $item = [];
         /** @var \Wandu\Validator\Exception\InvalidValueException[] $exceptions */
         $exceptions = [];
         if (!$this->test($item)) {
@@ -42,10 +42,7 @@ class ArrayValidator extends ValidatorAbstract
         }
         foreach ($this->attributes as $name => $validator) {
             try {
-                if (!is_array($item) || !array_key_exists($name, $item)) {
-                    throw new InvalidValueException(static::ERROR_ATTRIBUTE_TYPE);
-                }
-                $validator->assert($item[$name]);
+                $validator->assert(isset($item[$name]) ? $item[$name] : null);
             } catch (InvalidValueException $e) {
                 $exceptions[$name] = $e;
             }
@@ -60,9 +57,9 @@ class ArrayValidator extends ValidatorAbstract
      */
     public function validate($item)
     {
-        if (!$this->test($item)) {
-            return false;
-        }
+        if (!isset($item)) $item = [];
+        if (!$this->test($item)) return false;
+        
         foreach ($this->attributes as $name => $validator) {
             if (!is_array($item) || !array_key_exists($name, $item)) {
                 return false;

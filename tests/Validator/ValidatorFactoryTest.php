@@ -45,18 +45,18 @@ class ValidatorFactoryTest extends PHPUnit_Framework_TestCase
     public function testCreateAnd()
     {
         static::assertEquals(
-            validator()->and([
+            validator()->pipeline([
                 validator()->string(),
                 validator()->lengthMin(20),
             ]),
-            validator()->from('string&&length_min:20')
+            validator()->from('string|length_min:20')
         );
         static::assertEquals(
-            validator()->and([
+            validator()->pipeline([
                 validator()->string(),
                 validator()->lengthMin(20),
             ]),
-            validator()->from('string && length_min:20')
+            validator()->from('string | length_min:20')
         );
     }
 
@@ -76,20 +76,20 @@ class ValidatorFactoryTest extends PHPUnit_Framework_TestCase
 
         // with pipeline
         static::assertEquals(validator()->array([
-            'username' => validator()->and([
+            'username' => validator()->pipeline([
                 validator()->string(),
                 validator()->lengthMax(30),
             ]),
             'license' => validator()->array([
-                'expired_at' => validator()->and([
+                'expired_at' => validator()->pipeline([
                     validator()->integer(),
                     validator()->min(20),
                 ]),
             ]),
         ]), validator()->from([
-            'username' => 'string&&length_max:30',
+            'username' => 'string|length_max:30',
             'license' => [
-                'expired_at' => 'integer&&min:20',
+                'expired_at' => 'integer|min:20',
             ]
         ]));
     }
@@ -102,50 +102,20 @@ class ValidatorFactoryTest extends PHPUnit_Framework_TestCase
         );
         
         static::assertEquals(validator()->array([
-            'username' => validator()->and([
+            'username' => validator()->pipeline([
                 validator()->string(),
                 validator()->lengthMax(30),
             ]),
             'license' => validator()->array([
-                'expired_at' => validator()->and([
+                'expired_at' => validator()->pipeline([
                     validator()->integer(),
                     validator()->not(validator()->min(20)),
                 ]),
             ]),
         ]), validator()->from([
-            'username' => 'string&&length_max:30',
+            'username' => 'string|length_max:30',
             'license' => [
-                'expired_at' => 'integer&&!min:20',
-            ]
-        ]));
-    }
-
-    public function testCreateOptional()
-    {
-        static::assertEquals(
-            validator()->not(validator()->optional(validator()->min(20))),
-            validator()->from('!min?:20')
-        );
-
-        static::assertEquals(validator()->array([
-            'username' => validator()->and([
-                validator()->not(
-                    validator()->optional(
-                        validator()->string()
-                    )
-                ),
-                validator()->lengthMax(30),
-            ]),
-            'license' => validator()->array([
-                'expired_at' => validator()->and([
-                    validator()->optional(validator()->integer()),
-                    validator()->not(validator()->min(20))
-                ]),
-            ]),
-        ]), validator()->from([
-            'username' => '!string?&&length_max:30',
-            'license' => [
-                'expired_at' => 'integer?&&!min:20',
+                'expired_at' => 'integer|!min:20',
             ]
         ]));
     }

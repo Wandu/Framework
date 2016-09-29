@@ -21,7 +21,7 @@ class CustomValidatorTest extends ValidatorTestCase
     
     public function testValidateWithOthers()
     {
-        $validator = validator()->and([
+        $validator = validator()->pipeline([
             validator()->max(20),
             new TestOverTenValidator(),
         ]);

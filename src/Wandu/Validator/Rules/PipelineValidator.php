@@ -4,20 +4,11 @@ namespace Wandu\Validator\Rules;
 use Wandu\Validator\Contracts\ValidatorInterface;
 use Wandu\Validator\Exception\InvalidValueException;
 
-/**
- * true && true = true
- * true = true
- * nothing = true
- * 
- * true && false = false
- * false && true = false
- * 
- */
-class OrValidator implements ValidatorInterface
+class PipelineValidator implements ValidatorInterface
 {
     /** @var array|\Wandu\Validator\Contracts\ValidatorInterface[] */
     protected $validators;
-
+    
     /**
      * @param \Wandu\Validator\Contracts\ValidatorInterface[] $validators
      */
@@ -25,16 +16,12 @@ class OrValidator implements ValidatorInterface
     {
         $this->validators = $validators;
     }
-
+    
     /**
      * {@inheritdoc}
      */
     public function assert($item)
     {
-        if (count($this->validators) === 0) {
-            throw new InvalidValueException();
-        }
-
         /** @var \Wandu\Validator\Exception\InvalidValueException[] $exceptions */
         $exceptions = [];
         foreach ($this->validators as $validator) {
@@ -44,7 +31,7 @@ class OrValidator implements ValidatorInterface
                 $exceptions[] = $exception;
             }
         }
-        if (count($exceptions) === count($this->validators)) {
+        if (count($exceptions)) {
             $baseException = $exceptions[0];
             for ($i = 1, $length = count($exceptions); $i < $length; $i++) {
                 $baseException->appendTypes($exceptions[$i]->getTypes());
@@ -59,10 +46,10 @@ class OrValidator implements ValidatorInterface
     public function validate($item)
     {
         foreach ($this->validators as $validator) {
-            if ($validator->validate($item)) {
-                return true;
+            if (!$validator->validate($item)) {
+                return false;
             }
         }
-        return false;
+        return true;
     }
 }

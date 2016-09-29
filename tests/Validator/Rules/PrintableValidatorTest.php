@@ -14,6 +14,8 @@ class PrintableValidatorTest extends ValidatorTestCase
         validator()->printable()->assert('string');
         validator()->printable()->assert('string');
 
+        validator()->printable()->assert(new TestPrintableValidator());
+
         $this->assertInvalidValueException(function () {
             validator()->printable()->assert([]);
         }, [
@@ -24,11 +26,6 @@ class PrintableValidatorTest extends ValidatorTestCase
         }, [
             'printable',
         ]);
-    }
-    
-    public function testObjectHasToString()
-    {
-        validator()->printable()->assert(new TestPrintableValidator());
     }
 }
 

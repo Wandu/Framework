@@ -44,23 +44,11 @@ class ObjectValidatorTest extends ValidatorTestCase
             $validator->assert('string');
         }, [
             'object',
-            'object_property@name',
-            'object_property@age',
         ]);
 
-        $this->assertInvalidValueException(function () use ($validator) {
-            $validator->assert((object)[]);
-        }, [
-            'object_property@name',
-            'object_property@age',
-        ]);
-
-        $this->assertInvalidValueException(function () use ($validator) {
-            $validator->assert((object)[
-                'age' => 30
-            ]);
-        }, [
-            'object_property@name',
+        $validator->assert((object)[]);
+        $validator->assert((object)[
+            'age' => 30
         ]);
     }
 
@@ -86,32 +74,18 @@ class ObjectValidatorTest extends ValidatorTestCase
             $validator->assert('string');
         }, [
             'object',
-            'object_property@name',
-            'object_property@company',
         ]);
 
-        $this->assertInvalidValueException(function () use ($validator) {
-            $validator->assert((object)[]);
-        }, [
-            'object_property@name',
-            'object_property@company',
-        ]);
-
-        $this->assertInvalidValueException(function () use ($validator) {
-            $validator->assert((object)[
-                'company' => [],
-            ]);
-        }, [
-            'object_property@name',
-            'array_attribute@company.name',
-            'array_attribute@company.age',
+        $validator->assert((object)[]);
+        $validator->assert((object)[
+            'company' => [],
         ]);
     }
 
     public function testAssertAndValidatorOfArray()
     {
         $validator = validator()->object([
-            'name' => 'string&&length_min:5',
+            'name' => 'string|length_min:5',
         ]);
 
         $this->assertInvalidValueException(function () use ($validator) {
