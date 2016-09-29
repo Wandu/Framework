@@ -25,6 +25,7 @@ use Wandu\Validator\Rules\ArrayValidator;
  * @method \Wandu\Validator\Contracts\ValidatorInterface lengthMin(int $min)
  * @method \Wandu\Validator\Contracts\ValidatorInterface lengthMax(int $max)
  * @method \Wandu\Validator\Contracts\ValidatorInterface email(\Egulias\EmailValidator\Validation\EmailValidation $validation = null)
+ * @method \Wandu\Validator\Contracts\ValidatorInterface regExp(string $pattern)
  */
 class ValidatorFactory
 {
