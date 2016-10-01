@@ -72,9 +72,11 @@ class Dispatcher
             $routes = $cacheData['routes'];
         } else {
             $router = new Router;
-            $router->middleware($this->config->getMiddleware(), function (Router $router) {
-                $router->append($this->routes);
-            });
+            if ($this->routes) {
+                $router->middleware($this->config->getMiddleware(), function (Router $router) {
+                    $router->append($this->routes);
+                });
+            }
             $dispatchData = $router->getCollector()->getData();
             $routes = $router->getRoutes();
         }

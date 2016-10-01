@@ -1,9 +1,10 @@
 <?php
-namespace ___NAMESPACE___;
+namespace YourOwnApp;
 
 use Wandu\DI\ContainerInterface;
 use Wandu\DI\ServiceProviderInterface;
 use Wandu\Foundation\Contracts\HttpErrorHandlerInterface;
+use Wandu\Foundation\Contracts\KernelInterface;
 use Wandu\Foundation\Error\DefaultHttpErrorHandler;
 
 class ApplicationServiceProvider implements ServiceProviderInterface
@@ -15,5 +16,10 @@ class ApplicationServiceProvider implements ServiceProviderInterface
 
     public function boot(ContainerInterface $app)
     {
+        if ($app->has(KernelInterface::class)) {
+            $kernel = $app->get(KernelInterface::class);
+            $kernel['commands'] = require __DIR__ . '/../app/commands.php';
+            $kernel['routes'] = require __DIR__ . '/../app/routes.php';
+        }
     }
 }

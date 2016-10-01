@@ -40,9 +40,9 @@ class TwigView implements RenderInterface
             $twig->setLoader(new Twig_Loader_Filesystem($basePath));
         }
         try {
-            return $twig->render($template . '.html', $values + $this->values);
+            return $twig->render($template, $values + $this->values);
         } catch (\Exception $e) {
-            throw new FileNotFoundException("Cannot find the template file, {$template}.html");
+            throw new FileNotFoundException("Cannot find the template file, {$template}");
         }
     }
 }

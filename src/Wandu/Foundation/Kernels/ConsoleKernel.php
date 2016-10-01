@@ -2,35 +2,12 @@
 namespace Wandu\Foundation\Kernels;
 
 use Symfony\Component\Console\Application as SymfonyApplication;
-use Wandu\Config\Config;
-use Wandu\Config\Contracts\ConfigInterface;
 use Wandu\Console\Dispatcher;
 use Wandu\DI\ContainerInterface;
 use Wandu\Foundation\Application;
-use Wandu\Foundation\Contracts\DefinitionInterface;
-use Wandu\Foundation\Contracts\KernelInterface;
 
-class ConsoleKernel implements KernelInterface
+class ConsoleKernel extends KernelAbstract
 {
-    /** @var \Wandu\Foundation\Contracts\DefinitionInterface */
-    protected $definition;
-
-    public function __construct(DefinitionInterface $definition)
-    {
-        $this->definition = $definition;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function boot(ContainerInterface $app)
-    {
-        $app->instance(Config::class, new Config($this->definition->configs()));
-        $app->alias(ConfigInterface::class, Config::class);
-        $app->alias('config', Config::class);
-        $this->definition->providers($app);
-    }
-
     /**
      * {@inheritdoc}
      */
@@ -44,7 +21,10 @@ class ConsoleKernel implements KernelInterface
             )
         );
 
-        $this->definition->commands($dispatcher);
+        $commands = isset($this->attributes['commands']) ? $this->attributes['commands'] : [];
+        foreach ($commands as $name => $command) {
+            $dispatcher->add($name, $command);
+        }
         $dispatcher->execute();
         return $symfonyApplication->run();
     }

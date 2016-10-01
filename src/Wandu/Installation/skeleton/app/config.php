@@ -17,18 +17,18 @@ return [
             ],
         ],
         'migration' => [
-            'path' => '{path}migrations',
+            'path' => 'migrations',
         ],
     ],
     'session' => [
         'type' => 'file',
-        'path' => '{path}cache/sessions',
+        'path' => 'cache/sessions',
     ],
     'log' => [
         'path' => null,
     ],
     'view' => [
-        'path' => '{path}views',
-        'cache' => '{path}cache/views',
+        'path' => 'views',
+        'cache' => 'cache/views',
     ],
 ];

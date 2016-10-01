@@ -1,5 +1,5 @@
 <?php
-namespace Wandu\Database;
+namespace Wandu\Bridges\Eloquent;
 
 use Illuminate\Database\Capsule\Manager;
 use Illuminate\Database\Schema\Builder;
@@ -9,6 +9,9 @@ abstract class Migration
     /** @var string */
     protected $connection = 'default';
 
+    /** @var \Illuminate\Database\Capsule\Manager */
+    protected $manager;
+    
     /**
      * @param \Illuminate\Database\Capsule\Manager $manager
      */

@@ -31,8 +31,10 @@ class Application extends Container
      */
     public function boot()
     {
-        $this->kernel->boot($this);
-        parent::boot();
+        if (!$this->isBooted) {
+            $this->kernel->boot($this);
+            parent::boot();
+        }
         return $this;
     }
 

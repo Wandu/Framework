@@ -31,6 +31,9 @@ class Container implements ContainerInterface
     
     /** @var array */
     protected $indexOfAliases = [];
+    
+    /** @var bool */
+    protected $isBooted = false;
 
     public function __construct()
     {
@@ -267,8 +270,11 @@ class Container implements ContainerInterface
      */
     public function boot()
     {
-        foreach ($this->providers as $provider) {
-            $provider->boot($this);
+        if (!$this->isBooted) {
+            foreach ($this->providers as $provider) {
+                $provider->boot($this);
+            }
+            $this->isBooted = true;
         }
         return $this;
     }

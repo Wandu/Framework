@@ -1,5 +1,5 @@
 <?php
-namespace Wandu\Database\Console;
+namespace Wandu\Bridges\Eloquent\Console;
 
 use DirectoryIterator;
 use Illuminate\Database\Capsule\Manager;

@@ -50,19 +50,23 @@ class InstallCommand extends Command
         $appBasePath = $this->getAppBasePath();
         $appNamespace = $this->getAppNamespace();
 
-        $installer = new SkeletonBuilder($appBasePath, __DIR__ . '/skeleton-app');
+        $installer = new SkeletonBuilder($appBasePath, __DIR__ . '/../skeleton');
         $path = str_replace($this->basePath, '', $appBasePath);
         $path = ltrim($path ? $path . '/' : '', '/');
         
         $replacers = [
-            '___NAMESPACE___' => $appNamespace,
+            'YourOwnApp' => $appNamespace,
             '{path}' => $path,
             '%%origin%%' => new OriginReplacer(),
         ];
         $installer->build($replacers);
 
-        $baseInstaller = new SkeletonBuilder($this->basePath, __DIR__ . '/skeleton-root');
-        $baseInstaller->build($replacers);
+        file_put_contents($appBasePath . '/.wandu.php', <<<PHP
+<?php
+return new {$appNamespace}\ApplicationDefinition();
+
+PHP
+        );
 
         // set composer
         $this->saveAutoloadToComposer($appNamespace, $composerFile, $path);
