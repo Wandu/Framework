@@ -49,8 +49,8 @@ GITIGNORE
         $this->assertTrue(is_dir(__DIR__ . '/target'));
         $this->assertTrue(is_dir(__DIR__ . '/target/cache'));
         
-        $this->assertFalse(file_exists(__DIR__ . '/target/cache/.gitkeep'));
-        
+        $this->assertTrue(file_exists(__DIR__ . '/target/cache/.gitkeep'));
+
         $assertNumber = 30 + $randNumber;
         $this->assertEquals(<<<PHP
 <?php

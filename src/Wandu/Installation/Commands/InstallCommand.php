@@ -19,13 +19,17 @@ class InstallCommand extends Command
 
     /** @var \Symfony\Component\Console\Style\SymfonyStyle */
     protected $io;
-    
+
     /** @var string */
     protected $basePath;
-    
+
+    /** @var string */
+    protected $appPath;
+
     public function __construct(ContainerInterface $container)
     {
         $this->basePath = $container['base_path'];
+        $this->appPath = $container['app_path'];
     }
 
     /**
@@ -39,7 +43,7 @@ class InstallCommand extends Command
 
     public function execute()
     {
-        if (file_exists($this->basePath . '/.wandu.php')) {
+        if (file_exists($this->appPath . '/.wandu.php')) {
             throw new \RuntimeException('already installed. if you want to re-install, remove the ".wandu.php" file!');
         }
 
@@ -47,13 +51,39 @@ class InstallCommand extends Command
 
         $composerFile = $this->basePath . '/composer.json';
 
-        $appBasePath = $this->getAppBasePath();
-        $appNamespace = $this->getAppNamespace();
+        $appBasePath = $this->askAppBasePath('install path?', $this->basePath);
+        $appNamespace = $this->askAppNamespace('app namespace?', 'Wandu\\App');
 
-        $installer = new SkeletonBuilder($appBasePath, __DIR__ . '/../skeleton');
+        $templateEngine = $this->io->choice(
+            'template engine?',
+            ['php' => 'PHP', 'twig' => 'Twig(Sensio Labs)', 'latte' => 'Latte(Nette)', ],
+            'PHP'
+        );
+
+        $database = $this->io->choice(
+            'orm(database)?',
+            ['none' => 'None', 'eloquent' => 'Eloquent(Laravel)', ],
+            'None'
+        );
+
         $path = str_replace($this->basePath, '', $appBasePath);
         $path = ltrim($path ? $path . '/' : '', '/');
-        
+
+        $this->install($appBasePath, $appNamespace, $path);
+
+        // set composer
+        $this->saveAutoloadToComposer($appNamespace, $composerFile, $path);
+
+        // run composer
+        $this->runDumpAutoload($composerFile);
+
+        $this->output->writeln("<info>Install Complete!</info>");
+    }
+
+    protected function install($appBasePath, $appNamespace, $path)
+    {
+        $installer = new SkeletonBuilder($appBasePath, __DIR__ . '/../skeleton');
+
         $replacers = [
             'YourOwnApp' => $appNamespace,
             '{path}' => $path,
@@ -67,16 +97,8 @@ return new {$appNamespace}\ApplicationDefinition();
 
 PHP
         );
-
-        // set composer
-        $this->saveAutoloadToComposer($appNamespace, $composerFile, $path);
-
-        // run composer
-        $this->runDumpAutoload($composerFile);
-
-        $this->output->writeln("<info>Install Complete!</info>");
     }
-
+    
     protected function runDumpAutoload($composerFile)
     {
         $basePath = dirname($composerFile);
@@ -115,22 +137,16 @@ PHP
         $this->output->writeln("<info>ok</info>");
     }
 
-    /**
-     * @return string
-     */
-    protected function getAppNamespace()
+    protected function askAppNamespace($message, $default)
     {
-        return $this->io->ask('app namespace?', 'Wandu\\App', function ($namespace) {
+        return $this->io->ask($message, $default, function ($namespace) {
             return rtrim($namespace, '\\');
         });
     }
 
-    /**
-     * @return string
-     */
-    protected function getAppBasePath()
+    protected function askAppBasePath($message, $default)
     {
-        $appBasePath = $this->io->ask('install path?', $this->basePath);
+        $appBasePath = $this->io->ask($message, $default);
         if ($appBasePath[0] === '~') {
             if (!function_exists('posix_getuid')) {
                 throw new \InvalidArgumentException('cannot use tilde(~) character in your php enviroment.');
