@@ -48,7 +48,13 @@ class RulesTest extends ValidatorTestCase
         validator()->numeric()->assert(0347123);
         validator()->numeric()->assert("0347123");
         validator()->numeric()->assert(0xfffff);
-        validator()->numeric()->assert('0xfffff');
+        
+        if (!version_compare(PHP_VERSION, '7', '>=')) {
+            // php7 not support hex string.
+            // https://wiki.php.net/rfc/remove_hex_support_in_numeric_strings
+             validator()->numeric()->assert('0xfffff');
+        }
+        
         validator()->numeric()->assert(30.33);
         validator()->numeric()->assert('30.33');
 
