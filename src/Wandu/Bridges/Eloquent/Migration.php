@@ -3,8 +3,9 @@ namespace Wandu\Bridges\Eloquent;
 
 use Illuminate\Database\Capsule\Manager;
 use Illuminate\Database\Schema\Builder;
+use Wandu\Database\Migrator\MigrationInterface;
 
-abstract class Migration
+abstract class Migration implements MigrationInterface
 {
     /** @var string */
     protected $connection = 'default';

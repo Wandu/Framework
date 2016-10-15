@@ -54,17 +54,17 @@ class InstallCommand extends Command
         $appBasePath = $this->askAppBasePath('install path?', $this->basePath);
         $appNamespace = $this->askAppNamespace('app namespace?', 'Wandu\\App');
 
-        $templateEngine = $this->io->choice(
-            'template engine?',
-            ['php' => 'PHP', 'twig' => 'Twig(Sensio Labs)', 'latte' => 'Latte(Nette)', ],
-            'PHP'
-        );
-
-        $database = $this->io->choice(
-            'orm(database)?',
-            ['none' => 'None', 'eloquent' => 'Eloquent(Laravel)', ],
-            'None'
-        );
+//        $templateEngine = $this->io->choice(
+//            'template engine?',
+//            ['php' => 'PHP', 'twig' => 'Twig(Sensio Labs)', 'latte' => 'Latte(Nette)', ],
+//            'PHP'
+//        );
+//
+//        $database = $this->io->choice(
+//            'orm(database)?',
+//            ['none' => 'None', 'eloquent' => 'Eloquent(Laravel)', ],
+//            'None'
+//        );
 
         $path = str_replace($this->basePath, '', $appBasePath);
         $path = ltrim($path ? $path . '/' : '', '/');

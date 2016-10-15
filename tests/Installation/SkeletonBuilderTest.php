@@ -1,10 +1,8 @@
 <?php
 namespace Wandu\Installation;
 
-use Mockery;
 use PHPUnit_Framework_TestCase;
 use Wandu\Installation\Replacers\OriginReplacer;
-use Wandu\Q\Queue;
 
 class SkeletonBuilderTest extends PHPUnit_Framework_TestCase
 {

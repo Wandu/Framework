@@ -16,7 +16,9 @@ return [
                 'prefix'    => 'local_',
             ],
         ],
-        'migration' => [
+        'migrator' => [
+            'connection' => 'default',
+            'table' => 'migrations',
             'path' => 'migrations',
         ],
     ],
