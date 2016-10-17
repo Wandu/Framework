@@ -1,8 +1,9 @@
 <?php
 namespace Wandu;
 
-use Mockery;
+use Composer\Semver\Semver;
 use PHPUnit_Framework_TestCase;
+use Wandu\Foundation\Application;
 
 class DeployTest extends PHPUnit_Framework_TestCase
 {
@@ -10,7 +11,7 @@ class DeployTest extends PHPUnit_Framework_TestCase
     protected $basePath = __DIR__ . '/../';
     
     /** @var string */
-    protected $rootJsonFiles = 'composer.json';
+    protected $rootComposerJson = 'composer.json';
     
     /** @var array */
     protected $jsonFiles = [
@@ -19,10 +20,13 @@ class DeployTest extends PHPUnit_Framework_TestCase
         'src/Wandu/Config/composer.json',
         'src/Wandu/Console/composer.json',
         'src/Wandu/Database/composer.json',
+        'src/Wandu/DateTime/composer.json',
         'src/Wandu/DI/composer.json',
         'src/Wandu/Event/composer.json',
         'src/Wandu/Foundation/composer.json',
         'src/Wandu/Http/composer.json',
+        'src/Wandu/Installation/composer.json',
+        'src/Wandu/Math/composer.json',
         'src/Wandu/Q/composer.json',
         'src/Wandu/Router/composer.json',
         'src/Wandu/Support/composer.json',
@@ -32,23 +36,69 @@ class DeployTest extends PHPUnit_Framework_TestCase
     
     public function testIsJsonSyntaxOK()
     {
-        foreach (array_merge($this->jsonFiles, [$this->rootJsonFiles]) as $jsonFile) {
+        foreach (array_merge($this->jsonFiles, [$this->rootComposerJson]) as $jsonFile) {
             $this->getJsonFromFile($jsonFile);
         }
     }
 
     public function testPhpVersions()
     {
-        $mainRequires = $this->getJsonFromFile($this->rootJsonFiles)['require'];
+        $mainRequires = $this->getJsonFromFile($this->rootComposerJson)['require'];
 
-        foreach (array_merge($this->jsonFiles, [$this->rootJsonFiles]) as $jsonFile) {
+        foreach (array_merge($this->jsonFiles, [$this->rootComposerJson]) as $jsonFile) {
             $subComposer = $this->getJsonFromFile($jsonFile);
             $subRequires = $subComposer['require'];
             $subName = $subComposer['name'];
             foreach ($subRequires as $name => $version) {
                 if (strpos($name, 'wandu/') === 0) continue;
-                $this->assertArrayHasKey($name, $mainRequires);
-                $this->assertEquals($mainRequires[$name], $version, "File: {$jsonFile} -> {$name}");
+                static::assertArrayHasKey($name, $mainRequires);
+                static::assertEquals($mainRequires[$name], $version, "File: {$jsonFile} -> {$name}");
+            }
+        }
+    }
+
+    public function testCheckAutoloadFiles()
+    {
+        $rootJson = $this->getJsonFromFile($this->rootComposerJson);
+        $rootAutoloadFiles = $rootJson['autoload']['files'];  
+        foreach ($rootAutoloadFiles as $file) {
+            static::assertFileExists($this->basePath . $file); // exists files
+        }
+        
+        $subAutoloadFiles = [];
+        foreach (array_merge($this->jsonFiles) as $jsonFile) {
+            $packagePath = dirname($jsonFile);
+            $json = $this->getJsonFromFile($jsonFile);
+            if (isset($json['autoload']['files'])) {
+                foreach ($json['autoload']['files'] as $file) {
+                    static::assertFileExists("{$packagePath}/{$file}"); // exists files
+                    $subAutoloadFiles[] = "{$packagePath}/{$file}";
+                }
+            }
+        }
+
+        sort($rootAutoloadFiles);
+        sort($subAutoloadFiles);
+        
+        static::assertEquals($rootAutoloadFiles, $subAutoloadFiles);
+    }
+
+    public function testCheckRequire()
+    {
+        $rootJson = $this->getJsonFromFile($this->rootComposerJson);
+        $rootRequires = array_merge($rootJson['require'], $rootJson['require-dev'], $rootJson['replace']);
+
+        foreach (array_merge($this->jsonFiles) as $jsonFile) {
+            $subJson = $this->getJsonFromFile($jsonFile);
+            if (isset($subJson['require'])) {
+                foreach ($subJson['require'] as $subRequireName => $subRequireVersion) {
+                    static::assertArrayHasKey($subRequireName, $rootRequires); // root require contains all of sub require package
+                    if ($rootRequires[$subRequireName] === 'self.version') {
+                        static::assertTrue(Semver::satisfies(Application::VERSION, $subRequireVersion)); // self.version version check
+                    } else {
+                        static::assertEquals($rootRequires[$subRequireName], $subRequireVersion); 
+                    }
+                }
             }
         }
     }
@@ -62,9 +112,9 @@ class DeployTest extends PHPUnit_Framework_TestCase
      */
     public function testExtraVersion()
     {
-        $mainExtra = $this->getJsonFromFile($this->rootJsonFiles)['extra'];
+        $mainExtra = $this->getJsonFromFile($this->rootComposerJson)['extra'];
 
-        foreach (array_merge($this->jsonFiles, [$this->rootJsonFiles]) as $jsonFile) {
+        foreach (array_merge($this->jsonFiles, [$this->rootComposerJson]) as $jsonFile) {
             $subComposer = $this->getJsonFromFile($jsonFile);
             static::assertArrayHasKey('extra', $subComposer, "File: {$jsonFile}");
             $subExtra = $subComposer['extra'];
