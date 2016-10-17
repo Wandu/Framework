@@ -1,12 +1,10 @@
 <?php
-use Wandu\Bridges\Eloquent\EloquentServiceProvider;
-use Wandu\Bridges\Latte\LatteServiceProvider;
-use Wandu\Bridges\Monolog\MonologServiceProvider;
 use Wandu\Database\Migrator\MigratorServiceProvider;
 use Wandu\DateTime\DateTimeServiceProvider;
 use Wandu\Event\EventServiceProvider;
 use Wandu\Http\HttpServiceProvider;
 use Wandu\Router\RouterServiceProvider;
+use Wandu\View\PhpViewServiceProvider;
 use YourOwnApp\ApplicationServiceProvider;
 
 return [
@@ -14,9 +12,7 @@ return [
     RouterServiceProvider::class,
     EventServiceProvider::class,
     DateTimeServiceProvider::class,
-    MonologServiceProvider::class,
-    EloquentServiceProvider::class,
     MigratorServiceProvider::class,
-    LatteServiceProvider::class,
+    PhpViewServiceProvider::class,
     ApplicationServiceProvider::class,
 ];
