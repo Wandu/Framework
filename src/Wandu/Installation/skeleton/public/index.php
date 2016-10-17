@@ -26,11 +26,8 @@ while (!file_exists($appPath . '/.wandu.php')) {
     $appPath = dirname($appPath);
 }
 
-if (isset($appPath)) {
-    $definition = require $appPath . '/.wandu.php';
-} else {
-    $definition = new NeedInstallDefinition();
-}
+$definition = require $appPath . '/.wandu.php';
+
 define('WANDU_APP_PATH', $appPath);
 unset($appPath);
 
