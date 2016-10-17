@@ -8,10 +8,7 @@
     "autoload": {
         "psr-4": {
             "Wandu\\Support\\": ""
-        },
-        "files" : [
-            "functions.php"
-        ]
+        }
     },
     "extra": {
         "branch-alias": {

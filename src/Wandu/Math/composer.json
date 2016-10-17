@@ -8,7 +8,7 @@
         "psr-4": {
             "Wandu\\Math\\": ""
         },
-        "files" : [
+        "files": [
             "functions.php"
         ]
     },
