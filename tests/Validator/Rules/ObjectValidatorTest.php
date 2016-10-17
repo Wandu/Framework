@@ -44,23 +44,56 @@ class ObjectValidatorTest extends ValidatorTestCase
             $validator->assert('string');
         }, [
             'object',
-            'exists@name',
-            'exists@age',
+        ]);
+
+        $validator->assert((object)[]);
+        $validator->assert((object)[
+            'age' => 30
+        ]);
+    }
+
+    public function testAssertArrayOfArray()
+    {
+        $validator = validator()->object([
+            'name' => 'string',
+            'company' => [
+                'name' => 'string',
+                'age' => 'integer',
+            ],
+        ]);
+
+        $validator->assert((object)[
+            'name' => 'name string',
+            'company' => [
+                'name' => 'string',
+                'age' => 38
+            ],
         ]);
 
         $this->assertInvalidValueException(function () use ($validator) {
-            $validator->assert((object)[]);
+            $validator->assert('string');
         }, [
-            'exists@name',
-            'exists@age',
+            'object',
+        ]);
+
+        $validator->assert((object)[]);
+        $validator->assert((object)[
+            'company' => [],
+        ]);
+    }
+
+    public function testAssertAndValidatorOfArray()
+    {
+        $validator = validator()->object([
+            'name' => 'string|length_min:5',
         ]);
 
         $this->assertInvalidValueException(function () use ($validator) {
             $validator->assert((object)[
-                'age' => 30
+                'name' => '1234'
             ]);
         }, [
-            'exists@name',
+            'length_min:5@name',
         ]);
     }
 }

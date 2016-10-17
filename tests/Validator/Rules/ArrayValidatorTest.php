@@ -8,24 +8,25 @@ class ArrayValidatorTest extends ValidatorTestCase
 {
     public function testValidate()
     {
-        $this->assertTrue(validator()->array()->validate([]));
-        $this->assertFalse(validator()->array()->validate((object)[]));
-        $this->assertFalse(validator()->array()->validate("30"));
+        static::assertTrue(validator()->array()->validate(null));
+        static::assertTrue(validator()->array()->validate([]));
+        static::assertFalse(validator()->array()->validate((object)[]));
+        static::assertFalse(validator()->array()->validate("30"));
 
-        $this->assertTrue(validator()->array([
+        static::assertTrue(validator()->array([
             'age' => 'integer',
         ])->validate(['age' => 30]));
 
         // ignore other key 
-        $this->assertTrue(validator()->array([
+        static::assertTrue(validator()->array([
             'age' => 'integer',
         ])->validate(['age' => 30, 'other' => 'other...']));
 
-        $this->assertFalse(validator()->array([
+        static::assertFalse(validator()->array([
             'age' => 'integer',
         ])->validate(['age' => "age string"]));
 
-        $this->assertFalse(validator()->array([
+        static::assertFalse(validator()->array([
             'wrong' => 'integer',
         ])->validate([]));
     }
@@ -40,27 +41,15 @@ class ArrayValidatorTest extends ValidatorTestCase
             'age' => 30,
         ]);
 
-        $this->assertInvalidValueException(function () use ($validator) {
+        static::assertInvalidValueException(function () use ($validator) {
             $validator->assert('string');
         }, [
             'array',
-            'exists@name',
-            'exists@age',
         ]);
 
-        $this->assertInvalidValueException(function () use ($validator) {
-            $validator->assert([]);
-        }, [
-            'exists@name',
-            'exists@age',
-        ]);
-
-        $this->assertInvalidValueException(function () use ($validator) {
-            $validator->assert([
-                'age' => 30
-            ]);
-        }, [
-            'exists@name',
+        $validator->assert([]);
+        $validator->assert([
+            'age' => 30
         ]);
     }
     
@@ -82,29 +71,30 @@ class ArrayValidatorTest extends ValidatorTestCase
             ],
         ]);
 
-        $this->assertInvalidValueException(function () use ($validator) {
+        static::assertInvalidValueException(function () use ($validator) {
             $validator->assert('string');
         }, [
             'array',
-            'exists@name',
-            'exists@company',
         ]);
 
-        $this->assertInvalidValueException(function () use ($validator) {
-            $validator->assert([]);
-        }, [
-            'exists@name',
-            'exists@company',
+        $validator->assert([]);
+        $validator->assert([
+            'company' => [],
+        ]);
+    }
+
+    public function testAssertAndValidatorOfArray()
+    {
+        $validator = validator()->array([
+            'name' => 'string|length_min:5',
         ]);
 
-        $this->assertInvalidValueException(function () use ($validator) {
+        static::assertInvalidValueException(function () use ($validator) {
             $validator->assert([
-                'company' => [],
+                'name' => '1234'
             ]);
         }, [
-            'exists@name',
-            'exists@company.name',
-            'exists@company.age',
+            'length_min:5@name',
         ]);
     }
 }

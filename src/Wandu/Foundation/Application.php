@@ -7,7 +7,7 @@ use Wandu\Foundation\Contracts\KernelInterface;
 class Application extends Container
 {
     const NAME = "Wandu";
-    const VERSION = "3.0.0-beta2";
+    const VERSION = "3.0.0";
 
     /** @var \Wandu\Foundation\Contracts\KernelInterface */
     protected $kernel;
@@ -31,8 +31,10 @@ class Application extends Container
      */
     public function boot()
     {
-        $this->kernel->boot($this);
-        parent::boot();
+        if (!$this->isBooted) {
+            $this->kernel->boot($this);
+            parent::boot();
+        }
         return $this;
     }
 

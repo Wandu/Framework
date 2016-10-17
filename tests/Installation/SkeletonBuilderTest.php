@@ -1,10 +1,8 @@
 <?php
 namespace Wandu\Installation;
 
-use Mockery;
 use PHPUnit_Framework_TestCase;
 use Wandu\Installation\Replacers\OriginReplacer;
-use Wandu\Q\Queue;
 
 class SkeletonBuilderTest extends PHPUnit_Framework_TestCase
 {
@@ -49,8 +47,8 @@ GITIGNORE
         $this->assertTrue(is_dir(__DIR__ . '/target'));
         $this->assertTrue(is_dir(__DIR__ . '/target/cache'));
         
-        $this->assertFalse(file_exists(__DIR__ . '/target/cache/.gitkeep'));
-        
+        $this->assertTrue(file_exists(__DIR__ . '/target/cache/.gitkeep'));
+
         $assertNumber = 30 + $randNumber;
         $this->assertEquals(<<<PHP
 <?php

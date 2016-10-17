@@ -1,9 +1,10 @@
 <?php
 namespace Wandu\Foundation\Contracts;
 
+use ArrayAccess;
 use Wandu\DI\ContainerInterface;
 
-interface KernelInterface
+interface KernelInterface extends ArrayAccess
 {
     /**
      * @param \Wandu\DI\ContainerInterface $app

@@ -32,6 +32,7 @@ class NotValidator extends ValidatorAbstract
      */
     public function assert($item)
     {
+        if (!isset($item)) return;
         try {
             $this->next->assert($item);
         } catch (InvalidValueException $exception) {
@@ -50,6 +51,7 @@ class NotValidator extends ValidatorAbstract
      */
     public function validate($item)
     {
+        if (!isset($item)) return true;
         return !$this->next->validate($item);
     }
 }

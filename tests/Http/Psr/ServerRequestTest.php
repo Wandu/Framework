@@ -6,6 +6,7 @@ use Mockery;
 use PHPUnit_Framework_TestCase;
 use Psr\Http\Message\UploadedFileInterface;
 use Psr\Http\Message\UriInterface;
+use Wandu\Http\Attribute\LazyAttribute;
 
 class ServerRequestTest extends PHPUnit_Framework_TestCase
 {
@@ -18,22 +19,22 @@ class ServerRequestTest extends PHPUnit_Framework_TestCase
     {
         $request = new ServerRequest();
 
-        $this->assertEquals([], $request->getServerParams());
-        $this->assertEquals([], $request->getCookieParams());
-        $this->assertEquals([], $request->getQueryParams());
-        $this->assertEquals([], $request->getUploadedFiles());
-        $this->assertEquals([], $request->getParsedBody());
-        $this->assertEquals([], $request->getAttributes());
+        static::assertEquals([], $request->getServerParams());
+        static::assertEquals([], $request->getCookieParams());
+        static::assertEquals([], $request->getQueryParams());
+        static::assertEquals([], $request->getUploadedFiles());
+        static::assertEquals([], $request->getParsedBody());
+        static::assertEquals([], $request->getAttributes());
 
         // message
-        $this->assertEquals('1.1', $request->getProtocolVersion());
-        $this->assertEquals([], $request->getHeaders());
-        $this->assertNull($request->getBody());
+        static::assertEquals('1.1', $request->getProtocolVersion());
+        static::assertEquals([], $request->getHeaders());
+        static::assertNull($request->getBody());
 
         // request
-        $this->assertEquals(null, $request->getMethod());
-        $this->assertEquals(null, $request->getUri());
-        $this->assertEquals('/', $request->getRequestTarget());
+        static::assertEquals(null, $request->getMethod());
+        static::assertEquals(null, $request->getUri());
+        static::assertEquals('/', $request->getRequestTarget());
     }
 
     public function testConstructWithSuccess()
@@ -83,15 +84,15 @@ class ServerRequestTest extends PHPUnit_Framework_TestCase
             ],
             '2.0'
         );
-        $this->assertEquals(['PHPSESSID' => '32eo4tk9dcaacb2f3hqg0s6s54'], $request->getCookieParams());
-        $this->assertEquals(['page' => 1, 'order' => false], $request->getQueryParams());
-        $this->assertEquals(['profileImage' => $mockFile], $request->getUploadedFiles());
-        $this->assertEquals(['id' => 'wan2land'], $request->getParsedBody());
-        $this->assertEquals(['status' => 'join'], $request->getAttributes());
+        static::assertEquals(['PHPSESSID' => '32eo4tk9dcaacb2f3hqg0s6s54'], $request->getCookieParams());
+        static::assertEquals(['page' => 1, 'order' => false], $request->getQueryParams());
+        static::assertEquals(['profileImage' => $mockFile], $request->getUploadedFiles());
+        static::assertEquals(['id' => 'wan2land'], $request->getParsedBody());
+        static::assertEquals(['status' => 'join'], $request->getAttributes());
 
         // message
-        $this->assertEquals('2.0', $request->getProtocolVersion());
-        $this->assertEquals([
+        static::assertEquals('2.0', $request->getProtocolVersion());
+        static::assertEquals([
             'host' => ['localhost:8002'],
             'connection' => ['keep-alive'],
             'user-agent' => ['Mozilla/5.0'],
@@ -103,9 +104,9 @@ class ServerRequestTest extends PHPUnit_Framework_TestCase
     {
         try {
             new ServerRequest([], [], [], [], ['hello' => ['world' => new \stdClass()]]);
-            $this->fail();
+            static::fail();
         } catch (InvalidArgumentException $e) {
-            $this->assertEquals(
+            static::assertEquals(
                 'Invalid uploaded files value. It must be a array of UploadedFileInterface.',
                 $e->getMessage()
             );
@@ -116,8 +117,8 @@ class ServerRequestTest extends PHPUnit_Framework_TestCase
     {
         $request = new ServerRequest();
 
-        $this->assertNotSame($request, $request->withCookieParams([]));
-        $this->assertEquals(
+        static::assertNotSame($request, $request->withCookieParams([]));
+        static::assertEquals(
             ['other' => 'blabla'],
             $request->withCookieParams(['other' => 'blabla'])->getCookieParams()
         );
@@ -126,8 +127,8 @@ class ServerRequestTest extends PHPUnit_Framework_TestCase
     public function testWithQueryParams()
     {
         $request = new ServerRequest();
-        $this->assertNotSame($request, $request->withQueryParams([]));
-        $this->assertEquals(
+        static::assertNotSame($request, $request->withQueryParams([]));
+        static::assertEquals(
             ['other' => 'blabla'],
             $request->withQueryParams(['other' => 'blabla'])->getQueryParams()
         );
@@ -139,8 +140,8 @@ class ServerRequestTest extends PHPUnit_Framework_TestCase
 
         $request = new ServerRequest();
 
-        $this->assertNotSame($request, $request->withUploadedFiles([]));
-        $this->assertEquals(
+        static::assertNotSame($request, $request->withUploadedFiles([]));
+        static::assertEquals(
             ['main' => $mockFile],
             $request->withUploadedFiles(['main' => $mockFile])->getUploadedFiles()
         );
@@ -150,8 +151,8 @@ class ServerRequestTest extends PHPUnit_Framework_TestCase
     {
         $request = new ServerRequest();
 
-        $this->assertNotSame($request, $request->withParsedBody([]));
-        $this->assertEquals(
+        static::assertNotSame($request, $request->withParsedBody([]));
+        static::assertEquals(
             ['main' => 'hello?'],
             $request->withParsedBody(['main' => 'hello?'])->getParsedBody()
         );
@@ -163,19 +164,19 @@ class ServerRequestTest extends PHPUnit_Framework_TestCase
             'id' => 'wan2land',
             'status' => 'modify'
         ]);
-        $this->assertEquals('wan2land', $request->getAttribute('id'));
-        $this->assertEquals('modify', $request->getAttribute('status'));
+        static::assertEquals('wan2land', $request->getAttribute('id'));
+        static::assertEquals('modify', $request->getAttribute('status'));
 
-        $this->assertNull($request->getAttribute('unknown'));
-        $this->assertEquals('default', $request->getAttribute('unknown', 'default'));
+        static::assertNull($request->getAttribute('unknown'));
+        static::assertEquals('default', $request->getAttribute('unknown', 'default'));
     }
 
     public function testWithAttribute()
     {
         $request = new ServerRequest();
 
-        $this->assertNotSame($request, $request->withAttribute('name', 30));
-        $this->assertEquals([
+        static::assertNotSame($request, $request->withAttribute('name', 30));
+        static::assertEquals([
             'name' => 30
         ], $request->withAttribute('name', 30)->getAttributes());
     }
@@ -187,12 +188,35 @@ class ServerRequestTest extends PHPUnit_Framework_TestCase
             'status' => 'modify'
         ]);
 
-        $this->assertNotSame($request, $request->withoutAttribute('id'));
-        $this->assertNotSame($request, $request->withoutAttribute('unknown'));
+        static::assertNotSame($request, $request->withoutAttribute('id'));
+        static::assertNotSame($request, $request->withoutAttribute('unknown'));
 
-        $this->assertEquals([
+        static::assertEquals([
             'status' => 'modify'
         ], $request->withoutAttribute('id')->getAttributes());
+    }
+    
+    public function testLazyWithAttribute()
+    {
+        $request = new ServerRequest();
+        
+        $request = $request->withAttribute('hello', new LazyAttribute(function () {
+            return "hello world!!!";
+        }));
+        
+        $request = unserialize(serialize($request));
 
+        static::assertEquals('hello world!!!', $request->getAttribute('hello'));
+    }
+
+    public function testLazyWithAttributeAsSingleton()
+    {
+        $request = new ServerRequest();
+
+        $request = $request->withAttribute('array', new LazyAttribute(function () {
+            return new \ArrayObject();
+        }));
+
+        static::assertSame($request->getAttribute('array'), $request->getAttribute('array'));
     }
 }

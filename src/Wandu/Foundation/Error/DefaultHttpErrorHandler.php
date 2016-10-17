@@ -6,6 +6,8 @@ use Psr\Log\LoggerInterface;
 use Wandu\Config\Contracts\ConfigInterface;
 use Wandu\Foundation\Contracts\HttpErrorHandlerInterface;
 use Wandu\Http\Exception\HttpException;
+use Wandu\Router\Exception\MethodNotAllowedException as RouteMethodException;
+use Wandu\Router\Exception\RouteNotFoundException;
 use Whoops\Handler\JsonResponseHandler;
 use Whoops\Handler\PlainTextHandler;
 use Whoops\Handler\PrettyPageHandler;
@@ -22,13 +24,13 @@ class DefaultHttpErrorHandler implements HttpErrorHandlerInterface
     protected $config;
     
     /**
-     * @param \Psr\Log\LoggerInterface $logger
      * @param \Wandu\Config\Contracts\ConfigInterface $config
+     * @param \Psr\Log\LoggerInterface $logger
      */
-    public function __construct(LoggerInterface $logger, ConfigInterface $config)
+    public function __construct(ConfigInterface $config, LoggerInterface $logger = null)
     {
-        $this->logger = $logger;
         $this->config = $config;
+        $this->logger = $logger;
     }
 
     /**
@@ -37,8 +39,10 @@ class DefaultHttpErrorHandler implements HttpErrorHandlerInterface
     public function handle(ServerRequestInterface $request, $exception)
     {
         if ($exception instanceof HttpException) {
-            $this->logger->notice($this->prettifyRequest($request));
-            $this->logger->notice($exception);
+            if ($this->logger) {
+                $this->logger->notice($this->prettifyRequest($request));
+                $this->logger->notice($exception);
+            }
             return $exception;
         }
         if ($this->config->get('debug', true)) {
@@ -49,8 +53,17 @@ class DefaultHttpErrorHandler implements HttpErrorHandlerInterface
         $statusCode = 500;
         $reasonPhrase = 'Internal Server Error';
 
-        $this->logger->error($this->prettifyRequest($request));
-        $this->logger->error($exception);
+        if ($exception instanceof RouteNotFoundException) {
+            $statusCode = 404;
+            $reasonPhrase = "Not Found";
+        } elseif ($exception instanceof RouteMethodException) {
+            $statusCode = 405;
+            $reasonPhrase = 'Method Not Allowed';
+        }
+        if ($this->logger) {
+            $this->logger->error($this->prettifyRequest($request));
+            $this->logger->error($exception);
+        }
 
         if ($this->isAjax($request)) {
             return json([

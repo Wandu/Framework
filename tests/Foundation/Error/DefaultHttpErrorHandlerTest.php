@@ -32,7 +32,7 @@ class DefaultHttpErrorHandlerTest extends PHPUnit_Framework_TestCase
     {
         $this->logger->shouldReceive('error')->twice(); // exception is error
         
-        $handler = new DefaultHttpErrorHandler($this->logger, new Config(['debug' => false]));
+        $handler = new DefaultHttpErrorHandler(new Config(['debug' => false]), $this->logger);
         $response = $handler->handle(
             (new ServerRequest())->withUri(new Uri('/')),
             new Exception()
@@ -47,7 +47,7 @@ class DefaultHttpErrorHandlerTest extends PHPUnit_Framework_TestCase
     {
         $this->logger->shouldReceive('notice')->twice(); // http exception is notice
         
-        $handler = new DefaultHttpErrorHandler($this->logger, new Config(['debug' => false]));
+        $handler = new DefaultHttpErrorHandler(new Config(['debug' => false]), $this->logger);
         $response = $handler->handle(
             (new ServerRequest())->withUri(new Uri('/')),
             (new NotFoundException())->withBody(new StringStream('404 Not Found...'))
@@ -60,7 +60,7 @@ class DefaultHttpErrorHandlerTest extends PHPUnit_Framework_TestCase
 
     public function testHandleDebugMode()
     {
-        $handler = new DefaultHttpErrorHandler($this->logger, new Config(['debug' => true]));
+        $handler = new DefaultHttpErrorHandler(new Config(['debug' => true]), $this->logger);
         $response = $handler->handle(
             (new ServerRequest())->withUri(new Uri('/')),
             new Exception()
@@ -79,7 +79,7 @@ class DefaultHttpErrorHandlerTest extends PHPUnit_Framework_TestCase
     {
         $this->logger->shouldReceive('notice')->twice(); // http exception is notice
 
-        $handler = new DefaultHttpErrorHandler($this->logger, new Config(['debug' => true]));
+        $handler = new DefaultHttpErrorHandler(new Config(['debug' => true]), $this->logger);
         $response = $handler->handle(
             (new ServerRequest())->withUri(new Uri('/')),
             (new NotFoundException())->withBody(new StringStream('404 Not Found...'))

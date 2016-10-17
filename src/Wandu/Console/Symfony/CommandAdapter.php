@@ -10,6 +10,9 @@ use Wandu\Console\Exception\ConsoleException;
 
 class CommandAdapter extends SymfonyCommand
 {
+    /** @var \Wandu\Console\Command */
+    protected $command;
+    
     /**
      * @param string $name
      * @param \Wandu\Console\Command $command

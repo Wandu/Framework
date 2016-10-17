@@ -30,7 +30,7 @@ class ServerRequestFactoryTest extends PHPUnit_Framework_TestCase
             'REQUEST_URI' => '/abk?sdnkf',
         ], [], [], [], []);
 
-        $this->assertEquals('http://localhost:8002/abk?sdnkf', $serverRequest->getUri()->__toString());
+        static::assertEquals('http://localhost:8002/abk?sdnkf', $serverRequest->getUri()->__toString());
     }
 
     public function testGetUriFromServerVariable()
@@ -41,7 +41,7 @@ class ServerRequestFactoryTest extends PHPUnit_Framework_TestCase
             'REQUEST_URI' => '/abk?sdnkf',
         ], [], [], [], []);
 
-        $this->assertEquals('http://0.0.0.0:8002/abk?sdnkf', $serverRequest->getUri()->__toString());
+        static::assertEquals('http://0.0.0.0:8002/abk?sdnkf', $serverRequest->getUri()->__toString());
     }
 
     public function testGetUriFromBoth()
@@ -53,7 +53,56 @@ class ServerRequestFactoryTest extends PHPUnit_Framework_TestCase
             'REQUEST_URI' => '/abk?sdnkf',
         ], [], [], [], []);
 
-        $this->assertEquals('http://localhost:8002/abk?sdnkf', $serverRequest->getUri()->__toString());
+        static::assertEquals('http://localhost:8002/abk?sdnkf', $serverRequest->getUri()->__toString());
+    }
+
+    public function testGetHeader()
+    {
+        $request = $this->factory->create([
+            'HTTP_HOST' => 'blog.wani.kr',
+            'HTTP_CONNECTION' => 'keep-alive',
+            'HTTP_CACHE_CONTROL' => 'max-age=0',
+            'HTTP_USER_AGENT' => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.116 Safari/537.36',
+            'HTTP_ACCEPT' => 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+            'HTTP_ACCEPT_ENCODING' => 'gzip, deflate, sdch',
+            'HTTP_ACCEPT_LANGUAGE' => 'ko,en;q=0.8,en-US;q=0.6',
+            'HTTP_COOKIE' => 'intercom-id=b5998208-7329-4a94-a338-bdd555d042e3; wcs_bt=unknown:1470904067|s_5943a5ef73da:1472693733; _ga=GA1.2.1905714981.1465871995',
+        ], [], [], [], []);
+
+        static::assertEquals([], $request->getHeader('unknown'));
+
+        static::assertEquals(['blog.wani.kr'], $request->getHeader('host'));
+        static::assertEquals(['blog.wani.kr'], $request->getHeader('HOST'));
+        static::assertEquals(['blog.wani.kr'], $request->getHeader('Host'));
+
+        static::assertEquals(['keep-alive'], $request->getHeader('connection'));
+        static::assertEquals(['max-age=0'], $request->getHeader('cache-control'));
+        static::assertEquals([
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.116 Safari/537.36'
+        ], $request->getHeader('uSer-agEnt')); // not sensitive
+        static::assertEquals([
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.116 Safari/537.36'
+        ], $request->getHeader('user-agent'));
+        static::assertEquals([
+            'text/html',
+            'application/xhtml+xml',
+            'application/xml;q=0.9',
+            'image/webp',
+            '*/*;q=0.8',
+        ], $request->getHeader('accept'));
+        static::assertEquals([
+            'gzip',
+            'deflate',
+            'sdch',
+        ], $request->getHeader('accept-encoding'));
+        static::assertEquals([
+            'ko',
+            'en;q=0.8',
+            'en-US;q=0.6',
+        ], $request->getHeader('accept-language'));
+        static::assertEquals([
+            'intercom-id=b5998208-7329-4a94-a338-bdd555d042e3; wcs_bt=unknown:1470904067|s_5943a5ef73da:1472693733; _ga=GA1.2.1905714981.1465871995',
+        ], $request->getHeader('cookie'));
     }
 
     public function testGetJsonParsedBody()
@@ -65,7 +114,7 @@ class ServerRequestFactoryTest extends PHPUnit_Framework_TestCase
             'HTTP_CONTENT_TYPE' => 'application/json',
         ], [], [], [], [], $body);
 
-        $this->assertEquals([
+        static::assertEquals([
             'hello' => [1,2,3,4,5]
         ], $serverRequest->getParsedBody());
     }
@@ -79,7 +128,7 @@ class ServerRequestFactoryTest extends PHPUnit_Framework_TestCase
             'HTTP_CONTENT_TYPE' => 'application/json;charset=UTF-8',
         ], [], [], [], [], $body);
 
-        $this->assertEquals([
+        static::assertEquals([
             'hello' => [1,2,3,4,5]
         ], $serverRequest->getParsedBody());
     }
@@ -102,22 +151,22 @@ HTTP;
 
         $request = $this->factory->createFromSocketBody($body);
 
-        $this->assertEquals('1.1', $request->getProtocolVersion());
-        $this->assertEquals('GET', $request->getMethod());
-        $this->assertEquals('http://localhost/favicon.ico', $request->getUri()->__toString());
+        static::assertEquals('1.1', $request->getProtocolVersion());
+        static::assertEquals('GET', $request->getMethod());
+        static::assertEquals('http://localhost/favicon.ico', $request->getUri()->__toString());
 
-        $this->assertEquals('localhost', $request->getHeaderLine('host'));
-        $this->assertEquals('keep-alive', $request->getHeaderLine('connection'));
-        $this->assertEquals('no-cache', $request->getHeaderLine('cache-control'));
-        $this->assertEquals(
+        static::assertEquals('localhost', $request->getHeaderLine('host'));
+        static::assertEquals('keep-alive', $request->getHeaderLine('connection'));
+        static::assertEquals('no-cache', $request->getHeaderLine('cache-control'));
+        static::assertEquals(
             'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.116 Safari/537.36',
             $request->getHeaderLine('user-agent')
         );
-        $this->assertEquals('http://localhost/', $request->getHeaderLine('referer'));
+        static::assertEquals('http://localhost/', $request->getHeaderLine('referer'));
 
-        $this->assertEquals('http://localhost/', $request->getHeaderLine('referer'));
+        static::assertEquals('http://localhost/', $request->getHeaderLine('referer'));
 
-        $this->assertEquals(
+        static::assertEquals(
             'FOO=135050505050; BAR=1; PHPSESSID=djiar0p36a1nhrc3j6pd6r0gp3',
             $request->getHeaderLine('cookie')
         );

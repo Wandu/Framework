@@ -3,22 +3,35 @@ namespace Wandu\Validator;
 
 use Wandu\Validator\Contracts\ValidatorInterface;
 use Wandu\Validator\Exception\ValidatorNotFoundException;
-use Wandu\Validator\Rules\PipelineValidator;
+use Wandu\Validator\Rules\ArrayValidator;
 
 /**
- * @method \Wandu\Validator\Contracts\ValidatorInterface optional(\Wandu\Validator\Contracts\ValidatorInterface $validator = null)
+ * @method \Wandu\Validator\Contracts\ValidatorInterface required()
  * @method \Wandu\Validator\Contracts\ValidatorInterface not(\Wandu\Validator\Contracts\ValidatorInterface $validator)
  * @method \Wandu\Validator\Contracts\ValidatorInterface array(array $attributes = [])
  * @method \Wandu\Validator\Contracts\ValidatorInterface object(array $properties = [])
  * @method \Wandu\Validator\Contracts\ValidatorInterface integer()
+ * @method \Wandu\Validator\Contracts\ValidatorInterface boolean()
+ * @method \Wandu\Validator\Contracts\ValidatorInterface float()
  * @method \Wandu\Validator\Contracts\ValidatorInterface string()
+ * @method \Wandu\Validator\Contracts\ValidatorInterface integerable()
+ * @method \Wandu\Validator\Contracts\ValidatorInterface floatable()
+ * @method \Wandu\Validator\Contracts\ValidatorInterface numeric()
+ * @method \Wandu\Validator\Contracts\ValidatorInterface stringable()
+ * @method \Wandu\Validator\Contracts\ValidatorInterface printable()
+ * @method \Wandu\Validator\Contracts\ValidatorInterface pipeline(array $validators = [])
  * @method \Wandu\Validator\Contracts\ValidatorInterface min(int $min)
  * @method \Wandu\Validator\Contracts\ValidatorInterface max(int $max)
  * @method \Wandu\Validator\Contracts\ValidatorInterface lengthMin(int $min)
  * @method \Wandu\Validator\Contracts\ValidatorInterface lengthMax(int $max)
+ * @method \Wandu\Validator\Contracts\ValidatorInterface email(\Egulias\EmailValidator\Validation\EmailValidation $validation = null)
+ * @method \Wandu\Validator\Contracts\ValidatorInterface regExp(string $pattern)
  */
 class ValidatorFactory
 {
+    /** @var \Wandu\Validator\ValidatorFactory */
+    public static $factory;
+    
     /** @var array */
     private $instances = [];
     
@@ -46,14 +59,15 @@ class ValidatorFactory
     }
 
     /**
-     * return this always new instance, so do not use __call.
-     * @return \Wandu\Validator\Rules\PipelineValidator
+     * @return \Wandu\Validator\ValidatorFactory
      */
-    public function pipeline()
+    public function setAsGlobal()
     {
-        return new PipelineValidator();
+        $oldFactory = static::$factory;
+        static::$factory = $this;
+        return $oldFactory;
     }
-
+    
     /**
      * @param $namespace
      * @return static
@@ -74,23 +88,23 @@ class ValidatorFactory
             return $attributes;
         }
         if (is_array($attributes)) {
-            return $this->array($attributes);
+            return new ArrayValidator($attributes);
         }
         if (is_object($attributes)) {
-            return $this->object($attributes);
+            return $this->object(get_object_vars($attributes));
         }
         $attributes = explode('|', $attributes);
         if (count($attributes) === 1) {
             return $this->createValidator($attributes[0]);
         }
         // if count bigger than 1, need pipeline.
-        $pipeline = validator()->pipeline();
+        $validators = [];
         foreach ($attributes as $attribute) {
             if ($validator = $this->createValidator($attribute)) {
-                $pipeline->push($validator);
+                $validators[] = $validator;
             }
         }
-        return $pipeline;
+        return validator()->pipeline($validators);
     }
     
     protected function createValidator($attribute)
@@ -101,9 +115,6 @@ class ValidatorFactory
         }
         list($method, $params) = $this->getMethodAndParams($attribute);
         $validator = $this->__call($this->underscoreToCamelCase($method), $params);
-        if (substr($method, -1) === '?') {
-            $validator = $this->optional($validator);
-        }
         if (substr($method, 0, 1) === '!') {
             $validator = $this->not($validator);
         }
@@ -136,7 +147,7 @@ class ValidatorFactory
      */
     protected function underscoreToCamelCase($text)
     {
-        $text = trim($text, '!?');
+        $text = trim($text, '!');
         $text = str_replace(' ', '', ucwords(str_replace('_', ' ', $text)));
         $text[0] = strtolower($text[0]);
         return $text;

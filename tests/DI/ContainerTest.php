@@ -1,6 +1,7 @@
 <?php
 namespace Wandu\DI;
 
+use ArrayObject;
 use Interop\Container\ContainerInterface as InteropContainer;
 use Wandu\DI\Containee\ClosureContainee;
 use Wandu\DI\Exception\CannotChangeException;
@@ -18,10 +19,10 @@ class ContainerTest extends PHPUnit_Framework_TestCase
     {
         $container = new Container();
 
-        $this->assertSame($container, $container->get('container'));
-        $this->assertSame($container, $container->get(Container::class));
-        $this->assertSame($container, $container->get(ContainerInterface::class));
-        $this->assertSame($container, $container->get(InteropContainer::class));
+        static::assertSame($container, $container->get('container'));
+        static::assertSame($container, $container->get(Container::class));
+        static::assertSame($container, $container->get(ContainerInterface::class));
+        static::assertSame($container, $container->get(InteropContainer::class));
     }
 
     public function testHas()
@@ -30,14 +31,14 @@ class ContainerTest extends PHPUnit_Framework_TestCase
 
         $container->instance(Renderable::class, new XmlRenderer);
 
-        $this->assertTrue($container->has(Renderable::class)); // set by instance
-        $this->assertFalse($container->has(ServerAccessible::class)); // interface false
-        $this->assertTrue($container->has(JsonRenderer::class)); // class true
+        static::assertTrue($container->has(Renderable::class)); // set by instance
+        static::assertFalse($container->has(ServerAccessible::class)); // interface false
+        static::assertTrue($container->has(JsonRenderer::class)); // class true
 
         // "has" map to offsetExists
-        $this->assertTrue(isset($container[Renderable::class]));
-        $this->assertFalse(isset($container[ServerAccessible::class]));
-        $this->assertTrue(isset($container[JsonRenderer::class]));
+        static::assertTrue(isset($container[Renderable::class]));
+        static::assertFalse(isset($container[ServerAccessible::class]));
+        static::assertTrue(isset($container[JsonRenderer::class]));
     }
 
     public function testHasNull()
@@ -46,10 +47,10 @@ class ContainerTest extends PHPUnit_Framework_TestCase
 
         $container->instance('null', null);
 
-        $this->assertTrue($container->has('null'));
+        static::assertTrue($container->has('null'));
 
         // "has" map to offsetExists but except null.
-        $this->assertFalse(isset($container['null']));
+        static::assertFalse(isset($container['null']));
     }
 
     public function testSet()
@@ -63,12 +64,12 @@ class ContainerTest extends PHPUnit_Framework_TestCase
         // "set" map to offsetSet
         $container['json'] = $json;
 
-        $this->assertSame($xml, $container->get('xml'));
-        $this->assertSame($json, $container->get('json'));
+        static::assertSame($xml, $container->get('xml'));
+        static::assertSame($json, $container->get('json'));
 
         // "get" map to offsetGet
-        $this->assertSame($xml, $container['xml']);
-        $this->assertSame($json, $container['json']);
+        static::assertSame($xml, $container['xml']);
+        static::assertSame($json, $container['json']);
     }
 
     public function testSetWithContainee()
@@ -76,7 +77,7 @@ class ContainerTest extends PHPUnit_Framework_TestCase
         $container = new Container();
 
         $container->set('xml', new ClosureContainee(function () {
-            return new XmlREnderer();
+            return new XmlRenderer();
         }));
 
         // "set" map to offsetSet
@@ -84,8 +85,8 @@ class ContainerTest extends PHPUnit_Framework_TestCase
             return new JsonRenderer();
         });
 
-        $this->assertInstanceOf(XmlRenderer::class, $container->get('xml'));
-        $this->assertInstanceOf(JsonRenderer::class, $container->get('json'));
+        static::assertInstanceOf(XmlRenderer::class, $container->get('xml'));
+        static::assertInstanceOf(JsonRenderer::class, $container->get('json'));
     }
 
     public function testInstance()
@@ -95,10 +96,10 @@ class ContainerTest extends PHPUnit_Framework_TestCase
         
         $container->instance('xml', $xml);
 
-        $this->assertSame($xml, $container->get('xml'));
+        static::assertSame($xml, $container->get('xml'));
 
         // "get" map to offsetGet
-        $this->assertSame($xml, $container['xml']);
+        static::assertSame($xml, $container['xml']);
     }
 
     public function testClosure()
@@ -113,10 +114,10 @@ class ContainerTest extends PHPUnit_Framework_TestCase
             ]);
         });
 
-        $this->assertInstanceOf(HttpController::class, $container[HttpController::class]);
-        $this->assertSame($container[HttpController::class], $container[HttpController::class]);
-        $this->assertSame($renderer, $container[HttpController::class]->getRenderer());
-        $this->assertEquals([
+        static::assertInstanceOf(HttpController::class, $container[HttpController::class]);
+        static::assertSame($container[HttpController::class], $container[HttpController::class]);
+        static::assertSame($renderer, $container[HttpController::class]->getRenderer());
+        static::assertEquals([
             'username' => 'username string',
             'password' => 'password string',
         ], $container[HttpController::class]->getConfig());
@@ -132,9 +133,9 @@ class ContainerTest extends PHPUnit_Framework_TestCase
         $container->alias('myalias', Renderable::class);
         $container->alias('otheralias', 'myalias');
 
-        $this->assertSame($renderer, $container[Renderable::class]);
-        $this->assertSame($renderer, $container['myalias']);
-        $this->assertSame($renderer, $container['otheralias']);
+        static::assertSame($renderer, $container[Renderable::class]);
+        static::assertSame($renderer, $container['myalias']);
+        static::assertSame($renderer, $container['otheralias']);
     }
 
     public function testGetByCreate()
@@ -142,7 +143,7 @@ class ContainerTest extends PHPUnit_Framework_TestCase
         $container = new Container();
 
         $controller = $container->get(JsonRenderer::class);
-        $this->assertInstanceOf(JsonRenderer::class, $controller);
+        static::assertInstanceOf(JsonRenderer::class, $controller);
     }
 
     public function testGetFail()
@@ -151,9 +152,9 @@ class ContainerTest extends PHPUnit_Framework_TestCase
 
         try {
             $container->get('unknown');
-            $this->fail();
+            static::fail();
         } catch (NullReferenceException $exception) {
-            $this->assertEquals('unknown', $exception->getClass());
+            static::assertEquals('unknown', $exception->getClass());
         }
     }
 
@@ -163,11 +164,11 @@ class ContainerTest extends PHPUnit_Framework_TestCase
 
         $container->instance('xml', new XmlRenderer());
 
-        $this->assertTrue($container->has('xml'));
+        static::assertTrue($container->has('xml'));
 
         $container->destroy('xml');
 
-        $this->assertFalse($container->has('xml'));
+        static::assertFalse($container->has('xml'));
     }
 
     public function testDestroyMany()
@@ -177,13 +178,13 @@ class ContainerTest extends PHPUnit_Framework_TestCase
         $container->instance('xml1', new XmlRenderer());
         $container->instance('xml2', new XmlRenderer());
 
-        $this->assertTrue($container->has('xml1'));
-        $this->assertTrue($container->has('xml2'));
+        static::assertTrue($container->has('xml1'));
+        static::assertTrue($container->has('xml2'));
 
         $container->destroy('xml1', 'xml2');
 
-        $this->assertFalse($container->has('xml1'));
-        $this->assertFalse($container->has('xml2'));
+        static::assertFalse($container->has('xml1'));
+        static::assertFalse($container->has('xml2'));
     }
 
     public function testFrozen()
@@ -211,43 +212,98 @@ class ContainerTest extends PHPUnit_Framework_TestCase
         // now cannot change
         try {
             $container->instance('instance', 'instance string changed 2');
-            $this->fail();
+            static::fail();
         } catch (CannotChangeException $exception) {
-            $this->assertEquals('It cannot be changed; instance', $exception->getMessage());
+            static::assertEquals('It cannot be changed; instance', $exception->getMessage());
         }
         try {
             $container->closure('closure', function () {
                 return 'closure string change 2';
             });
-            $this->fail();
+            static::fail();
         } catch (CannotChangeException $exception) {
-            $this->assertEquals('It cannot be changed; closure', $exception->getMessage());
+            static::assertEquals('It cannot be changed; closure', $exception->getMessage());
         }
         try {
             $container->alias('alias', 'closure');
-            $this->fail();
+            static::fail();
         } catch (CannotChangeException $exception) {
-            $this->assertEquals('It cannot be changed; alias', $exception->getMessage());
+            static::assertEquals('It cannot be changed; alias', $exception->getMessage());
         }
 
         // also cannot remove
         try {
             $container->offsetUnset('instance');
-            $this->fail();
+            static::fail();
         } catch (CannotChangeException $exception) {
-            $this->assertEquals('It cannot be changed; instance', $exception->getMessage());
+            static::assertEquals('It cannot be changed; instance', $exception->getMessage());
         }
         try {
             $container->offsetUnset('closure');
-            $this->fail();
+            static::fail();
         } catch (CannotChangeException $exception) {
-            $this->assertEquals('It cannot be changed; closure', $exception->getMessage());
+            static::assertEquals('It cannot be changed; closure', $exception->getMessage());
         }
         try {
             $container->offsetUnset('alias');
-            $this->fail();
+            static::fail();
         } catch (CannotChangeException $exception) {
-            $this->assertEquals('It cannot be changed; alias', $exception->getMessage());
+            static::assertEquals('It cannot be changed; alias', $exception->getMessage());
         }
+    }
+    
+    public function testWith()
+    {
+        $container = new Container();
+
+        $instance1 = new ArrayObject();
+        $instance2 = new ArrayObject();
+        $instance3 = new ArrayObject();
+        $instance4 = new ArrayObject();
+
+        $container->instance('instance1', $instance1);
+        $container->instance('instance2', $instance2);
+        $container->instance('instance3', $instance3);
+        $container->instance('instance4', $instance4);
+
+        static::assertNotSame($instance1, $instance2); // same is real same?
+        static::assertSame($instance1, $container->get('instance1'));
+        static::assertSame($instance2, $container->get('instance2'));
+        static::assertSame($instance3, $container->get('instance3'));
+        static::assertSame($instance4, $container->get('instance4'));
+
+        static::assertSame($container, $container->get(Container::class));
+        static::assertSame($container, $container->get(ContainerInterface::class));
+        static::assertSame($container, $container->get(InteropContainer::class));
+        static::assertSame($container, $container->get('container'));
+
+        $addedInstance1 = new ArrayObject();
+        $addedInstance2 = new ArrayObject();
+        
+        $otherContainer = $container->with([
+            'added_instance1' => $addedInstance1,
+            'added_instance2' => $addedInstance2,
+        ]);
+
+        static::assertNotEquals($otherContainer, $container);
+
+        static::assertFalse($container->has('added_instance1'));
+        static::assertFalse($container->has('added_instance2'));
+
+        static::assertTrue($otherContainer->has('added_instance1'));
+        static::assertTrue($otherContainer->has('added_instance2'));
+
+        static::assertSame($instance1, $otherContainer->get('instance1'));
+        static::assertSame($instance2, $otherContainer->get('instance2'));
+        static::assertSame($instance3, $otherContainer->get('instance3'));
+        static::assertSame($instance4, $otherContainer->get('instance4'));
+
+        static::assertSame($addedInstance1, $otherContainer->get('added_instance1'));
+        static::assertSame($addedInstance2, $otherContainer->get('added_instance2'));
+
+        static::assertSame($otherContainer, $otherContainer->get(Container::class));
+        static::assertSame($otherContainer, $otherContainer->get(ContainerInterface::class));
+        static::assertSame($otherContainer, $otherContainer->get(InteropContainer::class));
+        static::assertSame($otherContainer, $otherContainer->get('container'));
     }
 }

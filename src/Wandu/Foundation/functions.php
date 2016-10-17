@@ -1,30 +1,34 @@
 <?php
-namespace Wandu\Foundation
+namespace Wandu\Foundation;
+
+/**
+ * @return \Wandu\Foundation\Application
+ */
+function app()
 {
-    /**
-     * @return \Wandu\Foundation\Application
-     */
-    function app()
-    {
-        return Application::$app;
-    }
+    return Application::$app;
+}
 
-    /**
-     * @param string $name
-     * @param mixed $default
-     * @return mixed
-     */
-    function config($name, $default = null)
-    {
-        return app()->get('config')->get($name, $default);
-    }
+/**
+ * @param string $name
+ * @param mixed $default
+ * @return mixed
+ */
+function config($name, $default = null)
+{
+    return app()->get('config')->get($name, $default);
+}
 
-    /**
-     * @param string $path
-     * @return string
-     */
-    function path($path)
-    {
-        return app()->get('base_path') . '/' . $path;
+/**
+ * @param string|array $path
+ * @return string|array
+ */
+function path($path)
+{
+    if (is_array($path)) {
+        return array_map(function ($path) {
+            return path($path);
+        }, $path);
     }
+    return app()->get('base_path') . '/' . $path;
 }

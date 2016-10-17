@@ -1,8 +1,9 @@
 <?php
 namespace Wandu\Installation;
 
-use Wandu\Installation\Contracts\ReplacerInterface;
+use DirectoryIterator;
 use SplFileInfo;
+use Wandu\Installation\Contracts\ReplacerInterface;
 use Wandu\Installation\Replacers\CallableReplacer;
 use Wandu\Installation\Replacers\StringReplacer;
 
@@ -21,9 +22,12 @@ class SkeletonBuilder
     public function __construct($targetPath, $skeletonPath)
     {
         $this->targetPath = rtrim($targetPath, '/');
-        $this->skeletonPath = rtrim($skeletonPath, '/');
+        $this->skeletonPath = realpath($skeletonPath);
     }
-    
+
+    /**
+     * @param array $replacers
+     */
     public function build(array $replacers = [])
     {
         $this->buildFile($this->skeletonPath, $this->normalizeReplacers($replacers));
@@ -51,12 +55,9 @@ class SkeletonBuilder
         if (!is_dir($dest)) {
             mkdir($dest);
         }
-        foreach (new \DirectoryIterator($file) as $item) {
-            if ($item->getFilename() === '.' || $item->getFilename() === '..' || $item->getFilename() === '.gitkeep') {
-                continue;
-            } else {
-                $this->buildFile($item->getRealPath(), $replaces);
-            }
+        foreach (new DirectoryIterator($file) as $item) {
+            if ($item->getFilename() === '.' || $item->getFilename() === '..') continue;
+            $this->buildFile($item->getRealPath(), $replaces);
         }
     }
 

@@ -19,7 +19,7 @@ class ContainerChainTest extends PHPUnit_Framework_TestCase
         try {
             $container->instance('obj2', new stdClass)->freeze();
             $container->destroy('obj2');
-            $this->fail();
+            static::fail();
         } catch (CannotChangeException $e) {
         }
     }
@@ -32,9 +32,9 @@ class ContainerChainTest extends PHPUnit_Framework_TestCase
         $container->instance('obj1', $object1);
         
         // all same
-        $this->assertSame($object1, $container['obj1']);
-        $this->assertSame($object1, $container['obj1']);
-        $this->assertSame($object1, $container['obj1']);
+        static::assertSame($object1, $container['obj1']);
+        static::assertSame($object1, $container['obj1']);
+        static::assertSame($object1, $container['obj1']);
 
 
         $object2 = new stdClass();
@@ -43,15 +43,15 @@ class ContainerChainTest extends PHPUnit_Framework_TestCase
         // all not same
         $object2_1 = $container['obj2'];
 
-        $this->assertNotSame($object2, $object2_1);
-        $this->assertEquals($object2, $object2_1);
+        static::assertNotSame($object2, $object2_1);
+        static::assertEquals($object2, $object2_1);
         
         $object2_2 = $container['obj2'];
 
-        $this->assertNotSame($object2, $object2_2);
-        $this->assertEquals($object2, $object2_2);
-        $this->assertNotSame($object2_1, $object2_2);
-        $this->assertEquals($object2_1, $object2_2);
+        static::assertNotSame($object2, $object2_2);
+        static::assertEquals($object2, $object2_2);
+        static::assertNotSame($object2_1, $object2_2);
+        static::assertEquals($object2_1, $object2_2);
     }
 
     public function testClosureFactory()
@@ -64,9 +64,9 @@ class ContainerChainTest extends PHPUnit_Framework_TestCase
 
         // all same
         $object1 = $container['obj1'];
-        $this->assertSame($object1, $container['obj1']);
-        $this->assertSame($object1, $container['obj1']);
-        $this->assertSame($object1, $container['obj1']);
+        static::assertSame($object1, $container['obj1']);
+        static::assertSame($object1, $container['obj1']);
+        static::assertSame($object1, $container['obj1']);
 
 
         $container->closure('obj2', function () {
@@ -77,15 +77,15 @@ class ContainerChainTest extends PHPUnit_Framework_TestCase
         // all not same
         $object2_1 = $container['obj2'];
 
-        $this->assertNotSame($object2, $object2_1);
-        $this->assertEquals($object2, $object2_1);
+        static::assertNotSame($object2, $object2_1);
+        static::assertEquals($object2, $object2_1);
 
         $object2_2 = $container['obj2'];
 
-        $this->assertNotSame($object2, $object2_2);
-        $this->assertEquals($object2, $object2_2);
-        $this->assertNotSame($object2_1, $object2_2);
-        $this->assertEquals($object2_1, $object2_2);
+        static::assertNotSame($object2, $object2_2);
+        static::assertEquals($object2, $object2_2);
+        static::assertNotSame($object2_1, $object2_2);
+        static::assertEquals($object2_1, $object2_2);
     }
 
     public function testBindFactory()
@@ -96,9 +96,9 @@ class ContainerChainTest extends PHPUnit_Framework_TestCase
 
         // all same
         $object1 = $container[DependInterface::class];
-        $this->assertSame($object1, $container[DependInterface::class]);
-        $this->assertSame($object1, $container[DependInterface::class]);
-        $this->assertSame($object1, $container[DependInterface::class]);
+        static::assertSame($object1, $container[DependInterface::class]);
+        static::assertSame($object1, $container[DependInterface::class]);
+        static::assertSame($object1, $container[DependInterface::class]);
 
         // reset
         $container = new Container();
@@ -111,14 +111,14 @@ class ContainerChainTest extends PHPUnit_Framework_TestCase
         // all not same
         $object2_1 = $container[DependInterface::class];
 
-        $this->assertNotSame($object2, $object2_1);
-        $this->assertEquals($object2, $object2_1);
+        static::assertNotSame($object2, $object2_1);
+        static::assertEquals($object2, $object2_1);
 
         $object2_2 = $container[DependInterface::class];
 
-        $this->assertNotSame($object2, $object2_2);
-        $this->assertEquals($object2, $object2_2);
-        $this->assertNotSame($object2_1, $object2_2);
-        $this->assertEquals($object2_1, $object2_2);
+        static::assertNotSame($object2, $object2_2);
+        static::assertEquals($object2, $object2_2);
+        static::assertNotSame($object2_1, $object2_2);
+        static::assertEquals($object2_1, $object2_2);
     }
 }

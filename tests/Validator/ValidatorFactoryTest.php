@@ -10,54 +10,59 @@ class ValidatorFactoryTest extends PHPUnit_Framework_TestCase
         $factory = new ValidatorFactory();
         
         // singleton
-        $this->assertSame($factory->integer(), $factory->integer());
-        $this->assertSame($factory->string(), $factory->string());
+        static::assertSame($factory->integer(), $factory->integer());
+        static::assertSame($factory->string(), $factory->string());
         
         // new creation : this is not singleton because it has parameter
-        $this->assertNotSame($factory->min(5), $factory->min(5));
-        $this->assertNotSame($factory->pipeline(), $factory->pipeline());
+        static::assertNotSame($factory->min(5), $factory->min(5));
     }
     
     public function testFactoryViaHelper()
     {
-        $this->assertInstanceOf(ValidatorFactory::class, validator());
+        static::assertInstanceOf(ValidatorFactory::class, validator());
 
         // singleton
-        $this->assertSame(validator(), validator());
-        $this->assertSame(validator()->integer(), validator()->integer());
-        $this->assertSame(validator()->string(), validator()->string());
+        static::assertSame(validator(), validator());
+        static::assertSame(validator()->integer(), validator()->integer());
+        static::assertSame(validator()->string(), validator()->string());
     }
 
     public function testCreateSimple()
     {
-        $this->assertEquals(validator()->string(), validator()->from('string'));
-        $this->assertEquals(validator()->string(), validator()->from('string:'));
+        static::assertEquals(validator()->string(), validator()->from('string'));
+        static::assertEquals(validator()->string(), validator()->from('string:'));
 
-        $this->assertNotEquals(validator()->min(6), validator()->from('min:5'));
+        static::assertNotEquals(validator()->min(6), validator()->from('min:5'));
 
-        $this->assertEquals(validator()->lengthMin(20), validator()->from('length_min:20'));
+        static::assertEquals(validator()->lengthMin(20), validator()->from('length_min:20'));
 
-        $this->assertEquals(validator()->min(5), validator()->from('min:5'));
-        $this->assertEquals(validator()->min(5), validator()->from('min:5,,,'));
-        $this->assertEquals(validator()->min(5), validator()->from('min:   5, , ,  '));
-        $this->assertEquals(validator()->min(5), validator()->from('min:,,,5,,,'));
+        static::assertEquals(validator()->min(5), validator()->from('min:5'));
+        static::assertEquals(validator()->min(5), validator()->from('min:5,,,'));
+        static::assertEquals(validator()->min(5), validator()->from('min:   5, , ,  '));
+        static::assertEquals(validator()->min(5), validator()->from('min:,,,5,,,'));
     }
 
-    public function testCreatePipeline()
+    public function testCreateAnd()
     {
-        $this->assertEquals(
-            validator()->pipeline()->string()->lengthMin(20),
+        static::assertEquals(
+            validator()->pipeline([
+                validator()->string(),
+                validator()->lengthMin(20),
+            ]),
             validator()->from('string|length_min:20')
         );
-        $this->assertEquals(
-            validator()->pipeline()->string()->lengthMin(20),
+        static::assertEquals(
+            validator()->pipeline([
+                validator()->string(),
+                validator()->lengthMin(20),
+            ]),
             validator()->from('string | length_min:20')
         );
     }
 
     public function testCreateArray()
     {
-        $this->assertEquals(validator()->array([
+        static::assertEquals(validator()->array([
             'username' => validator()->string(),
             'license' => validator()->array([
                 'expired_at' => validator()->integer(),
@@ -70,10 +75,16 @@ class ValidatorFactoryTest extends PHPUnit_Framework_TestCase
         ]));
 
         // with pipeline
-        $this->assertEquals(validator()->array([
-            'username' => validator()->pipeline()->string()->lengthMax(30),
+        static::assertEquals(validator()->array([
+            'username' => validator()->pipeline([
+                validator()->string(),
+                validator()->lengthMax(30),
+            ]),
             'license' => validator()->array([
-                'expired_at' => validator()->pipeline()->integer()->min(20),
+                'expired_at' => validator()->pipeline([
+                    validator()->integer(),
+                    validator()->min(20),
+                ]),
             ]),
         ]), validator()->from([
             'username' => 'string|length_max:30',
@@ -85,44 +96,26 @@ class ValidatorFactoryTest extends PHPUnit_Framework_TestCase
     
     public function testCreateNot()
     {
-        $this->assertEquals(
+        static::assertEquals(
             validator()->not(validator()->min(20)),
             validator()->from('!min:20')
         );
         
-        $this->assertEquals(validator()->array([
-            'username' => validator()->pipeline()->string()->lengthMax(30),
+        static::assertEquals(validator()->array([
+            'username' => validator()->pipeline([
+                validator()->string(),
+                validator()->lengthMax(30),
+            ]),
             'license' => validator()->array([
-                'expired_at' => validator()->pipeline()->integer()->not(validator()->min(20)),
+                'expired_at' => validator()->pipeline([
+                    validator()->integer(),
+                    validator()->not(validator()->min(20)),
+                ]),
             ]),
         ]), validator()->from([
             'username' => 'string|length_max:30',
             'license' => [
                 'expired_at' => 'integer|!min:20',
-            ]
-        ]));
-    }
-
-    public function testCreateOptional()
-    {
-        $this->assertEquals(
-            validator()->not(validator()->optional(validator()->min(20))),
-            validator()->from('!min?:20')
-        );
-
-        $this->assertEquals(validator()->array([
-            'username' => validator()->pipeline()->not(
-                validator()->optional(
-                    validator()->string()
-                )
-            )->lengthMax(30),
-            'license' => validator()->array([
-                'expired_at' => validator()->pipeline()->optional(validator()->integer())->not(validator()->min(20)),
-            ]),
-        ]), validator()->from([
-            'username' => '!string?|length_max:30',
-            'license' => [
-                'expired_at' => 'integer?|!min:20',
             ]
         ]));
     }

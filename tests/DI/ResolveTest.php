@@ -23,17 +23,17 @@ class ResolveTest extends PHPUnit_Framework_TestCase
 
         $container->bind(DependInterface::class, AutoResolvedDepend::class);
 
-        $this->assertInstanceOf(
+        static::assertInstanceOf(
             AutoResolvedDepend::class,
             $instance1 = $container->get(AutoResolvedDepend::class)
         );
 
-        $this->assertInstanceOf(
+        static::assertInstanceOf(
             AutoResolvedDepend::class,
             $instance2 = $container->get(DependInterface::class)
         );
         
-        $this->assertSame($instance1, $instance2);
+        static::assertSame($instance1, $instance2);
     }
 
     public function testCreateFail()
@@ -42,9 +42,9 @@ class ResolveTest extends PHPUnit_Framework_TestCase
 
         try {
             $container->create(CreateNormalExample::class);
-            $this->fail();
+            static::fail();
         } catch (CannotResolveException $e) {
-            $this->assertEquals(CreateNormalExample::class, $e->getClass());
+            static::assertEquals(CreateNormalExample::class, $e->getClass());
         }
     }
     
@@ -54,12 +54,12 @@ class ResolveTest extends PHPUnit_Framework_TestCase
 
         $container->bind(DependInterface::class, AutoResolvedDepend::class);
 
-        $this->assertInstanceOf(
+        static::assertInstanceOf(
             CreateNormalExample::class,
             $container->create(CreateNormalExample::class)
         );
 
-        $this->assertInstanceOf(
+        static::assertInstanceOf(
             AutoResolvedDepend::class,
             $container->create(CreateNormalExample::class)->getDepend()
         );
@@ -73,9 +73,9 @@ class ResolveTest extends PHPUnit_Framework_TestCase
 
         try {
             $container->create(CreateWithArrayExample::class);
-            $this->fail();
+            static::fail();
         } catch (CannotResolveException $e) {
-            $this->assertEquals(CreateWithArrayExample::class, $e->getClass());
+            static::assertEquals(CreateWithArrayExample::class, $e->getClass());
         }
     }
 
@@ -89,10 +89,10 @@ class ResolveTest extends PHPUnit_Framework_TestCase
             ['config' => 'config string!'],
         ]);
 
-        $this->assertInstanceOf(CreateWithArrayExample::class, $created);
+        static::assertInstanceOf(CreateWithArrayExample::class, $created);
 
-        $this->assertEquals(['config' => 'config string!'], $created->getConfigs());
-        $this->assertInstanceOf(AutoResolvedDepend::class, $created->getDepend());
+        static::assertEquals(['config' => 'config string!'], $created->getConfigs());
+        static::assertInstanceOf(AutoResolvedDepend::class, $created->getDepend());
     }
 
     public function testCreateWithOtherDepend()
@@ -106,10 +106,10 @@ class ResolveTest extends PHPUnit_Framework_TestCase
             DependInterface::class => new ReplacedDepend(), // key => value mean use this
         ]);
 
-        $this->assertInstanceOf(CreateWithArrayExample::class, $created);
+        static::assertInstanceOf(CreateWithArrayExample::class, $created);
 
-        $this->assertEquals(['config' => 'config string!'], $created->getConfigs());
-        $this->assertInstanceOf(ReplacedDepend::class, $created->getDepend());
+        static::assertEquals(['config' => 'config string!'], $created->getConfigs());
+        static::assertInstanceOf(ReplacedDepend::class, $created->getDepend());
     }
 
     /**
@@ -121,41 +121,48 @@ class ResolveTest extends PHPUnit_Framework_TestCase
 
         $container->bind(DependInterface::class, AutoResolvedDepend::class);
 
-        function stub(DependInterface $dep)
-        {
-            return 'call function';
-        }
-
         // closure
-        $this->assertEquals('call closure', $container->call(function (DependInterface $dep) {
+        static::assertEquals('call closure', $container->call(function (DependInterface $dep) {
             return 'call closure';
         }));
 
         // function
-        $this->assertEquals('call function', $container->call(__NAMESPACE__ . '\\stub'));
+        static::assertEquals('call function', $container->call(__NAMESPACE__ . '\\stubFunction'));
 
         // static method
-        $this->assertEquals(
+        static::assertEquals(
             'static method',
-            $container->call(CallExample::class . '::staticMethod')
+            $container->call(TestCallExample::class . '::staticMethod')
         );
 
         // array of static
-        $this->assertEquals(
+        static::assertEquals(
             'static method',
-            $container->call([CallExample::class, 'staticMethod'])
+            $container->call([TestCallExample::class, 'staticMethod'])
         );
 
         // array of method
-        $this->assertEquals(
+        static::assertEquals(
             'instance method',
-            $container->call([new CallExample, 'instanceMethod'])
+            $container->call([new TestCallExample, 'instanceMethod'])
         );
 
         // invoker
-        $this->assertEquals(
+        static::assertEquals(
             'invoke',
-            $container->call(new CallExample())
+            $container->call(new TestCallExample())
+        );
+        
+        // __call
+        static::assertEquals(
+            ['__call', 'callViaCallMagicMethod', []],
+            $container->call([new TestCallExample(), 'callViaCallMagicMethod'])
+        );
+        
+        // __staticCall
+        static::assertEquals(
+            ['__callStatic', 'callViaStaticCallMagicMethod', []],
+            $container->call([TestCallExample::class, 'callViaStaticCallMagicMethod'])
         );
     }
 
@@ -167,21 +174,21 @@ class ResolveTest extends PHPUnit_Framework_TestCase
             return func_get_args();
         };
 
-        $this->assertEquals([], $container->call($callback));
-        $this->assertEquals([1, 2], $container->call($callback, [1, 2]));
-        $this->assertEquals([1, 2], $container->call($callback, [1, 2, 'foo' => 'foo string']));
+        static::assertEquals([], $container->call($callback));
+        static::assertEquals([1, 2], $container->call($callback, [1, 2]));
+        static::assertEquals([1, 2], $container->call($callback, [1, 2, 'foo' => 'foo string']));
 
         $callback = function ($foo = null) {
             return func_get_args();
         };
 
-        $this->assertEquals([null], $container->call($callback));
-        $this->assertEquals([1, 2], $container->call($callback, [1, 2]));
-        $this->assertEquals(
+        static::assertEquals([null], $container->call($callback));
+        static::assertEquals([1, 2], $container->call($callback, [1, 2]));
+        static::assertEquals(
             [1, 2],
             $container->call($callback, ['foo' => 'foo!', 1, 2,])
         );
-        $this->assertEquals(
+        static::assertEquals(
             [1, 2],
             $container->call($callback, [1, 2, 'foo' => 'foo!'])
         );
@@ -190,10 +197,10 @@ class ResolveTest extends PHPUnit_Framework_TestCase
             return func_get_args();
         };
 
-        $this->assertEquals(['default', null], $container->call($callback));
-        $this->assertEquals([null, 2], $container->call($callback, [null, 2]));
-        $this->assertEquals([1, 2], $container->call($callback, [1, 2]));
-        $this->assertEquals(
+        static::assertEquals(['default', null], $container->call($callback));
+        static::assertEquals([null, 2], $container->call($callback, [null, 2]));
+        static::assertEquals([1, 2], $container->call($callback, [1, 2]));
+        static::assertEquals(
             [1, 2],
             $container->call($callback, [1, 2, 'foo' => 'foo!'])
         );
@@ -202,21 +209,21 @@ class ResolveTest extends PHPUnit_Framework_TestCase
             return func_get_args();
         };
 
-        $this->assertEquals([null], $container->call($callback));
-        $this->assertEquals([null, 1, 2], $container->call($callback, [1, 2]));
+        static::assertEquals([null], $container->call($callback));
+        static::assertEquals([null, 1, 2], $container->call($callback, [1, 2]));
 
         // instantly insert!
         $param = new ArrayObject();
-        $this->assertEquals(
+        static::assertEquals(
             [null, 1, 2, 3],
             $container->call($callback, [1, 2, 3, 'foo' => $param])
         );
-        $this->assertEquals(
+        static::assertEquals(
             [$param, 1, 2, 3],
             $container->call($callback, [1, 2, 3, ArrayAccess::class => $param])
         );
 
-        $this->assertFalse($container->has(ArrayAccess::class));
+        static::assertFalse($container->has(ArrayAccess::class));
     }
     
     public function testResolveException()
@@ -225,18 +232,18 @@ class ResolveTest extends PHPUnit_Framework_TestCase
 
         try {
             $container->get(StubResolveException1Depth::class);
-            $this->fail();
+            static::fail();
         } catch (CannotResolveException $e) {
-            $this->assertEquals('unknown', $e->getParameter());
-            $this->assertEquals(StubResolveException1Depth::class, $e->getClass());
+            static::assertEquals('unknown', $e->getParameter());
+            static::assertEquals(StubResolveException1Depth::class, $e->getClass());
         }
 
         try {
             $container->get(StubResolveException2Depth::class);
-            $this->fail();
+            static::fail();
         } catch (CannotResolveException $e) {
-            $this->assertEquals('unknown', $e->getParameter());
-            $this->assertEquals(StubResolveException1Depth::class, $e->getClass());
+            static::assertEquals('unknown', $e->getParameter());
+            static::assertEquals(StubResolveException1Depth::class, $e->getClass());
         }
     }
     
@@ -250,14 +257,19 @@ class ResolveTest extends PHPUnit_Framework_TestCase
         $request = $request->withParsedBody(['abc' => 'def']);
         
         $container->call(function (ServerRequestInterface $req, ParsedBody $parsedBody) use (&$count, $request) {
-            $this->assertSame($request, $req);
+            static::assertSame($request, $req);
             $count++;
         }, [
             ServerRequestInterface::class => $request,
         ]);
         
-        $this->assertEquals(1, $count);
+        static::assertEquals(1, $count);
     }
+}
+
+function stubFunction(DependInterface $dep)
+{
+    return 'call function';
 }
 
 class StubResolveException1Depth
@@ -271,5 +283,52 @@ class StubResolveException2Depth
 {
     public function __construct(StubResolveException1Depth $depth1)
     {
+    }
+}
+
+class TestCallExample
+{
+    /**
+     * @return string
+     */
+    public static function staticMethod()
+    {
+        return 'static method';
+    }
+
+    /**
+     * @return string
+     */
+    public function instanceMethod()
+    {
+        return 'instance method';
+    }
+
+    /**
+     * @return string
+     */
+    public function __invoke()
+    {
+        return 'invoke';
+    }
+
+    /**
+     * @param $name
+     * @param $arguments
+     * @return array
+     */
+    public function __call($name, $arguments)
+    {
+        return ['__call', $name, $arguments];
+    }
+
+    /**
+     * @param $name
+     * @param $arguments
+     * @return array
+     */
+    public static function __callStatic($name, $arguments)
+    {
+        return ['__callStatic', $name, $arguments];
     }
 }

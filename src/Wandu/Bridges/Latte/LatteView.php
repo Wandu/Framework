@@ -44,9 +44,9 @@ class LatteView implements RenderInterface
         if (!isset($basePath)) {
             $basePath = $this->basePath;
         }
-        if (!file_exists("{$basePath}/{$template}.latte")) {
-            throw new FileNotFoundException("Cannot find the file, {$basePath}/{$template}.latte");
+        if (!file_exists("{$basePath}/{$template}")) {
+            throw new FileNotFoundException("Cannot find the file, {$basePath}/{$template}");
         }
-        return $this->latte->renderToString("{$basePath}/{$template}.latte" , $values + $this->values);
+        return $this->latte->renderToString("{$basePath}/{$template}" , $values + $this->values);
     }
 }

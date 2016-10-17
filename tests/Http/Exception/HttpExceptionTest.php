@@ -110,6 +110,6 @@ class HttpExceptionTest extends PHPUnit_Framework_TestCase
         
         $this->assertInstanceOf(StringStream::class, $response->getBody());
         $this->assertSame('1.0', $response->getProtocolVersion());
-        $this->assertEquals(['content-type' => 'application/json'], $response->getHeaders());
+        $this->assertEquals(['content-type' => ['application/json']], $response->getHeaders());
     }
 }
