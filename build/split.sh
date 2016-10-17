@@ -6,6 +6,7 @@ git subsplit publish --heads="develop master" --no-tags src/Wandu/Compiler:git@g
 git subsplit publish --heads="develop master" --no-tags src/Wandu/Config:git@github.com:Wandu/Config.git
 git subsplit publish --heads="develop master" --no-tags src/Wandu/Console:git@github.com:Wandu/Console.git
 git subsplit publish --heads="develop master" --no-tags src/Wandu/Database:git@github.com:Wandu/Database.git
+git subsplit publish --heads="develop master" --no-tags src/Wandu/DateTime:git@github.com:Wandu/DateTime.git
 git subsplit publish --heads="develop master" --no-tags src/Wandu/DI:git@github.com:Wandu/DI.git
 git subsplit publish --heads="develop master" --no-tags src/Wandu/Event:git@github.com:Wandu/Event.git
 git subsplit publish --heads="develop master" --no-tags src/Wandu/Foundation:git@github.com:Wandu/Foundation.git

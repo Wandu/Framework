@@ -58,6 +58,7 @@
         "wandu/config": "self.version",
         "wandu/console": "self.version",
         "wandu/database": "self.version",
+        "wandu/datetime": "self.version",
         "wandu/di": "self.version",
         "wandu/event": "self.version",
         "wandu/foundation": "self.version",
