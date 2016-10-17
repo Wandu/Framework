@@ -7,7 +7,7 @@ class HelloWorldController
 {
     public function index()
     {
-        return View\render('welcome.latte', [
+        return View\render('welcome.php', [
             'message' => 'Hello Wandu'
         ]);
     }

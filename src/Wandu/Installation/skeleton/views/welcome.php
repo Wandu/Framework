@@ -5,6 +5,6 @@
     <title>Wandu Welcome</title>
 </head>
 <body>
-{$message}
+<?php echo $message ?>
 </body>
 </html>

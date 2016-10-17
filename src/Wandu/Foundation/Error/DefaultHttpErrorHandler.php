@@ -24,13 +24,13 @@ class DefaultHttpErrorHandler implements HttpErrorHandlerInterface
     protected $config;
     
     /**
-     * @param \Psr\Log\LoggerInterface $logger
      * @param \Wandu\Config\Contracts\ConfigInterface $config
+     * @param \Psr\Log\LoggerInterface $logger
      */
-    public function __construct(LoggerInterface $logger, ConfigInterface $config)
+    public function __construct(ConfigInterface $config, LoggerInterface $logger = null)
     {
-        $this->logger = $logger;
         $this->config = $config;
+        $this->logger = $logger;
     }
 
     /**
@@ -39,8 +39,10 @@ class DefaultHttpErrorHandler implements HttpErrorHandlerInterface
     public function handle(ServerRequestInterface $request, $exception)
     {
         if ($exception instanceof HttpException) {
-            $this->logger->notice($this->prettifyRequest($request));
-            $this->logger->notice($exception);
+            if ($this->logger) {
+                $this->logger->notice($this->prettifyRequest($request));
+                $this->logger->notice($exception);
+            }
             return $exception;
         }
         if ($this->config->get('debug', true)) {
@@ -59,8 +61,10 @@ class DefaultHttpErrorHandler implements HttpErrorHandlerInterface
             $reasonPhrase = 'Method Not Allowed';
         }
         
-        $this->logger->error($this->prettifyRequest($request));
-        $this->logger->error($exception);
+        if ($this->logger) {
+            $this->logger->error($this->prettifyRequest($request));
+            $this->logger->error($exception);
+        }
 
         if ($this->isAjax($request)) {
             return json([
