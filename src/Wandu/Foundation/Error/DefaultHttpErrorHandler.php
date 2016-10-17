@@ -60,7 +60,6 @@ class DefaultHttpErrorHandler implements HttpErrorHandlerInterface
             $statusCode = 405;
             $reasonPhrase = 'Method Not Allowed';
         }
-        
         if ($this->logger) {
             $this->logger->error($this->prettifyRequest($request));
             $this->logger->error($exception);
