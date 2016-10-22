@@ -1,15 +1,12 @@
 <?php
 namespace Wandu\Http\Session;
 
-use PHPUnit_Framework_TestCase;
-use Mockery;
 use InvalidArgumentException;
-use Wandu\Http\Contracts\ParameterInterfaceTestTrait;
+use Mockery;
+use Wandu\Http\Parameters\ParameterTest;
 
-class SessionTest extends PHPUnit_Framework_TestCase
+class SessionTest extends ParameterTest
 {
-    use ParameterInterfaceTestTrait;
-
     /** @var \Wandu\Http\Session\Session */
     private $session;
 
@@ -30,6 +27,8 @@ class SessionTest extends PHPUnit_Framework_TestCase
         ]);
         $this->param2 = new Session(1, [
             'null' => null,
+            'empty' => '',
+            'false' => false,
         ]);
 
         $this->param3 = new Session(1, [
@@ -55,62 +54,62 @@ class SessionTest extends PHPUnit_Framework_TestCase
     {
         try {
             $this->session->set(30, 30);
-            $this->fail();
+            static::fail();
         } catch (InvalidArgumentException $e) {
-            $this->assertEquals('The session name must be string; "30"', $e->getMessage());
+            static::assertEquals('The session name must be string; "30"', $e->getMessage());
         }
         try {
             $this->session->set('', 30);
-            $this->fail();
+            static::fail();
         } catch (InvalidArgumentException $e) {
-            $this->assertEquals('The session name cannot be empty.', $e->getMessage());
+            static::assertEquals('The session name cannot be empty.', $e->getMessage());
         }
     }
 
     public function testGet()
     {
-        $this->assertEquals(37, $this->session->get('id'));
-        $this->assertNull($this->session->get('not_exists_key'));
+        static::assertEquals(37, $this->session->get('id'));
+        static::assertNull($this->session->get('not_exists_key'));
     }
 
     public function testSetAndRemove()
     {
         // first
-        $this->assertEquals(37, $this->session->get('id'));
-        $this->asserttrue($this->session->has('id'));
+        static::assertEquals(37, $this->session->get('id'));
+        static::assertTrue($this->session->has('id'));
 
-        $this->assertNull($this->session->get('_new'));
-        $this->assertFalse($this->session->has('_new'));
+        static::assertNull($this->session->get('_new'));
+        static::assertFalse($this->session->has('_new'));
 
         // set
         $this->session->set('_new', "new value!");
-        $this->assertEquals('new value!', $this->session->get('_new'));
-        $this->assertTrue($this->session->has('_new'));
+        static::assertEquals('new value!', $this->session->get('_new'));
+        static::assertTrue($this->session->has('_new'));
 
         $this->session->remove('_new');
-        $this->assertNull($this->session->get('_new'));
-        $this->assertFalse($this->session->has('_new'));
+        static::assertNull($this->session->get('_new'));
+        static::assertFalse($this->session->has('_new'));
 
         $this->session->remove('id');
-        $this->assertNull($this->session->get('id'));
-        $this->assertFalse($this->session->has('id'));
+        static::assertNull($this->session->get('id'));
+        static::assertFalse($this->session->has('id'));
     }
 
     public function testArrayAccess()
     {
-        $this->assertSame($this->session->get('id'), $this->session['id']);
-        $this->assertSame($this->session->get('unknown'), $this->session['unknown']);
+        static::assertSame($this->session->get('id'), $this->session['id']);
+        static::assertSame($this->session->get('unknown'), $this->session['unknown']);
 
-        $this->assertSame($this->session->has('id'), isset($this->session['id']));
-        $this->assertSame($this->session->has('unknown'), isset($this->session['unknown']));
+        static::assertSame($this->session->has('id'), isset($this->session['id']));
+        static::assertSame($this->session->has('unknown'), isset($this->session['unknown']));
 
-        $this->assertFalse($this->session->has('added'));
+        static::assertFalse($this->session->has('added'));
         $this->session['added'] = 'added!';
-        $this->assertTrue($this->session->has('added'));
+        static::assertTrue($this->session->has('added'));
 
-        $this->assertTrue($this->session->has('id'));
+        static::assertTrue($this->session->has('id'));
         unset($this->session['id']);
-        $this->assertFalse($this->session->has('id'));
+        static::assertFalse($this->session->has('id'));
     }
 
     /**
@@ -121,38 +120,38 @@ class SessionTest extends PHPUnit_Framework_TestCase
     {
         $this->session->flash('flash', 'hello world!');
 
-        $this->assertEquals('hello world!', $this->session->get('flash'));
-        $this->assertNull($this->session->get('flash'));
+        static::assertEquals('hello world!', $this->session->get('flash'));
+        static::assertNull($this->session->get('flash'));
     }
 
     public function testHasWithFlash()
     {
         $this->session->flash('flash', 'hello world!');
 
-        $this->assertTrue($this->session->has('flash'));
-        $this->assertTrue($this->session->has('flash'));
-        $this->assertTrue($this->session->has('flash'));
+        static::assertTrue($this->session->has('flash'));
+        static::assertTrue($this->session->has('flash'));
+        static::assertTrue($this->session->has('flash'));
 
-        $this->assertEquals('hello world!', $this->session->get('flash'));
+        static::assertEquals('hello world!', $this->session->get('flash'));
 
-        $this->assertFalse($this->session->has('flash'));
-        $this->assertFalse($this->session->has('flash'));
-        $this->assertFalse($this->session->has('flash'));
+        static::assertFalse($this->session->has('flash'));
+        static::assertFalse($this->session->has('flash'));
+        static::assertFalse($this->session->has('flash'));
 
-        $this->assertNull($this->session->get('flash'));
+        static::assertNull($this->session->get('flash'));
     }
 
     public function testToArrayWithFlash()
     {
         $this->session->flash('flash', 'hello world!');
 
-        $this->assertEquals([
+        static::assertEquals([
             'flash' => 'hello world!',
             'id' => 37,
             'username' => 'wan2land'
         ], $this->session->toArray());
 
-        $this->assertEquals([
+        static::assertEquals([
             'id' => 37,
             'username' => 'wan2land'
         ], $this->session->toArray());

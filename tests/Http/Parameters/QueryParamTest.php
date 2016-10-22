@@ -19,6 +19,6 @@ class QueryParamsTest extends PHPUnit_Framework_TestCase
 
         $parsedBody = new QueryParams($request);
 
-        $this->assertEquals([], $parsedBody->toArray());
+        static::assertEquals([], $parsedBody->toArray());
     }
 }
