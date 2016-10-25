@@ -42,6 +42,16 @@ class ValidatorFactory
     ];
 
     /**
+     * @return \Wandu\Validator\ValidatorFactory
+     */
+    public static function clearGlobal()
+    {
+        $clearedFactory = static::$factory;
+        static::$factory = null;
+        return $clearedFactory;
+    }
+    
+    /**
      * @param string $name
      * @param array $arguments
      * @return \Wandu\Validator\Contracts\ValidatorInterface
