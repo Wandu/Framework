@@ -7,6 +7,11 @@ use Wandu\Validator\Rules\ValidatorAbstract;
 
 class CustomValidatorTest extends ValidatorTestCase
 {
+    public function tearDown()
+    {
+        ValidatorFactory::clearGlobal();
+    }
+    
     public function testValidate()
     {
         $validator = new TestOverTenValidator();
@@ -15,7 +20,7 @@ class CustomValidatorTest extends ValidatorTestCase
         $this->assertInvalidValueException(function () use ($validator) {
             $validator->assert(10);
         }, [
-            'test_custom:hello',
+            'test_over_ten:hello',
         ]);
     }
     
@@ -29,7 +34,7 @@ class CustomValidatorTest extends ValidatorTestCase
         $this->assertInvalidValueException(function () use ($validator) {
             $validator->assert(10);
         }, [
-            'test_custom:hello',
+            'test_over_ten:hello',
         ]);
         $this->assertInvalidValueException(function () use ($validator) {
             $validator->assert(21);
@@ -40,17 +45,38 @@ class CustomValidatorTest extends ValidatorTestCase
 
     public function testRegisterBaseNamespace()
     {
-        $factory = new ValidatorFactory();
+        ValidatorFactory::clearGlobal();
+        (new ValidatorFactory)->setAsGlobal();
         try {
-            $factory->testOverTen();
-            $this->fail();
+            validator()->testOverTen();
+            static::fail();
         } catch (ValidatorNotFoundException $e) {
-            $this->assertEquals('testOverTen', $e->getName());
+            static::assertEquals('testOverTen', $e->getName());
         }
         
-        $factory->register(__NAMESPACE__); // register
+        validator()->register(__NAMESPACE__); // register
 
-        $factory->testOverTen();
+        validator()->testOverTen()->assert(11);
+        validator()->from('test_over_ten')->assert(11);
+        validator()->from([
+            'age' => 'required|test_over_ten'
+        ])->assert([
+            'age' => 11,
+        ]);
+
+        $this->assertInvalidValueException(function () {
+            validator()->testOverTen()->assert(10);
+        }, ['test_over_ten:hello']);
+        $this->assertInvalidValueException(function () {
+            validator()->from('test_over_ten')->assert(10);
+        }, ['test_over_ten:hello']);
+        $this->assertInvalidValueException(function () {
+            validator()->from([
+                'age' => 'required|test_over_ten'
+            ])->assert([
+                'age' => 10,
+            ]);
+        }, ['test_over_ten:hello@age']);
     }
     
     public function testOverrideValidator()
@@ -78,7 +104,7 @@ class MinValidator implements ValidatorInterface
 
 class TestOverTenValidator extends ValidatorAbstract
 {
-    const ERROR_TYPE = 'test_custom:{{something}}';
+    const ERROR_TYPE = 'test_over_ten:{{something}}';
     
     protected $something = "hello";
     

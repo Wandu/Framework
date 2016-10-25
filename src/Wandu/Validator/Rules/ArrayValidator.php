@@ -61,10 +61,7 @@ class ArrayValidator extends ValidatorAbstract
         if (!$this->test($item)) return false;
         
         foreach ($this->attributes as $name => $validator) {
-            if (!is_array($item) || !array_key_exists($name, $item)) {
-                return false;
-            }
-            if (!$validator->validate($item[$name])) {
+            if (!$validator->validate(isset($item[$name]) ? $item[$name] : null)) {
                 return false;
             }
         }

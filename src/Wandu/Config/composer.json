@@ -1,5 +1,6 @@
 {
     "name": "wandu/config",
+    "description": "Simple Config Based On Dot Array.",
     "license": "MIT",
     "require": {
         "php": ">=5.6",

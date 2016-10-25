@@ -19,7 +19,10 @@
     </testsuites>
     <filter>
         <whitelist>
-            <directory suffix=".php">src/</directory>
+            <directory suffix=".php">./src/</directory>
+            <exclude>
+                <directory>./src/Wandu/Installation/skeleton</directory>
+            </exclude>
         </whitelist>
     </filter>
 </phpunit>

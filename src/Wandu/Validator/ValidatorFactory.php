@@ -9,6 +9,8 @@ use Wandu\Validator\Rules\ArrayValidator;
  * @method \Wandu\Validator\Contracts\ValidatorInterface required()
  * @method \Wandu\Validator\Contracts\ValidatorInterface not(\Wandu\Validator\Contracts\ValidatorInterface $validator)
  * @method \Wandu\Validator\Contracts\ValidatorInterface array(array $attributes = [])
+ * @method \Wandu\Validator\Contracts\ValidatorInterface collection($rule = null)
+ * @method \Wandu\Validator\Contracts\ValidatorInterface arrayable(array $attributes = [])
  * @method \Wandu\Validator\Contracts\ValidatorInterface object(array $properties = [])
  * @method \Wandu\Validator\Contracts\ValidatorInterface integer()
  * @method \Wandu\Validator\Contracts\ValidatorInterface boolean()
@@ -41,6 +43,16 @@ class ValidatorFactory
     ];
 
     /**
+     * @return \Wandu\Validator\ValidatorFactory
+     */
+    public static function clearGlobal()
+    {
+        $clearedFactory = static::$factory;
+        static::$factory = null;
+        return $clearedFactory;
+    }
+    
+    /**
      * @param string $name
      * @param array $arguments
      * @return \Wandu\Validator\Contracts\ValidatorInterface
@@ -69,37 +81,40 @@ class ValidatorFactory
     }
     
     /**
-     * @param $namespace
+     * @param string|array $namespaces
      * @return static
      */
-    public function register($namespace)
+    public function register($namespaces)
     {
-        $this->namespaces[] = $namespace;
+        if (!is_array($namespaces)) {
+            $namespaces = [$namespaces];
+        }
+        $this->namespaces = array_merge($this->namespaces, $namespaces);
         return $this;
     }
 
     /**
-     * @param $attributes
+     * @param $rule
      * @return \Wandu\Validator\Contracts\ValidatorInterface
      */
-    public function from($attributes)
+    public function from($rule)
     {
-        if ($attributes instanceof ValidatorInterface) {
-            return $attributes;
+        if ($rule instanceof ValidatorInterface) {
+            return $rule;
         }
-        if (is_array($attributes)) {
-            return new ArrayValidator($attributes);
+        if (is_array($rule)) {
+            return new ArrayValidator($rule);
         }
-        if (is_object($attributes)) {
-            return $this->object(get_object_vars($attributes));
+        if (is_object($rule)) {
+            return $this->object(get_object_vars($rule));
         }
-        $attributes = explode('|', $attributes);
-        if (count($attributes) === 1) {
-            return $this->createValidator($attributes[0]);
+        $rule = explode('|', $rule);
+        if (count($rule) === 1) {
+            return $this->createValidator($rule[0]);
         }
         // if count bigger than 1, need pipeline.
         $validators = [];
-        foreach ($attributes as $attribute) {
+        foreach ($rule as $attribute) {
             if ($validator = $this->createValidator($attribute)) {
                 $validators[] = $validator;
             }

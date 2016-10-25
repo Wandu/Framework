@@ -6,6 +6,10 @@ Wandu Config
 [![Total Downloads](https://poser.pugx.org/wandu/config/downloads.svg)](https://packagist.org/packages/wandu/config)
 [![License](https://poser.pugx.org/wandu/config/license.svg)](https://packagist.org/packages/wandu/config)
 
-## Websites
+Simple Config Based On Dot Array.
 
-- [wandu.github.io](https://wandu.github.io)
+## Installation
+
+```bash
+composer require wandu/config
+```

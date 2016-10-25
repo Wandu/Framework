@@ -6,6 +6,12 @@ Wandu View
 [![Total Downloads](https://poser.pugx.org/wandu/view/downloads.svg)](https://packagist.org/packages/wandu/view)
 [![License](https://poser.pugx.org/wandu/view/license.svg)](https://packagist.org/packages/wandu/view)
 
+## Installation
+
+```bash
+composer require wandu/view
+```
+
 ## Websites
 
 - [wandu.github.io](https://wandu.github.io)

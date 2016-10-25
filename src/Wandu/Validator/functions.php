@@ -6,9 +6,8 @@ namespace Wandu\Validator;
  */
 function validator()
 {
-    static $factory;
-    if (!isset($factory)) {
-        $factory = new ValidatorFactory();
+    if (!isset(ValidatorFactory::$factory)) {
+        (new ValidatorFactory)->setAsGlobal();
     }
-    return $factory;
+    return ValidatorFactory::$factory;
 }

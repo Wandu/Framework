@@ -1,6 +1,6 @@
 {
     "name": "wandu/event",
-    "description": "Simple Event",
+    "description": "Simple Event Implementation.",
     "keywords": ["wandu", "queue"],
     "license": "MIT",
     "require": {

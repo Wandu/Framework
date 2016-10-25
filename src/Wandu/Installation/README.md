@@ -6,6 +6,12 @@ Wandu Installation
 [![Total Downloads](https://poser.pugx.org/wandu/installation/downloads.svg)](https://packagist.org/packages/wandu/installation)
 [![License](https://poser.pugx.org/wandu/installation/license.svg)](https://packagist.org/packages/wandu/installation)
 
+## Installation
+
+```bash
+composer require wandu/installation
+```
+
 ## Websites
 
 - [wandu.github.io](https://wandu.github.io)
