@@ -26,8 +26,11 @@ class ArrayValidatorTest extends ValidatorTestCase
             'age' => 'integer',
         ])->validate(['age' => "age string"]));
 
-        static::assertFalse(validator()->array([
+        static::assertTrue(validator()->array([
             'wrong' => 'integer',
+        ])->validate([]));
+        static::assertFalse(validator()->array([
+            'wrong' => 'required|integer',
         ])->validate([]));
     }
 

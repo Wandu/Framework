@@ -9,6 +9,7 @@ use Wandu\Validator\Rules\ArrayValidator;
  * @method \Wandu\Validator\Contracts\ValidatorInterface required()
  * @method \Wandu\Validator\Contracts\ValidatorInterface not(\Wandu\Validator\Contracts\ValidatorInterface $validator)
  * @method \Wandu\Validator\Contracts\ValidatorInterface array(array $attributes = [])
+ * @method \Wandu\Validator\Contracts\ValidatorInterface arrayable(array $attributes = [])
  * @method \Wandu\Validator\Contracts\ValidatorInterface object(array $properties = [])
  * @method \Wandu\Validator\Contracts\ValidatorInterface integer()
  * @method \Wandu\Validator\Contracts\ValidatorInterface boolean()
