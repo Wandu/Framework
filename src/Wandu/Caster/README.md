@@ -8,6 +8,8 @@ Wandu Caster
 
 Perfect Type Casting Library.
 
-## Websites
+## Installation
 
-- [wandu.github.io](https://wandu.github.io)
+```bash
+composer require wandu/caster
+```

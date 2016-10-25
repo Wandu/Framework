@@ -1,6 +1,6 @@
 {
     "name": "wandu/datetime",
-    "description": "Date & Time classes",
+    "description": "Date And Time.",
     "keywords": ["wandu", "datetime", "date", "time"],
     "license": "MIT",
     "require": {

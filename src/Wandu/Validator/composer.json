@@ -1,5 +1,6 @@
 {
     "name": "wandu/validator",
+    "description": "Perfect Validator Library.",
     "license": "MIT",
     "require": {
         "php": ">=5.6",

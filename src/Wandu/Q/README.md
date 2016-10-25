@@ -8,11 +8,13 @@ Wandu Q
 
 Very Simple Queue.
 
-## Websites
+## Installation
 
-- [wandu.github.io](https://wandu.github.io)
+```bash
+composer require wandu/q
+```
 
-## Example
+## Usage
 
 **Sender**
 
@@ -55,3 +57,7 @@ while (true) {
     sleep(3);
 }
 ```
+
+## Websites
+
+- [wandu.github.io](https://wandu.github.io)

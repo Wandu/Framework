@@ -1,5 +1,6 @@
 {
     "name": "wandu/foundation",
+    "description": "Wandu Framework Kernel.",
     "license": "MIT",
     "require": {
         "php": ">=5.6",
