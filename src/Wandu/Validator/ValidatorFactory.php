@@ -4,7 +4,6 @@ namespace Wandu\Validator;
 use Wandu\Validator\Contracts\ValidatorInterface;
 use Wandu\Validator\Exception\ValidatorNotFoundException;
 use Wandu\Validator\Rules\ArrayValidator;
-use Wandu\Validator\Rules\CollectionValidator;
 
 /**
  * @method \Wandu\Validator\Contracts\ValidatorInterface required()
