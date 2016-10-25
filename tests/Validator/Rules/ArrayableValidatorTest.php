@@ -2,8 +2,8 @@
 namespace Wandu\Validator\Rules;
 
 use ArrayObject;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 use Wandu\Validator\ValidatorTestCase;
 use function Wandu\Validator\validator;
 
@@ -15,7 +15,7 @@ class ArrayableValidatorTest extends ValidatorTestCase
         static::assertTrue(validator()->arrayable()->validate([]));
         static::assertTrue(validator()->arrayable()->validate(new ArrayObject([])));
         static::assertTrue(validator()->arrayable()->validate(new Collection([]))); // also use Laravel's Collection.
-        static::assertTrue(validator()->arrayable()->validate(new Tester([]))); // also use Laravel's Model
+        static::assertTrue(validator()->arrayable()->validate(new ArrayableTestModel([]))); // also use Laravel's Model
 
         static::assertFalse(validator()->arrayable()->validate((object)[]));
         static::assertFalse(validator()->arrayable()->validate("30"));
@@ -109,7 +109,7 @@ class ArrayableValidatorTest extends ValidatorTestCase
     }
 }
 
-class Tester extends Model 
+class ArrayableTestModel extends Model 
 {
     protected $fillable = [
         'name',
