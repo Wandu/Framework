@@ -4,6 +4,7 @@ namespace Wandu\Http\Psr;
 use InvalidArgumentException;
 use Psr\Http\Message\UriInterface;
 use Wandu\Http\Contracts\ExtendedUriInterface;
+use function Wandu\Http\parseUrl;
 
 class Uri implements UriInterface, ExtendedUriInterface
 {
@@ -31,22 +32,21 @@ class Uri implements UriInterface, ExtendedUriInterface
     /** @var array */
     protected $queryParams;
 
-    /** @var bool */
-    protected $isStrict;
-
     /** @var array */
     protected static $allowedSchemes = [
         'http'  => 80,
         'https' => 443,
+        'ftp' => 21,
+        'sftp' => 22,
+        'ssh' => 22,
     ];
 
     /**
      * @param string $uri
-     * @param bool $isStrict
      */
-    public function __construct($uri, $isStrict = false)
+    public function __construct($uri)
     {
-        $parsedUrl = parse_url(rawurldecode($uri));
+        $parsedUrl = parseUrl(rawurldecode($uri));
 
         $this->scheme = isset($parsedUrl['scheme']) ? $this->filterScheme($parsedUrl['scheme']) : '';
         $this->host = isset($parsedUrl['host']) ? $this->filterHost($parsedUrl['host']) : '';
@@ -62,7 +62,6 @@ class Uri implements UriInterface, ExtendedUriInterface
 
         parse_str($this->getQuery(), $params);
         $this->queryParams = $params;
-        $this->isStrict = $isStrict;
 
         $this->fragment = isset($parsedUrl['fragment']) ? $this->filterFragment($parsedUrl['fragment']) : '';
     }
@@ -238,25 +237,25 @@ class Uri implements UriInterface, ExtendedUriInterface
     /**
      * {@inheritdoc}
      */
-    public function hasQueryParam($name)
+    public function hasQueryParam($name, $emptyStrict = false)
     {
         /* Same Source :-)
-        if ($this->isStrict) {
+        if ($emptyStrict) {
             return array_key_exists($name, $this->queryParams);
         }
         return array_key_exists($name, $this->queryParams) && $this->queryParams[$name];
         */
         return array_key_exists($name, $this->queryParams) && (
-            $this->isStrict || $this->queryParams[$name]
+            $emptyStrict || $this->queryParams[$name]
         );
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getQueryParam($name, $default = null)
+    public function getQueryParam($name, $default = null, $emptyStrict = false)
     {
-        if ($this->hasQueryParam($name)) {
+        if ($this->hasQueryParam($name, $emptyStrict)) {
             return $this->queryParams[$name];
         }
         return $default;
@@ -289,7 +288,7 @@ class Uri implements UriInterface, ExtendedUriInterface
     {
         $queryParams = [];
         foreach (array_keys($this->queryParams) as $key) {
-            if ($this->hasQueryParam($key)) {
+            if ($this->hasQueryParam($key, true)) {
                 $queryParams[$key] = $this->queryParams[$key];
             }
         }
@@ -389,9 +388,6 @@ class Uri implements UriInterface, ExtendedUriInterface
         $scheme = rtrim(strtolower($scheme), ':/');
         if ($scheme === '') {
             return '';
-        }
-        if (!isset(static::$allowedSchemes[$scheme])) {
-            throw new InvalidArgumentException("Unsupported scheme \"{$scheme}\".");
         }
         return $scheme;
     }

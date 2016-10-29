@@ -1,6 +1,6 @@
 {
     "name": "wandu/compiler",
-    "description": "PHP Base Compiler(Lexical Analyzer).",
+    "description": "[EXPERIMENT] PHP Base Compiler(Lexical Analyzer).",
     "keywords": ["compiler", "lexer", "lex", "yacc", "wandu"],
     "license": "MIT",
     "require": {

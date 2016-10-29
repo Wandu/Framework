@@ -9,12 +9,21 @@ class Configuration
     public function __construct(array $config = [])
     {
         $this->config = $config + [
+                'middleware' => [],
                 'virtual_method_enabled' => false,
                 'cache_enabled' => false,
                 'cache_file' => null,
             ];
     }
 
+    /**
+     * @return array
+     */
+    public function getMiddleware()
+    {
+        return $this->config['middleware'];
+    }
+    
     /**
      * @return boolean
      */

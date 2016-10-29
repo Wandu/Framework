@@ -1,0 +1,20 @@
+{
+    "name": "wandu/math",
+    "license": "MIT",
+    "require": {
+        "php": ">=5.6"
+    },
+    "autoload": {
+        "psr-4": {
+            "Wandu\\Math\\": ""
+        },
+        "files": [
+            "functions.php"
+        ]
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "3.0-dev"
+        }
+    }
+}

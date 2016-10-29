@@ -1,11 +1,8 @@
 <?php
 namespace Wandu\Foundation\Definitions;
 
-use Wandu\Console\Dispatcher;
-use Wandu\DI\ContainerInterface;
 use Wandu\Foundation\Contracts\DefinitionInterface;
-use Wandu\Installation\Commands\InstallCommand;
-use Wandu\Router\Router;
+use Wandu\Installation\InstallServiceProvider;
 
 class NeedInstallDefinition implements DefinitionInterface
 {
@@ -20,22 +17,10 @@ class NeedInstallDefinition implements DefinitionInterface
     /**
      * {@inheritdoc}
      */
-    public function providers(ContainerInterface $app)
+    public function providers()
     {
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function commands(Dispatcher $dispatcher)
-    {
-        $dispatcher->add('install', InstallCommand::class);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function routes(Router $router)
-    {
+        return [
+            InstallServiceProvider::class,
+        ];
     }
 }

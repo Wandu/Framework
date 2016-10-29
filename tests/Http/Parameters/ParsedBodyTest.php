@@ -19,6 +19,6 @@ class ParsedBodyTest extends PHPUnit_Framework_TestCase
         
         $parsedBody = new ParsedBody($request);
         
-        $this->assertEquals([], $parsedBody->toArray());
+        static::assertEquals([], $parsedBody->toArray());
     }
 }

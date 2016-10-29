@@ -1,0 +1,22 @@
+{
+    "name": "wandu/datetime",
+    "description": "Date And Time.",
+    "keywords": ["wandu", "datetime", "date", "time"],
+    "license": "MIT",
+    "require": {
+        "php": ">=5.6"
+    },
+    "autoload": {
+        "psr-4": {
+            "Wandu\\DateTime\\": ""
+        }
+    },
+    "suggest": {
+        "nesbot/carbon": "for Carbon based methods"
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "3.0-dev"
+        }
+    }
+}

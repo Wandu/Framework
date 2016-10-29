@@ -31,11 +31,28 @@ class Container implements ContainerInterface
     
     /** @var array */
     protected $indexOfAliases = [];
+    
+    /** @var bool */
+    protected $isBooted = false;
 
     public function __construct()
     {
         $this->instance(Container::class, $this)->freeze();
+        $this->instance(ContainerInterface::class, $this)->freeze();
+        $this->instance(InteropContainerInterface::class, $this)->freeze();
+        $this->instance('container', $this)->freeze();
+    }
 
+    public function __clone()
+    {
+        // direct remove instance because of frozen
+        unset(
+            $this->containees[Container::class],
+            $this->containees[ContainerInterface::class],
+            $this->containees[InteropContainerInterface::class],
+            $this->containees['container']
+        );
+        $this->instance(Container::class, $this)->freeze();
         $this->instance(ContainerInterface::class, $this)->freeze();
         $this->instance(InteropContainerInterface::class, $this)->freeze();
         $this->instance('container', $this)->freeze();
@@ -253,8 +270,11 @@ class Container implements ContainerInterface
      */
     public function boot()
     {
-        foreach ($this->providers as $provider) {
-            $provider->boot($this);
+        if (!$this->isBooted) {
+            foreach ($this->providers as $provider) {
+                $provider->boot($this);
+            }
+            $this->isBooted = true;
         }
         return $this;
     }
@@ -274,7 +294,11 @@ class Container implements ContainerInterface
     {
         $new = clone $this;
         foreach ($arguments as $name => $argument) {
-            $new->instance($name, $argument);
+            if ($argument instanceof ContaineeInterface) {
+                $new->addContainee($name, $argument);
+            } else {
+                $new->instance($name, $argument);
+            }
         }
         return $new;
     }
@@ -284,8 +308,8 @@ class Container implements ContainerInterface
      */
     public function create($class, array $arguments = [])
     {
-        $seqArguments = $this->getSeqArray($arguments);
-        $assocArguments = $this->getAssocArray($arguments);
+        $seqArguments = static::getSeqArray($arguments);
+        $assocArguments = static::getAssocArray($arguments);
         if (count($assocArguments)) {
             return $this->with($assocArguments)->create($class, $seqArguments);
         }
@@ -294,8 +318,6 @@ class Container implements ContainerInterface
         if ($reflectionMethod) {
             try {
                 $parameters = $this->getParameters($reflectionMethod, $arguments);
-            } catch (CannotResolveException $e) {
-                throw $e;
             } catch (CannotFindParameterException $e) {
                 throw new CannotResolveException($class, $e->getParameter());
             }
@@ -310,15 +332,19 @@ class Container implements ContainerInterface
      */
     public function call(callable $callee, array $arguments = [])
     {
-        $seqArguments = $this->getSeqArray($arguments);
-        $assocArguments = $this->getAssocArray($arguments);
+        $seqArguments = static::getSeqArray($arguments);
+        $assocArguments = static::getAssocArray($arguments);
         if (count($assocArguments)) {
             return $this->with($assocArguments)->call($callee, $seqArguments);
         }
-        return call_user_func_array(
-            $callee,
-            $this->getParameters(new ReflectionCallable($callee), $seqArguments)
-        );
+        try {
+            return call_user_func_array(
+                $callee,
+                $this->getParameters(new ReflectionCallable($callee), $seqArguments)
+            );
+        } catch (CannotFindParameterException $e) {
+            throw new CannotResolveException(null, $e->getParameter());
+        }
     }
 
     /**
@@ -464,7 +490,7 @@ class Container implements ContainerInterface
      * @param array $array
      * @return array
      */
-    protected function getSeqArray(array $array)
+    protected static function getSeqArray(array $array)
     {
         $arrayToReturn = [];
         foreach ($array as $key => $item) {
@@ -479,7 +505,7 @@ class Container implements ContainerInterface
      * @param array $array
      * @return array
      */
-    protected function getAssocArray(array $array)
+    protected static function getAssocArray(array $array)
     {
         $arrayToReturn = [];
         foreach ($array as $key => $item) {

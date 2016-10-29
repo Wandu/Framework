@@ -1,24 +1,22 @@
 {
-  "name": "wandu/console",
-  "license": "MIT",
-  "require": {
-    "php": ">=5.6",
-    "symfony/console": "^3.1"
-  },
-  "autoload": {
-    "psr-4": {
-      "Wandu\\Console\\": ""
+    "name": "wandu/console",
+    "description": "Symfony Console Wrapper With DI Container.",
+    "license": "MIT",
+    "require": {
+        "php": ">=5.6",
+        "symfony/console": "^3.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "Wandu\\Console\\": ""
+        }
+    },
+    "suggest": {
+        "psy/psysh": "for Psysh command"
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "3.0-dev"
+        }
     }
-  },
-  "provide": {
-    "psr/http-message-implementation": "1.0"
-  },
-  "suggest": {
-    "psy/psysh": "for Psysh command"
-  },
-  "extra": {
-    "branch-alias": {
-      "dev-master": "3.0-dev"
-    }
-  }
 }

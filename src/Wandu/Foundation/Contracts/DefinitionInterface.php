@@ -1,10 +1,6 @@
 <?php
 namespace Wandu\Foundation\Contracts;
 
-use Wandu\Console\Dispatcher;
-use Wandu\DI\ContainerInterface;
-use Wandu\Router\Router;
-
 interface DefinitionInterface
 {
     /**
@@ -13,17 +9,7 @@ interface DefinitionInterface
     public function configs();
 
     /**
-     * @param \Wandu\DI\ContainerInterface $app
+     * @return array
      */
-    public function providers(ContainerInterface $app);
-
-    /**
-     * @param \Wandu\Console\Dispatcher $dispatcher
-     */
-    public function commands(Dispatcher $dispatcher);
-
-    /**
-     * @param \Wandu\Router\Router $router
-     */
-    public function routes(Router $router);
+    public function providers();
 }

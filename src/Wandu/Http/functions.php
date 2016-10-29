@@ -1,7 +1,6 @@
 <?php
 namespace Wandu\Http
 {
-
     use Wandu\Http\Factory\ResponseFactory;
 
     /**
@@ -15,7 +14,27 @@ namespace Wandu\Http
         }
         return $factory;
     }
+
+    /**
+     * @reference https://gist.github.com/Mulkave/65daabb82752f9b9a0dd
+     * @param string $url
+     * @return array|boolean
+     */
+    function parseUrl($url)
+    {
+        $parts = parse_url(preg_replace_callback('/[^:\/@?&=#]+/u', function ($matches) {
+            return urlencode($matches[0]);
+        }, $url));
+        if ($parts === false) {
+            return false;
+        }
+        foreach($parts as $name => $value) {
+            $parts[$name] = ($name === 'port') ? $value : urldecode($value);
+        }
+        return $parts;
+    }
 }
+
 namespace Wandu\Http\Response
 {
     use Closure;

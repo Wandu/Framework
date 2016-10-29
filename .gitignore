@@ -7,11 +7,3 @@ composer.lock
 /tests/Http/Session/Handler/sessions
 /tests/Installation/Commands/project
 /tests/Installation/target
-
-# local installed
-/app
-/public
-/migrations
-/views
-/.wandu.php
-/.wandu.config.php

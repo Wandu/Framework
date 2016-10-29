@@ -5,9 +5,9 @@ use Latte\Engine;
 use Latte\Loaders\FileLoader;
 use Wandu\DI\ContainerInterface;
 use Wandu\DI\ServiceProviderInterface;
-use Wandu\Foundation;
 use Wandu\View\Contracts\RenderInterface;
 use function Wandu\Foundation\config;
+use function Wandu\Foundation\path;
 
 class LatteServiceProvider implements ServiceProviderInterface
 {
@@ -21,14 +21,14 @@ class LatteServiceProvider implements ServiceProviderInterface
             $engine->setLoader(new FileLoader());
             $cachePath = config('view.cache');
             if ($cachePath) {
-                $engine->setTempDirectory(Foundation\path($cachePath));
+                $engine->setTempDirectory(path($cachePath));
             }
             return $engine;
         });
         $app->closure(RenderInterface::class, function ($app) {
             return new LatteView(
                 $app[Engine::class],
-                Foundation\path(config('view.path'))
+                path(config('view.path'))
             );
         });
     }

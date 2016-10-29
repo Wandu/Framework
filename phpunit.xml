@@ -11,11 +11,18 @@
          stopOnFailure="false"
          syntaxCheck="true"
          verbose="true"
-        >
+    >
     <testsuites>
         <testsuite name="Wandu Framework Test Suite">
             <directory suffix="Test.php">./tests</directory>
-            <exclude>./tests/Installation/Commands/project</exclude>
         </testsuite>
     </testsuites>
+    <filter>
+        <whitelist>
+            <directory suffix=".php">./src/</directory>
+            <exclude>
+                <directory>./src/Wandu/Installation/skeleton</directory>
+            </exclude>
+        </whitelist>
+    </filter>
 </phpunit>

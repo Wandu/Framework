@@ -5,7 +5,7 @@
     "license": "MIT",
     "require": {
         "php": ">=5.6",
-        "wandu/reflection": "^0.0.1",
+        "wandu/reflection": "^0.2",
         "container-interop/container-interop": "^1.1"
     },
     "autoload": {
