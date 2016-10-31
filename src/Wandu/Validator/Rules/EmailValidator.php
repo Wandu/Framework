@@ -5,6 +5,10 @@ use Egulias\EmailValidator\EmailLexer;
 use Egulias\EmailValidator\Validation\EmailValidation;
 use Egulias\EmailValidator\Validation\RFCValidation;
 
+/**
+ * Class EmailValidator
+ * @Annotation
+ */
 class EmailValidator extends ValidatorAbstract
 {
     const ERROR_TYPE = 'email';

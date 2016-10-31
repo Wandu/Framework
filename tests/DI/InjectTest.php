@@ -1,11 +1,12 @@
 <?php
 namespace Wandu\DI;
 
+use Wandu\DI\Annotations\AutoWired;
 use Wandu\DI\Exception\CannotInjectException;
-use Wandu\DI\Stub\Inject\AutoInjectExample;
 use Wandu\DI\Stub\Resolve\AutoResolvedDepend;
 use Wandu\DI\Stub\Resolve\DependInterface;
 use PHPUnit_Framework_TestCase;
+use Wandu\Validator\Rules\EmailValidator;
 
 class InjectTest extends PHPUnit_Framework_TestCase
 {
@@ -13,52 +14,52 @@ class InjectTest extends PHPUnit_Framework_TestCase
     {
         $container = new Container();
 
-        $example = new AutoInjectExample();
+        $example = new InjectTestExample();
 
-        $this->assertNull($example->getSomething()); // null
-        $this->assertNull($example->getOtherthing()); // null
+        static::assertNull($example->getSomething()); // null
+        static::assertNull($example->getOtherthing()); // null
 
         // inject object
         $container->inject($example, [
             'something' => $something = new AutoResolvedDepend(),
         ]);
 
-        $this->assertSame($something, $example->getSomething()); // same
+        static::assertSame($something, $example->getSomething()); // same
 
         // inject scalar
         $container->inject($example, [
-            'something' => null, // Autowired always has some value..
             'otherthing' => 12341234
         ]);
 
-        $this->assertSame(12341234, $example->getOtherthing()); // same
+        static::assertSame($something, $example->getSomething()); // same
+        static::assertSame(12341234, $example->getOtherthing()); // same
     }
 
     public function testDirectInjectByDocClassName()
     {
         $container = new Container();
 
-        $example = new AutoInjectExample();
+        $example = new InjectTestExample();
 
         $container->inject($example, [
             DependInterface::class => $something = new AutoResolvedDepend(),
         ]);
 
-        $this->assertSame($something, $example->getSomething()); // same
+        static::assertSame($something, $example->getSomething()); // same
     }
 
     public function testAutoInjectWithFail()
     {
         $container = new Container();
 
-        $example = new AutoInjectExample();
+        $example = new InjectTestExample();
 
         try {
             $container->inject($example);
             $this->fail();
         } catch (CannotInjectException $e) {
-            $this->assertEquals(DependInterface::class, $e->getClass());
-            $this->assertEquals('something', $e->getProperty());
+            static::assertEquals(DependInterface::class, $e->getClass());
+            static::assertEquals('something', $e->getProperty());
         }
     }
 
@@ -68,13 +69,13 @@ class InjectTest extends PHPUnit_Framework_TestCase
 
         $container->instance(DependInterface::class, $something1 = new AutoResolvedDepend);
 
-        $example = new AutoInjectExample();
-        $this->assertNull($example->getSomething());
+        $example = new InjectTestExample();
+        static::assertNull($example->getSomething());
 
         $container->inject($example);
 
         // inject success!
-        $this->assertSame($something1, $example->getSomething());
+        static::assertSame($something1, $example->getSomething());
     }
 
     public function testAutoInjectWithDirectInject()
@@ -83,16 +84,16 @@ class InjectTest extends PHPUnit_Framework_TestCase
 
         $container->instance(DependInterface::class, $something1 = new AutoResolvedDepend);
 
-        $example = new AutoInjectExample();
-        $this->assertNull($example->getSomething());
+        $example = new InjectTestExample();
+        static::assertNull($example->getSomething());
 
         $container->inject($example, [
             'something' => $something2 = new AutoResolvedDepend(), // this prority bigger than auto resolve's.
         ]);
 
         // inject success!
-        $this->assertNotSame($something1, $example->getSomething());
-        $this->assertSame($something2, $example->getSomething());
+        static::assertNotSame($something1, $example->getSomething());
+        static::assertSame($something2, $example->getSomething());
     }
 
     public function testAutoWiring()
@@ -100,16 +101,16 @@ class InjectTest extends PHPUnit_Framework_TestCase
         $container = new Container();
 
         $container->bind(DependInterface::class, AutoResolvedDepend::class);
-        $container->bind(AutoInjectExample::class)->wire(true);
+        $container->bind(InjectTestExample::class)->wire(true);
 
-        $this->assertInstanceOf(AutoInjectExample::class, $container->get(AutoInjectExample::class));
-        $this->assertSame(
-            $container->get(AutoInjectExample::class),
-            $container->get(AutoInjectExample::class)
+        static::assertInstanceOf(InjectTestExample::class, $container->get(InjectTestExample::class));
+        static::assertSame(
+            $container->get(InjectTestExample::class),
+            $container->get(InjectTestExample::class)
         );
 
-        $example = $container->get(AutoInjectExample::class);
-        $this->assertInstanceOf(DependInterface::class, $example->getSomething());
+        $example = $container->get(InjectTestExample::class);
+        static::assertInstanceOf(DependInterface::class, $example->getSomething());
     }
     
     public function testEachInject()
@@ -122,18 +123,18 @@ class InjectTest extends PHPUnit_Framework_TestCase
         $item1 = $container->get(TestEachInject1::class);
         $item2 = $container->get(TestEachInject2::class);
 
-        $this->assertInstanceOf(TestEachInject1::class, $item1);
-        $this->assertInstanceOf(TestEachInject2::class, $item2);
+        static::assertInstanceOf(TestEachInject1::class, $item1);
+        static::assertInstanceOf(TestEachInject2::class, $item2);
 
-        $this->assertInstanceOf(TestEachInject2::class, $item1->getItem());
-        $this->assertInstanceOf(TestEachInject1::class, $item2->getItem());
+        static::assertInstanceOf(TestEachInject2::class, $item1->getItem());
+        static::assertInstanceOf(TestEachInject1::class, $item2->getItem());
         
         // very important!
-        $this->assertSame($item1, $item2->getItem());
-        $this->assertSame($item2, $item1->getItem());
+        static::assertSame($item1, $item2->getItem());
+        static::assertSame($item2, $item1->getItem());
 
-        $this->assertSame($item1, $item1->getItem()->getItem());
-        $this->assertSame($item2, $item2->getItem()->getItem());
+        static::assertSame($item1, $item1->getItem()->getItem());
+        static::assertSame($item2, $item2->getItem()->getItem());
     }
 }
 
@@ -154,7 +155,7 @@ class TestEachInject1
 class TestEachInject2
 {
     /**
-     * @Autowired
+     * @AutoWired()
      * @var \Wandu\DI\TestEachInject1
      */
     protected $item;
@@ -162,5 +163,30 @@ class TestEachInject2
     public function getItem()
     {
         return $this->item;
+    }
+}
+
+class InjectTestExample
+{
+    /**
+     * @AutoWired({"foo"})
+     * @var \Wandu\DI\Stub\Resolve\DependInterface
+     */
+    private $something;
+
+    /** @var mixed */
+    private $otherthing;
+
+    /**
+     * @return mixed
+     */
+    public function getSomething()
+    {
+        return $this->something;
+    }
+
+    public function getOtherthing()
+    {
+        return $this->otherthing;
     }
 }

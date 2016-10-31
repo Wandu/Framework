@@ -3,19 +3,18 @@ namespace Wandu\DI;
 
 use ArrayAccess;
 use ArrayObject;
+use PHPUnit_Framework_TestCase;
 use Psr\Http\Message\ServerRequestInterface;
 use Wandu\DI\Exception\CannotResolveException;
 use Wandu\DI\Stub\Resolve\AutoResolvedDepend;
-use Wandu\DI\Stub\Resolve\CallExample;
 use Wandu\DI\Stub\Resolve\CreateNormalExample;
 use Wandu\DI\Stub\Resolve\CreateWithArrayExample;
 use Wandu\DI\Stub\Resolve\DependInterface;
 use Wandu\DI\Stub\Resolve\ReplacedDepend;
 use Wandu\Http\Parameters\ParsedBody;
 use Wandu\Http\Psr\ServerRequest;
-use PHPUnit_Framework_TestCase;
 
-class ResolveTest extends PHPUnit_Framework_TestCase
+class AutoResolveTest extends PHPUnit_Framework_TestCase
 {
     public function testBind()
     {
@@ -45,6 +44,7 @@ class ResolveTest extends PHPUnit_Framework_TestCase
             static::fail();
         } catch (CannotResolveException $e) {
             static::assertEquals(CreateNormalExample::class, $e->getClass());
+            static::assertEquals('depend', $e->getParameter());
         }
     }
     
