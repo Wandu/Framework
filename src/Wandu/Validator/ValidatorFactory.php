@@ -143,8 +143,9 @@ class ValidatorFactory
             return [$pattern, []]; // "simple"
         }
         $method = substr($pattern, 0, $pivot);
+        preg_match_all('/\/[^\/]*\/|[^,]+/', substr($pattern, $pivot + 1), $matches);
         $params = array_reduce(
-            explode(',', substr($pattern, $pivot + 1)),
+            $matches[0],
             function ($carry, $value) {
                 $value = trim($value);
                 if ($value) {
@@ -161,7 +162,7 @@ class ValidatorFactory
      * @param string $text
      * @return string
      */
-    protected function underscoreToCamelCase($text)
+    private function underscoreToCamelCase($text)
     {
         $text = trim($text, '!');
         $text = str_replace(' ', '', ucwords(str_replace('_', ' ', $text)));
