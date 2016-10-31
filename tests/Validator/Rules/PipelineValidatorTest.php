@@ -19,7 +19,7 @@ class PipelineValidatorTest extends ValidatorTestCase
             validator()->alwaysTrue(),
         ]);
 
-        static::assertTrue($validator->validate(''));
+        static::assertTrue($validator->validate(true));
 
         $validator = validator()->pipeline([
             validator()->alwaysFalse(),
@@ -27,7 +27,7 @@ class PipelineValidatorTest extends ValidatorTestCase
             validator()->alwaysTrue(),
         ]);
 
-        static::assertFalse($validator->validate(''));
+        static::assertFalse($validator->validate(true));
 
         $validator = validator()->pipeline([
             validator()->alwaysFalse(),
@@ -35,7 +35,7 @@ class PipelineValidatorTest extends ValidatorTestCase
             validator()->alwaysFalse(),
         ]);
 
-        static::assertFalse($validator->validate(''));
+        static::assertFalse($validator->validate(true));
     }
 
     public function testAssert()
@@ -60,7 +60,7 @@ class PipelineValidatorTest extends ValidatorTestCase
         ]);
 
         $this->assertInvalidValueException(function () use ($validator) {
-            $validator->assert('');
+            $validator->assert(true);
         }, [
             'always_false',
         ]);
@@ -72,7 +72,7 @@ class PipelineValidatorTest extends ValidatorTestCase
         ]);
 
         $this->assertInvalidValueException(function () use ($validator) {
-            $validator->assert('');
+            $validator->assert(true);
         }, [
             'always_false',
             'always_false',
