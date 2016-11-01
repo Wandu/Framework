@@ -87,6 +87,9 @@ class ContainerTest extends PHPUnit_Framework_TestCase
 
         static::assertInstanceOf(XmlRenderer::class, $container->get('xml'));
         static::assertInstanceOf(JsonRenderer::class, $container->get('json'));
+
+        static::assertSame($container->get('xml'), $container->get('xml'));
+        static::assertSame($container->get('json'), $container->get('json'));
     }
 
     public function testInstance()

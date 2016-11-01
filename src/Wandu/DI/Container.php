@@ -239,7 +239,7 @@ class Container implements ContainerInterface
      * @param \Wandu\DI\ContaineeInterface $containee
      * @return \Wandu\DI\ContaineeInterface
      */
-    protected function addContainee($name, ContaineeInterface $containee)
+    private function addContainee($name, ContaineeInterface $containee)
     {
         $this->destroy($name);
         return $this->containees[$name] = $containee;
@@ -353,40 +353,43 @@ class Container implements ContainerInterface
     public function inject($object, array $properties = [])
     {
         $reflectionObject = new ReflectionObject($object);
-        foreach ($reflectionObject->getProperties() as $property) {
-            // if property doesn't have doc type hint,
-            // 1.1. search in properties by property name
-
-            // if property has doc type hint,
-            // 2.1. search in properties by property name ( == 1.1)
-            // 2.2. search in properties by class name (in doc)
-            // 2.3. if has doc @Autowired then search in container by class name (in doc)
-            //      else exception!
-
-            // 1.1, 2.1
-            if (array_key_exists($propertyName = $property->getName(), $properties)) {
-                $this->injectProperty($property, $object, $properties[$propertyName]);
-                continue;
-            }
-            $docComment = $property->getDocComment();
-            $propertyClassName = $this->getClassNameFromDocComment($docComment);
-            if ($propertyClassName) {
-                // 2.2
-                if (array_key_exists($propertyClassName, $properties)) {
-                    $this->injectProperty($property, $object, $properties[$propertyClassName]);
-                    continue;
-                }
-                // 2.3
-                if ($this->hasAutowiredFromDocComment($docComment)) {
-                    if ($this->has($propertyClassName)) {
-                        $this->injectProperty($property, $object, $this->getRawItem($propertyClassName));
-                        continue;
-                    } else {
-                        throw new CannotInjectException($propertyClassName, $property->getName());
-                    }
-                }
-            }
+        foreach ($properties as $property => $value) {
+            $this->injectProperty($reflectionObject->getProperty($property), $object, $value);
         }
+//        foreach ($reflectionObject->getProperties() as $property) {
+//            // if property doesn't have doc type hint,
+//            // 1.1. search in properties by property name
+//
+//            // if property has doc type hint,
+//            // 2.1. search in properties by property name ( == 1.1)
+//            // 2.2. search in properties by class name (in doc)
+//            // 2.3. if has doc @Autowired then search in container by class name (in doc)
+//            //      else exception!
+//
+//            // 1.1, 2.1
+//            if (array_key_exists($propertyName = $property->getName(), $properties)) {
+//                $this->injectProperty($property, $object, $properties[$propertyName]);
+//                continue;
+//            }
+//            $docComment = $property->getDocComment();
+//            $propertyClassName = $this->getClassNameFromDocComment($docComment);
+//            if ($propertyClassName) {
+//                // 2.2
+//                if (array_key_exists($propertyClassName, $properties)) {
+//                    $this->injectProperty($property, $object, $properties[$propertyClassName]);
+//                    continue;
+//                }
+//                // 2.3
+//                if ($this->hasAutowiredFromDocComment($docComment)) {
+//                    if ($this->has($propertyClassName)) {
+//                        $this->injectProperty($property, $object, $this->getRawItem($propertyClassName));
+//                        continue;
+//                    } else {
+//                        throw new CannotInjectException($propertyClassName, $property->getName());
+//                    }
+//                }
+//            }
+//        }
     }
 
     /**
