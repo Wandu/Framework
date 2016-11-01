@@ -4,7 +4,7 @@ split_parallel() {
     mkdir $PACKAGENAME
     pushd $PACKAGENAME
     git subsplit init git@github.com:Wandu/Framework.git
-    git subsplit publish --heads="develop master" --no-tags src/Wandu/$PACKAGENAME:git@github.com:Wandu/$PACKAGENAME.git
+    git subsplit publish --heads="master 3.0" --no-tags src/Wandu/$PACKAGENAME:git@github.com:Wandu/$PACKAGENAME.git
     popd
     rm -rf $PACKAGENAME
 }
