@@ -10,10 +10,12 @@ class RequiredValidatorTest extends ValidatorTestCase
     {
         $validator = validator()->required();
 
-        static::assertTrue($validator->validate(''));
+        static::assertFalse($validator->validate(''));
         static::assertFalse($validator->validate(null));
 
-        $validator->assert('');
+        $this->assertInvalidValueException(function () use ($validator) {
+            $validator->assert('');
+        }, ['required']);
         $this->assertInvalidValueException(function () use ($validator) {
             $validator->assert(null);
         }, ['required']);
@@ -56,9 +58,10 @@ class RequiredValidatorTest extends ValidatorTestCase
             ],
         ]);
 
+        $validator->assert([]);
         $validator->assert(['company' => ['name' => 'gogle']]);
         $this->assertInvalidValueException(function () use ($validator) {
-            $validator->assert([]);
+            $validator->assert(['company' => []]);
         }, ['required@company.name']);
     }
 

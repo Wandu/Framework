@@ -3,6 +3,7 @@ namespace Wandu\Validator\Rules;
 
 use Wandu\Validator\Contracts\ValidatorInterface;
 use Wandu\Validator\Exception\InvalidValueException;
+use function Wandu\Validator\validator;
 
 class PipelineValidator implements ValidatorInterface
 {
@@ -14,7 +15,9 @@ class PipelineValidator implements ValidatorInterface
      */
     public function __construct(array $validators = [])
     {
-        $this->validators = $validators;
+        $this->validators = array_map(function ($validator) {
+            return validator()->from($validator);
+        }, $validators);
     }
     
     /**

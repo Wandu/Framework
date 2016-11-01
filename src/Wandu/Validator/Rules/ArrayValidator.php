@@ -34,11 +34,13 @@ class ArrayValidator extends ValidatorAbstract
      */
     public function assert($item)
     {
-        if (!isset($item)) $item = [];
+        if (!isset($item)) return;
+        if ($item === '') return;
+
         /** @var \Wandu\Validator\Exception\InvalidValueException[] $exceptions */
         $exceptions = [];
         if (!$this->test($item)) {
-            $exceptions['.'] = $this->createException();
+            throw $this->createException();
         }
         foreach ($this->attributes as $name => $validator) {
             try {
