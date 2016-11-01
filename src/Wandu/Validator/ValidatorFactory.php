@@ -6,10 +6,13 @@ use Wandu\Validator\Exception\ValidatorNotFoundException;
 use Wandu\Validator\Rules\ArrayValidator;
 
 /**
+ * @method \Wandu\Validator\Rules\PipelineValidator pipeline(array $validators = [])
+
  * @method \Wandu\Validator\Contracts\ValidatorInterface required()
  * @method \Wandu\Validator\Contracts\ValidatorInterface not(\Wandu\Validator\Contracts\ValidatorInterface $validator)
  * @method \Wandu\Validator\Contracts\ValidatorInterface array(array $attributes = [])
  * @method \Wandu\Validator\Contracts\ValidatorInterface collection($rule = null)
+ * @method \Wandu\Validator\Contracts\ValidatorInterface iterable($rule = null)
  * @method \Wandu\Validator\Contracts\ValidatorInterface arrayable(array $attributes = [])
  * @method \Wandu\Validator\Contracts\ValidatorInterface object(array $properties = [])
  * @method \Wandu\Validator\Contracts\ValidatorInterface integer()
@@ -21,7 +24,6 @@ use Wandu\Validator\Rules\ArrayValidator;
  * @method \Wandu\Validator\Contracts\ValidatorInterface numeric()
  * @method \Wandu\Validator\Contracts\ValidatorInterface stringable()
  * @method \Wandu\Validator\Contracts\ValidatorInterface printable()
- * @method \Wandu\Validator\Contracts\ValidatorInterface pipeline(array $validators = [])
  * @method \Wandu\Validator\Contracts\ValidatorInterface min(int $min)
  * @method \Wandu\Validator\Contracts\ValidatorInterface max(int $max)
  * @method \Wandu\Validator\Contracts\ValidatorInterface lengthMin(int $min)

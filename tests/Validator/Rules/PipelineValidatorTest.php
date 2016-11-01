@@ -6,7 +6,7 @@ use function Wandu\Validator\validator;
 
 class PipelineValidatorTest extends ValidatorTestCase
 {
-    public function testValidate()
+    public function testValidateMethod()
     {
         $validator = validator()->pipeline();
 
@@ -38,7 +38,7 @@ class PipelineValidatorTest extends ValidatorTestCase
         static::assertFalse($validator->validate(true));
     }
 
-    public function testAssert()
+    public function testAssertMethod()
     {
         $validator = validator()->pipeline();
 
@@ -122,5 +122,16 @@ class PipelineValidatorTest extends ValidatorTestCase
             'min:10',
             'min:30',
         ]);
+    }
+    
+    public function testViaCallMethod()
+    {
+        $validator1 = validator()->pipeline()->min(10)->max(100);
+        $validator2 = validator()->pipeline([
+            validator()->min(10),
+            validator()->max(100),
+        ]);
+        
+        static::assertEquals($validator1, $validator2);
     }
 }
