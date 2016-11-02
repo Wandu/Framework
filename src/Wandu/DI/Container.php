@@ -13,7 +13,6 @@ use Wandu\DI\Containee\ClosureContainee;
 use Wandu\DI\Containee\InstanceContainee;
 use Wandu\DI\Exception\CannotChangeException;
 use Wandu\DI\Exception\CannotFindParameterException;
-use Wandu\DI\Exception\CannotInjectException;
 use Wandu\DI\Exception\CannotResolveException;
 use Wandu\DI\Exception\NullReferenceException;
 use Wandu\Reflection\ReflectionCallable;
@@ -239,7 +238,7 @@ class Container implements ContainerInterface
      * @param \Wandu\DI\ContaineeInterface $containee
      * @return \Wandu\DI\ContaineeInterface
      */
-    protected function addContainee($name, ContaineeInterface $containee)
+    public function addContainee($name, ContaineeInterface $containee)
     {
         $this->destroy($name);
         return $this->containees[$name] = $containee;
@@ -308,21 +307,15 @@ class Container implements ContainerInterface
      */
     public function create($class, array $arguments = [])
     {
-        $seqArguments = static::getSeqArray($arguments);
-        $assocArguments = static::getAssocArray($arguments);
-        if (count($assocArguments)) {
-            return $this->with($assocArguments)->create($class, $seqArguments);
-        }
         $reflectionClass = new ReflectionClass($class);
         $reflectionMethod = $reflectionClass->getConstructor();
-        if ($reflectionMethod) {
-            try {
-                $parameters = $this->getParameters($reflectionMethod, $arguments);
-            } catch (CannotFindParameterException $e) {
-                throw new CannotResolveException($class, $e->getParameter());
-            }
-        } else {
-            $parameters = [];
+        if (!$reflectionMethod) {
+            return $reflectionClass->newInstance();
+        }
+        try {
+            $parameters = $this->getParameters($reflectionMethod, $arguments);
+        } catch (CannotFindParameterException $e) {
+            throw new CannotResolveException($class, $e->getParameter());
         }
         return $reflectionClass->newInstanceArgs($parameters);
     }
@@ -332,15 +325,10 @@ class Container implements ContainerInterface
      */
     public function call(callable $callee, array $arguments = [])
     {
-        $seqArguments = static::getSeqArray($arguments);
-        $assocArguments = static::getAssocArray($arguments);
-        if (count($assocArguments)) {
-            return $this->with($assocArguments)->call($callee, $seqArguments);
-        }
         try {
             return call_user_func_array(
                 $callee,
-                $this->getParameters(new ReflectionCallable($callee), $seqArguments)
+                $this->getParameters(new ReflectionCallable($callee), $arguments)
             );
         } catch (CannotFindParameterException $e) {
             throw new CannotResolveException(null, $e->getParameter());
@@ -353,40 +341,43 @@ class Container implements ContainerInterface
     public function inject($object, array $properties = [])
     {
         $reflectionObject = new ReflectionObject($object);
-        foreach ($reflectionObject->getProperties() as $property) {
-            // if property doesn't have doc type hint,
-            // 1.1. search in properties by property name
-
-            // if property has doc type hint,
-            // 2.1. search in properties by property name ( == 1.1)
-            // 2.2. search in properties by class name (in doc)
-            // 2.3. if has doc @Autowired then search in container by class name (in doc)
-            //      else exception!
-
-            // 1.1, 2.1
-            if (array_key_exists($propertyName = $property->getName(), $properties)) {
-                $this->injectProperty($property, $object, $properties[$propertyName]);
-                continue;
-            }
-            $docComment = $property->getDocComment();
-            $propertyClassName = $this->getClassNameFromDocComment($docComment);
-            if ($propertyClassName) {
-                // 2.2
-                if (array_key_exists($propertyClassName, $properties)) {
-                    $this->injectProperty($property, $object, $properties[$propertyClassName]);
-                    continue;
-                }
-                // 2.3
-                if ($this->hasAutowiredFromDocComment($docComment)) {
-                    if ($this->has($propertyClassName)) {
-                        $this->injectProperty($property, $object, $this->getRawItem($propertyClassName));
-                        continue;
-                    } else {
-                        throw new CannotInjectException($propertyClassName, $property->getName());
-                    }
-                }
-            }
+        foreach ($properties as $property => $value) {
+            $this->injectProperty($reflectionObject->getProperty($property), $object, $value);
         }
+//        foreach ($reflectionObject->getProperties() as $property) {
+//            // if property doesn't have doc type hint,
+//            // 1.1. search in properties by property name
+//
+//            // if property has doc type hint,
+//            // 2.1. search in properties by property name ( == 1.1)
+//            // 2.2. search in properties by class name (in doc)
+//            // 2.3. if has doc @Autowired then search in container by class name (in doc)
+//            //      else exception!
+//
+//            // 1.1, 2.1
+//            if (array_key_exists($propertyName = $property->getName(), $properties)) {
+//                $this->injectProperty($property, $object, $properties[$propertyName]);
+//                continue;
+//            }
+//            $docComment = $property->getDocComment();
+//            $propertyClassName = $this->getClassNameFromDocComment($docComment);
+//            if ($propertyClassName) {
+//                // 2.2
+//                if (array_key_exists($propertyClassName, $properties)) {
+//                    $this->injectProperty($property, $object, $properties[$propertyClassName]);
+//                    continue;
+//                }
+//                // 2.3
+//                if ($this->hasAutowiredFromDocComment($docComment)) {
+//                    if ($this->has($propertyClassName)) {
+//                        $this->injectProperty($property, $object, $this->getRawItem($propertyClassName));
+//                        continue;
+//                    } else {
+//                        throw new CannotInjectException($propertyClassName, $property->getName());
+//                    }
+//                }
+//            }
+//        }
     }
 
     /**
@@ -394,39 +385,10 @@ class Container implements ContainerInterface
      * @param object $object
      * @param mixed $target
      */
-    protected function injectProperty(ReflectionProperty $property, $object, $target)
+    private function injectProperty(ReflectionProperty $property, $object, $target)
     {
         $property->setAccessible(true);
         $property->setValue($object, $target);
-    }
-
-    /**
-     * @param string $comment
-     * @return string
-     */
-    protected function getClassNameFromDocComment($comment)
-    {
-        $varPosition = strpos($comment, '@var');
-        if ($varPosition === false) {
-            return null;
-        }
-        preg_match('/^([a-zA-Z0-9\\\\]+)/', ltrim(substr($comment, $varPosition + 4)), $matches);
-        $className =  $matches[0];
-        if ($className[0] === '\\') {
-            $className = substr($className, 1);
-        }
-        return $className;
-    }
-
-    /**
-     * @param string $comment
-     * @return bool
-     */
-    protected function hasAutowiredFromDocComment($comment)
-    {
-        return strpos($comment, '@autowired') !== false ||
-            strpos($comment, '@Autowired') !== false ||
-            strpos($comment, '@AUTOWIRED') !== false;
     }
 
     /**
@@ -434,56 +396,48 @@ class Container implements ContainerInterface
      * @param array $arguments
      * @return array
      */
-    protected function getParameters(ReflectionFunctionAbstract $reflectionFunction, array $arguments)
+    protected function getParameters(ReflectionFunctionAbstract $reflectionFunction, array $arguments = [])
     {
-        $parametersToReturn = [];
-        $parameters = $arguments;
-        foreach ($reflectionFunction->getParameters() as $param) {
-            // if parameter doesn't have type hint,
-            // 1.2. insert remain arguments
-            // 1.3. if has default value, insert default value.
-            // 1.4. exception
+        $parametersToReturn = static::getSeqArray($arguments);
 
-            // if parameter has type hint,
-            // 2.2. search in arguments by class name
-            // 2.3. search in container by class name
-            // 2.4. if has default value, insert default vlue. ( == 1.3)
-            // 2.5. exception ( == 1.4)a
-
-            $paramName = $param->getName();
-            try {
+        $reflectionParameters = array_slice($reflectionFunction->getParameters(), count($parametersToReturn));
+        if (!count($reflectionParameters)) {
+            return $parametersToReturn; 
+        }
+        
+        try {
+            /* @var \ReflectionParameter $param */
+            foreach ($reflectionParameters as $param) {
+                /*
+                 * #1. search in arguments by parameter name
+                 * #2. if parameter has type hint
+                 * #2.1. search in container by class name
+                 * #3. if has default value, insert default value.
+                 * #4. exception
+                 */
+                $paramName = $param->getName();
+                if (array_key_exists($paramName, $arguments)) { // #1.
+                    $parametersToReturn[] = $arguments[$paramName];
+                    continue;
+                }
                 $paramClass = $param->getClass();
-                if ($paramClass) { // 2.*
-                    // 2.2
+                if ($paramClass) { // #2.
                     $paramClassName = $paramClass->getName();
-                    if (isset($arguments[$paramClassName])) {
-                        $parametersToReturn[] = $arguments[$paramClassName];
-                        continue;
-                    }
-                    // 2.3
-                    if ($this->has($paramClassName)) {
+                    if ($this->has($paramClassName)) { // #2.1.
                         $parametersToReturn[] = $this->get($paramClassName);
                         continue;
                     }
-                } else { // 1.*
-                    // 1.2
-                    if (count($parameters)) {
-                        $parametersToReturn[] = array_shift($parameters);
-                        continue;
-                    }
                 }
-                // 1.3, 2.4
-                if ($param->isDefaultValueAvailable()) {
+                if ($param->isDefaultValueAvailable()) { // #3.
                     $parametersToReturn[] = $param->getDefaultValue();
                     continue;
                 }
-                // 1.4, 2.5
-                throw new CannotFindParameterException($paramName);
-            } catch (ReflectionException $e) {
-                throw new CannotFindParameterException($paramName);
+                throw new CannotFindParameterException($paramName); // #4.
             }
+        } catch (ReflectionException $e) {
+            throw new CannotFindParameterException($paramName);
         }
-        return array_merge($parametersToReturn, $parameters);
+        return $parametersToReturn;
     }
 
     /**

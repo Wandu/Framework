@@ -1,9 +1,8 @@
 <?php
-namespace Wandu\DI;
+namespace Wandu\DI\Methods;
 
-use Wandu\DI\Stub\JsonRenderer;
-use Wandu\DI\Stub\XmlRenderer;
 use PHPUnit_Framework_TestCase;
+use Wandu\DI\Container;
 
 class ExtendTest extends PHPUnit_Framework_TestCase
 {
@@ -11,25 +10,25 @@ class ExtendTest extends PHPUnit_Framework_TestCase
     {
         $container = new Container();
         
-        $container->instance('instance', $renderer = new XmlRenderer());
+        $container->instance('instance', $renderer = new ExtendTestXmlRenderer());
         $container->extend('instance', function ($item) {
             $item->contents = 'instance contents';
             return $item;
         });
 
         // extended
-        $this->assertEquals('instance contents', $container['instance']->contents);
+        static::assertEquals('instance contents', $container['instance']->contents);
 
         // and equal :-)
-        $this->assertSame($renderer, $container['instance']);
+        static::assertSame($renderer, $container['instance']);
     }
 
-    public function testClosureExtned()
+    public function testClosureExtend()
     {
         $container = new Container();
 
         $container->closure('closure', function () {
-            return new JsonRenderer();
+            return new ExtendTestJsonRenderer();
         });
         $container->extend('closure', function ($item) {
             $item->contents = 'closure contents';
@@ -37,16 +36,16 @@ class ExtendTest extends PHPUnit_Framework_TestCase
         });
 
         // extended
-        $this->assertEquals('closure contents', $container['closure']->contents);
+        static::assertEquals('closure contents', $container['closure']->contents);
 
-        $this->assertSame($container['closure'], $container['closure']);
+        static::assertSame($container['closure'], $container['closure']);
     }
 
     public function testAliasExtend()
     {
         $container = new Container();
         
-        $container->instance('xml', $renderer = new XmlRenderer);
+        $container->instance('xml', $renderer = new ExtendTestXmlRenderer);
 
         $container->alias('xml.alias', 'xml');
         $container->alias('xml.other.alias', 'xml.alias');
@@ -56,10 +55,10 @@ class ExtendTest extends PHPUnit_Framework_TestCase
             return $item;
         });
 
-        $this->assertEquals('alias contents', $container['xml']->contents);
+        static::assertEquals('alias contents', $container['xml']->contents);
 
         // and equal :-)
-        $this->assertSame($renderer, $container['xml.other.alias']);
+        static::assertSame($renderer, $container['xml.other.alias']);
     }
 
     public function testAliasExtendPropagation()
@@ -72,15 +71,15 @@ class ExtendTest extends PHPUnit_Framework_TestCase
             return $item;
         });
 
-        $container->instance('xml', $renderer = new XmlRenderer);
+        $container->instance('xml', $renderer = new ExtendTestXmlRenderer);
 
         $container->alias('xml.alias', 'xml');
         $container->alias('xml.other.alias', 'xml.alias');
         
-        $this->assertEquals('alias contents', $container['xml']->contents);
+        static::assertEquals('alias contents', $container['xml']->contents);
 
         // and equal :-)
-        $this->assertSame($renderer, $container['xml.other.alias']);
+        static::assertSame($renderer, $container['xml.other.alias']);
     }
 
     public function testExtendUnknown()
@@ -92,3 +91,7 @@ class ExtendTest extends PHPUnit_Framework_TestCase
         });
     }
 }
+
+interface ExtendTestRenderable {}
+class ExtendTestXmlRenderer implements ExtendTestRenderable {}
+class ExtendTestJsonRenderer implements ExtendTestRenderable {}

@@ -6,11 +6,6 @@ use Interop\Container\ContainerInterface as InteropContainer;
 use Wandu\DI\Containee\ClosureContainee;
 use Wandu\DI\Exception\CannotChangeException;
 use Wandu\DI\Exception\NullReferenceException;
-use Wandu\DI\Stub\HttpController;
-use Wandu\DI\Stub\JsonRenderer;
-use Wandu\DI\Stub\Renderable;
-use Wandu\DI\Stub\ServerAccessible;
-use Wandu\DI\Stub\XmlRenderer;
 use PHPUnit_Framework_TestCase;
 
 class ContainerTest extends PHPUnit_Framework_TestCase
@@ -29,16 +24,17 @@ class ContainerTest extends PHPUnit_Framework_TestCase
     {
         $container = new Container();
 
-        $container->instance(Renderable::class, new XmlRenderer);
+        $container->instance(ContainerTestRenderable::class, new ContainerTestXmlRenderer);
 
-        static::assertTrue($container->has(Renderable::class)); // set by instance
-        static::assertFalse($container->has(ServerAccessible::class)); // interface false
-        static::assertTrue($container->has(JsonRenderer::class)); // class true
+        static::assertTrue($container->has(ContainerTestRenderable::class)); // set by instance
+        static::assertTrue($container->has(ContainerTestJsonRenderer::class)); // class true
+        static::assertFalse($container->has(ContainerTestServerAccessible::class)); // interface false
+        static::assertFalse($container->has('Unknown\\Class')); // not defined class
 
         // "has" map to offsetExists
-        static::assertTrue(isset($container[Renderable::class]));
-        static::assertFalse(isset($container[ServerAccessible::class]));
-        static::assertTrue(isset($container[JsonRenderer::class]));
+        static::assertTrue(isset($container[ContainerTestRenderable::class]));
+        static::assertFalse(isset($container[ContainerTestServerAccessible::class]));
+        static::assertTrue(isset($container[ContainerTestJsonRenderer::class]));
     }
 
     public function testHasNull()
@@ -47,17 +43,19 @@ class ContainerTest extends PHPUnit_Framework_TestCase
 
         $container->instance('null', null);
 
-        static::assertTrue($container->has('null'));
+        static::assertTrue($container->has('null')); // container has null,
+        static::assertFalse($container->has('undefined'));
 
         // "has" map to offsetExists but except null.
         static::assertFalse(isset($container['null']));
+        static::assertFalse(isset($container['undefined']));
     }
 
     public function testSet()
     {
         $container = new Container();
-        $xml = new XmlRenderer();
-        $json = new JsonRenderer();
+        $xml = new ContainerTestXmlRenderer();
+        $json = new ContainerTestJsonRenderer();
         
         $container->set('xml', $xml);
 
@@ -77,63 +75,69 @@ class ContainerTest extends PHPUnit_Framework_TestCase
         $container = new Container();
 
         $container->set('xml', new ClosureContainee(function () {
-            return new XmlRenderer();
+            return new ContainerTestXmlRenderer();
         }));
 
         // "set" map to offsetSet
         $container['json'] = new ClosureContainee(function () {
-            return new JsonRenderer();
+            return new ContainerTestJsonRenderer();
         });
 
-        static::assertInstanceOf(XmlRenderer::class, $container->get('xml'));
-        static::assertInstanceOf(JsonRenderer::class, $container->get('json'));
+        static::assertInstanceOf(ContainerTestXmlRenderer::class, $container->get('xml'));
+        static::assertInstanceOf(ContainerTestJsonRenderer::class, $container->get('json'));
+
+        static::assertSame($container->get('xml'), $container->get('xml'));
+        static::assertSame($container->get('json'), $container->get('json'));
     }
 
     public function testInstance()
     {
         $container = new Container();
-        $xml = new XmlRenderer();
+        $xml = new ContainerTestXmlRenderer();
         
         $container->instance('xml', $xml);
+        $container->instance('is_debug', true);
 
         static::assertSame($xml, $container->get('xml'));
+        static::assertSame(true, $container->get('is_debug'));
 
         // "get" map to offsetGet
         static::assertSame($xml, $container['xml']);
+        static::assertSame(true, $container['is_debug']);
     }
 
     public function testClosure()
     {
         $container = new Container();
 
-        $container->instance(Renderable::class, $renderer = new XmlRenderer());
-        $container->closure(HttpController::class, function ($app) {
-            return new HttpController($app[Renderable::class], [
+        $container->instance(ContainerTestRenderable::class, $renderer = new ContainerTestXmlRenderer());
+        $container->closure(ContainerTestHttpController::class, function ($app) {
+            return new ContainerTestHttpController($app[ContainerTestRenderable::class], [
                 'username' => 'username string',
                 'password' => 'password string',
             ]);
         });
 
-        static::assertInstanceOf(HttpController::class, $container[HttpController::class]);
-        static::assertSame($container[HttpController::class], $container[HttpController::class]);
-        static::assertSame($renderer, $container[HttpController::class]->getRenderer());
+        static::assertInstanceOf(ContainerTestHttpController::class, $container[ContainerTestHttpController::class]);
+        static::assertSame($container[ContainerTestHttpController::class], $container[ContainerTestHttpController::class]);
+        static::assertSame($renderer, $container[ContainerTestHttpController::class]->renderer);
         static::assertEquals([
             'username' => 'username string',
             'password' => 'password string',
-        ], $container[HttpController::class]->getConfig());
+        ], $container[ContainerTestHttpController::class]->config);
     }
 
     public function testAlias()
     {
         $container = new Container();
-        $renderer = new XmlRenderer;
+        $renderer = new ContainerTestXmlRenderer;
 
-        $container->instance(Renderable::class, $renderer);
+        $container->instance(ContainerTestRenderable::class, $renderer);
 
-        $container->alias('myalias', Renderable::class);
+        $container->alias('myalias', ContainerTestRenderable::class);
         $container->alias('otheralias', 'myalias');
 
-        static::assertSame($renderer, $container[Renderable::class]);
+        static::assertSame($renderer, $container[ContainerTestRenderable::class]);
         static::assertSame($renderer, $container['myalias']);
         static::assertSame($renderer, $container['otheralias']);
     }
@@ -142,8 +146,8 @@ class ContainerTest extends PHPUnit_Framework_TestCase
     {
         $container = new Container();
 
-        $controller = $container->get(JsonRenderer::class);
-        static::assertInstanceOf(JsonRenderer::class, $controller);
+        $controller = $container->get(ContainerTestJsonRenderer::class);
+        static::assertInstanceOf(ContainerTestJsonRenderer::class, $controller);
     }
 
     public function testGetFail()
@@ -162,7 +166,7 @@ class ContainerTest extends PHPUnit_Framework_TestCase
     {
         $container = new Container();
 
-        $container->instance('xml', new XmlRenderer());
+        $container->instance('xml', new ContainerTestXmlRenderer());
 
         static::assertTrue($container->has('xml'));
 
@@ -175,8 +179,8 @@ class ContainerTest extends PHPUnit_Framework_TestCase
     {
         $container = new Container();
 
-        $container->instance('xml1', new XmlRenderer());
-        $container->instance('xml2', new XmlRenderer());
+        $container->instance('xml1', new ContainerTestXmlRenderer());
+        $container->instance('xml2', new ContainerTestXmlRenderer());
 
         static::assertTrue($container->has('xml1'));
         static::assertTrue($container->has('xml2'));
@@ -305,5 +309,20 @@ class ContainerTest extends PHPUnit_Framework_TestCase
         static::assertSame($otherContainer, $otherContainer->get(ContainerInterface::class));
         static::assertSame($otherContainer, $otherContainer->get(InteropContainer::class));
         static::assertSame($otherContainer, $otherContainer->get('container'));
+    }
+}
+
+interface ContainerTestRenderable {}
+class ContainerTestJsonRenderer implements ContainerTestRenderable {}
+class ContainerTestXmlRenderer implements ContainerTestRenderable {}
+
+interface ContainerTestServerAccessible {}
+
+class ContainerTestHttpController
+{
+    public function __construct(ContainerTestRenderable $renderer, array $config)
+    {
+        $this->renderer = $renderer;
+        $this->config = $config;
     }
 }

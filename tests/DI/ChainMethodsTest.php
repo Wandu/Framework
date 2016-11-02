@@ -3,11 +3,9 @@ namespace Wandu\DI;
 
 use stdClass;
 use Wandu\DI\Exception\CannotChangeException;
-use Wandu\DI\Stub\Resolve\AutoResolvedDepend;
-use Wandu\DI\Stub\Resolve\DependInterface;
 use PHPUnit_Framework_TestCase;
 
-class ContainerChainTest extends PHPUnit_Framework_TestCase
+class ChainMethodsTest extends PHPUnit_Framework_TestCase
 {
     public function testFreeze()
     {
@@ -92,29 +90,29 @@ class ContainerChainTest extends PHPUnit_Framework_TestCase
     {
         $container = new Container();
         
-        $container->bind(DependInterface::class, AutoResolvedDepend::class);
+        $container->bind(ChainMethodTestDependInterface::class, ChainMethodTestDepend::class);
 
         // all same
-        $object1 = $container[DependInterface::class];
-        static::assertSame($object1, $container[DependInterface::class]);
-        static::assertSame($object1, $container[DependInterface::class]);
-        static::assertSame($object1, $container[DependInterface::class]);
+        $object1 = $container[ChainMethodTestDependInterface::class];
+        static::assertSame($object1, $container[ChainMethodTestDependInterface::class]);
+        static::assertSame($object1, $container[ChainMethodTestDependInterface::class]);
+        static::assertSame($object1, $container[ChainMethodTestDependInterface::class]);
 
         // reset
         $container = new Container();
         
         $container
-            ->bind(DependInterface::class, AutoResolvedDepend::class)
+            ->bind(ChainMethodTestDependInterface::class, ChainMethodTestDepend::class)
             ->factory(true);
-        $object2 = $container[DependInterface::class];
+        $object2 = $container[ChainMethodTestDependInterface::class];
 
         // all not same
-        $object2_1 = $container[DependInterface::class];
+        $object2_1 = $container[ChainMethodTestDependInterface::class];
 
         static::assertNotSame($object2, $object2_1);
         static::assertEquals($object2, $object2_1);
 
-        $object2_2 = $container[DependInterface::class];
+        $object2_2 = $container[ChainMethodTestDependInterface::class];
 
         static::assertNotSame($object2, $object2_2);
         static::assertEquals($object2, $object2_2);
@@ -122,3 +120,6 @@ class ContainerChainTest extends PHPUnit_Framework_TestCase
         static::assertEquals($object2_1, $object2_2);
     }
 }
+
+interface ChainMethodTestDependInterface {}
+class ChainMethodTestDepend implements ChainMethodTestDependInterface {}
