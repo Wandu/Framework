@@ -26,7 +26,7 @@ Wandu is PHP Framework.
 - [Wandu Console](src/Wandu/Console) (Git Repository : [Wandu/Console](https://github.com/Wandu/Console))
 - [Wandu DateTime](src/Wandu/DateTime) (Git Repository : [Wandu/DateTime](https://github.com/Wandu/DateTime))
 - [Wandu Database](src/Wandu/Database) (Git Repository : [Wandu/Database](https://github.com/Wandu/Database))
-- [Wandu Di](src/Wandu/Di) (Git Repository : [Wandu/Di](https://github.com/Wandu/Di))
+- [Wandu DI](src/Wandu/DI) (Git Repository : [Wandu/DI](https://github.com/Wandu/DI))
 - [Wandu Event](src/Wandu/Event) (Git Repository : [Wandu/Event](https://github.com/Wandu/Event))
 - [Wandu Foundation](src/Wandu/Foundation) (Git Repository : [Wandu/Foundation](https://github.com/Wandu/Foundation))
 - [Wandu Http](src/Wandu/Http) (Git Repository : [Wandu/Http](https://github.com/Wandu/Http))
