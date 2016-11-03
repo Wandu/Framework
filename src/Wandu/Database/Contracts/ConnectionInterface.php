@@ -29,6 +29,13 @@ interface ConnectionInterface
     /**
      * @param string|callable|\Wandu\Database\Query\QueryBuilder $query
      * @param array $bindings
+     * @return array
+     */
+    public function first($query, array $bindings = []);
+    
+    /**
+     * @param string|callable|\Wandu\Database\Query\QueryBuilder $query
+     * @param array $bindings
      * @return bool
      */
     public function query($query, array $bindings = []);

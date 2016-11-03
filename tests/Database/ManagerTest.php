@@ -15,7 +15,7 @@ class ManagerTest extends PHPUnit_Framework_TestCase
             $manager->connect([
                 'username' => 'root',
                 'password' => 'root',
-                'database' => 'wandu',
+                'database' => 'sakila',
             ]);
             static::fail();
         } catch (DriverNotFoundException $e) {
@@ -28,7 +28,7 @@ class ManagerTest extends PHPUnit_Framework_TestCase
                 'driver' => 'wrong_driver',
                 'username' => 'root',
                 'password' => 'root',
-                'database' => 'wandu',
+                'database' => 'sakila',
             ]);
             static::fail();
         } catch (DriverNotFoundException $e) {
@@ -45,7 +45,7 @@ class ManagerTest extends PHPUnit_Framework_TestCase
             'driver' => 'mysql',
             'username' => 'root',
             'password' => 'root',
-            'database' => 'wandu',
+            'database' => 'sakila',
             'charset'   => 'utf8mb4',
             'collation' => 'utf8mb4_unicode_ci',
             'prefix' => 'local_',
@@ -56,7 +56,7 @@ class ManagerTest extends PHPUnit_Framework_TestCase
         $connection = $manager->connect(new MysqlConnector([
             'username' => 'root',
             'password' => 'root',
-            'database' => 'wandu',
+            'database' => 'sakila',
             'charset'   => 'utf8mb4',
             'collation' => 'utf8mb4_unicode_ci',
             'prefix' => 'local_',

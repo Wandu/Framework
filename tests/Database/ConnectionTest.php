@@ -1,44 +1,76 @@
 <?php
 namespace Wandu\Database;
 
-use Doctrine\DBAL\Schema\Schema;
-use PDO;
-use PHPUnit_Framework_TestCase;
-use Wandu\Database\Connector\MysqlConnector;
-use Wandu\Database\Contracts\ConnectionInterface;
-use Wandu\Database\Query\QueryBuilder;
-use Wandu\Database\Schema\SchemaBuilder;
+use Generator;
 
-class ConnectionTest extends PHPUnit_Framework_TestCase
+class ConnectionTest extends SakilaTestCase
 {
-    public function testConnect()
+    public function testOne()
     {
-        $connector = new MysqlConnector([
-            'username' => 'root',
-            'password' => 'root',
-            'database' => 'wandu',
-            'charset'   => 'utf8mb4',
-            'collation' => 'utf8mb4_unicode_ci',
-            'prefix' => 'local_',
-            'timezone' => '+09:00',
-            'options' => [ // default
-                PDO::ATTR_CASE => PDO::CASE_NATURAL,
-                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                PDO::ATTR_ORACLE_NULLS => PDO::NULL_NATURAL,
-                PDO::ATTR_STRINGIFY_FETCHES => false,
-                PDO::ATTR_EMULATE_PREPARES => false,
-            ],
-        ]);
-        
-        $connection = $connector->connect();
+        $expectedRow = [
+            'actor_id' => 183,
+            'first_name' => 'RUSSELL',
+            'last_name' => 'CLOSE',
+            'last_update' => '2006-02-15 04:34:33',
+        ];
 
-        $cursor = $connection->fetch(function (ConnectionInterface $connection) {
-            return $connection->createQueryBuilder('users')->orderBy('id', false);
-        });
-        
-        foreach ($cursor as $row) {
-            print_r($row);
+        $row = $this->connection->first(
+            "SELECT * FROM `actor` WHERE `last_name` LIKE ? ORDER BY `actor_id` DESC LIMIT 3",
+            ['C%']
+        );
+        static::assertEquals($expectedRow, $row);
+
+        $row = $this->connection->first(function () {
+            return "SELECT * FROM `actor` WHERE `last_name` LIKE ? ORDER BY `actor_id` DESC LIMIT 3"; 
+        }, ['C%']);
+        static::assertEquals($expectedRow, $row);
+    }
+
+    public function testFetch()
+    {
+        $expectedRows = [
+            [
+                'actor_id' => 183,
+                'first_name' => 'RUSSELL',
+                'last_name' => 'CLOSE',
+                'last_update' => '2006-02-15 04:34:33',
+            ],
+            [
+                'actor_id' => 181,
+                'first_name' => 'MATTHEW',
+                'last_name' => 'CARREY',
+                'last_update' => '2006-02-15 04:34:33',
+            ],
+            [
+                'actor_id' => 176,
+                'first_name' => 'JON',
+                'last_name' => 'CHASE',
+                'last_update' => '2006-02-15 04:34:33',
+            ],
+        ];
+
+        $cursor = $this->connection->fetch(
+            "SELECT * FROM `actor` WHERE `last_name` LIKE ? ORDER BY `actor_id` DESC LIMIT 3",
+            ['C%']
+        );
+        $interateCount = 0;
+        static::assertInstanceOf(Generator::class, $cursor); // cursor is generator!
+        foreach ($cursor as $index => $row) {
+            static::assertSame($expectedRows[$index], $row);
+            $interateCount++;
         }
-        
+        static::assertEquals(3, $interateCount);
+
+        // same
+        $cursor = $this->connection->fetch(function () {
+            return "SELECT * FROM `actor` WHERE `last_name` LIKE ? ORDER BY `actor_id` DESC LIMIT 3";
+        }, ['C%']);
+        $interateCount = 0;
+        static::assertInstanceOf(Generator::class, $cursor); // cursor is generator!
+        foreach ($cursor as $index => $row) {
+            static::assertSame($expectedRows[$index], $row);
+            $interateCount++;
+        }
+        static::assertEquals(3, $interateCount);
     }
 }

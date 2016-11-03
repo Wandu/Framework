@@ -65,6 +65,16 @@ class MysqlConnection implements ConnectionInterface
     /**
      * {@inheritdoc}
      */
+    public function first($query, array $bindings = [])
+    {
+        $statement = $this->prepare($query, $bindings);
+        $statement->execute();
+        return $statement->fetch(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function query($query, array $bindings = [])
     {
         $statement = $this->prepare($query, $bindings);

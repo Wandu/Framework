@@ -28,7 +28,9 @@ class MysqlConnector implements ConnectorInterface
         $this->applyCharset($connection);
         $this->applyTimezone($connection);
         
-        return new MysqlConnection($connection, isset($this->config['prefix']) ? $this->config['prefix'] : '');
+        return new MysqlConnection($connection, [
+            'prefix' => isset($this->config['prefix']) ? $this->config['prefix'] : '',
+        ]);
     }
 
     /**
