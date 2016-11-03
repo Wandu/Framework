@@ -1,6 +1,7 @@
 <?php
 namespace Wandu\Installation;
 
+use Wandu\Console\Commands\PsyshCommand;
 use Wandu\DI\ContainerInterface;
 use Wandu\DI\ServiceProviderInterface;
 use Wandu\Foundation\Contracts\KernelInterface;
@@ -24,6 +25,7 @@ class InstallServiceProvider implements ServiceProviderInterface
             /** @var \Wandu\Foundation\Contracts\KernelInterface $kernel */
             $kernel = $app->get(KernelInterface::class);
             $kernel['commands'] = [
+                'psysh' => PsyshCommand::class,
                 'install' => InstallCommand::class,
             ];
         }
