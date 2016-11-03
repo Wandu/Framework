@@ -427,7 +427,7 @@ class Container implements ContainerInterface
     {
         /* @var \Doctrine\Common\Annotations\Reader $reader */
         $reader = $this->get(Reader::class);
-        class_exists(AutoWired::class);
+        class_exists(AutoWired::class); // pre-load for Annotation Reader
         $reflObject = new ReflectionObject($instance);
         foreach ($reflObject->getProperties() as $reflProperty) {
             /* @var \Wandu\DI\Annotations\AutoWired $autoWired */
