@@ -10,7 +10,7 @@ class RequiredValidator extends ValidatorAbstract
      */
     public function test($item)
     {
-        return isset($item);
+        return isset($item) && $item !== '';
     }
 
     /**

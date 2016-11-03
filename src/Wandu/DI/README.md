@@ -18,4 +18,4 @@ composer require wandu/di
 
 ## Websites
 
-- [wandu.github.io/#di](https://wandu.github.io/#di)
+- [wandu.github.io/docs/di](https://wandu.github.io/docs/di)

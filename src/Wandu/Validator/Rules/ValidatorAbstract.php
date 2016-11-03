@@ -20,6 +20,7 @@ abstract class ValidatorAbstract implements ValidatorInterface
     public function assert($item)
     {
         if (!isset($item)) return;
+        if ($item === '') return;
         if (!$this->test($item)) {
             throw $this->createException();
         }

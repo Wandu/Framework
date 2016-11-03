@@ -7,48 +7,48 @@ use Wandu\Validator\ValidatorTestCase;
 use Illuminate\Database\Eloquent\Model;
 use function Wandu\Validator\validator;
 
-class CollectionValidatorTest extends ValidatorTestCase
+class IterableValidatorTest extends ValidatorTestCase
 {
     public function testNullCollectionValidate()
     {
-        static::assertTrue(validator()->collection()->validate(null));
-        static::assertTrue(validator()->collection()->validate([]));
-        static::assertTrue(validator()->collection()->validate(new ArrayObject([])));
-        static::assertTrue(validator()->collection()->validate(new Collection([1, 2, 3]))); // also use Laravel's Collection.
-        static::assertTrue(validator()->collection()->validate(['3', 0, 1, 2, 'something']));
+        static::assertTrue(validator()->iterable()->validate(null));
+        static::assertTrue(validator()->iterable()->validate([]));
+        static::assertTrue(validator()->iterable()->validate(new ArrayObject([])));
+        static::assertTrue(validator()->iterable()->validate(new Collection([1, 2, 3]))); // also use Laravel's Collection.
+        static::assertTrue(validator()->iterable()->validate(['3', 0, 1, 2, 'something']));
 
-        static::assertFalse(validator()->collection()->validate((object)[]));
-        static::assertFalse(validator()->collection()->validate("30"));
-        static::assertFalse(validator()->collection()->validate([
+        static::assertFalse(validator()->iterable()->validate((object)[]));
+        static::assertFalse(validator()->iterable()->validate("30"));
+        static::assertFalse(validator()->iterable()->validate([
             'hello' => 'world',
         ]));
-        static::assertFalse(validator()->collection()->validate(new Collection([
+        static::assertFalse(validator()->iterable()->validate(new Collection([
             'id' => 1,
         ]))); // but cannot use Laravel's Assoc Collection.
-        static::assertFalse(validator()->collection()->validate(new CollectionTestUser([]))); // cannot use Laravel's Model
+        static::assertFalse(validator()->iterable()->validate(new IterableTestUser([]))); // cannot use Laravel's Model
 
     }
 
     public function testValidate()
     {
-        static::assertTrue(validator()->collection('integer')->validate([30, 40, 50, 60]));
-        static::assertFalse(validator()->collection('integer')->validate([30, '40', 50, 60]));
+        static::assertTrue(validator()->iterable('integer')->validate([30, 40, 50, 60]));
+        static::assertFalse(validator()->iterable('integer')->validate([30, '40', 50, 60]));
 
         // ignore other key 
-        static::assertTrue(validator()->collection([
+        static::assertTrue(validator()->iterable([
             'age' => 'integer',
         ])->validate([
             ['age' => 30, 'other' => 'other...'],
         ]));
 
-        static::assertFalse(validator()->collection([
+        static::assertFalse(validator()->iterable([
             'age' => 'integer',
         ])->validate(['age' => 30, 'other' => 'other...']));
     }
-    
+
     public function testAssertMethod()
     {
-        $validator = validator()->collection(['name' => 'string', 'age' => 'integer',]);
+        $validator = validator()->iterable(['name' => 'string', 'age' => 'integer',]);
 
         // valid
         $validator->assert([]);
@@ -75,7 +75,7 @@ class CollectionValidatorTest extends ValidatorTestCase
         static::assertInvalidValueException(function () use ($validator) {
             $validator->assert('string');
         }, [
-            'collection',
+            'iterable',
         ]);
         static::assertInvalidValueException(function () use ($validator) {
             $validator->assert([
@@ -94,7 +94,7 @@ class CollectionValidatorTest extends ValidatorTestCase
 
     public function testAssertCollectionOfArray()
     {
-        $validator = validator()->collection([
+        $validator = validator()->iterable([
             'name' => 'string',
             'company' => [
                 'name' => 'string',
@@ -128,7 +128,7 @@ class CollectionValidatorTest extends ValidatorTestCase
         static::assertInvalidValueException(function () use ($validator) {
             $validator->assert('string');
         }, [
-            'collection',
+            'iterable',
         ]);
         static::assertInvalidValueException(function () use ($validator) {
             $validator->assert([
@@ -158,7 +158,7 @@ class CollectionValidatorTest extends ValidatorTestCase
     {
         $validator = validator()->from([
             'name' => 'string',
-            'children' => validator()->collection([
+            'children' => validator()->iterable([
                 'name' => 'string',
                 'company' => [
                     'name' => 'string',
@@ -217,30 +217,30 @@ class CollectionValidatorTest extends ValidatorTestCase
             'integer@children.1.company.age',
         ]);
     }
-    
+
     public function testEloquentCollection()
     {
         $validator = validator()->arrayable([
             'name' => 'string',
-            'children' => validator()->collection(validator()->arrayable([
+            'children' => validator()->iterable(validator()->arrayable([
                 'name' => 'required|string',
             ])),
         ]);
 
-        $user = new CollectionTestUser();
+        $user = new IterableTestUser();
         $children = new Collection([
-            new CollectionTestUser(['name' => 'alex']),
-            new CollectionTestUser(['name' => 'lily'])
+            new IterableTestUser(['name' => 'alex']),
+            new IterableTestUser(['name' => 'lily'])
         ]);
         $user->setRelation('children', $children);
-        
+
         $validator->assert($user);
 
         static::assertInvalidValueException(function () use ($validator) {
-            $user = new CollectionTestUser();
+            $user = new IterableTestUser();
             $children = new Collection([
-                new CollectionTestUser(['name' => 3030]),
-                new CollectionTestUser([])
+                new IterableTestUser(['name' => 3030]),
+                new IterableTestUser([])
             ]);
             $user->setRelation('children', $children);
 
@@ -252,7 +252,7 @@ class CollectionValidatorTest extends ValidatorTestCase
     }
 }
 
-class CollectionTestUser extends Model
+class IterableTestUser extends Model
 {
     protected $fillable = [
         'name',

@@ -9,7 +9,7 @@ use function Wandu\Validator\validator;
 
 class ArrayableValidatorTest extends ValidatorTestCase
 {
-    public function testValidate()
+    public function testValidateMethod()
     {
         static::assertTrue(validator()->arrayable()->validate(null));
         static::assertTrue(validator()->arrayable()->validate([]));
