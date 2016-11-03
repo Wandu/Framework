@@ -1,32 +1,38 @@
 
 split_parallel() {
     PACKAGENAME=$1
+    TAG=$2
     mkdir $PACKAGENAME
     pushd $PACKAGENAME
     git subsplit init git@github.com:Wandu/Framework.git
-    git subsplit publish --heads="master 3.0" src/Wandu/$PACKAGENAME:git@github.com:Wandu/$PACKAGENAME.git
+    if [ ! -z "$TAG" ]; then
+        git subsplit publish --heads="master 3.0" --tags="$TAG" src/Wandu/$PACKAGENAME:git@github.com:Wandu/$PACKAGENAME.git
+    else
+        git subsplit publish --heads="master 3.0" --no-tags src/Wandu/$PACKAGENAME:git@github.com:Wandu/$PACKAGENAME.git
+    fi
     popd
     rm -rf $PACKAGENAME
 }
 
+TAG=$1
 PIDS=()
 
-split_parallel Caster       & PIDS+=($!)
-split_parallel Compiler     & PIDS+=($!)
-split_parallel Config       & PIDS+=($!)
-split_parallel Console      & PIDS+=($!)
-split_parallel Database     & PIDS+=($!)
-split_parallel DateTime     & PIDS+=($!)
-split_parallel DI           & PIDS+=($!)
-split_parallel Event        & PIDS+=($!)
-split_parallel Foundation   & PIDS+=($!)
-split_parallel Http         & PIDS+=($!)
-split_parallel Installation & PIDS+=($!)
-split_parallel Q            & PIDS+=($!)
-split_parallel Router       & PIDS+=($!)
-split_parallel Support      & PIDS+=($!)
-split_parallel Validator    & PIDS+=($!)
-split_parallel View         & PIDS+=($!)
+split_parallel Caster       $TAG & PIDS+=($!)
+split_parallel Compiler     $TAG & PIDS+=($!)
+split_parallel Config       $TAG & PIDS+=($!)
+split_parallel Console      $TAG & PIDS+=($!)
+split_parallel Database     $TAG & PIDS+=($!)
+split_parallel DateTime     $TAG & PIDS+=($!)
+split_parallel DI           $TAG & PIDS+=($!)
+split_parallel Event        $TAG & PIDS+=($!)
+split_parallel Foundation   $TAG & PIDS+=($!)
+split_parallel Http         $TAG & PIDS+=($!)
+split_parallel Installation $TAG & PIDS+=($!)
+split_parallel Q            $TAG & PIDS+=($!)
+split_parallel Router       $TAG & PIDS+=($!)
+split_parallel Support      $TAG & PIDS+=($!)
+split_parallel Validator    $TAG & PIDS+=($!)
+split_parallel View         $TAG & PIDS+=($!)
 
 for PID in "${PIDS[@]}"
 do
