@@ -27,6 +27,31 @@ class AutoWiringTest extends PHPUnit_Framework_TestCase
         static::assertInstanceOf(AutoWiringTestExampleDepend::class, $object->getDepend1());
         static::assertNull($object->getDepend2());
     }
+    
+    public function testAutoWiringEachOther()
+    {
+        $container = new Container();
+        $container->bind(Reader::class, AnnotationReader::class); // add annotation.
+
+        $container->bind(AutoWiringTestEachOther1::class)->wire();
+        $container->bind(AutoWiringTestEachOther2::class)->wire();
+
+        $object = $container->get(AutoWiringTestEachOther1::class);
+        
+        static::assertInstanceOf(AutoWiringTestEachOther2::class, $object->getDepend());
+        static::assertInstanceOf(AutoWiringTestEachOther1::class, $object->getDepend()->getDepend());
+
+        $container = new Container();
+        $container->bind(Reader::class, AnnotationReader::class); // add annotation.
+
+        $container->bind(AutoWiringTestEachOther1::class)->wire();
+        $container->bind(AutoWiringTestEachOther2::class)->wire();
+
+        $object = $container->get(AutoWiringTestEachOther2::class);
+
+        static::assertInstanceOf(AutoWiringTestEachOther1::class, $object->getDepend());
+        static::assertInstanceOf(AutoWiringTestEachOther2::class, $object->getDepend()->getDepend());
+    }
 }
 
 class AutoWiringTestExampleDepend {}
@@ -47,5 +72,37 @@ class AutoWiringTestExample
     public function getDepend2()
     {
         return $this->depend2;
+    }
+}
+
+class AutoWiringTestEachOther1
+{
+    /**
+     * @AutoWired(AutoWiringTestEachOther2::class)
+     */
+    private $depend;
+
+    /**
+     * @return mixed
+     */
+    public function getDepend()
+    {
+        return $this->depend;
+    }
+}
+
+class AutoWiringTestEachOther2
+{
+    /**
+     * @AutoWired(AutoWiringTestEachOther1::class)
+     */
+    private $depend;
+
+    /**
+     * @return mixed
+     */
+    public function getDepend()
+    {
+        return $this->depend;
     }
 }

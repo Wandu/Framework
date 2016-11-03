@@ -3,12 +3,14 @@ namespace Wandu\DI;
 
 use Closure;
 use Doctrine\Common\Annotations\Reader;
+use Exception;
 use Interop\Container\ContainerInterface as InteropContainerInterface;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionFunctionAbstract;
 use ReflectionObject;
 use ReflectionProperty;
+use Throwable;
 use Wandu\DI\Annotations\AutoWired;
 use Wandu\DI\Containee\BindContainee;
 use Wandu\DI\Containee\ClosureContainee;
@@ -138,24 +140,14 @@ class Container implements ContainerInterface
     }
     
     /**
-     * @param string $name
-     * @return mixed
-     */
-    public function getRawItem($name)
-    {
-        return $this->containee($name)->get($this);
-    }
-    
-    /**
      * {@inheritdoc}
      */
     public function get($name)
     {
-        $instance = $this->getRawItem($name);
+        $instance = $this->containee($name)->get($this);
         if ($this->containees[$name]->isWireEnabled()) {
             $this->applyWire($instance);
         }
-
         foreach ($this->getExtenders($name) as $extender) {
             $instance = $extender->__invoke($instance);
         }
@@ -425,17 +417,31 @@ class Container implements ContainerInterface
     
     protected function applyWire($instance)
     {
-        /* @var \Doctrine\Common\Annotations\Reader $reader */
-        $reader = $this->get(Reader::class);
-        class_exists(AutoWired::class); // pre-load for Annotation Reader
-        $reflObject = new ReflectionObject($instance);
-        foreach ($reflObject->getProperties() as $reflProperty) {
-            /* @var \Wandu\DI\Annotations\AutoWired $autoWired */
-            if ($autoWired = $reader->getPropertyAnnotation($reflProperty, AutoWired::class)) {
-                $this->inject($instance, [
-                    $reflProperty->getName() => $this->get($autoWired->name),
-                ]);
-            }
+        static $callStack = [];
+        if (in_array($instance, $callStack)) {
+            return; // return when a circular call is detected.
         }
+        array_push($callStack, $instance);
+        try {
+            /* @var \Doctrine\Common\Annotations\Reader $reader */
+            $reader = $this->get(Reader::class);
+            class_exists(AutoWired::class); // pre-load for Annotation Reader
+            $reflObject = new ReflectionObject($instance);
+            foreach ($reflObject->getProperties() as $reflProperty) {
+                /* @var \Wandu\DI\Annotations\AutoWired $autoWired */
+                if ($autoWired = $reader->getPropertyAnnotation($reflProperty, AutoWired::class)) {
+                    $this->inject($instance, [
+                        $reflProperty->getName() => $this->get($autoWired->name),
+                    ]);
+                }
+            }
+        } catch (Exception $e) {
+            array_pop($callStack);
+            throw $e;
+        } catch (Throwable $e) {
+            array_pop($callStack);
+            throw $e;
+        }
+        array_pop($callStack);
     }
 }
