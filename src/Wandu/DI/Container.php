@@ -2,12 +2,14 @@
 namespace Wandu\DI;
 
 use Closure;
+use Doctrine\Common\Annotations\Reader;
 use Interop\Container\ContainerInterface as InteropContainerInterface;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionFunctionAbstract;
 use ReflectionObject;
 use ReflectionProperty;
+use Wandu\DI\Annotations\AutoWired;
 use Wandu\DI\Containee\BindContainee;
 use Wandu\DI\Containee\ClosureContainee;
 use Wandu\DI\Containee\InstanceContainee;
@@ -151,7 +153,7 @@ class Container implements ContainerInterface
     {
         $instance = $this->getRawItem($name);
         if ($this->containees[$name]->isWireEnabled()) {
-           $this->inject($instance);
+            $this->applyWire($instance);
         }
 
         foreach ($this->getExtenders($name) as $extender) {
@@ -344,40 +346,6 @@ class Container implements ContainerInterface
         foreach ($properties as $property => $value) {
             $this->injectProperty($reflectionObject->getProperty($property), $object, $value);
         }
-//        foreach ($reflectionObject->getProperties() as $property) {
-//            // if property doesn't have doc type hint,
-//            // 1.1. search in properties by property name
-//
-//            // if property has doc type hint,
-//            // 2.1. search in properties by property name ( == 1.1)
-//            // 2.2. search in properties by class name (in doc)
-//            // 2.3. if has doc @Autowired then search in container by class name (in doc)
-//            //      else exception!
-//
-//            // 1.1, 2.1
-//            if (array_key_exists($propertyName = $property->getName(), $properties)) {
-//                $this->injectProperty($property, $object, $properties[$propertyName]);
-//                continue;
-//            }
-//            $docComment = $property->getDocComment();
-//            $propertyClassName = $this->getClassNameFromDocComment($docComment);
-//            if ($propertyClassName) {
-//                // 2.2
-//                if (array_key_exists($propertyClassName, $properties)) {
-//                    $this->injectProperty($property, $object, $properties[$propertyClassName]);
-//                    continue;
-//                }
-//                // 2.3
-//                if ($this->hasAutowiredFromDocComment($docComment)) {
-//                    if ($this->has($propertyClassName)) {
-//                        $this->injectProperty($property, $object, $this->getRawItem($propertyClassName));
-//                        continue;
-//                    } else {
-//                        throw new CannotInjectException($propertyClassName, $property->getName());
-//                    }
-//                }
-//            }
-//        }
     }
 
     /**
@@ -454,19 +422,20 @@ class Container implements ContainerInterface
         }
         return $arrayToReturn;
     }
-
-    /**
-     * @param array $array
-     * @return array
-     */
-    protected static function getAssocArray(array $array)
+    
+    protected function applyWire($instance)
     {
-        $arrayToReturn = [];
-        foreach ($array as $key => $item) {
-            if (!is_int($key)) {
-                $arrayToReturn[$key] = $item;
+        /* @var \Doctrine\Common\Annotations\Reader $reader */
+        $reader = $this->get(Reader::class);
+        class_exists(AutoWired::class);
+        $reflObject = new ReflectionObject($instance);
+        foreach ($reflObject->getProperties() as $reflProperty) {
+            /* @var \Wandu\DI\Annotations\AutoWired $autoWired */
+            if ($autoWired = $reader->getPropertyAnnotation($reflProperty, AutoWired::class)) {
+                $this->inject($instance, [
+                    $reflProperty->getName() => $this->get($autoWired->name),
+                ]);
             }
         }
-        return $arrayToReturn;
     }
 }
