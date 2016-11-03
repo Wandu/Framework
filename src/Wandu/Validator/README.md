@@ -6,7 +6,7 @@ Wandu Validator
 [![Total Downloads](https://poser.pugx.org/wandu/validator/downloads.svg)](https://packagist.org/packages/wandu/validator)
 [![License](https://poser.pugx.org/wandu/validator/license.svg)](https://packagist.org/packages/wandu/validator)
 
-Perfect Validator Library.
+Perfect Validator Library, Maybe.
 
 ## Installation
 
@@ -14,4 +14,4 @@ Perfect Validator Library.
 
 ## Websites
 
-- [wandu.github.io/#validator](https://wandu.github.io/#validator)
+- [wandu.github.io/docs/validator](https://wandu.github.io/docs/validator)

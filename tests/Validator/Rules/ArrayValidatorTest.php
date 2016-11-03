@@ -100,4 +100,108 @@ class ArrayValidatorTest extends ValidatorTestCase
             'length_min:5@name',
         ]);
     }
+    
+    public function testArrayWithMultiEmptyArray()
+    {
+        $validator = validator()->array([
+            'username' => 'required|reg_exp:/^[a-zA-Z0-9_-]{4,30}$/',
+            'name' => 'length_max:16',
+            'profile' => validator()->pipeline(['required', [
+                'image' => 'required|length_max:64',
+                'alt' => 'string',
+            ]]),
+            'driver' => [
+                'company' => 'required|length_max:16',
+                'description' => 'string',
+            ],
+            'company' => [
+                'registration' => 'required|length_max:16',
+                'description' => 'string',
+            ],
+        ]);
+
+        // all empty
+        $validator->assert(null);
+        $validator->assert('');
+        
+        // only array
+        $validator->assert([
+            'username' => 'wan2land',
+            'profile' => ['image' => 'static/images/000.png',],
+        ]);
+        $this->assertInvalidValueException(function () use ($validator) {
+            $validator->assert([]);
+        }, [
+            'required@username',
+            'required@profile',
+        ]);
+        $this->assertInvalidValueException(function () use ($validator) {
+            $validator->assert([
+                'username' => 'wan2land',
+                'profile' => null,
+            ]);
+        }, [
+            'required@profile',
+        ]);
+        $this->assertInvalidValueException(function () use ($validator) {
+            $validator->assert([
+                'username' => 'wan2land',
+                'profile' => [],
+            ]);
+        }, [
+            'required@profile.image',
+        ]);
+        
+        // with driver
+        $validator->assert([
+            'username' => 'wan2land',
+            'profile' => ['image' => 'static/images/000.png',],
+            'driver' => null,
+        ]);
+        $validator->assert([
+            'username' => 'wan2land',
+            'profile' => ['image' => 'static/images/000.png',],
+            'driver' => '',
+        ]);
+        $validator->assert([
+            'username' => 'wan2land',
+            'profile' => ['image' => 'static/images/000.png',],
+            'driver' => ['company' => 'something'],
+        ]);
+        $this->assertInvalidValueException(function () use ($validator) {
+            $validator->assert([
+                'username' => 'wan2land',
+                'profile' => ['image' => 'static/images/000.png',],
+                'driver' => [],
+            ]);
+        }, [
+            'required@driver.company',
+        ]);
+
+        // with company
+        $validator->assert([
+            'username' => 'wan2land',
+            'profile' => ['image' => 'static/images/000.png',],
+            'company' => null,
+        ]);
+        $validator->assert([
+            'username' => 'wan2land',
+            'profile' => ['image' => 'static/images/000.png',],
+            'company' => '',
+        ]);
+        $validator->assert([
+            'username' => 'wan2land',
+            'profile' => ['image' => 'static/images/000.png',],
+            'company' => ['registration' => '000-1234-1234'],
+        ]);
+        $this->assertInvalidValueException(function () use ($validator) {
+            $validator->assert([
+                'username' => 'wan2land',
+                'profile' => ['image' => 'static/images/000.png',],
+                'company' => [],
+            ]);
+        }, [
+            'required@company.registration',
+        ]);
+    }
 }

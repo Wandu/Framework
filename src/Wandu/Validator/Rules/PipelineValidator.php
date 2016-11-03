@@ -3,7 +3,32 @@ namespace Wandu\Validator\Rules;
 
 use Wandu\Validator\Contracts\ValidatorInterface;
 use Wandu\Validator\Exception\InvalidValueException;
+use function Wandu\Validator\validator;
 
+/**
+ * @method \Wandu\Validator\Rules\PipelineValidator required()
+ * @method \Wandu\Validator\Rules\PipelineValidator not(\Wandu\Validator\Rules\PipelineValidator $validator)
+ * @method \Wandu\Validator\Rules\PipelineValidator array(array $attributes = [])
+ * @method \Wandu\Validator\Rules\PipelineValidator collection($rule = null)
+ * @method \Wandu\Validator\Rules\PipelineValidator iterable($rule = null)
+ * @method \Wandu\Validator\Rules\PipelineValidator arrayable(array $attributes = [])
+ * @method \Wandu\Validator\Rules\PipelineValidator object(array $properties = [])
+ * @method \Wandu\Validator\Rules\PipelineValidator integer()
+ * @method \Wandu\Validator\Rules\PipelineValidator boolean()
+ * @method \Wandu\Validator\Rules\PipelineValidator float()
+ * @method \Wandu\Validator\Rules\PipelineValidator string()
+ * @method \Wandu\Validator\Rules\PipelineValidator integerable()
+ * @method \Wandu\Validator\Rules\PipelineValidator floatable()
+ * @method \Wandu\Validator\Rules\PipelineValidator numeric()
+ * @method \Wandu\Validator\Rules\PipelineValidator stringable()
+ * @method \Wandu\Validator\Rules\PipelineValidator printable()
+ * @method \Wandu\Validator\Rules\PipelineValidator min(int $min)
+ * @method \Wandu\Validator\Rules\PipelineValidator max(int $max)
+ * @method \Wandu\Validator\Rules\PipelineValidator lengthMin(int $min)
+ * @method \Wandu\Validator\Rules\PipelineValidator lengthMax(int $max)
+ * @method \Wandu\Validator\Rules\PipelineValidator email(\Egulias\EmailValidator\Validation\EmailValidation $validation = null)
+ * @method \Wandu\Validator\Rules\PipelineValidator regExp(string $pattern)
+ */
 class PipelineValidator implements ValidatorInterface
 {
     /** @var array|\Wandu\Validator\Contracts\ValidatorInterface[] */
@@ -14,9 +39,22 @@ class PipelineValidator implements ValidatorInterface
      */
     public function __construct(array $validators = [])
     {
-        $this->validators = $validators;
+        $this->validators = array_map(function ($validator) {
+            return validator()->from($validator);
+        }, $validators);
     }
-    
+
+    /**
+     * @param string $name
+     * @param array $arguments
+     * @return \Wandu\Validator\Rules\PipelineValidator
+     */
+    public function __call($name, array $arguments = [])
+    {
+        $this->validators[] = validator()->__call($name, $arguments);
+        return $this;
+    }
+
     /**
      * {@inheritdoc}
      */

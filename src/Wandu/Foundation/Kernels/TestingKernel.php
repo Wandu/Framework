@@ -1,27 +1,25 @@
 <?php
 namespace Wandu\Foundation\Kernels;
 
-use Wandu\Foundation\Contracts\KernelInterface;
-use Wandu\DI\ContainerInterface;
 use PHPUnit_Framework_Test;
+use Wandu\DI\ContainerInterface;
 use Wandu\DI\Exception\CannotInjectException;
+use Wandu\Foundation\Contracts\DefinitionInterface;
 
-class TestingKernel implements KernelInterface
+class TestingKernel extends KernelAbstract
 {
     /** @var \PHPUnit_Framework_Test */
     protected $test;
 
-    public function __construct(PHPUnit_Framework_Test $test)
+    public function __construct(DefinitionInterface $definition, PHPUnit_Framework_Test $test)
     {
+        parent::__construct($definition);
         $this->test = $test;
     }
-
-    public function boot(ContainerInterface $app)
-    {
-    }
-
+    
     public function execute(ContainerInterface $app)
     {
+        $this->useErrorHandling();
         try {
             $app->inject($this->test);
         } catch (CannotInjectException $exception) {
@@ -35,10 +33,5 @@ class TestingKernel implements KernelInterface
                 throw $exception;
             }
         }
-    }
-
-    public function result()
-    {
-        return 0;
     }
 }
