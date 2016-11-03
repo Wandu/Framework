@@ -12,6 +12,8 @@ Wandu Framework
 
 Wandu is PHP Framework.
 
+![Wandu](readme.png)
+
 ## Websites
 
 - [wandu.github.io](https://wandu.github.io)
