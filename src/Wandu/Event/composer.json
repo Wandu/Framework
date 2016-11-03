@@ -12,7 +12,7 @@
         }
     },
     "suggest": {
-        "wandu/q": "for Queue Event"
+        "wandu/q": "for queue event."
     },
     "extra": {
         "branch-alias": {

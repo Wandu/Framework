@@ -12,7 +12,7 @@
         }
     },
     "suggest": {
-        "psy/psysh": "for Psysh command"
+        "psy/psysh": "for the Psysh command."
     },
     "extra": {
         "branch-alias": {

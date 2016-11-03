@@ -12,8 +12,8 @@
         }
     },
     "suggest": {
-        "aws/aws-sdk-php": "for SQS queue",
-        "pda/pheanstalk": "for Beanstalkd queue"
+        "aws/aws-sdk-php": "for SQS queue.",
+        "pda/pheanstalk": "for Beanstalkd queue."
     },
     "extra": {
         "branch-alias": {
