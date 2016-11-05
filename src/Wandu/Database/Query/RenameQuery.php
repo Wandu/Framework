@@ -2,7 +2,6 @@
 namespace Wandu\Database\Query;
 
 use Wandu\Database\Contracts\ExpressionInterface;
-use Wandu\Database\Support\Attributes;
 
 /**
  * @see http://dev.mysql.com/doc/refman/5.7/en/rename-table.html
@@ -11,22 +10,20 @@ use Wandu\Database\Support\Attributes;
  */
 class RenameQuery implements ExpressionInterface
 {
-    use Attributes;
+    /** @var string */
+    protected $table;
 
     /** @var string */
-    protected $oldTableName;
-
-    /** @var string */
-    protected $newTableName;
+    protected $newTable;
 
     /**
-     * @param string $oldTableName
-     * @param string $newTableName
+     * @param string $table
+     * @param string $newTable
      */
-    public function __construct($oldTableName, $newTableName)
+    public function __construct($table, $newTable)
     {
-        $this->oldTableName = $oldTableName;
-        $this->newTableName = $newTableName;
+        $this->table = $table;
+        $this->newTable = $newTable;
     }
 
     /**
@@ -34,7 +31,7 @@ class RenameQuery implements ExpressionInterface
      */
     public function toSql()
     {
-        return "RENAME TABLE `{$this->oldTableName}` TO `{$this->newTableName}`";
+        return "RENAME TABLE `{$this->table}` TO `{$this->newTable}`";
     }
 
     /**

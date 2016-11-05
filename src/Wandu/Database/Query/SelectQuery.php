@@ -1,6 +1,8 @@
 <?php
 namespace Wandu\Database\Query;
 
+use Wandu\Database\Query\Expression\HasWhereExpression;
+
 class SelectQuery extends HasWhereExpression
 {
     /** @var string */

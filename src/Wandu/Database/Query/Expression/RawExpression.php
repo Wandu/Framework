@@ -1,5 +1,5 @@
 <?php
-namespace Wandu\Database\Query;
+namespace Wandu\Database\Query\Expression;
 
 use Wandu\Database\Contracts\ExpressionInterface;
 

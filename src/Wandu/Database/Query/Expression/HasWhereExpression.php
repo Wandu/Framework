@@ -1,10 +1,7 @@
 <?php
-namespace Wandu\Database\Query;
+namespace Wandu\Database\Query\Expression;
 
 use Wandu\Database\Contracts\ExpressionInterface;
-use Wandu\Database\Query\Expression\LimitExpression;
-use Wandu\Database\Query\Expression\OrderByExpression;
-use Wandu\Database\Query\Expression\WhereExpression;
 
 class HasWhereExpression implements ExpressionInterface
 {

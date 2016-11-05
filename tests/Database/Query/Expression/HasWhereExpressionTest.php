@@ -1,5 +1,5 @@
 <?php
-namespace Wandu\Database\Query;
+namespace Wandu\Database\Query\Expression;
 
 use PHPUnit_Framework_TestCase;
 

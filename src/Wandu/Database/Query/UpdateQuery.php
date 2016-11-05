@@ -1,6 +1,7 @@
 <?php
 namespace Wandu\Database\Query;
 
+use Wandu\Database\Query\Expression\HasWhereExpression;
 use Wandu\Database\Support\Helper;
 
 class UpdateQuery extends HasWhereExpression
