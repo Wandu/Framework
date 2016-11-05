@@ -1,10 +1,11 @@
 <?php
 namespace Wandu\Database\Query;
 
+use Wandu\Database\Contracts\QueryInterface;
 use Wandu\Database\Query\Expression\HasWhereExpression;
 use Wandu\Database\Support\Helper;
 
-class UpdateQuery extends HasWhereExpression
+class UpdateQuery extends HasWhereExpression implements QueryInterface
 {
     /** @var string */
     protected $table;

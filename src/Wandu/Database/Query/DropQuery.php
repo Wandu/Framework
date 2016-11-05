@@ -1,7 +1,7 @@
 <?php
 namespace Wandu\Database\Query;
 
-use Wandu\Database\Contracts\ExpressionInterface;
+use Wandu\Database\Contracts\QueryInterface;
 use Wandu\Database\Support\Attributes;
 
 /**
@@ -13,7 +13,7 @@ use Wandu\Database\Support\Attributes;
  * @method \Wandu\Database\Query\DropQuery restrict()
  * @method \Wandu\Database\Query\DropQuery cascade()
  */
-class DropQuery implements ExpressionInterface
+class DropQuery implements QueryInterface
 {
     use Attributes;
 

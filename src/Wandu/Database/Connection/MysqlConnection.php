@@ -6,7 +6,8 @@ use Throwable;
 use PDO;
 use PDOStatement;
 use Wandu\Database\Contracts\ConnectionInterface;
-use Wandu\Database\Query\QueryBuilder;
+use Wandu\Database\Contracts\QueryInterface;
+use Wandu\Database\QueryBuilder;
 
 class MysqlConnection implements ConnectionInterface
 {
@@ -84,6 +85,14 @@ class MysqlConnection implements ConnectionInterface
     /**
      * {@inheritdoc}
      */
+    public function getLastInsertId()
+    {
+        return $this->pdo->lastInsertId();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function transaction(callable $handler)
     {
         $this->pdo->beginTransaction();
@@ -106,10 +115,10 @@ class MysqlConnection implements ConnectionInterface
      */
     protected function prepare($query, array $bindings = [])
     {
-        if (is_callable($query)) {
+        while (is_callable($query)) {
             $query = call_user_func($query, $this);
         }
-        if ($query instanceof QueryBuilder) {
+        if ($query instanceof QueryInterface) {
             $bindings = $query->getBindings();
             $query = $query->toSql();
         }

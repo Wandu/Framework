@@ -1,9 +1,10 @@
 <?php
 namespace Wandu\Database\Query;
 
+use Wandu\Database\Contracts\QueryInterface;
 use Wandu\Database\Support\Helper;
 
-class InsertQuery
+class InsertQuery implements QueryInterface
 {
     /** @var string */
     protected $table;

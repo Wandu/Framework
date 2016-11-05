@@ -15,31 +15,36 @@ interface ConnectionInterface
 
     /**
      * @param string $table
-     * @return \Wandu\Database\Query\QueryBuilder
+     * @return \Wandu\Database\QueryBuilder
      */
     public function createQueryBuilder($table);
 
     /**
-     * @param string|callable|\Wandu\Database\Query\QueryBuilder $query
+     * @param string|callable|\Wandu\Database\Contracts\QueryInterface $query
      * @param array $bindings
      * @return \Generator
      */
     public function fetch($query, array $bindings = []);
 
     /**
-     * @param string|callable|\Wandu\Database\Query\QueryBuilder $query
+     * @param string|callable|\Wandu\Database\Contracts\QueryInterface $query
      * @param array $bindings
      * @return array
      */
     public function first($query, array $bindings = []);
     
     /**
-     * @param string|callable|\Wandu\Database\Query\QueryBuilder $query
+     * @param string|callable|\Wandu\Database\Contracts\QueryInterface $query
      * @param array $bindings
      * @return bool
      */
     public function query($query, array $bindings = []);
 
+    /**
+     * @return string|int
+     */
+    public function getLastInsertId();
+    
     /**
      * @param callable $handler
      * @throws \Exception

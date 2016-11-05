@@ -18,7 +18,7 @@ class SakilaTestCase extends PHPUnit_Framework_TestCase
             'database' => 'sakila',
             'charset'   => 'utf8mb4',
             'collation' => 'utf8mb4_unicode_ci',
-            'prefix' => 'local_',
+            'prefix' => '',
             'timezone' => '+09:00',
             'options' => [ // default
                 PDO::ATTR_CASE => PDO::CASE_NATURAL,

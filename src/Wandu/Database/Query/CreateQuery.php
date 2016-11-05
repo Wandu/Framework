@@ -2,6 +2,7 @@
 namespace Wandu\Database\Query;
 
 use Wandu\Database\Contracts\ExpressionInterface;
+use Wandu\Database\Contracts\QueryInterface;
 use Wandu\Database\Query\Expression\ColumnExpression;
 use Wandu\Database\Query\Expression\ConstraintExpression;
 use Wandu\Database\Support\Attributes;
@@ -26,7 +27,7 @@ use Wandu\Database\Support\Attributes;
  * @method \Wandu\Database\Query\CreateQuery charset(string $charset)
  * @method \Wandu\Database\Query\CreateQuery collation(string $collation)
  */
-class CreateQuery implements ExpressionInterface
+class CreateQuery implements QueryInterface
 {
     use Attributes;
     

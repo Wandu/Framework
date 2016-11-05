@@ -1,9 +1,10 @@
 <?php
 namespace Wandu\Database\Query;
 
+use Wandu\Database\Contracts\QueryInterface;
 use Wandu\Database\Query\Expression\HasWhereExpression;
 
-class DeleteQuery extends HasWhereExpression
+class DeleteQuery extends HasWhereExpression implements QueryInterface
 {
     /** @var string */
     protected $table;
