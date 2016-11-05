@@ -1,5 +1,5 @@
 <?php
-namespace Wandu\Database\Query;
+namespace Wandu\Database\Contracts;
 
 interface ExpressionInterface
 {

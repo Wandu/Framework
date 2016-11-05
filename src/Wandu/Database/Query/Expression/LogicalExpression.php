@@ -1,7 +1,7 @@
 <?php
 namespace Wandu\Database\Query\Expression;
 
-use Wandu\Database\Query\ExpressionInterface;
+use Wandu\Database\Contracts\ExpressionInterface;
 
 /**
  * LogicalExpression = '(' ComparisonExpression (' AND '|' OR ') LogicalExpression ')' | ComparisonExpression
@@ -14,7 +14,7 @@ class LogicalExpression implements ExpressionInterface
     /** @var array */
     protected $operators = [];
     
-    /** @var \Wandu\Database\Query\ExpressionInterface[] */
+    /** @var \Wandu\Database\Contracts\ExpressionInterface[] */
     protected $expressions = [];
 
     /**

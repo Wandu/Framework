@@ -1,7 +1,7 @@
 <?php
-namespace Wandu\Database\Schema\Expression;
+namespace Wandu\Database\Query;
 
-use Wandu\Database\Query\ExpressionInterface;
+use Wandu\Database\Contracts\ExpressionInterface;
 use Wandu\Database\Support\Attributes;
 
 /**
@@ -9,7 +9,7 @@ use Wandu\Database\Support\Attributes;
  *
  * RENAME TABLE tbl_name TO new_tbl_name
  */
-class RenameExpression implements ExpressionInterface
+class RenameQuery implements ExpressionInterface
 {
     use Attributes;
 

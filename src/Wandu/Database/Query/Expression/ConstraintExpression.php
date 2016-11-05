@@ -1,7 +1,7 @@
 <?php
-namespace Wandu\Database\Schema\Expression;
+namespace Wandu\Database\Query\Expression;
 
-use Wandu\Database\Query\ExpressionInterface;
+use Wandu\Database\Contracts\ExpressionInterface;
 use Wandu\Database\Support\Attributes;
 use Wandu\Database\Support\Helper;
 
@@ -16,7 +16,7 @@ use Wandu\Database\Support\Helper;
  * index_type:
  *     USING {BTREE | HASH}
  *
- * @method \Wandu\Database\Schema\Expression\ConstraintExpression using(int $indexType)
+ * @method \Wandu\Database\Query\Expression\ConstraintExpression using(int $indexType)
  */
 class ConstraintExpression implements ExpressionInterface
 {
@@ -37,7 +37,7 @@ class ConstraintExpression implements ExpressionInterface
     /** @var string */
     protected $name;
 
-    /** @var \Wandu\Database\Schema\Expression\ReferenceExpression */
+    /** @var \Wandu\Database\Query\Expression\ReferenceExpression */
     protected $reference;
     
     /**
@@ -55,7 +55,7 @@ class ConstraintExpression implements ExpressionInterface
     /**
      * @param string $table
      * @param string|array $column
-     * @return \Wandu\Database\Schema\Expression\ReferenceExpression
+     * @return \Wandu\Database\Query\Expression\ReferenceExpression
      */
     public function reference($table, $column)
     {

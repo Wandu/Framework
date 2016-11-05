@@ -1,7 +1,7 @@
 <?php
-namespace Wandu\Database\Schema\Expression;
+namespace Wandu\Database\Query\Expression;
 
-use Wandu\Database\Query\ExpressionInterface;
+use Wandu\Database\Contracts\ExpressionInterface;
 use Wandu\Database\Support\Attributes;
 use Wandu\Database\Support\Helper;
 
@@ -15,8 +15,8 @@ use Wandu\Database\Support\Helper;
  * reference_option:
  *     RESTRICT | CASCADE | SET NULL | NO ACTION
  *
- * @method \Wandu\Database\Schema\Expression\ReferenceExpression onUpdate(int $option)
- * @method \Wandu\Database\Schema\Expression\ReferenceExpression onDelete(int $option)
+ * @method \Wandu\Database\Query\Expression\ReferenceExpression onUpdate(int $option)
+ * @method \Wandu\Database\Query\Expression\ReferenceExpression onDelete(int $option)
  */
 class ReferenceExpression implements ExpressionInterface
 {

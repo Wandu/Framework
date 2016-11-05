@@ -1,7 +1,7 @@
 <?php
-namespace Wandu\Database\Schema\Expression;
+namespace Wandu\Database\Query;
 
-use Wandu\Database\Query\ExpressionInterface;
+use Wandu\Database\Contracts\ExpressionInterface;
 use Wandu\Database\Support\Attributes;
 
 /**
@@ -9,11 +9,11 @@ use Wandu\Database\Support\Attributes;
  *
  * DROP TABLE [IF EXISTS] tbl_name [RESTRICT | CASCADE]
  *
- * @method \Wandu\Database\Schema\Expression\DropExpression ifExists()
- * @method \Wandu\Database\Schema\Expression\DropExpression restrict()
- * @method \Wandu\Database\Schema\Expression\DropExpression cascade()
+ * @method \Wandu\Database\Query\DropQuery ifExists()
+ * @method \Wandu\Database\Query\DropQuery restrict()
+ * @method \Wandu\Database\Query\DropQuery cascade()
  */
-class DropExpression implements ExpressionInterface
+class DropQuery implements ExpressionInterface
 {
     use Attributes;
 

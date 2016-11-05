@@ -1,6 +1,8 @@
 <?php
 namespace Wandu\Database\Query;
 
+use Wandu\Database\Contracts\ExpressionInterface;
+
 class RawExpression implements ExpressionInterface 
 {
     /** @var string */

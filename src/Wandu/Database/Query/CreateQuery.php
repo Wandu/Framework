@@ -1,7 +1,9 @@
 <?php
-namespace Wandu\Database\Schema\Expression;
+namespace Wandu\Database\Query;
 
-use Wandu\Database\Query\ExpressionInterface;
+use Wandu\Database\Contracts\ExpressionInterface;
+use Wandu\Database\Query\Expression\ColumnExpression;
+use Wandu\Database\Query\Expression\ConstraintExpression;
 use Wandu\Database\Support\Attributes;
 
 /**
@@ -19,22 +21,22 @@ use Wandu\Database\Support\Attributes;
  *   | [DEFAULT] COLLATE [=] collation_name
  *
  * @see http://dev.mysql.com/doc/refman/5.7/en/create-table.html
- * @method \Wandu\Database\Schema\Expression\CreateExpression ifNotExists()
- * @method \Wandu\Database\Schema\Expression\CreateExpression engine(string $engine)
- * @method \Wandu\Database\Schema\Expression\CreateExpression charset(string $charset)
- * @method \Wandu\Database\Schema\Expression\CreateExpression collation(string $collation)
+ * @method \Wandu\Database\Query\CreateQuery ifNotExists()
+ * @method \Wandu\Database\Query\CreateQuery engine(string $engine)
+ * @method \Wandu\Database\Query\CreateQuery charset(string $charset)
+ * @method \Wandu\Database\Query\CreateQuery collation(string $collation)
  */
-class CreateExpression implements ExpressionInterface
+class CreateQuery implements ExpressionInterface
 {
     use Attributes;
     
     /** @var string */
     protected $table;
     
-    /** @var array|\Wandu\Database\Query\ExpressionInterface[] */
+    /** @var array|\Wandu\Database\Contracts\ExpressionInterface[] */
     protected $columns = [];
 
-    /** @var  array|\Wandu\Database\Query\ExpressionInterface[] */
+    /** @var  array|\Wandu\Database\Contracts\ExpressionInterface[] */
     protected $constraints = [];
     
     /** @var array */
@@ -54,7 +56,7 @@ class CreateExpression implements ExpressionInterface
     /**
      * @param string $name
      * @param int $length
-     * @return \Wandu\Database\Schema\Expression\ColumnExpression
+     * @return \Wandu\Database\Query\Expression\ColumnExpression
      */
     public function bit($name, $length = 1)
     {
@@ -66,7 +68,7 @@ class CreateExpression implements ExpressionInterface
     /**
      * @param string $name
      * @param int $length
-     * @return \Wandu\Database\Schema\Expression\ColumnExpression
+     * @return \Wandu\Database\Query\Expression\ColumnExpression
      */
     public function tinyInteger($name, $length = 4)
     {
@@ -78,7 +80,7 @@ class CreateExpression implements ExpressionInterface
     /**
      * @param string $name
      * @param int $length
-     * @return \Wandu\Database\Schema\Expression\ColumnExpression
+     * @return \Wandu\Database\Query\Expression\ColumnExpression
      */
     public function smallInteger($name, $length = 6)
     {
@@ -90,7 +92,7 @@ class CreateExpression implements ExpressionInterface
     /**
      * @param string $name
      * @param int $length
-     * @return \Wandu\Database\Schema\Expression\ColumnExpression
+     * @return \Wandu\Database\Query\Expression\ColumnExpression
      */
     public function mediumInteger($name, $length = 9)
     {
@@ -102,7 +104,7 @@ class CreateExpression implements ExpressionInterface
     /**
      * @param string $name
      * @param int $length
-     * @return \Wandu\Database\Schema\Expression\ColumnExpression
+     * @return \Wandu\Database\Query\Expression\ColumnExpression
      */
     public function integer($name, $length = 11)
     {
@@ -114,7 +116,7 @@ class CreateExpression implements ExpressionInterface
     /**
      * @param string $name
      * @param int $length
-     * @return \Wandu\Database\Schema\Expression\ColumnExpression
+     * @return \Wandu\Database\Query\Expression\ColumnExpression
      */
     public function bigInteger($name, $length = 20)
     {
@@ -127,7 +129,7 @@ class CreateExpression implements ExpressionInterface
      * @param string $name
      * @param int $length
      * @param int $decimal
-     * @return \Wandu\Database\Schema\Expression\ColumnExpression
+     * @return \Wandu\Database\Query\Expression\ColumnExpression
      */
     public function double($name, $length = null, $decimal = null)
     {
@@ -141,7 +143,7 @@ class CreateExpression implements ExpressionInterface
      * @param string $name
      * @param int $length
      * @param int $decimal
-     * @return \Wandu\Database\Schema\Expression\ColumnExpression
+     * @return \Wandu\Database\Query\Expression\ColumnExpression
      */
     public function float($name, $length = null, $decimal = null)
     {
@@ -154,7 +156,7 @@ class CreateExpression implements ExpressionInterface
     /**
      * @param string $name
      * @param int $fsp
-     * @return \Wandu\Database\Schema\Expression\ColumnExpression
+     * @return \Wandu\Database\Query\Expression\ColumnExpression
      */
     public function date($name, $fsp = null)
     {
@@ -166,7 +168,7 @@ class CreateExpression implements ExpressionInterface
     /**
      * @param string $name
      * @param int $fsp
-     * @return \Wandu\Database\Schema\Expression\ColumnExpression
+     * @return \Wandu\Database\Query\Expression\ColumnExpression
      */
     public function time($name, $fsp = null)
     {
@@ -178,7 +180,7 @@ class CreateExpression implements ExpressionInterface
     /**
      * @param string $name
      * @param int $fsp
-     * @return \Wandu\Database\Schema\Expression\ColumnExpression
+     * @return \Wandu\Database\Query\Expression\ColumnExpression
      */
     public function timestamp($name, $fsp = null)
     {
@@ -190,7 +192,7 @@ class CreateExpression implements ExpressionInterface
     /**
      * @param string $name
      * @param int $fsp
-     * @return \Wandu\Database\Schema\Expression\ColumnExpression
+     * @return \Wandu\Database\Query\Expression\ColumnExpression
      */
     public function datetime($name, $fsp = null)
     {
@@ -202,7 +204,7 @@ class CreateExpression implements ExpressionInterface
     /**
      * @param string $name
      * @param int $length
-     * @return \Wandu\Database\Schema\Expression\ColumnExpression
+     * @return \Wandu\Database\Query\Expression\ColumnExpression
      */
     public function string($name, $length = 255)
     {
@@ -214,7 +216,7 @@ class CreateExpression implements ExpressionInterface
     /**
      * @param string $name
      * @param int $length
-     * @return \Wandu\Database\Schema\Expression\ColumnExpression
+     * @return \Wandu\Database\Query\Expression\ColumnExpression
      */
     public function char($name, $length = 1)
     {
@@ -226,7 +228,7 @@ class CreateExpression implements ExpressionInterface
     /**
      * @param string $name
      * @param int $length
-     * @return \Wandu\Database\Schema\Expression\ColumnExpression
+     * @return \Wandu\Database\Query\Expression\ColumnExpression
      */
     public function varchar($name, $length)
     {
@@ -238,7 +240,7 @@ class CreateExpression implements ExpressionInterface
     /**
      * @param string $name
      * @param int $length
-     * @return \Wandu\Database\Schema\Expression\ColumnExpression
+     * @return \Wandu\Database\Query\Expression\ColumnExpression
      */
     public function binary($name, $length = 1)
     {
@@ -250,7 +252,7 @@ class CreateExpression implements ExpressionInterface
     /**
      * @param string $name
      * @param int $length
-     * @return \Wandu\Database\Schema\Expression\ColumnExpression
+     * @return \Wandu\Database\Query\Expression\ColumnExpression
      */
     public function varbinary($name, $length)
     {
@@ -261,7 +263,7 @@ class CreateExpression implements ExpressionInterface
 
     /**
      * @param string $name
-     * @return \Wandu\Database\Schema\Expression\ColumnExpression
+     * @return \Wandu\Database\Query\Expression\ColumnExpression
      */
     public function tinyBlob($name)
     {
@@ -270,7 +272,7 @@ class CreateExpression implements ExpressionInterface
 
     /**
      * @param string $name
-     * @return \Wandu\Database\Schema\Expression\ColumnExpression
+     * @return \Wandu\Database\Query\Expression\ColumnExpression
      */
     public function blob($name)
     {
@@ -279,7 +281,7 @@ class CreateExpression implements ExpressionInterface
 
     /**
      * @param string $name
-     * @return \Wandu\Database\Schema\Expression\ColumnExpression
+     * @return \Wandu\Database\Query\Expression\ColumnExpression
      */
     public function mediumBlob($name)
     {
@@ -288,7 +290,7 @@ class CreateExpression implements ExpressionInterface
 
     /**
      * @param string $name
-     * @return \Wandu\Database\Schema\Expression\ColumnExpression
+     * @return \Wandu\Database\Query\Expression\ColumnExpression
      */
     public function longBlob($name)
     {
@@ -297,7 +299,7 @@ class CreateExpression implements ExpressionInterface
 
     /**
      * @param string $name
-     * @return \Wandu\Database\Schema\Expression\ColumnExpression
+     * @return \Wandu\Database\Query\Expression\ColumnExpression
      */
     public function tinyText($name)
     {
@@ -306,7 +308,7 @@ class CreateExpression implements ExpressionInterface
 
     /**
      * @param string $name
-     * @return \Wandu\Database\Schema\Expression\ColumnExpression
+     * @return \Wandu\Database\Query\Expression\ColumnExpression
      */
     public function text($name)
     {
@@ -315,7 +317,7 @@ class CreateExpression implements ExpressionInterface
 
     /**
      * @param string $name
-     * @return \Wandu\Database\Schema\Expression\ColumnExpression
+     * @return \Wandu\Database\Query\Expression\ColumnExpression
      */
     public function mediumText($name)
     {
@@ -324,7 +326,7 @@ class CreateExpression implements ExpressionInterface
 
     /**
      * @param string $name
-     * @return \Wandu\Database\Schema\Expression\ColumnExpression
+     * @return \Wandu\Database\Query\Expression\ColumnExpression
      */
     public function longText($name)
     {
@@ -334,7 +336,7 @@ class CreateExpression implements ExpressionInterface
     /**
      * @param string $name
      * @param array $values
-     * @return \Wandu\Database\Schema\Expression\ColumnExpression
+     * @return \Wandu\Database\Query\Expression\ColumnExpression
      */
     public function enum($name, array $values = [])
     {
@@ -346,7 +348,7 @@ class CreateExpression implements ExpressionInterface
     /**
      * @param string $name
      * @param array $values
-     * @return \Wandu\Database\Schema\Expression\ColumnExpression
+     * @return \Wandu\Database\Query\Expression\ColumnExpression
      */
     public function set($name, array $values = [])
     {
@@ -356,10 +358,10 @@ class CreateExpression implements ExpressionInterface
     }
 
     /**
-     * @param string|\Wandu\Database\Query\ExpressionInterface $name
+     * @param string|\Wandu\Database\Contracts\ExpressionInterface $name
      * @param string $type
      * @param array $attributes
-     * @return \Wandu\Database\Schema\Expression\ColumnExpression|\Wandu\Database\Query\ExpressionInterface
+     * @return \Wandu\Database\Query\Expression\ColumnExpression|\Wandu\Database\Contracts\ExpressionInterface
      */
     public function addColumn($name, $type = null, array $attributes = [])
     {
@@ -371,7 +373,7 @@ class CreateExpression implements ExpressionInterface
 
     /**
      * @param array|string $column
-     * @return \Wandu\Database\Schema\Expression\ConstraintExpression
+     * @return \Wandu\Database\Query\Expression\ConstraintExpression
      */
     public function primaryKey($column)
     {
@@ -383,7 +385,7 @@ class CreateExpression implements ExpressionInterface
     /**
      * @param array|string $column
      * @param string $name
-     * @return \Wandu\Database\Schema\Expression\ConstraintExpression
+     * @return \Wandu\Database\Query\Expression\ConstraintExpression
      */
     public function uniqueKey($column, $name = null)
     {
@@ -395,7 +397,7 @@ class CreateExpression implements ExpressionInterface
     /**
      * @param array|string $column
      * @param string $name
-     * @return \Wandu\Database\Schema\Expression\ConstraintExpression
+     * @return \Wandu\Database\Query\Expression\ConstraintExpression
      */
     public function foreignKey($column, $name = null)
     {
@@ -407,7 +409,7 @@ class CreateExpression implements ExpressionInterface
     /**
      * @param array|string $column
      * @param string $name
-     * @return \Wandu\Database\Schema\Expression\ConstraintExpression
+     * @return \Wandu\Database\Query\Expression\ConstraintExpression
      */
     public function index($column, $name = null)
     {
@@ -415,10 +417,10 @@ class CreateExpression implements ExpressionInterface
     }
     
     /**
-     * @param array|string|\Wandu\Database\Query\ExpressionInterface $column
+     * @param array|string|\Wandu\Database\Contracts\ExpressionInterface $column
      * @param string $name
      * @param array $attributes
-     * @return \Wandu\Database\Schema\Expression\ConstraintExpression|\Wandu\Database\Query\ExpressionInterface
+     * @return \Wandu\Database\Query\Expression\ConstraintExpression|\Wandu\Database\Contracts\ExpressionInterface
      */
     public function addConstraint($column, $name = null, array $attributes = [])
     {

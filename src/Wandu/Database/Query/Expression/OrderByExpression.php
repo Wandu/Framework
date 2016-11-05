@@ -1,7 +1,7 @@
 <?php
 namespace Wandu\Database\Query\Expression;
 
-use Wandu\Database\Query\ExpressionInterface;
+use Wandu\Database\Contracts\ExpressionInterface;
 use Wandu\Database\Support\Helper;
 
 /**

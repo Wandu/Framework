@@ -1,7 +1,7 @@
 <?php
-namespace Wandu\Database\Schema\Expression;
+namespace Wandu\Database\Query;
 
-use Wandu\Database\Query\ExpressionInterface;
+use Wandu\Database\Contracts\ExpressionInterface;
 use Wandu\Database\Support\Attributes;
 
 /**
@@ -9,10 +9,8 @@ use Wandu\Database\Support\Attributes;
  *
  * TRUNCATE TABLE tbl_name
  */
-class TruncateExpression implements ExpressionInterface
+class TruncateQuery implements ExpressionInterface
 {
-    use Attributes;
-
     /** @var string */
     protected $table;
 

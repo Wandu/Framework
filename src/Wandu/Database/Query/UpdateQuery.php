@@ -1,13 +1,25 @@
 <?php
-namespace Wandu\Database\Query\Expression;
+namespace Wandu\Database\Query;
 
-use Wandu\Database\Query\ExpressionInterface;
 use Wandu\Database\Support\Helper;
 
-class SetExpression implements ExpressionInterface
+class UpdateQuery extends HasWhereExpression
 {
+    /** @var string */
+    protected $table;
+
     /** @var array */
-    protected $attributes = [];
+    protected $attributes;
+    
+    /**
+     * @param string $table
+     * @param array $attributes
+     */
+    public function __construct($table, array $attributes = [])
+    {
+        $this->table = $table;
+        $this->attributes = $attributes;
+    }
 
     /**
      * @param array $attributes
@@ -34,11 +46,15 @@ class SetExpression implements ExpressionInterface
      */
     public function toSql()
     {
+        $parts = ['UPDATE `' . $this->table . '`'];
         if (count($this->attributes)) {
             $columns = array_keys($this->attributes);
-            return "SET " . Helper::arrayImplode(', ', $columns, "`", "` = ?");
+            $parts[] = "SET " . Helper::arrayImplode(', ', $columns, "`", "` = ?");
         }
-        return '';
+        if ($part = parent::toSql()) {
+            $parts[] = $part;
+        }
+        return implode(' ', $parts);
     }
 
     /**
@@ -46,6 +62,6 @@ class SetExpression implements ExpressionInterface
      */
     public function getBindings()
     {
-        return array_values($this->attributes);
+        return array_merge(array_values($this->attributes), parent::getBindings());
     }
 }

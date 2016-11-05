@@ -1,7 +1,7 @@
 <?php
-namespace Wandu\Database\Schema\Expression;
+namespace Wandu\Database\Query\Expression;
 
-use Wandu\Database\Query\ExpressionInterface;
+use Wandu\Database\Contracts\ExpressionInterface;
 use Wandu\Database\Support\Attributes;
 use Wandu\Database\Support\Helper;
 
@@ -52,23 +52,23 @@ use Wandu\Database\Support\Helper;
  *   | JSON
  *   | spatial_type
  *
- * @method \Wandu\Database\Schema\Expression\ColumnExpression nullable()
- * @method \Wandu\Database\Schema\Expression\ColumnExpression default(mixed $value)
- * @method \Wandu\Database\Schema\Expression\ColumnExpression autoIncrement()
- * @method \Wandu\Database\Schema\Expression\ColumnExpression unique()
- * @method \Wandu\Database\Schema\Expression\ColumnExpression primary()
+ * @method \Wandu\Database\Query\Expression\ColumnExpression nullable()
+ * @method \Wandu\Database\Query\Expression\ColumnExpression default(mixed $value)
+ * @method \Wandu\Database\Query\Expression\ColumnExpression autoIncrement()
+ * @method \Wandu\Database\Query\Expression\ColumnExpression unique()
+ * @method \Wandu\Database\Query\Expression\ColumnExpression primary()
  *
- * @method \Wandu\Database\Schema\Expression\ColumnExpression length(int $length)
- * @method \Wandu\Database\Schema\Expression\ColumnExpression decimal(int $decimal)
- * @method \Wandu\Database\Schema\Expression\ColumnExpression fsp($fsp)
- * @method \Wandu\Database\Schema\Expression\ColumnExpression values(array $values)
- * @method \Wandu\Database\Schema\Expression\ColumnExpression unsigned()
- * @method \Wandu\Database\Schema\Expression\ColumnExpression binary()
- * @method \Wandu\Database\Schema\Expression\ColumnExpression charset()
- * @method \Wandu\Database\Schema\Expression\ColumnExpression collation()
+ * @method \Wandu\Database\Query\Expression\ColumnExpression length(int $length)
+ * @method \Wandu\Database\Query\Expression\ColumnExpression decimal(int $decimal)
+ * @method \Wandu\Database\Query\Expression\ColumnExpression fsp($fsp)
+ * @method \Wandu\Database\Query\Expression\ColumnExpression values(array $values)
+ * @method \Wandu\Database\Query\Expression\ColumnExpression unsigned()
+ * @method \Wandu\Database\Query\Expression\ColumnExpression binary()
+ * @method \Wandu\Database\Query\Expression\ColumnExpression charset()
+ * @method \Wandu\Database\Query\Expression\ColumnExpression collation()
  *
- * @method \Wandu\Database\Schema\Expression\ColumnExpression first()
- * @method \Wandu\Database\Schema\Expression\ColumnExpression after(string $column)
+ * @method \Wandu\Database\Query\Expression\ColumnExpression first()
+ * @method \Wandu\Database\Query\Expression\ColumnExpression after(string $column)
  */
 class ColumnExpression implements ExpressionInterface
 {
@@ -143,7 +143,7 @@ class ColumnExpression implements ExpressionInterface
     /** @var string */
     protected $type;
     
-    /** @var \Wandu\Database\Schema\Expression\ReferenceExpression */
+    /** @var \Wandu\Database\Query\Expression\ReferenceExpression */
     protected $reference;
 
     /**
@@ -161,7 +161,7 @@ class ColumnExpression implements ExpressionInterface
     /**
      * @param string $table
      * @param string|array $column
-     * @return \Wandu\Database\Schema\Expression\ReferenceExpression
+     * @return \Wandu\Database\Query\Expression\ReferenceExpression
      */
     public function reference($table, $column)
     {
