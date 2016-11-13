@@ -1,11 +1,11 @@
 <?php
 namespace Wandu\Database;
 
-use Doctrine\Common\Annotations\AnnotationReader;
 use InvalidArgumentException;
 use stdClass;
 use Wandu\Database\Annotations\Column;
 use Wandu\Database\Annotations\Table;
+use Wandu\Database\Repository\Repository;
 use Wandu\Database\Repository\RepositorySettings;
 
 /**
@@ -23,16 +23,16 @@ use Wandu\Database\Repository\RepositorySettings;
  */
 class RepositoryTest extends SakilaTestCase
 {
-    /** @var \Wandu\Database\Repository\RepositorySettings */
-    protected $settings1;
+    /** @var \Wandu\Database\Repository\Repository */
+    protected $repository1;
 
-    /** @var \Wandu\Database\Repository\RepositorySettings */
-    protected $settings2;
+    /** @var \Wandu\Database\Repository\Repository */
+    protected $repository2;
 
     public function setUp()
     {
         parent::setUp();
-        $this->settings1 = new RepositorySettings('actor', [
+        $this->repository1 = new Repository($this->connection, new RepositorySettings('actor', [
             'model' => RepositoryTestActor::class,
             'columns' => [
                 'actor_id' => 'id',
@@ -48,16 +48,13 @@ class RepositoryTest extends SakilaTestCase
             ],
             'identifier' => 'actor_id',
             'increments' => true,
-        ]);
-        $this->settings2 = RepositorySettings::fromAnnotation(
-            RepositoryTestActor::class,
-            new AnnotationReader()
-        );
+        ]));
+        $this->repository2 = $this->connection->createRepository(RepositoryTestActor::class);
     }
 
     public function testFromAnnotation()
     {
-        static::assertEquals($this->settings1, $this->settings2);
+        static::assertEquals($this->repository1, $this->repository2);
     }
     
     public function provideSelectQueries()
@@ -86,10 +83,8 @@ class RepositoryTest extends SakilaTestCase
             new RepositoryTestActor(176, 'JON', 'CHASE', '2006-02-15 04:34:33'),
         ];
 
-        $repository = new Repository($this->connection, $this->settings1);
-
         $iterateCount = 0;
-        foreach ($repository->fetch($query, ["C%"]) as $index => $model) {
+        foreach ($this->repository1->fetch($query, ["C%"]) as $index => $model) {
             $iterateCount++;
             static::assertNotSame($expectedModels[$index], $model);
             static::assertEquals($expectedModels[$index], $model);
@@ -103,24 +98,22 @@ class RepositoryTest extends SakilaTestCase
      */
     public function testFirst($query)
     {
-        $repository = new Repository($this->connection, $this->settings1);
-
         static::assertEquals(
             new RepositoryTestActor(183, 'RUSSELL', 'CLOSE', '2006-02-15 04:34:33'),
-            $repository->first($query, ["C%"])
+            $this->repository1->first($query, ["C%"])
         );
     }
 
     public function testInsert()
     {
-        $repository = new Repository($this->connection, $this->settings1);
+        $repository = $this->repository1;
 
         try {
             $repository->insert(new stdClass());
             static::fail();
         } catch (InvalidArgumentException $e) {
             static::assertEquals(
-                "Argument 1 passed to Wandu\\Database\\Repository::insert() must be of the type Wandu\\Database\\RepositoryTestActor",
+                "Argument 1 passed to Wandu\\Database\\Repository\\Repository::insert() must be of the type Wandu\\Database\\RepositoryTestActor",
                 $e->getMessage()
             );
         }
@@ -143,14 +136,14 @@ class RepositoryTest extends SakilaTestCase
 
     public function testUpdate()
     {
-        $repository = new Repository($this->connection, $this->settings1);
+        $repository = $this->repository1;
 
         try {
             $repository->update(new stdClass());
             static::fail();
         } catch (InvalidArgumentException $e) {
             static::assertEquals(
-                "Argument 1 passed to Wandu\\Database\\Repository::update() must be of the type Wandu\\Database\\RepositoryTestActor",
+                "Argument 1 passed to Wandu\\Database\\Repository\\Repository::update() must be of the type Wandu\\Database\\RepositoryTestActor",
                 $e->getMessage()
             );
         }

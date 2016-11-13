@@ -1,6 +1,7 @@
 <?php
 namespace Wandu\Database;
 
+use Interop\Container\ContainerInterface;
 use Wandu\Database\Connector\MysqlConnector;
 use Wandu\Database\Contracts\ConnectionInterface;
 use Wandu\Database\Contracts\ConnectorInterface;
@@ -10,9 +11,20 @@ class Manager
 {
     /** @var \Wandu\Database\Manager */
     protected static $instance;
-    
+
+    /** @var \Interop\Container\ContainerInterface */
+    protected $container;
+
     /** @var array */
     protected $connections = [];
+
+    /**
+     * @param \Interop\Container\ContainerInterface $container
+     */
+    public function __construct(ContainerInterface $container = null)
+    {
+        $this->container = $container;
+    }
 
     /**
      * @param array|\Wandu\Database\Contracts\ConnectorInterface $information
@@ -24,7 +36,7 @@ class Manager
         if (!$information instanceof ConnectorInterface) {
             $information = $this->getConnectorFromConfig($information);
         }
-        return $this->connection($information->connect(), $name);
+        return $this->connection($information->connect($this->container), $name);
     }
 
     /**

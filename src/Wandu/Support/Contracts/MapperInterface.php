@@ -1,5 +1,5 @@
 <?php
-namespace Wandu\Database\Contracts;
+namespace Wandu\Support\Contracts;
 
 interface MapperInterface
 {

@@ -1,12 +1,11 @@
 <?php
-namespace Wandu\Database;
+namespace Wandu\Database\Repository;
 
 use InvalidArgumentException;
 use ReflectionClass;
 use ReflectionProperty;
 use stdClass;
 use Wandu\Database\Contracts\ConnectionInterface;
-use Wandu\Database\Repository\RepositorySettings;
 
 class Repository
 {

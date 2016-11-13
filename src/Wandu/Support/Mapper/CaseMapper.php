@@ -1,8 +1,8 @@
 <?php
-namespace Wandu\Database\Mapper;
+namespace Wandu\Support\Mapper;
 
 use InvalidArgumentException;
-use Wandu\Database\Contracts\MapperInterface;
+use Wandu\Support\Contracts\MapperInterface;
 
 class CaseMapper implements MapperInterface
 {

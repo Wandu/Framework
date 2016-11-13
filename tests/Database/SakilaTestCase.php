@@ -1,9 +1,12 @@
 <?php
 namespace Wandu\Database;
 
+use Doctrine\Common\Annotations\AnnotationReader;
+use Doctrine\Common\Annotations\Reader;
 use PDO;
 use PHPUnit_Framework_TestCase;
 use Wandu\Database\Connector\MysqlConnector;
+use Wandu\DI\Container;
 
 class SakilaTestCase extends PHPUnit_Framework_TestCase
 {
@@ -12,6 +15,9 @@ class SakilaTestCase extends PHPUnit_Framework_TestCase
 
     public function setUp()
     {
+        $container = new Container();
+        $container[Reader::class] = new AnnotationReader();
+        
         $connector = new MysqlConnector([
             'username' => 'root',
             'password' => 'root',
@@ -28,6 +34,6 @@ class SakilaTestCase extends PHPUnit_Framework_TestCase
                 PDO::ATTR_EMULATE_PREPARES => false,
             ],
         ]);
-        $this->connection = $connector->connect();
+        $this->connection = $connector->connect($container);
     }
 }

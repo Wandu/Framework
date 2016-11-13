@@ -12,17 +12,6 @@ class RepositorySettings
     {
         $settings = [
             'model' => $model,
-//            'columns' => [
-//                'actor_id' => 'id',
-//                'first_name' => 'firstName',
-//                'last_name' => 'lastName',
-//                'last_update' => 'lastUpdate',
-//            ],
-//            'casts' => [
-//                'actor_id' => 'integer',
-//            ],
-//            'identifier' => 'actor_id',
-//            'increments' => true,
         ];
         $classRefl = new ReflectionClass($model);
         $propertiesRefl = $classRefl->getProperties();

@@ -1,7 +1,7 @@
 <?php
-namespace Wandu\Database\Mapper;
+namespace Wandu\Support\Mapper;
 
-use Wandu\Database\Contracts\MapperInterface;
+use Wandu\Support\Contracts\MapperInterface;
 
 class ArrayMapper implements MapperInterface 
 {

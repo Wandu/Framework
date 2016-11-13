@@ -1,36 +1,68 @@
 <?php
 namespace Wandu\Database\Connector;
 
+use Interop\Container\ContainerInterface;
 use PDO;
 use Wandu\Database\Connection\MysqlConnection;
 use Wandu\Database\Contracts\ConnectorInterface;
 
 class MysqlConnector implements ConnectorInterface
 {
+    /** @var string */
+    protected $host = 'localhost';
+    
+    /** @var int */
+    protected $port = 4403;
+    
+    /** @var string */
+    protected $username = 'root';
+    
+    /** @var string */
+    protected $password = '';
+    
+    /** @var string */
+    protected $database;
+    
+    /** @var string */
+    protected $charset;
+    
+    /** @var string */
+    protected $collation;
+    
+    /** @var string */
+    protected $prefix = '';
+    
+    /** @var string */
+    protected $timezone;
+    
     /** @var array */
-    protected $config;
+    protected $options = [
+        PDO::ATTR_CASE => PDO::CASE_NATURAL,
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_ORACLE_NULLS => PDO::NULL_NATURAL,
+        PDO::ATTR_STRINGIFY_FETCHES => false,
+        PDO::ATTR_EMULATE_PREPARES => false,
+    ];
 
     /**
-     * @param array $config
+     * @param array $settings
      */
-    public function __construct(array $config = [])
+    public function __construct(array $settings = [])
     {
-        $this->config = $config;
+        foreach ($settings as $name => $setting) {
+            $this->{$name} = $setting;
+        }
     }
 
     /**
      * {@inheritdoc} 
      */
-    public function connect()
+    public function connect(ContainerInterface $container = null)
     {
-        $connection = $this->createPdo(isset($this->config['options']) ? $this->config['options'] : []);
-
+        $connection = $this->createPdo();
         $this->applyCharset($connection);
         $this->applyTimezone($connection);
-        
-        return new MysqlConnection($connection, [
-            'prefix' => isset($this->config['prefix']) ? $this->config['prefix'] : '',
-        ]);
+        return new MysqlConnection($connection, $container, $this->prefix);
     }
 
     /**
@@ -38,12 +70,10 @@ class MysqlConnector implements ConnectorInterface
      */
     protected function applyCharset(PDO $connection)
     {
-        if (isset($this->config['charset'])) {
-            $charset = $this->config['charset'];
-            $collation = isset($this->config['collation']) ? $this->config['collation'] : null;
-            $names = "SET NAMES '{$charset}'";
-            if ($collation) {
-                $names .= " COLLATE '{$collation}'";
+        if ($this->charset) {
+            $names = "SET NAMES '{$this->charset}'";
+            if ($this->collation) {
+                $names .= " COLLATE '{$this->collation}'";
             }
             $connection->prepare($names)->execute();
         }
@@ -54,31 +84,21 @@ class MysqlConnector implements ConnectorInterface
      */
     protected function applyTimezone(PDO $connection)
     {
-        if (isset($this->config['timezone'])) {
-            $timezone = $this->config['timezone'];
-            $connection->prepare("SET time_zone='{$timezone}'")->execute();
+        if ($this->timezone) {
+            $connection->prepare("SET time_zone='{$this->timezone}'")->execute();
         }
     }
 
     /**
-     * @param array $options
      * @return \PDO
      */
-    protected function createPdo(array $options = [])
+    protected function createPdo()
     {
-        $username = isset($this->config['username']) ? $this->config['username'] : 'root';
-        $password = isset($this->config['password']) ? $this->config['password'] : '';
-
-        $host = isset($this->config['host']) ? $this->config['host'] : 'localhost';
-        $port = isset($this->config['port']) ? $this->config['port'] : 3306;
-
-        $database = $this->config['database'];
-        
         return new PDO(
-            "mysql:host={$host};port={$port};dbname={$database}",
-            $username,
-            $password,
-            $options + [
+            "mysql:host={$this->host};port={$this->port};dbname={$this->database}",
+            $this->username,
+            $this->password,
+            $this->options + [
                 PDO::ATTR_CASE => PDO::CASE_NATURAL,
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                 PDO::ATTR_ORACLE_NULLS => PDO::NULL_NATURAL,

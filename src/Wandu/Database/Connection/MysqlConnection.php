@@ -1,38 +1,39 @@
 <?php
 namespace Wandu\Database\Connection;
 
+use Doctrine\Common\Annotations\Reader;
 use Exception;
+use Interop\Container\ContainerInterface;
 use Throwable;
 use PDO;
 use PDOStatement;
 use Wandu\Database\Contracts\ConnectionInterface;
 use Wandu\Database\Contracts\QueryInterface;
 use Wandu\Database\QueryBuilder;
+use Wandu\Database\Repository\Repository;
+use Wandu\Database\Repository\RepositorySettings;
 
 class MysqlConnection implements ConnectionInterface
 {
     /** @var \PDO */
     protected $pdo;
 
-    /** @var array */
-    protected $config;
+    /** @var \Interop\Container\ContainerInterface */
+    protected $container;
+
+    /** @var string */
+    protected $prefix;
 
     /**
      * @param \PDO $pdo
-     * @param array $config
+     * @param \Interop\Container\ContainerInterface $container
+     * @param string $prefix
      */
-    public function __construct(PDO $pdo, array $config = [])
+    public function __construct(PDO $pdo, ContainerInterface $container = null, $prefix = '')
     {
         $this->pdo = $pdo;
-        $this->config = $config;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function setConfig(array $config = [])
-    {
-        $this->config = array_merge($this->config, $config);
+        $this->container = $container;
+        $this->prefix = $prefix;
     }
 
     /**
@@ -40,7 +41,7 @@ class MysqlConnection implements ConnectionInterface
      */
     public function getPrefix()
     {
-        return isset($this->config['prefix']) ? $this->config['prefix'] : '';
+        return $this->prefix;
     }
 
     /**
@@ -49,6 +50,17 @@ class MysqlConnection implements ConnectionInterface
     public function createQueryBuilder($table)
     {
         return new QueryBuilder($this->getPrefix() . $table);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function createRepository($className)
+    {
+        if (!$this->container || !$this->container->has(Reader::class)) {
+            throw new Exception('cannot create repository!');
+        }
+        return new Repository($this, RepositorySettings::fromAnnotation($className, $this->container->get(Reader::class)));
     }
 
     /**
@@ -110,7 +122,7 @@ class MysqlConnection implements ConnectionInterface
     }
 
     /**
-     * @param string|callable|\Wandu\Database\Query\QueryBuilder $query
+     * @param string|callable|\Wandu\Database\Contracts\QueryInterface $query
      * @param array $bindings
      * @return \PDOStatement
      */
