@@ -4,9 +4,9 @@ namespace Wandu\Database\Connection;
 use Doctrine\Common\Annotations\Reader;
 use Exception;
 use Interop\Container\ContainerInterface;
-use Throwable;
 use PDO;
 use PDOStatement;
+use Throwable;
 use Wandu\Database\Contracts\ConnectionInterface;
 use Wandu\Database\Contracts\QueryInterface;
 use Wandu\Database\Exception\ClassNotFoundException;
@@ -130,7 +130,7 @@ class MysqlConnection implements ConnectionInterface
     protected function prepare($query, array $bindings = [])
     {
         while (is_callable($query)) {
-            $query = call_user_func($query, $this);
+            $query = call_user_func($query);
         }
         if ($query instanceof QueryInterface) {
             $bindings = $query->getBindings();

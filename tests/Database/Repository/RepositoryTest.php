@@ -1,28 +1,16 @@
 <?php
-namespace Wandu\Database;
+namespace Wandu\Database\Repository;
 
 use InvalidArgumentException;
 use stdClass;
 use Wandu\Database\Annotations\Column;
 use Wandu\Database\Annotations\Table;
 use Wandu\Database\Exception\IdentifierNotFoundException;
-use Wandu\Database\Repository\Repository;
-use Wandu\Database\Repository\RepositorySettings;
+use Wandu\Database\Query\SelectQuery;
+use Wandu\Database\QueryBuilder;
+use Wandu\Database\SakilaTestCase;
 
-/**
- * @todo
- * all($columns = array('*'))
- * lists($value, $key = null)
- * paginate($perPage = 1, $columns = array('*'));
- * create(array $data)
- * update(array $data, $id, $attribute = "id")
- * delete($id)
- * find($id, $columns = array('*'))
- * findBy($field, $value, $columns = array('*'))
- * findAllBy($field, $value, $columns = array('*'))
- * findWhere($where, $columns = array('*'))
- */
-class RepositoryTest extends SakilaTestCase
+class RepositoryTest extends SakilaTestCase 
 {
     /** @var \Wandu\Database\Repository\Repository */
     protected $repository1;
@@ -92,6 +80,26 @@ class RepositoryTest extends SakilaTestCase
         }
         static::assertEquals(3, $iterateCount);
     }
+    
+    public function testFetchByQueryBuilder()
+    {
+        $expectedActor = new RepositoryTestActor(138, 'LUCILLE', 'DEE', '2006-02-15 04:34:33');
+
+        $actor = $this->repository1->first(function (SelectQuery $query) {
+            return $query->where('actor_id', 138);
+        });
+        static::assertEquals($expectedActor, $actor);
+
+        $actors = $this->repository1->fetch(function (SelectQuery $query) {
+            return $query->where('actor_id', 138);
+        });
+        $iterateCount = 0;
+        foreach ($actors as $index => $actor) {
+            static::assertEquals($expectedActor, $actor);
+            $iterateCount++;
+        }
+        static::assertEquals(1, $iterateCount);
+    }
 
     /**
      * @dataProvider provideSelectQueries
@@ -114,7 +122,7 @@ class RepositoryTest extends SakilaTestCase
             static::fail();
         } catch (InvalidArgumentException $e) {
             static::assertEquals(
-                "Argument 1 passed to Wandu\\Database\\Repository\\Repository::insert() must be of the type Wandu\\Database\\RepositoryTestActor",
+                "Argument 1 passed to Wandu\\Database\\Repository\\Repository::insert() must be of the type Wandu\\Database\\Repository\\RepositoryTestActor",
                 $e->getMessage()
             );
         }
@@ -144,12 +152,12 @@ class RepositoryTest extends SakilaTestCase
             static::fail();
         } catch (InvalidArgumentException $e) {
             static::assertEquals(
-                "Argument 1 passed to Wandu\\Database\\Repository\\Repository::update() must be of the type Wandu\\Database\\RepositoryTestActor",
+                "Argument 1 passed to Wandu\\Database\\Repository\\Repository::update() must be of the type Wandu\\Database\\Repository\\RepositoryTestActor",
                 $e->getMessage()
             );
         }
-        
-        /** @var \Wandu\Database\RepositoryTestActor $actor */
+
+        /* @var \Wandu\Database\Repository\RepositoryTestActor $actor */
         $actor = $repository->first("SELECT * FROM `actor` WHERE `actor_id` = ?", ['80']);
 
         static::assertEquals('RALPH', $actor->getFirstName());
@@ -160,6 +168,7 @@ class RepositoryTest extends SakilaTestCase
         
         static::assertEquals(1, $repository->update($actor));
 
+        /* @var \Wandu\Database\Repository\RepositoryTestActor $actor */
         $actor = $repository->first("SELECT * FROM `actor` WHERE `actor_id` = ?", ['80']);
 
         static::assertEquals('CHANGWAN', $actor->getFirstName());

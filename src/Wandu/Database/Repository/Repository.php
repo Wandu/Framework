@@ -34,7 +34,7 @@ class Repository
      */
     public function fetch($query, array $bindings = [])
     {
-        foreach ($this->connection->fetch($query, $bindings) as $row) {
+        foreach ($this->connection->fetch($this->normalizeQuery($query), $bindings) as $row) {
             yield $this->hydrate($row);
         }
     }
@@ -46,7 +46,7 @@ class Repository
      */
     public function first($query, array $bindings = [])
     {
-        return $this->hydrate($this->connection->first($query, $bindings));
+        return $this->hydrate($this->connection->first($this->normalizeQuery($query), $bindings));
     }
 
     /**
@@ -148,6 +148,22 @@ class Repository
         return $entity;
     }
 
+    /**
+     * @param string|callable|\Wandu\Database\Contracts\QueryInterface $query
+     * @return string|\Wandu\Database\Contracts\QueryInterface
+     */
+    private function normalizeQuery($query)
+    {
+        if (is_callable($query)) {
+            $connection = $this->connection;
+            $queryBuilder = $connection->createQueryBuilder($this->settings->getTable())->select();
+            while (is_callable($query)) {
+                $query = call_user_func($query, $queryBuilder, $connection);
+            }
+        }
+        return $query;
+    }
+    
     private function cast($value, $type)
     {
         // "string", "integer", "float", "boolean", "array", "datetime", "date", "time"

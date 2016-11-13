@@ -77,7 +77,7 @@ class ConnectionTest extends SakilaTestCase
         static::assertEquals(3, $interateCount);
     }
     
-    public function testCreateRepository()
+    public function testFailToCreateRepository()
     {
         $connector = new MysqlConnector([
             'username' => 'root',
