@@ -167,8 +167,7 @@ class ValidatorFactory
     {
         $text = trim($text, '!');
         $text = str_replace(' ', '', ucwords(str_replace('_', ' ', $text)));
-        $text[0] = strtolower($text[0]);
-        return $text;
+        return lcfirst($text);
     }
 
     /**

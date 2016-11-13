@@ -1,77 +1,30 @@
 <?php
 namespace Wandu\Database;
 
-use Doctrine\Common\Annotations\Reader;
 use InvalidArgumentException;
 use ReflectionClass;
 use ReflectionProperty;
-use Wandu\Database\Annotations\Column;
-use Wandu\Database\Annotations\GenerateOnInsert;
-use Wandu\Database\Annotations\Identifier;
-use Wandu\Database\Annotations\Table;
+use stdClass;
 use Wandu\Database\Contracts\ConnectionInterface;
+use Wandu\Database\Repository\RepositorySettings;
 
 class Repository
 {
     /** @var \Wandu\Database\Contracts\ConnectionInterface */
     protected $connection;
     
-    /** @var \ReflectionClass */
-    protected $class;
-    
-    /** @var \ReflectionProperty[] key-value property reflections */
-    protected $properties;
-    
-    /** @var \Wandu\Database\Annotations\Table */
-    protected $table;
-    
-    /** @var \Wandu\Database\Annotations\Column[] */
-    protected $columns = [];
-    
-    /** @var string */
-    protected $identifier;
-
-    /** @var string */
-    protected $generateOnInsert;
+    /** @var \Wandu\Database\Repository\RepositorySettings */
+    protected $settings;
     
     /**
+     * Repository constructor.
      * @param \Wandu\Database\Contracts\ConnectionInterface $connection
-     * @param \Doctrine\Common\Annotations\Reader $reader
-     * @param string $model
+     * @param \Wandu\Database\Repository\RepositorySettings $settings
      */
-    public function __construct(ConnectionInterface $connection, Reader $reader, $model)
+    public function __construct(ConnectionInterface $connection, RepositorySettings $settings)
     {
         $this->connection = $connection;
-        
-        $this->class = $reflClass = new ReflectionClass($model);
-        $this->properties = [];
-        $reflProperties = $reflClass->getProperties();
-
-        class_exists(Table::class);
-        class_exists(Column::class);
-        class_exists(Identifier::class);
-        class_exists(GenerateOnInsert::class);
-
-        $this->table = $reader->getClassAnnotation($reflClass, Table::class);
-
-        $columns = [];
-        $identifierPropertyName = null;
-        $generateOnInsertPropertyName = null;
-        foreach ($reflProperties as $reflProperty) {
-            $propertyName = $reflProperty->getName();
-            $this->properties[$propertyName] = $reflProperty;
-            $propertyAnnotations = $reader->getPropertyAnnotations($reflProperty);
-            foreach ($propertyAnnotations as $annotation) {
-                if ($annotation instanceof Column) {
-                    $columns[$propertyName] = $annotation;
-                } elseif ($annotation instanceof Identifier) {
-                    $this->identifier = $propertyName;
-                } elseif ($annotation instanceof GenerateOnInsert) {
-                    $this->generateOnInsert = $propertyName;
-                }
-            }
-        }
-        $this->columns = $columns;
+        $this->settings = $settings;
     }
 
     /**
@@ -95,31 +48,79 @@ class Repository
     {
         return $this->hydrate($this->connection->first($query, $bindings));
     }
-    
-    public function store($entity, $table)
+
+    /**
+     * @param object $entity
+     * @return int
+     */
+    public function insert($entity)
     {
-        if (!$this->class->isInstance($entity)) {
+        $this->assertIsInstance($entity, __METHOD__);
+        $identifierKey = $this->settings->getIdentifier();
+        $columns = $this->settings->getColumns();
+        $attributesToStore = [];
+        foreach ($columns as $columnName => $propertyName) {
+            if ($identifierKey === $propertyName) continue;
+            $attributesToStore[$columnName] = $this->pickProperty($this->getPropertyReflection($propertyName), $entity);
+        }
+        $queryBuilder = $this->connection->createQueryBuilder($this->settings->getTable());
+        $rowAffected = $this->query($queryBuilder->insert($attributesToStore));
+        if ($this->settings->isIncrements()) {
+            $lastInsertId = $this->connection->getLastInsertId();
+            $this->injectProperty($this->getPropertyReflection($columns[$identifierKey]), $entity, $lastInsertId);
+        }
+        return $rowAffected;
+    }
+
+    public function update($entity)
+    {
+        $this->assertIsInstance($entity, __METHOD__);
+        $identifierKey = $this->settings->getIdentifier();
+        $columns = $this->settings->getColumns();
+        $identifier = $this->pickProperty($this->getPropertyReflection($columns[$identifierKey]), $entity);
+        if (!$identifier) {
+            // @todo Exception
             throw new InvalidArgumentException(
-                "Argument 1 passed to " . __METHOD__ . "() must be of the type " . $this->class->getName()
+                "Cannot get the identifier from the entity"
             );
         }
-        $identifierKey = null;
         $attributesToStore = [];
-        foreach ($this->columns as $propertyName => $column) {
-            if ($this->generateOnInsert === $propertyName) continue;
-            $attributesToStore[$column->name] = $this->pickProperty($this->properties[$propertyName], $entity);
+        foreach ($columns as $columnName => $propertyName) {
+            if ($identifierKey === $propertyName) continue;
+            $attributesToStore[$columnName] = $this->pickProperty($this->getPropertyReflection($propertyName), $entity);
         }
-        $this->query($this->connection->createQueryBuilder($table)->insert($attributesToStore));
-        if ($this->generateOnInsert) {
-            $lastInsertId = $this->connection->getLastInsertId();
-            $this->injectProperty($this->properties[$this->generateOnInsert], $entity, $lastInsertId);
+
+        $queryBuilder = $this->connection->createQueryBuilder($this->settings->getTable());
+        return $this->query($queryBuilder->update($attributesToStore)->where($identifierKey, $identifier));
+    }
+
+    /**
+     * @param object $entity
+     * @return int
+     */
+    public function delete($entity)
+    {
+        $this->assertIsInstance($entity, __METHOD__);
+        $identifierKey = $this->settings->getIdentifier();
+        $columns = $this->settings->getColumns();
+        
+        $identifier = $this->pickProperty($this->getPropertyReflection($columns[$identifierKey]), $entity);
+        if (!$identifier) {
+            // @todo Exception
+            throw new InvalidArgumentException(
+                "Cannot get the identifier from the entity"
+            );
         }
+        $queryBuilder = $this->connection->createQueryBuilder($this->settings->getTable());
+        $affectedRows = $this->query($queryBuilder->delete()->where($identifierKey, $identifier));
+        $this->injectProperty($this->getPropertyReflection($columns[$identifierKey]), $entity, null);
+        return $affectedRows;
     }
 
     /**
      * @param string|callable|\Wandu\Database\Contracts\QueryInterface $query
      * @param array $bindings
-     * @return bool
+     * @return int
      */
     public function query($query, array $bindings = [])
     {
@@ -127,22 +128,35 @@ class Repository
     }
 
     /**
-     * @param array $row
+     * @param array $attributes
      * @return object
      */
-    public function hydrate(array $row = [])
+    public function hydrate(array $attributes = [])
     {
-        $entity = $this->class->newInstanceWithoutConstructor();
-        foreach ($this->columns as $propertyName => $column) {
-            $value = $this->cast($row[$column->name], $column->cast);
-            $this->injectProperty($this->properties[$propertyName], $entity, $value);
+        $model = $this->settings->getModel();
+        $casts = $this->settings->getCasts();
+        $columns = $this->settings->getColumns(); // map
+
+        if ($model) {
+            $classReflection = $this->getClassReflection();
+            $entity = $classReflection->newInstanceWithoutConstructor();
+            foreach ($attributes as $name => $attribute) {
+                $value = isset($casts[$name]) ? $this->cast($attribute, $casts[$name]) : $attribute;
+                $this->injectProperty($this->getPropertyReflection($columns[$name]), $entity, $value);
+            }
+        } else {
+            $entity = new stdClass();
+            foreach ($attributes as $name => $attribute) {
+                $value = isset($casts[$name]) ? $this->cast($attribute, $casts[$name]) : $attribute;
+                $entity->{$columns[$name]} = $value;
+            }
         }
         return $entity;
     }
 
     private function cast($value, $type)
     {
-        // {"string", "integer", "float", "boolean", "array", "datetime", "date", "time"}
+        // "string", "integer", "float", "boolean", "array", "datetime", "date", "time"
         switch ($type) {
             case 'string':
                 return (string) $value;
@@ -152,18 +166,6 @@ class Repository
                 return (float) $value;
             case 'boolean':
                 return (bool) $value;
-//            case 'object':
-//                return $this->fromJson($value, true);
-//            case 'array':
-//            case 'json':
-//                return $this->fromJson($value);
-//            case 'collection':
-//                return new BaseCollection($this->fromJson($value));
-//            case 'date':
-//            case 'datetime':
-//                return $this->asDateTime($value);
-//            case 'timestamp':
-//                return $this->asTimeStamp($value);
             default:
                 return $value;
         }
@@ -189,5 +191,53 @@ class Repository
     {
         $property->setAccessible(true);
         return $property->getValue($object);
+    }
+
+    /**
+     * @return \ReflectionClass
+     */
+    private function getClassReflection()
+    {
+        static $reflection;
+        if (!isset($reflection)) {
+            $model = $this->settings->getModel();
+            return $reflection = new ReflectionClass($model ? $model : 'stdClass');
+        }
+        return $reflection;
+    }
+
+    /**
+     * @param string $name
+     * @return \ReflectionProperty
+     */
+    private function getPropertyReflection($name)
+    {
+        static $reflections = [];
+        if (!isset($reflections[$name])) {
+            return $reflections[$name] = $this->getClassReflection()->getProperty($name);
+        }
+        return $reflections[$name];
+    }
+
+    /**
+     * @param mixed $entity
+     * @param string $method
+     */
+    private function assertIsInstance($entity, $method)
+    {
+        if (!$this->isInstance($entity)) {
+            throw new InvalidArgumentException(
+                "Argument 1 passed to {$method}() must be of the type " . $this->getClassReflection()->getName()
+            );
+        }
+    }
+    
+    /**
+     * @param mixed $entity
+     * @return boolean
+     */
+    private function isInstance($entity)
+    {
+        return $this->getClassReflection()->isInstance($entity);
     }
 }

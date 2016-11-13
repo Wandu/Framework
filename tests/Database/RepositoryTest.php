@@ -1,14 +1,23 @@
 <?php
 namespace Wandu\Database;
 
-use Doctrine\Common\Annotations\AnnotationReader;
 use InvalidArgumentException;
 use stdClass;
-use Wandu\Database\Annotations\Column;
-use Wandu\Database\Annotations\GenerateOnInsert;
-use Wandu\Database\Annotations\Identifier;
-use Wandu\Database\Annotations\Table;
+use Wandu\Database\Repository\RepositorySettings;
 
+/**
+ * @todo
+ * all($columns = array('*'))
+ * lists($value, $key = null)
+ * paginate($perPage = 1, $columns = array('*'));
+ * create(array $data)
+ * update(array $data, $id, $attribute = "id")
+ * delete($id)
+ * find($id, $columns = array('*'))
+ * findBy($field, $value, $columns = array('*'))
+ * findAllBy($field, $value, $columns = array('*'))
+ * findWhere($where, $columns = array('*'))
+ */
 class RepositoryTest extends SakilaTestCase
 {
     public function provideSelectQueries()
@@ -31,12 +40,26 @@ class RepositoryTest extends SakilaTestCase
     public function testFetch($query)
     {
         $expectedModels = [
-            new Actor(183, 'RUSSELL', 'CLOSE', '2006-02-15 04:34:33'),
-            new Actor(181, 'MATTHEW', 'CARREY', '2006-02-15 04:34:33'),
-            new Actor(176, 'JON', 'CHASE', '2006-02-15 04:34:33'),
+            new RepositoryTestActorModel(183, 'RUSSELL', 'CLOSE', '2006-02-15 04:34:33'),
+            new RepositoryTestActorModel(181, 'MATTHEW', 'CARREY', '2006-02-15 04:34:33'),
+            new RepositoryTestActorModel(176, 'JON', 'CHASE', '2006-02-15 04:34:33'),
         ];
+
+        $repository = new Repository($this->connection, new RepositorySettings('actor', [
+            'model' => RepositoryTestActorModel::class,
+            'columns' => [
+                'actor_id' => 'id',
+                'first_name' => 'firstName',
+                'last_name' => 'lastName',
+                'last_update' => 'lastUpdate',
+            ],
+            'casts' => [
+                'actor_id' => 'integer',
+            ],
+            'identifier' => 'actor_id',
+            'increments' => true,
+        ]));
         
-        $repository = new Repository($this->connection, new AnnotationReader(), Actor::class);
         $iterateCount = 0;
         foreach ($repository->fetch($query, ["C%"]) as $index => $model) {
             $iterateCount++;
@@ -51,73 +74,131 @@ class RepositoryTest extends SakilaTestCase
      */
     public function testFirst($query)
     {
-        $repository = new Repository($this->connection, new AnnotationReader(), Actor::class);
+        $repository = new Repository($this->connection, new RepositorySettings('actor', [
+            'model' => RepositoryTestActorModel::class,
+            'columns' => [
+                'actor_id' => 'id',
+                'first_name' => 'firstName',
+                'last_name' => 'lastName',
+                'last_update' => 'lastUpdate',
+            ],
+            'casts' => [
+                'actor_id' => 'integer',
+            ],
+            'identifier' => 'actor_id',
+            'increments' => true,
+        ]));
         static::assertEquals(
-            new Actor(183, 'RUSSELL', 'CLOSE', '2006-02-15 04:34:33'),
+            new RepositoryTestActorModel(183, 'RUSSELL', 'CLOSE', '2006-02-15 04:34:33'),
             $repository->first($query, ["C%"])
         );
     }
-    
-    public function testStore()
+
+    public function testInsert()
     {
-        $repository = new Repository($this->connection, new AnnotationReader(), Actor::class);
+        $repository = new Repository($this->connection, new RepositorySettings('actor', [
+            'model' => RepositoryTestActorModel::class,
+            'columns' => [
+                'actor_id' => 'id',
+                'first_name' => 'firstName',
+                'last_name' => 'lastName',
+                'last_update' => 'lastUpdate',
+            ],
+            'casts' => [
+                'actor_id' => 'integer',
+            ],
+            'identifier' => 'actor_id',
+            'increments' => true,
+        ]));
 
         try {
-            $repository->store(new stdClass(), 'actor');
+            $repository->insert(new stdClass());
             static::fail();
         } catch (InvalidArgumentException $e) {
             static::assertEquals(
-                "Argument 1 passed to Wandu\\Database\\Repository::store() must be of the type Wandu\\Database\\Actor",
+                "Argument 1 passed to Wandu\\Database\\Repository::insert() must be of the type Wandu\\Database\\RepositoryTestActorModel",
                 $e->getMessage()
             );
         }
-        $repository->store($actor = new Actor(null, 'WANDU', 'J', '2016-11-06'), 'actor');
-        static::assertNotNull($actor->getId());
+        static::assertEquals(1, $repository->insert($actor = new RepositoryTestActorModel(null, 'WANDU', 'J', '2016-11-06')));
+        static::assertNotNull($actor->getIdentifier());
+
+        static::assertEquals(1, $repository->delete($actor));
+        static::assertNull($actor->getIdentifier());
+
+        try {
+            $repository->delete($actor);
+            static::fail();
+        } catch (InvalidArgumentException $e) {
+            static::assertEquals(
+                "Cannot get the identifier from the entity",
+                $e->getMessage()
+            );
+        }
     }
-    /*
-     * public function all($columns = array('*'))
-        public function lists($value, $key = null)
-        public function paginate($perPage = 1, $columns = array('*'));
-        public function create(array $data)
-        // if you use mongodb then you'll need to specify primary key $attribute
-        public function update(array $data, $id, $attribute = "id")
-        public function delete($id)
-        public function find($id, $columns = array('*'))
-        public function findBy($field, $value, $columns = array('*'))
-        public function findAllBy($field, $value, $columns = array('*'))
-        public function findWhere($where, $columns = array('*'))
-     */
+
+    public function testUpdate()
+    {
+        $repository = new Repository($this->connection, new RepositorySettings('actor', [
+            'model' => RepositoryTestActorModel::class,
+            'columns' => [
+                'actor_id' => 'id',
+                'first_name' => 'firstName',
+                'last_name' => 'lastName',
+                'last_update' => 'lastUpdate',
+            ],
+            'casts' => [
+                'actor_id' => 'integer',
+            ],
+            'identifier' => 'actor_id',
+            'increments' => true,
+        ]));
+
+        try {
+            $repository->update(new stdClass());
+            static::fail();
+        } catch (InvalidArgumentException $e) {
+            static::assertEquals(
+                "Argument 1 passed to Wandu\\Database\\Repository::update() must be of the type Wandu\\Database\\RepositoryTestActorModel",
+                $e->getMessage()
+            );
+        }
+        
+        /** @var \Wandu\Database\RepositoryTestActorModel $actor */
+        $actor = $repository->first("SELECT * FROM `actor` WHERE `actor_id` = ?", ['80']);
+
+        static::assertEquals('RALPH', $actor->getFirstName());
+        static::assertEquals('CRUZ', $actor->getLastName());
+
+        $actor->setFirstName('CHANGWAN');
+        $actor->setLastName('JUN');
+        
+        static::assertEquals(1, $repository->update($actor));
+
+        $actor = $repository->first("SELECT * FROM `actor` WHERE `actor_id` = ?", ['80']);
+
+        static::assertEquals('CHANGWAN', $actor->getFirstName());
+        static::assertEquals('JUN', $actor->getLastName());
+
+        $actor->setFirstName('RALPH');
+        $actor->setLastName('CRUZ');
+
+        static::assertEquals(1, $repository->update($actor));
+    }
 }
 
-/**
- * @Table(name="actor")
- */
-class Actor
+class RepositoryTestActorModel
 {
-    /**
-     * @Identifier
-     * @GenerateOnInsert
-     * @Column(name="actor_id", cast="integer")
-     * @var int
-     */
+    /** @var int */
     private $id;
 
-    /**
-     * @Column(name="first_name")
-     * @var string
-     */
+    /** @var string */
     private $firstName;
 
-    /**
-     * @Column(name="last_name")
-     * @var string
-     */
+    /** @var string */
     private $lastName;
 
-    /**
-     * @Column(name="last_update")
-     * @var string
-     */
+    /** @var string */
     private $lastUpdate;
 
     /**
@@ -133,12 +214,49 @@ class Actor
         $this->lastName = $lastName;
         $this->lastUpdate = $lastUpdate;
     }
-
-    /**
-     * @return int
-     */
-    public function getId()
+    
+    public function getIdentifier()
     {
         return $this->id;
+    }
+
+    /**
+     * @return string
+     */
+    public function getFirstName()
+    {
+        return $this->firstName;
+    }
+
+    /**
+     * @return string
+     */
+    public function getLastName()
+    {
+        return $this->lastName;
+    }
+
+    /**
+     * @return string
+     */
+    public function getLastUpdate()
+    {
+        return $this->lastUpdate;
+    }
+
+    /**
+     * @param string $firstName
+     */
+    public function setFirstName($firstName)
+    {
+        $this->firstName = $firstName;
+    }
+
+    /**
+     * @param string $lastName
+     */
+    public function setLastName($lastName)
+    {
+        $this->lastName = $lastName;
     }
 }

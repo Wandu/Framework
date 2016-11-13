@@ -79,7 +79,8 @@ class MysqlConnection implements ConnectionInterface
     public function query($query, array $bindings = [])
     {
         $statement = $this->prepare($query, $bindings);
-        return $statement->execute();
+        $statement->execute();
+        return $statement->rowCount();
     }
 
     /**

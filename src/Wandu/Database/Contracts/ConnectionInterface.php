@@ -36,7 +36,7 @@ interface ConnectionInterface
     /**
      * @param string|callable|\Wandu\Database\Contracts\QueryInterface $query
      * @param array $bindings
-     * @return bool
+     * @return int
      */
     public function query($query, array $bindings = []);
 
