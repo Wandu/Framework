@@ -15,4 +15,14 @@ class Table
      * @var string
      */
     public $name;
+
+    /**
+     * @var string
+     */
+    public $identifier = 'id';
+
+    /**
+     * @var bool
+     */
+    public $increments = true;
 }

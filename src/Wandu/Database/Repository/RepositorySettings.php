@@ -2,39 +2,56 @@
 namespace Wandu\Database\Repository;
 
 use Doctrine\Common\Annotations\Reader;
+use ReflectionClass;
+use Wandu\Database\Annotations\Column;
+use Wandu\Database\Annotations\Table;
 
 class RepositorySettings
 {
-    public static function fromAnnotation($model, Reader $reader = null)
+    public static function fromAnnotation($model, Reader $reader)
     {
-//        $this->connection = $connection;
-//
-//        $this->class = $reflClass = new ReflectionClass($model);
-//        $this->properties = [];
-//        $reflProperties = $reflClass->getProperties();
-//
-//        class_exists(Table::class);
-//        class_exists(Column::class);
-//        class_exists(AutoIncrements::class);
-//
-//        $this->table = $reader->getClassAnnotation($reflClass, Table::class);
-//
-//        $columns = [];
-//        $identifierPropertyName = null;
-//        $generateOnInsertPropertyName = null;
-//        foreach ($reflProperties as $reflProperty) {
-//            $propertyName = $reflProperty->getName();
-//            $this->properties[$propertyName] = $reflProperty;
-//            $propertyAnnotations = $reader->getPropertyAnnotations($reflProperty);
-//            foreach ($propertyAnnotations as $annotation) {
-//                if ($annotation instanceof Column) {
-//                    $columns[$propertyName] = $annotation;
-//                } elseif ($annotation instanceof AutoIncrements) {
-//                    $this->generateOnInsert = $propertyName;
-//                }
-//            }
-//        }
-//        $this->columns = $columns;        
+        $settings = [
+            'model' => $model,
+//            'columns' => [
+//                'actor_id' => 'id',
+//                'first_name' => 'firstName',
+//                'last_name' => 'lastName',
+//                'last_update' => 'lastUpdate',
+//            ],
+//            'casts' => [
+//                'actor_id' => 'integer',
+//            ],
+//            'identifier' => 'actor_id',
+//            'increments' => true,
+        ];
+        $classRefl = new ReflectionClass($model);
+        $propertiesRefl = $classRefl->getProperties();
+
+        class_exists(Table::class);
+        class_exists(Column::class);
+
+        /* @var \Wandu\Database\Annotations\Table $table */
+        if ($table = $reader->getClassAnnotation($classRefl, Table::class)) {
+            $settings['identifier'] = $table->identifier;
+            $settings['increments'] = $table->increments;
+        }
+        
+        $columns = [];
+        $casts = [];
+        foreach ($propertiesRefl as $propertyRefl) {
+            /* @var \Wandu\Database\Annotations\Column $column */
+            if ($column = $reader->getPropertyAnnotation($propertyRefl, Column::class)) {
+                $columns[$column->name] = $propertyRefl->name;
+                $casts[$column->name] = $column->cast;
+            }
+        }
+        if (count($columns)) {
+            $settings['columns'] = $columns;
+        }
+        if (count($casts)) {
+            $settings['casts'] = $casts;
+        }
+        return new RepositorySettings($table->name, $settings);
     }
     
     /** @var string */
