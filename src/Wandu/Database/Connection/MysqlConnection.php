@@ -9,6 +9,7 @@ use PDO;
 use PDOStatement;
 use Wandu\Database\Contracts\ConnectionInterface;
 use Wandu\Database\Contracts\QueryInterface;
+use Wandu\Database\Exception\ClassNotFoundException;
 use Wandu\Database\QueryBuilder;
 use Wandu\Database\Repository\Repository;
 use Wandu\Database\Repository\RepositorySettings;
@@ -58,7 +59,7 @@ class MysqlConnection implements ConnectionInterface
     public function createRepository($className)
     {
         if (!$this->container || !$this->container->has(Reader::class)) {
-            throw new Exception('cannot create repository!');
+            throw new ClassNotFoundException(Reader::class);
         }
         return new Repository($this, RepositorySettings::fromAnnotation($className, $this->container->get(Reader::class)));
     }

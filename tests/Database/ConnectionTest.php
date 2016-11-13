@@ -1,7 +1,10 @@
 <?php
 namespace Wandu\Database;
 
+use Doctrine\Common\Annotations\Reader;
 use Generator;
+use Wandu\Database\Connector\MysqlConnector;
+use Wandu\Database\Exception\ClassNotFoundException;
 
 class ConnectionTest extends SakilaTestCase
 {
@@ -72,5 +75,24 @@ class ConnectionTest extends SakilaTestCase
             $interateCount++;
         }
         static::assertEquals(3, $interateCount);
+    }
+    
+    public function testCreateRepository()
+    {
+        $connector = new MysqlConnector([
+            'username' => 'root',
+            'password' => 'root',
+            'database' => 'sakila',
+            'charset'   => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+        ]);
+        $connection = $connector->connect();
+        try {
+            $connection->createRepository('anything');
+            static::fail();
+        } catch (ClassNotFoundException $e) {
+            static::assertEquals(Reader::class, $e->getClassName());
+            static::assertContains('Class \'Doctrine\Common\Annotations\Reader\' not found in', $e->getMessage());
+        }
     }
 }

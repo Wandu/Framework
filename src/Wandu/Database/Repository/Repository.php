@@ -6,6 +6,7 @@ use ReflectionClass;
 use ReflectionProperty;
 use stdClass;
 use Wandu\Database\Contracts\ConnectionInterface;
+use Wandu\Database\Exception\IdentifierNotFoundException;
 
 class Repository
 {
@@ -78,10 +79,7 @@ class Repository
         $columns = $this->settings->getColumns();
         $identifier = $this->pickProperty($this->getPropertyReflection($columns[$identifierKey]), $entity);
         if (!$identifier) {
-            // @todo Exception
-            throw new InvalidArgumentException(
-                "Cannot get the identifier from the entity"
-            );
+            throw new IdentifierNotFoundException();
         }
         $attributesToStore = [];
         foreach ($columns as $columnName => $propertyName) {
@@ -105,10 +103,7 @@ class Repository
         
         $identifier = $this->pickProperty($this->getPropertyReflection($columns[$identifierKey]), $entity);
         if (!$identifier) {
-            // @todo Exception
-            throw new InvalidArgumentException(
-                "Cannot get the identifier from the entity"
-            );
+            throw new IdentifierNotFoundException();
         }
         $queryBuilder = $this->connection->createQueryBuilder($this->settings->getTable());
         $affectedRows = $this->query($queryBuilder->delete()->where($identifierKey, $identifier));

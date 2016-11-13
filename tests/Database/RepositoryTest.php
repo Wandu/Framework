@@ -5,6 +5,7 @@ use InvalidArgumentException;
 use stdClass;
 use Wandu\Database\Annotations\Column;
 use Wandu\Database\Annotations\Table;
+use Wandu\Database\Exception\IdentifierNotFoundException;
 use Wandu\Database\Repository\Repository;
 use Wandu\Database\Repository\RepositorySettings;
 
@@ -126,9 +127,9 @@ class RepositoryTest extends SakilaTestCase
         try {
             $repository->delete($actor);
             static::fail();
-        } catch (InvalidArgumentException $e) {
+        } catch (IdentifierNotFoundException $e) {
             static::assertEquals(
-                "Cannot get the identifier from the entity",
+                "Identifier not found from entity",
                 $e->getMessage()
             );
         }
