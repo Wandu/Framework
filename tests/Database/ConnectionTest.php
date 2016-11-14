@@ -72,7 +72,7 @@ class ConnectionTest extends SakilaTestCase
         $interateCount = 0;
         static::assertInstanceOf(Generator::class, $cursor); // cursor is generator!
         foreach ($cursor as $index => $row) {
-            static::assertSame($expectedRows[$index], $row);
+            static::assertEquals($expectedRows[$index], $row);
             $interateCount++;
         }
         static::assertEquals(3, $interateCount);
