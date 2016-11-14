@@ -3,7 +3,7 @@ namespace Wandu\Database\Connection;
 
 use Doctrine\Common\Annotations\Reader;
 use Exception;
-use Interop\Container\ContainerInterface;
+use ArrayAccess;
 use PDO;
 use PDOStatement;
 use Throwable;
@@ -19,7 +19,7 @@ class MysqlConnection implements ConnectionInterface
     /** @var \PDO */
     protected $pdo;
 
-    /** @var \Interop\Container\ContainerInterface */
+    /** @var \ArrayAccess */
     protected $container;
 
     /** @var string */
@@ -27,10 +27,10 @@ class MysqlConnection implements ConnectionInterface
 
     /**
      * @param \PDO $pdo
-     * @param \Interop\Container\ContainerInterface $container
+     * @param \ArrayAccess $container
      * @param string $prefix
      */
-    public function __construct(PDO $pdo, ContainerInterface $container = null, $prefix = '')
+    public function __construct(PDO $pdo, ArrayAccess $container = null, $prefix = '')
     {
         $this->pdo = $pdo;
         $this->container = $container;

@@ -1,7 +1,7 @@
 <?php
 namespace Wandu\Database;
 
-use Interop\Container\ContainerInterface;
+use ArrayAccess;
 use Wandu\Database\Connector\MysqlConnector;
 use Wandu\Database\Contracts\ConnectionInterface;
 use Wandu\Database\Contracts\ConnectorInterface;
@@ -12,16 +12,16 @@ class Manager
     /** @var \Wandu\Database\Manager */
     protected static $instance;
 
-    /** @var \Interop\Container\ContainerInterface */
+    /** @var \ArrayAccess */
     protected $container;
 
     /** @var array */
     protected $connections = [];
 
     /**
-     * @param \Interop\Container\ContainerInterface $container
+     * @param \ArrayAccess $container
      */
-    public function __construct(ContainerInterface $container = null)
+    public function __construct(ArrayAccess $container = null)
     {
         $this->container = $container;
     }

@@ -1,7 +1,7 @@
 <?php
 namespace Wandu\Database\Connector;
 
-use Interop\Container\ContainerInterface;
+use ArrayAccess;
 use PDO;
 use Wandu\Database\Connection\MysqlConnection;
 use Wandu\Database\Contracts\ConnectorInterface;
@@ -57,7 +57,7 @@ class MysqlConnector implements ConnectorInterface
     /**
      * {@inheritdoc} 
      */
-    public function connect(ContainerInterface $container = null)
+    public function connect(ArrayAccess $container = null)
     {
         $connection = $this->createPdo();
         $this->applyCharset($connection);

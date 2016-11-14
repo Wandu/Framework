@@ -1,13 +1,13 @@
 <?php
 namespace Wandu\Database\Contracts;
 
-use Interop\Container\ContainerInterface;
+use ArrayAccess;
 
 interface ConnectorInterface
 {
     /**
-     * @param \Interop\Container\ContainerInterface $container
+     * @param \ArrayAccess $container
      * @return \Wandu\Database\Contracts\ConnectionInterface
      */
-    public function connect(ContainerInterface $container = null);
+    public function connect(ArrayAccess $container = null);
 }

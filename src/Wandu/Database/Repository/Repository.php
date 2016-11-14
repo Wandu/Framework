@@ -49,6 +49,13 @@ class Repository
         return $this->hydrate($this->connection->first($this->normalizeQuery($query), $bindings));
     }
 
+    public function find($identifier)
+    {
+        
+    }
+    
+    
+    
     /**
      * @param object $entity
      * @return int
