@@ -1,5 +1,7 @@
 language: "php"
 
+addons:
+  mariadb: '10.0'
 matrix:
   fast_finish: true
   include:
@@ -10,6 +12,10 @@ matrix:
     - php: hhvm
 
 before_script:
+  - wget http://downloads.mysql.com/docs/sakila-db.tar.gz
+  - tar xvf sakila-db.tar.gz
+  - mysql < sakila-db/sakila-schema.sql -uroot
+  - mysql < sakila-db/sakila-data.sql -uroot
   - if [[ $EXECUTE_COVERAGE != 'true' ]]; then phpenv config-rm xdebug.ini || return 0 ; fi
   - composer install
 
