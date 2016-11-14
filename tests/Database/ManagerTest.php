@@ -14,7 +14,7 @@ class ManagerTest extends PHPUnit_Framework_TestCase
         try {
             $manager->connect([
                 'username' => 'root',
-                'password' => 'root',
+                'password' => '',
                 'database' => 'sakila',
             ]);
             static::fail();
@@ -27,7 +27,7 @@ class ManagerTest extends PHPUnit_Framework_TestCase
             $manager->connect([
                 'driver' => 'wrong_driver',
                 'username' => 'root',
-                'password' => 'root',
+                'password' => '',
                 'database' => 'sakila',
             ]);
             static::fail();
@@ -44,7 +44,7 @@ class ManagerTest extends PHPUnit_Framework_TestCase
         $connection = $manager->connect([
             'driver' => 'mysql',
             'username' => 'root',
-            'password' => 'root',
+            'password' => '',
             'database' => 'sakila',
             'charset'   => 'utf8mb4',
             'collation' => 'utf8mb4_unicode_ci',
@@ -55,7 +55,7 @@ class ManagerTest extends PHPUnit_Framework_TestCase
 
         $connection = $manager->connect(new MysqlConnector([
             'username' => 'root',
-            'password' => 'root',
+            'password' => '',
             'database' => 'sakila',
             'charset'   => 'utf8mb4',
             'collation' => 'utf8mb4_unicode_ci',

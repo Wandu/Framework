@@ -79,14 +79,7 @@ class ConnectionTest extends SakilaTestCase
     
     public function testFailToCreateRepository()
     {
-        $connector = new MysqlConnector([
-            'username' => 'root',
-            'password' => 'root',
-            'database' => 'sakila',
-            'charset'   => 'utf8mb4',
-            'collation' => 'utf8mb4_unicode_ci',
-        ]);
-        $connection = $connector->connect();
+        $connection = $this->connector->connect();
         try {
             $connection->createRepository('anything');
             static::fail();

@@ -58,10 +58,10 @@ class MysqlConnection implements ConnectionInterface
      */
     public function createRepository($className)
     {
-        if (!$this->container || !$this->container->has(Reader::class)) {
+        if (!$this->container || !$this->container[Reader::class]) {
             throw new ClassNotFoundException(Reader::class);
         }
-        return new Repository($this, RepositorySettings::fromAnnotation($className, $this->container->get(Reader::class)));
+        return new Repository($this, RepositorySettings::fromAnnotation($className, $this->container[Reader::class]));
     }
 
     /**

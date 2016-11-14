@@ -12,20 +12,21 @@ class SakilaTestCase extends PHPUnit_Framework_TestCase
 {
     /** @var \Wandu\Database\Contracts\ConnectionInterface */
     protected $connection;
+    
+    /** @var \Wandu\Database\Contracts\ConnectorInterface */
+    protected $connector;
 
     public function setUp()
     {
         $container = new Container();
         $container[Reader::class] = new AnnotationReader();
         
-        $connector = new MysqlConnector([
+        $this->connector = $connector = new MysqlConnector([
             'username' => 'root',
-            'password' => 'root',
+            'password' => '',
             'database' => 'sakila',
             'charset'   => 'utf8mb4',
             'collation' => 'utf8mb4_unicode_ci',
-            'prefix' => '',
-            'timezone' => '+09:00',
             'options' => [ // default
                 PDO::ATTR_CASE => PDO::CASE_NATURAL,
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
