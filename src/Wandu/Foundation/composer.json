@@ -5,7 +5,7 @@
     "require": {
         "php": ">=5.6",
         "filp/whoops": "^2.1",
-        "wandu/di": "^3.0"
+        "wandu/di": "^3.1"
     },
     "autoload": {
         "psr-4": {

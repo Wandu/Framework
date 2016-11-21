@@ -16,6 +16,7 @@ class DeployTest extends PHPUnit_Framework_TestCase
     /** @var array */
     protected $jsonFiles = [
         'src/Wandu/Caster/composer.json',
+        'src/Wandu/Collection/composer.json',
         'src/Wandu/Compiler/composer.json',
         'src/Wandu/Config/composer.json',
         'src/Wandu/Console/composer.json',

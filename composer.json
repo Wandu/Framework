@@ -55,6 +55,7 @@
     },
     "replace": {
         "wandu/caster": "self.version",
+        "wandu/collection": "self.version",
         "wandu/compiler": "self.version",
         "wandu/config": "self.version",
         "wandu/console": "self.version",
