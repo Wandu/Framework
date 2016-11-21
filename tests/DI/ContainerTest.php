@@ -123,6 +123,27 @@ class ContainerTest extends PHPUnit_Framework_TestCase
         ], $container[HttpController::class]->getConfig());
     }
 
+    public function testClosureWithTypeHint()
+    {
+        $container = new Container();
+
+        $container->instance(Renderable::class, $renderer = new XmlRenderer());
+        $container->closure(HttpController::class, function (Renderable $renderable) {
+            return new HttpController($renderable, [
+                'username' => 'username string',
+                'password' => 'password string',
+            ]);
+        });
+
+        static::assertInstanceOf(HttpController::class, $container[HttpController::class]);
+        static::assertSame($container[HttpController::class], $container[HttpController::class]);
+        static::assertSame($renderer, $container[HttpController::class]->getRenderer());
+        static::assertEquals([
+            'username' => 'username string',
+            'password' => 'password string',
+        ], $container[HttpController::class]->getConfig());
+    }
+
     public function testAlias()
     {
         $container = new Container();

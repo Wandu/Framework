@@ -23,12 +23,10 @@ class ClosureContainee extends ContaineeAbstract
     {
         $this->frozen = true;
         if ($this->factoryEnabled) {
-            $object = call_user_func($this->handler, $container);
-            return $object;
+            return $container->call($this->handler, [$container]);
         }
         if (!isset($this->caching)) {
-            $object = call_user_func($this->handler, $container);
-            $this->caching = $object;
+            $this->caching = $object = $container->call($this->handler, [$container]);
         }
         return $this->caching;
     }
