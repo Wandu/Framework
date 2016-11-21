@@ -1,8 +1,9 @@
 <?php
 namespace Wandu\Database\Migrator;
 
-use RuntimeException;
 use DirectoryIterator;
+use RuntimeException;
+use SplFileInfo;
 use Wandu\DI\ContainerInterface;
 
 class MigrateManager
@@ -114,7 +115,12 @@ class MigrateManager
             if ($file->isDot() || $file->isDir() || $file->getFilename()[0] === '.') continue;
             $files[] = $file->getFileInfo();
         }
-        sort($files);
+        usort($files, function (SplFileInfo $file, SplFileInfo $nextFile) {
+            if ($file->getFilename() > $nextFile->getFilename()) {
+                return 1;
+            }
+            return $file->getFilename() < $nextFile->getFilename() ? -1 : 0;
+        });
         return $files;
     }
 
