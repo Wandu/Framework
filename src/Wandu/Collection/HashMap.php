@@ -72,7 +72,6 @@ class HashMap implements MapInterface
      */
     public function offsetExists($offset)
     {
-        $this->assertIsNotNull($offset, __METHOD__);
         return isset($this->items[$offset]);
     }
 
@@ -81,7 +80,6 @@ class HashMap implements MapInterface
      */
     public function offsetGet($offset)
     {
-        $this->assertIsNotNull($offset, __METHOD__);
         return $this->get($offset);
     }
 
@@ -99,8 +97,7 @@ class HashMap implements MapInterface
      */
     public function offsetUnset($offset)
     {
-        $this->assertIsNotNull($offset, __METHOD__);
-        unset($this->items[$offset]);
+        $this->remove($offset);
     }
 
     /**
@@ -153,7 +150,6 @@ class HashMap implements MapInterface
      */
     public function get($key, $default = null)
     {
-        $this->assertIsNotNull($key, __METHOD__);
         return array_key_exists($key, $this->items) ? $this->items[$key] : $default;
     }
 

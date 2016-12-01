@@ -53,6 +53,9 @@ TEXT;
                 $e->getMessage()
             );
         }
+
+        static::assertEquals(null, $map['unknown']);
+
         $map['foo'] = 'foo string';
         static::assertEquals(1, count($map));
         static::assertEquals('foo string', $map['foo']);
@@ -170,7 +173,6 @@ TEXT;
         static::assertTrue($map->has('foo'));
         static::assertTrue($map->has('foo', 'bar'));
 
-        $map->set('get', null);
         $map->set('bar', null);
 
         static::assertTrue($map->has('foo', 'bar'));
