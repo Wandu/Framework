@@ -35,6 +35,23 @@ TEXT;
         static::assertEquals($expected, $map->__toString());
     }
 
+    public function testToArrayAndAll()
+    {
+        $map = new HashMap([
+            'name' => 'olympic',
+            'ages' => new ArrayList(['2004', '2010', '2014', '2018']),
+        ]);
+
+        static::assertEquals([
+            'name' => 'olympic',
+            'ages' => new ArrayList(['2004', '2010', '2014', '2018']),
+        ], $map->all());
+        static::assertEquals([
+            'name' => 'olympic',
+            'ages' => ['2004', '2010', '2014', '2018'],
+        ], $map->toArray());
+    }
+    
     public function testCount()
     {
         $map = new HashMap([1, 2, 3, 4, 5]);

@@ -48,7 +48,28 @@ class HashMap implements MapInterface
      */
     public function toArray()
     {
+        return array_map(function ($item) {
+            if (method_exists($item, 'toArray')) {
+                return $item->toArray();
+            }
+            return $item;
+        }, $this->items);
+    }
+    
+    /**
+     * {@inheritdoc}
+     */
+    public function all()
+    {
         return $this->items;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function isEmpty()
+    {
+        return $this->count() === 0;
     }
 
     /**

@@ -8,7 +8,7 @@ use JsonSerializable;
 use Serializable;
 
 /**
- * @todo diff, diffKeys, intersect, isEmpty, merge, union
+ * @todo diff, diffKeys, intersect, merge, union,
  */
 interface MapInterface extends ArrayAccess, Countable, IteratorAggregate, JsonSerializable, Serializable
 {
@@ -20,6 +20,11 @@ interface MapInterface extends ArrayAccess, Countable, IteratorAggregate, JsonSe
     /**
      * @return array
      */
+    public function all();
+    
+    /**
+     * @return array
+     */
     public function toArray();
     
     /**
@@ -27,6 +32,11 @@ interface MapInterface extends ArrayAccess, Countable, IteratorAggregate, JsonSe
      */
     public function clear();
 
+    /**
+     * @return boolean
+     */
+    public function isEmpty();
+    
     /**
      * @param array ...$values
      * @return boolean
