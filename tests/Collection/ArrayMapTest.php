@@ -7,13 +7,13 @@ use stdClass;
 use Wandu\Assertions;
 use Wandu\Collection\Contracts\ListInterface;
 
-class HashMapTest extends PHPUnit_Framework_TestCase
+class ArrayMapTest extends PHPUnit_Framework_TestCase
 {
     use Assertions;
 
     public function testToString()
     {
-        $map = new HashMap([
+        $map = new ArrayMap([
             'a' => 'a string',
             'b' => 30,
             'c' => 30.33,
@@ -37,7 +37,7 @@ TEXT;
 
     public function testToArrayAndAll()
     {
-        $map = new HashMap([
+        $map = new ArrayMap([
             'name' => 'olympic',
             'ages' => new ArrayList(['2004', '2010', '2014', '2018']),
         ]);
@@ -54,13 +54,13 @@ TEXT;
     
     public function testCount()
     {
-        $map = new HashMap([1, 2, 3, 4, 5]);
+        $map = new ArrayMap([1, 2, 3, 4, 5]);
         static::assertEquals(5, count($map));
     }
     
     public function testOffsetGetAndSet()
     {
-        $map = new HashMap();
+        $map = new ArrayMap();
         try {
             $map[] = 30;
             static::fail();
@@ -88,7 +88,7 @@ TEXT;
 
     public function testOffsetExistsAndUnset()
     {
-        $map = new HashMap();
+        $map = new ArrayMap();
 
         static::assertFalse(isset($map['foo']));
 
@@ -111,7 +111,7 @@ TEXT;
             'e' => new stdClass,
             'f' => [1, 2, 3, 4],
         ];
-        $map = new HashMap($expected);
+        $map = new ArrayMap($expected);
         
         $actual = [];
         foreach ($map as $key => $value) {
@@ -123,7 +123,7 @@ TEXT;
     
     public function testSerialize()
     {
-        $map = new HashMap([
+        $map = new ArrayMap([
             'a' => 'a string',
             'b' => 30,
             'c' => 30.33,
@@ -138,7 +138,7 @@ TEXT;
     
     public function testContains()
     {
-        $map = new HashMap([
+        $map = new ArrayMap([
             'a' => 'a string',
             'b' => 30,
             'c' => 30.33,
@@ -157,7 +157,7 @@ TEXT;
 
     public function testGetAndSet()
     {
-        $map = new HashMap();
+        $map = new ArrayMap();
 
         static::assertNull($map->get('foo'));
         static::assertEquals('default', $map->get('foo', 'default'));
@@ -175,7 +175,7 @@ TEXT;
 
     public function testHasAndRemove()
     {
-        $map = new HashMap();
+        $map = new ArrayMap();
 
         static::assertFalse($map->has('foo'));
         static::assertFalse($map->has('foo', 'bar'));
@@ -204,7 +204,7 @@ TEXT;
     
     public function testKeys()
     {
-        $map = new HashMap([
+        $map = new ArrayMap([
             'a' => 'a string',
             'b' => 30,
             'c' => 30.33,
@@ -219,7 +219,7 @@ TEXT;
 
     public function testValues()
     {
-        $map = new HashMap([
+        $map = new ArrayMap([
             'a' => 'a string',
             'b' => 30,
             'c' => 30.33,
@@ -241,7 +241,7 @@ TEXT;
     
     public function testMap()
     {
-        $map = new HashMap([
+        $map = new ArrayMap([
             'a' => 'a string',
             'b' => 'b string',
         ]);
@@ -255,7 +255,7 @@ TEXT;
 
     public function testReduce()
     {
-        $map = new HashMap([
+        $map = new ArrayMap([
             'a' => 'a string',
             'b' => 'b string',
         ]);

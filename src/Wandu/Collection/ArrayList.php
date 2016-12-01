@@ -277,7 +277,7 @@ class ArrayList implements ListInterface
             }
             $new[$groupName][] = $item;
         }
-        return new HashMap($new);
+        return new ArrayMap($new);
     }
 
     /**
@@ -290,7 +290,7 @@ class ArrayList implements ListInterface
             $keyName = call_user_func($handler, $item, $key);
             $new[$keyName] = $item;
         }
-        return new HashMap($new);
+        return new ArrayMap($new);
     }
 
     /**
@@ -299,7 +299,7 @@ class ArrayList implements ListInterface
     public function combine(ListInterface $list)
     {
         $this->executeIterator();
-        return new HashMap(array_combine($this->items, $list->all()));
+        return new ArrayMap(array_combine($this->items, $list->all()));
     }
 
     /**

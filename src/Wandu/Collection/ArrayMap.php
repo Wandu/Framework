@@ -5,7 +5,7 @@ use ArrayIterator;
 use InvalidArgumentException;
 use Wandu\Collection\Contracts\MapInterface;
 
-class HashMap implements MapInterface
+class ArrayMap implements MapInterface
 {
     /** @var array */
     protected $items;

@@ -111,17 +111,17 @@ TEXT;
     public function testToArrayAndAll()
     {
         $list = new ArrayList([
-            new HashMap(['name' => 'wan2land']),
-            new HashMap(['name' => 'wan3land']),
-            new HashMap(['name' => 'wan4land']),
-            new HashMap(['name' => 'wan5land']),
+            new ArrayMap(['name' => 'wan2land']),
+            new ArrayMap(['name' => 'wan3land']),
+            new ArrayMap(['name' => 'wan4land']),
+            new ArrayMap(['name' => 'wan5land']),
         ]);
         
         static::assertEquals([
-            new HashMap(['name' => 'wan2land']),
-            new HashMap(['name' => 'wan3land']),
-            new HashMap(['name' => 'wan4land']),
-            new HashMap(['name' => 'wan5land']),
+            new ArrayMap(['name' => 'wan2land']),
+            new ArrayMap(['name' => 'wan3land']),
+            new ArrayMap(['name' => 'wan4land']),
+            new ArrayMap(['name' => 'wan5land']),
         ], $list->all());
 
         static::assertEquals([
@@ -146,10 +146,10 @@ TEXT;
         static::assertEquals('["a string",30,30.33,null,{},[1,2,3,4]]', json_encode($list));
 
         $list = new ArrayList([
-            new HashMap(['name' => 'wan2land']),
-            new HashMap(['name' => 'wan3land']),
-            new HashMap(['name' => 'wan4land']),
-            new HashMap(['name' => 'wan5land']),
+            new ArrayMap(['name' => 'wan2land']),
+            new ArrayMap(['name' => 'wan3land']),
+            new ArrayMap(['name' => 'wan4land']),
+            new ArrayMap(['name' => 'wan5land']),
         ]);
         
         static::assertEquals('[{"name":"wan2land"},{"name":"wan3land"},{"name":"wan4land"},{"name":"wan5land"}]', json_encode($list));
