@@ -22,7 +22,7 @@ class ArrayMapTest extends PHPUnit_Framework_TestCase
             'f' => [1, 2, 3, 4],
         ]);
         $expected = <<<TEXT
-Wandu\Collection\HashMap [
+Wandu\Collection\ArrayMap [
     "a" => "a string",
     "b" => 30,
     "c" => 30.33,
@@ -66,7 +66,7 @@ TEXT;
             static::fail();
         } catch (InvalidArgumentException $e) {
             static::assertEquals(
-                'Argument 1 passed to Wandu\Collection\HashMap::offsetSet must be not null',
+                'Argument 1 passed to Wandu\Collection\ArrayMap::offsetSet must be not null',
                 $e->getMessage()
             );
         }

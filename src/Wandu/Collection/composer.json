@@ -1,6 +1,6 @@
 {
     "name": "wandu/collection",
-    "description": "Collection Library. Provides List, Map, and Set.",
+    "description": "Collection Library Like Java. Provides List, Map, and Set.",
     "license": "MIT",
     "require": {
         "php": ">=5.6"
