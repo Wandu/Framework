@@ -32,7 +32,7 @@ class Repository
      * @param array $bindings
      * @return \Generator
      */
-    public function fetch($query, array $bindings = [])
+    public function fetch($query = null, array $bindings = [])
     {
         foreach ($this->connection->fetch($this->normalizeQuery($query), $bindings) as $row) {
             yield $this->hydrate($row);
@@ -44,7 +44,7 @@ class Repository
      * @param array $bindings
      * @return object
      */
-    public function first($query, array $bindings = [])
+    public function first($query = null, array $bindings = [])
     {
         return $this->hydrate($this->connection->first($this->normalizeQuery($query), $bindings));
     }
@@ -159,11 +159,14 @@ class Repository
      * @param string|callable|\Wandu\Database\Contracts\QueryInterface $query
      * @return string|\Wandu\Database\Contracts\QueryInterface
      */
-    private function normalizeQuery($query)
+    private function normalizeQuery($query = null)
     {
-        if (is_callable($query)) {
+        if (!isset($query) || is_callable($query)) {
             $connection = $this->connection;
             $queryBuilder = $connection->createQueryBuilder($this->settings->getTable())->select();
+            if (!isset($query)) {
+                return $queryBuilder;
+            }
             while (is_callable($query)) {
                 $query = call_user_func($query, $queryBuilder, $connection);
             }

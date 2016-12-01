@@ -3,7 +3,6 @@ namespace Wandu\Database;
 
 use Doctrine\Common\Annotations\Reader;
 use Generator;
-use Wandu\Database\Connector\MysqlConnector;
 use Wandu\Database\Exception\ClassNotFoundException;
 
 class ConnectionTest extends SakilaTestCase
