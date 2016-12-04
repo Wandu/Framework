@@ -110,10 +110,13 @@ class Dispatcher
             return $request;
         }
         $parsedBody = $request->getParsedBody();
-        if (!isset($parsedBody['_method'])) {
-            return $request;
+        if (isset($parsedBody['_method'])) {
+            return $request->withMethod(strtoupper($parsedBody['_method']));
         }
-        return $request->withMethod(strtoupper($parsedBody['_method']));
+        if ($request->hasHeader('X-Http-Method-Override')) {
+            return $request->withMethod(strtoupper($request->getHeaderLine('X-Http-Method-Override')));
+        }
+        return $request;
     }
 
     /**

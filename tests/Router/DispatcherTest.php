@@ -19,7 +19,7 @@ class DispatcherTest extends TestCase
             $router->createRoute(['GET'], '/', TestDispatcherHomeController::class);
         });
 
-        $this->assertEquals(
+        static::assertEquals(
             '[GET] index@Home',
             $dispatcher->dispatch($this->createRequest('GET', '/'))->getBody()->__toString()
         );
@@ -34,11 +34,11 @@ class DispatcherTest extends TestCase
             $router->createRoute(['POST'], '/admin', TestDispatcherAdminController::class, 'action');
         });
 
-        $this->assertEquals(
+        static::assertEquals(
             '[GET] index@Admin',
             $dispatcher->dispatch($this->createRequest('GET', '/admin'))->getBody()->__toString()
         );
-        $this->assertEquals(
+        static::assertEquals(
             '[POST] action@Admin',
             $dispatcher->dispatch($this->createRequest('POST', '/admin'))->getBody()->__toString()
         );
@@ -46,7 +46,7 @@ class DispatcherTest extends TestCase
         foreach (['PUT', 'DELETE', 'OPTIONS', 'PATCH'] as $method) {
             try {
                 $dispatcher->dispatch($this->createRequest($method, '/admin'));
-                $this->fail();
+                static::fail();
             } catch (MethodNotAllowedException $exception) {
             }
         }
@@ -61,11 +61,11 @@ class DispatcherTest extends TestCase
             $router->createRoute(['GET'], '/admin/action', TestDispatcherAdminController::class, 'action');
         });
 
-        $this->assertEquals(
+        static::assertEquals(
             '[GET] index@Admin',
             $dispatcher->dispatch($this->createRequest('GET', '/admin/index'))->getBody()->__toString()
         );
-        $this->assertEquals(
+        static::assertEquals(
             '[GET] action@Admin',
             $dispatcher->dispatch($this->createRequest('GET', '/admin/action'))->getBody()->__toString()
         );
@@ -83,7 +83,7 @@ class DispatcherTest extends TestCase
         $request->shouldReceive('withAttribute')->with('user', '37')->andReturn($request);
         $request->shouldReceive('getAttribute')->with('user')->andReturn('37');
 
-        $this->assertEquals(
+        static::assertEquals(
             '[GET] users/37@Admin',
             $dispatcher->dispatch($request)->getBody()->__toString()
         );
@@ -105,17 +105,17 @@ class DispatcherTest extends TestCase
             });
         });
 
-        $this->assertEquals(
+        static::assertEquals(
             '[GET] index@Home',
             $dispatcher->dispatch($this->createRequest('GET', '/'))->getBody()->__toString()
         );
 
-        $this->assertEquals(
+        static::assertEquals(
             '[GET] auth success; [GET] index@Admin',
             $dispatcher->dispatch($this->createRequest('GET', '/admin'))->getBody()->__toString()
         );
 
-        $this->assertEquals(
+        static::assertEquals(
             '[POST] auth success; [POST] action@Admin',
             $dispatcher->dispatch($this->createRequest('POST', '/admin'))->getBody()->__toString()
         );
@@ -124,7 +124,7 @@ class DispatcherTest extends TestCase
         $request->shouldReceive('withAttribute')->with('user', '81')->andReturn($request);
         $request->shouldReceive('getAttribute')->with('user')->andReturn('81');
 
-        $this->assertEquals(
+        static::assertEquals(
             '[GET] auth success; [GET] users/81@Admin',
             $dispatcher->dispatch($request)->getBody()->__toString()
         );
@@ -143,17 +143,17 @@ class DispatcherTest extends TestCase
             });
         });
 
-        $this->assertEquals(
+        static::assertEquals(
             '[GET] index@Home',
             $dispatcher->dispatch($this->createRequest('GET', '/'))->getBody()->__toString()
         );
 
-        $this->assertEquals(
+        static::assertEquals(
             '[GET] index@Admin',
             $dispatcher->dispatch($this->createRequest('GET', '/admin'))->getBody()->__toString()
         );
 
-        $this->assertEquals(
+        static::assertEquals(
             '[POST] action@Admin',
             $dispatcher->dispatch($this->createRequest('POST', '/admin'))->getBody()->__toString()
         );
@@ -162,7 +162,7 @@ class DispatcherTest extends TestCase
         $request->shouldReceive('withAttribute')->with('user', '81')->andReturn($request);
         $request->shouldReceive('getAttribute')->with('user')->andReturn('81');
 
-        $this->assertEquals(
+        static::assertEquals(
             '[GET] users/81@Admin',
             $dispatcher->dispatch($request)->getBody()->__toString()
         );
@@ -180,12 +180,12 @@ class DispatcherTest extends TestCase
             });
         });
 
-        $this->assertEquals(
+        static::assertEquals(
             '[GET] auth success; [GET] index@Admin',
             $dispatcher->dispatch($this->createRequest('GET', '/admin'))->getBody()->__toString()
         );
 
-        $this->assertEquals(
+        static::assertEquals(
             '[POST] auth success; [POST] action@Admin',
             $dispatcher->dispatch($this->createRequest('POST', '/admin'))->getBody()->__toString()
         );
@@ -194,13 +194,13 @@ class DispatcherTest extends TestCase
         $request->shouldReceive('withAttribute')->with('user', '83')->andReturn($request);
         $request->shouldReceive('getAttribute')->with('user')->andReturn('83');
 
-        $this->assertEquals(
+        static::assertEquals(
             '[GET] auth success; [GET] users/83@Admin',
             $dispatcher->dispatch($request)->getBody()->__toString()
         );
     }
 
-    public function testVirtualMethod()
+    public function testVirtualMethodDisabled()
     {
         $dispatcher = (new Dispatcher(new DefaultLoader()))->withRoutes(function (Router $router) {
             $router->createRoute(['PUT'], '/', TestDispatcherHomeController::class);
@@ -216,12 +216,12 @@ class DispatcherTest extends TestCase
 
         try {
             $dispatcher->dispatch($request);
-            $this->fail();
+            static::fail();
         } catch (MethodNotAllowedException $e) {
         }
     }
 
-    public function testVirtualMethodEnabled()
+    public function testVirtualMethodByUnderbarMethod()
     {
         $dispatcher = $this->createDispatcher([
             'virtual_method_enabled' => true,
@@ -238,7 +238,30 @@ class DispatcherTest extends TestCase
             $this->createRequest('PUT', '/') // changed!
         );
 
-        $this->assertEquals(
+        static::assertEquals(
+            '[PUT] index@Home',
+            $dispatcher->dispatch($request)->getBody()->__toString()
+        );
+    }
+
+    public function testVirtualMethodByXHeader()
+    {
+        $dispatcher = $this->createDispatcher([
+            'virtual_method_enabled' => true,
+        ]);
+        $dispatcher = $dispatcher->withRoutes(function (Router $router) {
+            $router->createRoute(['PUT'], '/', TestDispatcherHomeController::class);
+        });
+
+        $request = $this->createRequest('POST', '/');
+        $request->shouldReceive('getParsedBody')->andReturn([]);
+        $request->shouldReceive('hasHeader')->with('X-Http-Method-Override')->andReturn(true);
+        $request->shouldReceive('getHeaderLine')->with('X-Http-Method-Override')->andReturn('PUT');
+        $request->shouldReceive('withMethod')->with('PUT')->andReturn(
+            $this->createRequest('PUT', '/') // changed!
+        );
+
+        static::assertEquals(
             '[PUT] index@Home',
             $dispatcher->dispatch($request)->getBody()->__toString()
         );
