@@ -118,6 +118,22 @@ class ServerRequestFactoryTest extends PHPUnit_Framework_TestCase
             'hello' => [1,2,3,4,5]
         ], $serverRequest->getParsedBody());
     }
+    
+    public function testServerParamsDuplicate()
+    {
+        $body = Mockery::mock(StreamInterface::class);
+        $body->shouldReceive('__toString')->andReturn('{"hello":[1,2,3,4,5]}');
+
+        $serverRequest = $this->factory->create([
+            'HTTP_CONTENT_TYPE' => 'application/x-www-form-urlencoded; charset=utf-8',
+            'CONTENT_TYPE' => 'application/x-www-form-urlencoded; charset=utf-8',
+            'REQUEST_METHOD' => 'PUT',
+        ], [], [], [], [], $body);
+
+        static::assertEquals([
+            'content-type' => ['application/x-www-form-urlencoded; charset=utf-8'],
+        ], $serverRequest->getHeaders());
+    }
 
     public function testGetJsonParsedBodyWithCharsetHeader()
     {
