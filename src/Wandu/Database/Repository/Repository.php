@@ -66,7 +66,7 @@ class Repository
         $identifierKey = $this->settings->getIdentifier();
         $columns = $this->settings->getColumns();
         $attributesToStore = [];
-        foreach ($columns as $columnName => $propertyName) {
+        foreach ($columns as $propertyName => $columnName) {
             if ($identifierKey === $propertyName) continue;
             $attributesToStore[$columnName] = $this->pickProperty($this->getPropertyReflection($propertyName), $entity);
         }
@@ -74,7 +74,7 @@ class Repository
         $rowAffected = $this->query($queryBuilder->insert($attributesToStore));
         if ($this->settings->isIncrements()) {
             $lastInsertId = $this->connection->getLastInsertId();
-            $this->injectProperty($this->getPropertyReflection($columns[$identifierKey]), $entity, $lastInsertId);
+            $this->injectProperty($this->getPropertyReflection($identifierKey), $entity, $lastInsertId);
         }
         return $rowAffected;
     }
@@ -84,18 +84,18 @@ class Repository
         $this->assertIsInstance($entity, __METHOD__);
         $identifierKey = $this->settings->getIdentifier();
         $columns = $this->settings->getColumns();
-        $identifier = $this->pickProperty($this->getPropertyReflection($columns[$identifierKey]), $entity);
+        $identifier = $this->pickProperty($this->getPropertyReflection($identifierKey), $entity);
         if (!$identifier) {
             throw new IdentifierNotFoundException();
         }
         $attributesToStore = [];
-        foreach ($columns as $columnName => $propertyName) {
+        foreach ($columns as $propertyName => $columnName) {
             if ($identifierKey === $propertyName) continue;
             $attributesToStore[$columnName] = $this->pickProperty($this->getPropertyReflection($propertyName), $entity);
         }
 
         $queryBuilder = $this->connection->createQueryBuilder($this->settings->getTable());
-        return $this->query($queryBuilder->update($attributesToStore)->where($identifierKey, $identifier));
+        return $this->query($queryBuilder->update($attributesToStore)->where($columns[$identifierKey], $identifier));
     }
 
     /**
@@ -108,13 +108,13 @@ class Repository
         $identifierKey = $this->settings->getIdentifier();
         $columns = $this->settings->getColumns();
         
-        $identifier = $this->pickProperty($this->getPropertyReflection($columns[$identifierKey]), $entity);
+        $identifier = $this->pickProperty($this->getPropertyReflection($identifierKey), $entity);
         if (!$identifier) {
             throw new IdentifierNotFoundException();
         }
         $queryBuilder = $this->connection->createQueryBuilder($this->settings->getTable());
-        $affectedRows = $this->query($queryBuilder->delete()->where($identifierKey, $identifier));
-        $this->injectProperty($this->getPropertyReflection($columns[$identifierKey]), $entity, null);
+        $affectedRows = $this->query($queryBuilder->delete()->where($columns[$identifierKey], $identifier));
+        $this->injectProperty($this->getPropertyReflection($identifierKey), $entity, null);
         return $affectedRows;
     }
 
@@ -141,9 +141,10 @@ class Repository
         if ($model) {
             $classReflection = $this->getClassReflection();
             $entity = $classReflection->newInstanceWithoutConstructor();
-            foreach ($attributes as $name => $attribute) {
-                $value = isset($casts[$name]) ? $this->cast($attribute, $casts[$name]) : $attribute;
-                $this->injectProperty($this->getPropertyReflection($columns[$name]), $entity, $value);
+            foreach ($columns as $propertyName => $column) {
+                if (!isset($attributes[$column])) continue;
+                $value = isset($casts[$column]) ? $this->cast($attributes[$column], $casts[$column]) : $attributes[$column];
+                $this->injectProperty($this->getPropertyReflection($propertyName), $entity, $value);
             }
         } else {
             $entity = new stdClass();

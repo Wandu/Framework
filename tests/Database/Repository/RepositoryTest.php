@@ -1,6 +1,7 @@
 <?php
 namespace Wandu\Database\Repository;
 
+use Doctrine\Common\Annotations\AnnotationReader;
 use InvalidArgumentException;
 use stdClass;
 use Wandu\Database\Annotations\Column;
@@ -24,18 +25,15 @@ class RepositoryTest extends SakilaTestCase
         $this->repository1 = new Repository($this->connection, new RepositorySettings('actor', [
             'model' => RepositoryTestActor::class,
             'columns' => [
-                'actor_id' => 'id',
-                'first_name' => 'firstName',
-                'last_name' => 'lastName',
-                'last_update' => 'lastUpdate',
+                'id' => 'actor_id',
+                'firstName' => 'first_name',
+                'lastName' => 'last_name',
+                'lastUpdate' => 'last_update',
             ],
             'casts' => [
-                'actor_id' => 'integer',
-                'first_name' => 'string',
-                'last_name' => 'string',
-                'last_update' => 'string',
+                'id' => 'integer',
             ],
-            'identifier' => 'actor_id',
+            'identifier' => 'id',
             'increments' => true,
         ]));
         $this->repository2 = $this->connection->createRepository(RepositoryTestActor::class);
@@ -43,7 +41,23 @@ class RepositoryTest extends SakilaTestCase
 
     public function testFromAnnotation()
     {
-        static::assertEquals($this->repository1, $this->repository2);
+        static::assertEquals(new RepositorySettings('actor', [
+            'model' => RepositoryTestActor::class,
+            'columns' => [
+                'id' => 'actor_id',
+                'firstName' => 'first_name',
+                'lastName' => 'last_name',
+                'lastUpdate' => 'last_update',
+            ],
+            'casts' => [
+                'id' => 'integer',
+                'firstName' => 'string',
+                'lastName' => 'string',
+                'lastUpdate' => 'string',
+            ],
+            'identifier' => 'id',
+            'increments' => true,
+        ]), RepositorySettings::fromAnnotation(RepositoryTestActor::class, new AnnotationReader()));
     }
     
     public function provideSelectQueries()
@@ -182,7 +196,7 @@ class RepositoryTest extends SakilaTestCase
 }
 
 /**
- * @Table(name="actor", identifier="actor_id", increments=true)
+ * @Table(name="actor", identifier="id", increments=true)
  */
 class RepositoryTestActor
 {

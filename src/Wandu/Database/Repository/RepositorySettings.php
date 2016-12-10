@@ -30,8 +30,8 @@ class RepositorySettings
         foreach ($propertiesRefl as $propertyRefl) {
             /* @var \Wandu\Database\Annotations\Column $column */
             if ($column = $reader->getPropertyAnnotation($propertyRefl, Column::class)) {
-                $columns[$column->name] = $propertyRefl->name;
-                $casts[$column->name] = $column->cast;
+                $columns[$propertyRefl->name] = $column->name;
+                $casts[$propertyRefl->name] = $column->cast;
             }
         }
         if (count($columns)) {
