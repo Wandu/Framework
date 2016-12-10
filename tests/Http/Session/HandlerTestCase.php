@@ -21,7 +21,7 @@ abstract class HandlerTestCase extends PHPUnit_Framework_TestCase
     {
         $session = $this->adapter->read(sha1(uniqid()));
 
-        $this->assertEquals('', $session);
+        static::assertEquals('', $session);
     }
     
     public function testNothingToDestroy()
@@ -40,23 +40,23 @@ abstract class HandlerTestCase extends PHPUnit_Framework_TestCase
             'name' => 'multi session test',
         ]));
 
-        $this->assertEquals([
+        static::assertEquals([
             'name' => 'multi session test',
         ], unserialize($this->adapter->read($sessionId1)));
-        $this->assertEquals('', $this->adapter->read($sessionId2));
+        static::assertEquals('', $this->adapter->read($sessionId2));
 
         // destroy
         $this->adapter->destroy($sessionId2);
 
-        $this->assertEquals([
+        static::assertEquals([
             'name' => 'multi session test',
         ], unserialize($this->adapter->read($sessionId1)));
-        $this->assertEquals('', $this->adapter->read($sessionId2));
+        static::assertEquals('', $this->adapter->read($sessionId2));
 
         $this->adapter->destroy($sessionId1);
 
         // then blank
-        $this->assertEquals('', $this->adapter->read($sessionId1));
+        static::assertEquals('', $this->adapter->read($sessionId1));
     }
 
     public function testWriteSession()
@@ -70,7 +70,7 @@ abstract class HandlerTestCase extends PHPUnit_Framework_TestCase
         ]));
 
         // then data
-        $this->assertEquals([
+        static::assertEquals([
             'hello' => 'world',
             'what' => 'um..'
         ], unserialize($this->adapter->read($sessionId)));
@@ -79,7 +79,7 @@ abstract class HandlerTestCase extends PHPUnit_Framework_TestCase
         $this->adapter->destroy($sessionId);
 
         // then blank
-        $this->assertEquals('', $this->adapter->read($sessionId));
+        static::assertEquals('', $this->adapter->read($sessionId));
     }
 
     public function testGarbageCollection()
@@ -91,24 +91,24 @@ abstract class HandlerTestCase extends PHPUnit_Framework_TestCase
         $this->adapter->write('3', 'string 3');
 
         // increase 3 files
-        $this->assertEquals($this->getCountOfSessionFiles(), $countOfSessionFiles + 3);
+        static::assertEquals($this->getCountOfSessionFiles(), $countOfSessionFiles + 3);
 
-        $this->assertTrue($this->adapter->gc(1));
+        static::assertTrue($this->adapter->gc(1));
 
-        $this->assertEquals('string 1', $this->adapter->read('1'));
-        $this->assertEquals('string 2', $this->adapter->read('2'));
-        $this->assertEquals('string 3', $this->adapter->read('3'));
+        static::assertEquals('string 1', $this->adapter->read('1'));
+        static::assertEquals('string 2', $this->adapter->read('2'));
+        static::assertEquals('string 3', $this->adapter->read('3'));
 
         sleep(2);
 
-        $this->assertTrue($this->adapter->gc(1));
+        static::assertTrue($this->adapter->gc(1));
 
         // decrease 3 files
-        $this->assertEquals($this->getCountOfSessionFiles(), $countOfSessionFiles);
+        static::assertEquals($this->getCountOfSessionFiles(), $countOfSessionFiles);
 
-        $this->assertEquals('', $this->adapter->read('1'));
-        $this->assertEquals('', $this->adapter->read('2'));
-        $this->assertEquals('', $this->adapter->read('3'));
+        static::assertEquals('', $this->adapter->read('1'));
+        static::assertEquals('', $this->adapter->read('2'));
+        static::assertEquals('', $this->adapter->read('3'));
     }
 
     /**

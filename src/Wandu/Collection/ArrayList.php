@@ -200,7 +200,7 @@ class ArrayList implements ListInterface
     {
         $this->executeIterator();
         if (isset($key)) {
-            $this->items[$key + 0] = $value;
+            $this->items[(int) $key] = $value;
         } else {
             $this->items[] = $value;
         }
