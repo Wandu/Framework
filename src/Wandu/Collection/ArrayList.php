@@ -504,7 +504,7 @@ class ArrayList implements ListInterface
             return;
         }
         if (is_string($value)) {
-            if ($value == (($value + 0) . '') && $value <= $this->count()) {
+            if ($value == (((int) $value) . '') && $value <= $this->count()) {
                 return;
             }
         }
