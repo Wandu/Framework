@@ -327,15 +327,22 @@ TEXT;
         $list = new ArrayList([1, 2, null, 4, 5]);
         static::assertSame([1, 2, 4, 5,], $list->filter()->toArray());
 
-        $list = new ArrayList([1, 2, null, 4, 5]);
-        static::assertSame([4, 5,], $list->filter(function ($item, $key) {
-            return $item > 3;
-        })->toArray());
+        if (defined('HHVM_VERSION')) {
+            $list = new ArrayList([1, 2, null, 4, 5]);
+            static::assertSame([4, 5,], $list->filter(function ($item) {
+                return $item > 3;
+            })->toArray());
+        } else {
+            $list = new ArrayList([1, 2, null, 4, 5]);
+            static::assertSame([4, 5,], $list->filter(function ($item, $key) {
+                return $item > 3;
+            })->toArray());
 
-        $list = new ArrayList([1, 2, null, 4, 5]);
-        static::assertSame([1, 2,], $list->filter(function ($item, $key) {
-            return $key < 2;
-        })->toArray());
+            $list = new ArrayList([1, 2, null, 4, 5]);
+            static::assertSame([1, 2,], $list->filter(function ($item, $key) {
+                return $key < 2;
+            })->toArray());
+        }
     }
 
     public function testMap()

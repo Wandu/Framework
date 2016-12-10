@@ -239,8 +239,11 @@ class ArrayList implements ListInterface
     {
         $this->executeIterator();
         if ($handler) {
-            // // 1 = ARRAY_FILTER_USE_BOTH (hhvm not defined ARRAY_FILTER_USE_BOTH)
-            return new ArrayList(array_values(array_filter($this->items, $handler, 1)));
+            if (defined("ARRAY_FILTER_USE_BOTH")) {
+                return new ArrayList(array_values(array_filter($this->items, $handler, ARRAY_FILTER_USE_BOTH)));
+            } else {
+                return new ArrayList(array_values(array_filter($this->items, $handler)));
+            }
         }
         return new ArrayList(array_values(array_filter($this->items)));
     }
