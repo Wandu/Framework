@@ -8,6 +8,7 @@ use Interop\Container\ContainerInterface as InteropContainerInterface;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionFunctionAbstract;
+use ReflectionMethod;
 use ReflectionObject;
 use ReflectionProperty;
 use Throwable;
@@ -365,6 +366,20 @@ class Container implements ContainerInterface
             return $parametersToReturn; 
         }
         
+        $autoWires = [];
+        if (
+            $reflectionFunction instanceof ReflectionMethod &&
+            $this->containees[$reflectionFunction->getDeclaringClass()->getName()]->isWireEnabled()
+        ) {
+            $autoWires = $this->getAutoWiresFromMethod($reflectionFunction);
+        } elseif (
+            $reflectionFunction instanceof ReflectionCallable &&
+            $reflectionFunction->getRawReflection() instanceof ReflectionMethod &&
+            $this->containees[$reflectionFunction->getRawReflection()->getDeclaringClass()->getName()]->isWireEnabled()
+        ) {
+            $autoWires = $this->getAutoWiresFromMethod($reflectionFunction->getRawReflection());
+        }
+        
         try {
             /* @var \ReflectionParameter $param */
             foreach ($reflectionParameters as $param) {
@@ -372,8 +387,10 @@ class Container implements ContainerInterface
                  * #1. search in arguments by parameter name
                  * #2. if parameter has type hint
                  * #2.1. search in container by class name
-                 * #3. if has default value, insert default value.
-                 * #4. exception
+                 * #3. if autowired enabled
+                 * #3.1. search in container by autowired name
+                 * #4. if has default value, insert default value.
+                 * #5. exception
                  */
                 $paramName = $param->getName();
                 if (array_key_exists($paramName, $arguments)) { // #1.
@@ -388,11 +405,15 @@ class Container implements ContainerInterface
                         continue;
                     }
                 }
-                if ($param->isDefaultValueAvailable()) { // #3.
+                if (array_key_exists($paramName, $autoWires) && $this->has($autoWires[$paramName])) {
+                    $parametersToReturn[] = $this->get($autoWires[$paramName]);
+                    continue;
+                }
+                if ($param->isDefaultValueAvailable()) { // #4.
                     $parametersToReturn[] = $param->getDefaultValue();
                     continue;
                 }
-                throw new CannotFindParameterException($paramName); // #4.
+                throw new CannotFindParameterException($paramName); // #5.
             }
         } catch (ReflectionException $e) {
             throw new CannotFindParameterException($paramName);
@@ -442,5 +463,22 @@ class Container implements ContainerInterface
             throw $e;
         }
         array_pop($callStack);
+    }
+
+    /**
+     * @param \ReflectionMethod $reflMethod
+     * @return array
+     */
+    protected function getAutoWiresFromMethod(ReflectionMethod $reflMethod)
+    {
+        $reader = $this->get(Reader::class);
+        class_exists(AutoWired::class); // pre-load for Annotation Reader
+        $autoWires = [];
+        foreach ($reader->getMethodAnnotations($reflMethod) as $annotation) {
+            if ($annotation instanceof AutoWired) {
+                $autoWires[$annotation->to] = $annotation->name;
+            }
+        }
+        return $autoWires;
     }
 }

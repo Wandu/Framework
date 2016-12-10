@@ -6,10 +6,13 @@ use Doctrine\Common\Annotations\Annotation\Target;
 
 /**
  * @Annotation
- * @Target({"PROPERTY"})
+ * @Target({"PROPERTY", "METHOD"})
  */
 class AutoWired
 {
     /** @Required @var string */
     public $name;
+
+    /** @var string */
+    public $to = null;
 }
