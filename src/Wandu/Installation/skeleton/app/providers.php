@@ -1,5 +1,5 @@
 <?php
-use Wandu\Bridges\Eloquent\EloquentServiceProvider;
+use Wandu\Database\DatabaseServiceProvider;
 use Wandu\Database\Migrator\MigratorServiceProvider;
 use Wandu\DateTime\DateTimeServiceProvider;
 use Wandu\Event\EventServiceProvider;
@@ -15,6 +15,6 @@ return [
     DateTimeServiceProvider::class,
     MigratorServiceProvider::class,
     PhpViewServiceProvider::class,
-    EloquentServiceProvider::class,
+    DatabaseServiceProvider::class,
     ApplicationServiceProvider::class,
 ];

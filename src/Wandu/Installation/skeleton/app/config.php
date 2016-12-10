@@ -7,13 +7,13 @@ return [
         'connections' => [
             'default' => [
                 'driver'    => 'mysql',
-                'host'      => 'localhost',
-                'database'  => 'wandu',
-                'username'  => 'root',
-                'password'  => 'root',
+                'host'      => WANDU_DB_HOST,
+                'database'  => WANDU_DB_DBNAME,
+                'username'  => WANDU_DB_USERNAME,
+                'password'  => WANDU_DB_PASSWORD,
                 'charset'   => 'utf8mb4',
                 'collation' => 'utf8mb4_unicode_ci',
-                'prefix'    => 'local_',
+                'prefix'    => WANDU_DB_PREFIX,
             ],
         ],
         'migrator' => [

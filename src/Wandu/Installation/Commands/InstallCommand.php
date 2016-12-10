@@ -93,6 +93,13 @@ class InstallCommand extends Command
 
         file_put_contents($appBasePath . '/.wandu.php', <<<PHP
 <?php
+
+define('WANDU_DB_HOST', 'localhost');
+define('WANDU_DB_DBNAME', 'wandu');
+define('WANDU_DB_USERNAME', 'root');
+define('WANDU_DB_PASSWORD', 'root');
+define('WANDU_DB_PREFIX', 'local_');
+
 return new {$appNamespace}\ApplicationDefinition();
 
 PHP
