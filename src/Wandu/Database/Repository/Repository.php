@@ -7,6 +7,7 @@ use ReflectionProperty;
 use stdClass;
 use Wandu\Database\Contracts\ConnectionInterface;
 use Wandu\Database\Exception\IdentifierNotFoundException;
+use Wandu\Database\Query\SelectQuery;
 
 class Repository
 {
@@ -49,12 +50,17 @@ class Repository
         return $this->hydrate($this->connection->first($this->normalizeQuery($query), $bindings));
     }
 
+    /**
+     * @param string|int $identifier
+     * @return object
+     */
     public function find($identifier)
     {
-        
+        return $this->first(function (SelectQuery $select) use ($identifier) {
+            $columns = $this->settings->getColumns();
+            return $select->where($columns[$this->settings->getIdentifier()], $identifier);
+        });
     }
-    
-    
     
     /**
      * @param object $entity
@@ -79,6 +85,10 @@ class Repository
         return $rowAffected;
     }
 
+    /**
+     * @param object $entity
+     * @return int
+     */
     public function update($entity)
     {
         $this->assertIsInstance($entity, __METHOD__);
@@ -132,8 +142,11 @@ class Repository
      * @param array $attributes
      * @return object
      */
-    public function hydrate(array $attributes = [])
+    public function hydrate(array $attributes = null)
     {
+        if (!$attributes) {
+            return null;
+        }
         $model = $this->settings->getModel();
         $casts = $this->settings->getCasts();
         $columns = $this->settings->getColumns(); // map

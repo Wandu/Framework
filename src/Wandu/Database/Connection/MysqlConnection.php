@@ -83,7 +83,8 @@ class MysqlConnection implements ConnectionInterface
     {
         $statement = $this->prepare($query, $bindings);
         $statement->execute();
-        return $statement->fetch(PDO::FETCH_ASSOC);
+        $attributes = $statement->fetch(PDO::FETCH_ASSOC);
+        return $attributes ?: null;
     }
 
     /**

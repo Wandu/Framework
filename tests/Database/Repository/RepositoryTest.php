@@ -115,6 +115,17 @@ class RepositoryTest extends SakilaTestCase
         static::assertEquals(1, $iterateCount);
     }
 
+    public function testFind()
+    {
+        $expectedActor = new RepositoryTestActor(138, 'LUCILLE', 'DEE', '2006-02-15 04:34:33');
+
+        $actor = $this->repository1->find(138);
+        static::assertEquals($expectedActor, $actor);
+
+        $actor = $this->repository1->find(-1);
+        static::assertNull($actor);
+    }
+
     /**
      * @dataProvider provideSelectQueries
      * @param string|callable|\Wandu\Database\Contracts\QueryInterface $query
