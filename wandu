@@ -15,6 +15,7 @@ while (!file_exists($autoloadPath . '/vendor/autoload.php')) {
 
 define('WANDU_BASE_PATH', $autoloadPath);
 require_once WANDU_BASE_PATH . '/vendor/autoload.php';
+chdir($autoloadPath);
 unset($autoloadPath);
 
 $appPath = realpath(getcwd());
