@@ -2,6 +2,7 @@
 namespace Wandu\Database\Query\Expression;
 
 use Wandu\Database\Contracts\ExpressionInterface;
+use Wandu\Database\Support\Helper;
 
 /**
  * ComparisonExpression = '`' $name '` ' $operator ' ' $value
@@ -44,7 +45,7 @@ class ComparisonExpression implements ExpressionInterface
      */
     public function toSql()
     {
-        return "`{$this->name}` {$this->operator} ?";
+        return Helper::normalizeName($this->name) . " {$this->operator} ?";
     }
 
     /**

@@ -7,6 +7,7 @@ use ArrayAccess;
 use PDO;
 use PDOStatement;
 use Throwable;
+use Wandu\Collection\ArrayList;
 use Wandu\Database\Contracts\ConnectionInterface;
 use Wandu\Database\Contracts\QueryInterface;
 use Wandu\Database\Exception\ClassNotFoundException;
@@ -74,6 +75,14 @@ class MysqlConnection implements ConnectionInterface
         while ($row = $statement->fetch(PDO::FETCH_ASSOC)) {
             yield $row;
         }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function all($query, array $bindings = [])
+    {
+        return new ArrayList($this->fetch($query, $bindings));
     }
 
     /**

@@ -48,7 +48,7 @@ class UpdateQuery extends HasWhereExpression implements QueryInterface
      */
     public function toSql()
     {
-        $parts = ['UPDATE `' . $this->table . '`'];
+        $parts = ['UPDATE ' . Helper::normalizeName($this->table) . ''];
         if (count($this->attributes)) {
             $columns = array_keys($this->attributes);
             $parts[] = "SET " . Helper::arrayImplode(', ', $columns, "`", "` = ?");

@@ -30,6 +30,13 @@ interface ConnectionInterface
     /**
      * @param string|callable|\Wandu\Database\Contracts\QueryInterface $query
      * @param array $bindings
+     * @return \Wandu\Collection\Contracts\ListInterface
+     */
+    public function all($query, array $bindings = []);
+
+    /**
+     * @param string|callable|\Wandu\Database\Contracts\QueryInterface $query
+     * @param array $bindings
      * @return array
      */
     public function first($query, array $bindings = []);

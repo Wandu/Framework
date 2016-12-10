@@ -28,7 +28,7 @@ class EventServiceProvider implements ServiceProviderInterface
      */
     public function register(ContainerInterface $app)
     {
-        $app->closure(Dispatcher::class, function ($container) {
+        $app->closure(Dispatcher::class, function (ContainerInterface $container) {
             return new Dispatcher($container);
         });
         $app->alias(DispatcherInterface::class, Dispatcher::class);

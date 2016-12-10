@@ -3,6 +3,7 @@ namespace Wandu\Database\Query;
 
 use Wandu\Database\Contracts\QueryInterface;
 use Wandu\Database\Query\Expression\HasWhereExpression;
+use Wandu\Database\Support\Helper;
 
 class SelectQuery extends HasWhereExpression implements QueryInterface
 {
@@ -32,10 +33,10 @@ class SelectQuery extends HasWhereExpression implements QueryInterface
             if ($column === '*') {
                 $columnSqlParts[] = '*';
             } else {
-                $columnSqlParts[] = "`{$column}`";
+                $columnSqlParts[] = Helper::normalizeName($column);
             }
         }
-        $parts = ["SELECT ". implode(', ', $columnSqlParts) ." FROM `{$this->table}`"];
+        $parts = ["SELECT ". implode(', ', $columnSqlParts) ." FROM " . Helper::normalizeName($this->table)];
         if ($part = parent::toSql()) {
             $parts[] = $part;
         }

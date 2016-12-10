@@ -31,6 +31,13 @@ class QueryBuilderTest extends PHPUnit_Framework_TestCase
         static::assertEquals('SELECT `user_id`, `created_at` FROM `tests` WHERE `foo` < ? AND `bar` = ? OR `def` = ? ORDER BY `id` DESC LIMIT ? OFFSET ?', $query->toSql());
         static::assertEquals(['foo string', 'bar string', 'def', 10, 20], $query->getBindings());
     }
+    
+    public function testSelectFromOtherDatabase()
+    {
+        $query = (new QueryBuilder('others.tests'))->select(['user_id', 'created_at']);
+
+        static::assertEquals('SELECT `user_id`, `created_at` FROM `others`.`tests`', $query->toSql());
+    }
 
     public function testInsertOne()
     {

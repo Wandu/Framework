@@ -43,4 +43,13 @@ class Helper
         }
         return $itemPrefix . implode($itemSuffix . $glue . $itemPrefix, $input) . $itemSuffix;
     }
+
+    /**
+     * @param string $name
+     * @return string
+     */
+    public static function normalizeName($name)
+    {
+        return "`" . implode('`.`', explode('.', $name)) . "`";
+    }
 }

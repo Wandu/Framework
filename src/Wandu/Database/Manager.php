@@ -9,13 +9,10 @@ use Wandu\Database\Exception\DriverNotFoundException;
 
 class Manager
 {
-    /** @var \Wandu\Database\Manager */
-    protected static $instance;
-
     /** @var \ArrayAccess */
     protected $container;
 
-    /** @var array */
+    /** @var \Wandu\Database\Contracts\ConnectionInterface[] */
     protected $connections = [];
 
     /**
@@ -36,7 +33,7 @@ class Manager
         if (!$information instanceof ConnectorInterface) {
             $information = $this->getConnectorFromConfig($information);
         }
-        return $this->connection($information->connect($this->container), $name);
+        return $this->setConnection($information->connect($this->container), $name);
     }
 
     /**
@@ -44,19 +41,18 @@ class Manager
      * @param string $name
      * @return \Wandu\Database\Contracts\ConnectionInterface
      */
-    public function connection(ConnectionInterface $connection, $name = 'default')
+    public function setConnection(ConnectionInterface $connection, $name = 'default')
     {
         return $this->connections[$name] = $connection;
     }
 
     /**
-     * @return \Wandu\Database\Manager
+     * @param string $name
+     * @return \Wandu\Database\Contracts\ConnectionInterface
      */
-    public function setAsGlobal()
+    public function getConnection($name = 'defeault')
     {
-        $beforeInstance = static::$instance;
-        static::$instance = $this;
-        return $beforeInstance;
+        return isset($this->connections[$name]) ? $this->connections[$name] : null;
     }
 
     /**

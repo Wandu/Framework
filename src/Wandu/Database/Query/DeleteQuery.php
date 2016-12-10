@@ -3,6 +3,7 @@ namespace Wandu\Database\Query;
 
 use Wandu\Database\Contracts\QueryInterface;
 use Wandu\Database\Query\Expression\HasWhereExpression;
+use Wandu\Database\Support\Helper;
 
 class DeleteQuery extends HasWhereExpression implements QueryInterface
 {
@@ -22,7 +23,7 @@ class DeleteQuery extends HasWhereExpression implements QueryInterface
      */
     public function toSql()
     {
-        $parts = ['DELETE FROM `' . $this->table . '`'];
+        $parts = ['DELETE FROM ' . Helper::normalizeName($this->table)];
         if ($part = parent::toSql()) {
             $parts[] = $part;
         }

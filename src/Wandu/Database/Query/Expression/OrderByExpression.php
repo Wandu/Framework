@@ -55,7 +55,7 @@ class OrderByExpression implements ExpressionInterface
         }
         $parts = [];
         foreach ($this->orders as $order) {
-            $parts[] = "`{$order[0]}`" . ($order[1] ? '' : ' DESC');
+            $parts[] = Helper::normalizeName($order[0]) . ($order[1] ? '' : ' DESC');
         }
         return 'ORDER BY ' . Helper::arrayImplode(", ", $parts);
     }
