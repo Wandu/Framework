@@ -1,69 +1,60 @@
 <?php
 namespace Wandu\Database\Connection;
 
-use Doctrine\Common\Annotations\Reader;
 use Exception;
-use ArrayAccess;
 use PDO;
 use PDOStatement;
 use Throwable;
 use Wandu\Collection\ArrayList;
+use Wandu\Database\Configuration;
 use Wandu\Database\Contracts\ConnectionInterface;
 use Wandu\Database\Contracts\QueryInterface;
-use Wandu\Database\Exception\ClassNotFoundException;
-use Wandu\Database\QueryBuilder;
-use Wandu\Database\Repository\Repository;
-use Wandu\Database\Repository\RepositorySettings;
 
 class MysqlConnection implements ConnectionInterface
 {
     /** @var \PDO */
     protected $pdo;
 
-    /** @var \ArrayAccess */
-    protected $container;
-
-    /** @var string */
-    protected $prefix;
+    /** @var \Wandu\Database\Configuration */
+    protected $config;
 
     /**
-     * @param \PDO $pdo
-     * @param \ArrayAccess $container
-     * @param string $prefix
+     * @param \Wandu\Database\Configuration $config
      */
-    public function __construct(PDO $pdo, ArrayAccess $container = null, $prefix = '')
+    public function __construct(Configuration $config)
     {
-        $this->pdo = $pdo;
-        $this->container = $container;
-        $this->prefix = $prefix;
+        $this->config = $config;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getPrefix()
+    public function connect()
     {
-        return $this->prefix;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function createQueryBuilder($table)
-    {
-        return new QueryBuilder($this->getPrefix() . $table);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function createRepository($className)
-    {
-        if (!$this->container || !$this->container[Reader::class]) {
-            throw new ClassNotFoundException(Reader::class);
+        if (!$this->pdo) {
+            $this->pdo = $this->config->createPdo();
         }
-        return new Repository($this, RepositorySettings::fromAnnotation($className, $this->container[Reader::class]));
+        return $this;
     }
+
+//    /**
+//     * {@inheritdoc}
+//     */
+//    public function createQueryBuilder($table)
+//    {
+//        return new QueryBuilder($this->getPrefix() . $table);
+//    }
+//
+//    /**
+//     * {@inheritdoc}
+//     */
+//    public function createRepository($className)
+//    {
+//        if (!$this->container || !$this->container[Reader::class]) {
+//            throw new ClassNotFoundException(Reader::class);
+//        }
+//        return new Repository($this, RepositorySettings::fromAnnotation($className, $this->container[Reader::class]));
+//    }
 
     /**
      * {@inheritdoc}

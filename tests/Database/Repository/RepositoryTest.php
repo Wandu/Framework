@@ -2,47 +2,30 @@
 namespace Wandu\Database\Repository;
 
 use Doctrine\Common\Annotations\AnnotationReader;
-use InvalidArgumentException;
-use stdClass;
-use Wandu\Database\Annotations\Column;
-use Wandu\Database\Annotations\Table;
 use Wandu\Database\Exception\IdentifierNotFoundException;
 use Wandu\Database\Query\SelectQuery;
 use Wandu\Database\QueryBuilder;
+use Wandu\Database\Sakila\SakilaActor;
 use Wandu\Database\SakilaTestCase;
+use InvalidArgumentException;
+use stdClass;
 
 class RepositoryTest extends SakilaTestCase 
 {
     /** @var \Wandu\Database\Repository\Repository */
-    protected $repository1;
-
-    /** @var \Wandu\Database\Repository\Repository */
-    protected $repository2;
-
+    protected $repository;
+    
     public function setUp()
     {
         parent::setUp();
-        $this->repository1 = new Repository($this->connection, new RepositorySettings('actor', [
-            'model' => RepositoryTestActor::class,
-            'columns' => [
-                'id' => 'actor_id',
-                'firstName' => 'first_name',
-                'lastName' => 'last_name',
-                'lastUpdate' => 'last_update',
-            ],
-            'casts' => [
-                'id' => 'integer',
-            ],
-            'identifier' => 'id',
-            'increments' => true,
-        ]));
-        $this->repository2 = $this->connection->createRepository(RepositoryTestActor::class);
+        $settings = RepositorySettings::fromAnnotation(SakilaActor::class, new AnnotationReader());
+        $this->repository = new Repository($this->connection, $settings);
     }
-
+    
     public function testFromAnnotation()
     {
         static::assertEquals(new RepositorySettings('actor', [
-            'model' => RepositoryTestActor::class,
+            'model' => SakilaActor::class,
             'columns' => [
                 'id' => 'actor_id',
                 'firstName' => 'first_name',
@@ -57,7 +40,7 @@ class RepositoryTest extends SakilaTestCase
             ],
             'identifier' => 'id',
             'increments' => true,
-        ]), RepositorySettings::fromAnnotation(RepositoryTestActor::class, new AnnotationReader()));
+        ]), RepositorySettings::fromAnnotation(SakilaActor::class, new AnnotationReader()));
     }
     
     public function provideSelectQueries()
@@ -81,13 +64,13 @@ class RepositoryTest extends SakilaTestCase
     public function testFetch($query)
     {
         $expectedModels = [
-            new RepositoryTestActor(183, 'RUSSELL', 'CLOSE', '2006-02-15 04:34:33'),
-            new RepositoryTestActor(181, 'MATTHEW', 'CARREY', '2006-02-15 04:34:33'),
-            new RepositoryTestActor(176, 'JON', 'CHASE', '2006-02-15 04:34:33'),
+            new SakilaActor(183, 'RUSSELL', 'CLOSE', '2006-02-15 04:34:33'),
+            new SakilaActor(181, 'MATTHEW', 'CARREY', '2006-02-15 04:34:33'),
+            new SakilaActor(176, 'JON', 'CHASE', '2006-02-15 04:34:33'),
         ];
 
         $iterateCount = 0;
-        foreach ($this->repository1->fetch($query, ["C%"]) as $index => $model) {
+        foreach ($this->repository->fetch($query, ["C%"]) as $index => $model) {
             $iterateCount++;
             static::assertNotSame($expectedModels[$index], $model);
             static::assertEquals($expectedModels[$index], $model);
@@ -97,14 +80,14 @@ class RepositoryTest extends SakilaTestCase
     
     public function testFetchByQueryBuilder()
     {
-        $expectedActor = new RepositoryTestActor(138, 'LUCILLE', 'DEE', '2006-02-15 04:34:33');
+        $expectedActor = new SakilaActor(138, 'LUCILLE', 'DEE', '2006-02-15 04:34:33');
 
-        $actor = $this->repository1->first(function (SelectQuery $query) {
+        $actor = $this->repository->first(function (SelectQuery $query) {
             return $query->where('actor_id', 138);
         });
         static::assertEquals($expectedActor, $actor);
 
-        $actors = $this->repository1->fetch(function (SelectQuery $query) {
+        $actors = $this->repository->fetch(function (SelectQuery $query) {
             return $query->where('actor_id', 138);
         });
         $iterateCount = 0;
@@ -117,12 +100,12 @@ class RepositoryTest extends SakilaTestCase
 
     public function testFind()
     {
-        $expectedActor = new RepositoryTestActor(138, 'LUCILLE', 'DEE', '2006-02-15 04:34:33');
+        $expectedActor = new SakilaActor(138, 'LUCILLE', 'DEE', '2006-02-15 04:34:33');
 
-        $actor = $this->repository1->find(138);
+        $actor = $this->repository->find(138);
         static::assertEquals($expectedActor, $actor);
 
-        $actor = $this->repository1->find(-1);
+        $actor = $this->repository->find(-1);
         static::assertNull($actor);
     }
 
@@ -133,32 +116,30 @@ class RepositoryTest extends SakilaTestCase
     public function testFirst($query)
     {
         static::assertEquals(
-            new RepositoryTestActor(183, 'RUSSELL', 'CLOSE', '2006-02-15 04:34:33'),
-            $this->repository1->first($query, ["C%"])
+            new SakilaActor(183, 'RUSSELL', 'CLOSE', '2006-02-15 04:34:33'),
+            $this->repository->first($query, ["C%"])
         );
     }
 
     public function testInsert()
     {
-        $repository = $this->repository1;
-
         try {
-            $repository->insert(new stdClass());
+            $this->repository->insert(new stdClass());
             static::fail();
         } catch (InvalidArgumentException $e) {
             static::assertEquals(
-                "Argument 1 passed to Wandu\\Database\\Repository\\Repository::insert() must be of the type Wandu\\Database\\Repository\\RepositoryTestActor",
+                "Argument 1 passed to Wandu\\Database\\Repository\\Repository::insert() must be of the type " . SakilaActor::class,
                 $e->getMessage()
             );
         }
-        static::assertEquals(1, $repository->insert($actor = new RepositoryTestActor(null, 'WANDU', 'J', '2016-11-06')));
+        static::assertEquals(1, $this->repository->insert($actor = new SakilaActor(null, 'WANDU', 'J', '2016-11-06')));
         static::assertNotNull($actor->getIdentifier());
 
-        static::assertEquals(1, $repository->delete($actor));
+        static::assertEquals(1, $this->repository->delete($actor));
         static::assertNull($actor->getIdentifier());
 
         try {
-            $repository->delete($actor);
+            $this->repository->delete($actor);
             static::fail();
         } catch (IdentifierNotFoundException $e) {
             static::assertEquals(
@@ -170,19 +151,19 @@ class RepositoryTest extends SakilaTestCase
 
     public function testUpdate()
     {
-        $repository = $this->repository1;
+        $repository = $this->repository;
 
         try {
             $repository->update(new stdClass());
             static::fail();
         } catch (InvalidArgumentException $e) {
             static::assertEquals(
-                "Argument 1 passed to Wandu\\Database\\Repository\\Repository::update() must be of the type Wandu\\Database\\Repository\\RepositoryTestActor",
+                "Argument 1 passed to Wandu\\Database\\Repository\\Repository::update() must be of the type " . SakilaActor::class,
                 $e->getMessage()
             );
         }
 
-        /* @var \Wandu\Database\Repository\RepositoryTestActor $actor */
+        /* @var \Wandu\Database\Sakila\SakilaActor $actor */
         $actor = $repository->first("SELECT * FROM `actor` WHERE `actor_id` = ?", ['80']);
 
         static::assertEquals('RALPH', $actor->getFirstName());
@@ -193,7 +174,7 @@ class RepositoryTest extends SakilaTestCase
         
         static::assertEquals(1, $repository->update($actor));
 
-        /* @var \Wandu\Database\Repository\RepositoryTestActor $actor */
+        /* @var \Wandu\Database\Sakila\SakilaActor $actor */
         $actor = $repository->first("SELECT * FROM `actor` WHERE `actor_id` = ?", ['80']);
 
         static::assertEquals('CHANGWAN', $actor->getFirstName());
@@ -203,97 +184,5 @@ class RepositoryTest extends SakilaTestCase
         $actor->setLastName('CRUZ');
 
         static::assertEquals(1, $repository->update($actor));
-    }
-}
-
-/**
- * @Table(name="actor", identifier="id", increments=true)
- */
-class RepositoryTestActor
-{
-    /**
-     * @Column(name="actor_id", cast="integer")
-     * @var int
-     */
-    private $id;
-
-    /**
-     * @Column(name="first_name")
-     * @var string
-     */
-    private $firstName;
-
-    /**
-     * @Column(name="last_name")
-     * @var string
-     */
-    private $lastName;
-
-    /**
-     * @Column(name="last_update")
-     * @var string
-     */
-    private $lastUpdate;
-
-    /**
-     * @param int $id
-     * @param string $firstName
-     * @param string $lastName
-     * @param string $lastUpdate
-     */
-    public function __construct($id, $firstName, $lastName, $lastUpdate)
-    {
-        $this->id = $id;
-        $this->firstName = $firstName;
-        $this->lastName = $lastName;
-        $this->lastUpdate = $lastUpdate;
-    }
-
-    /**
-     * @return int
-     */
-    public function getIdentifier()
-    {
-        return $this->id;
-    }
-
-    /**
-     * @return string
-     */
-    public function getFirstName()
-    {
-        return $this->firstName;
-    }
-
-    /**
-     * @return string
-     */
-    public function getLastName()
-    {
-        return $this->lastName;
-    }
-
-    /**
-     * @return string
-     */
-    public function getLastUpdate()
-    {
-        return $this->lastUpdate;
-    }
-
-    /**
-     * @param string $firstName
-     */
-    public function setFirstName($firstName)
-    {
-        $this->firstName = $firstName;
-    }
-
-    /**
-     * @param string $lastName
-     */
-    public function setLastName($lastName)
-    {
-        $this->lastName = $lastName;
     }
 }

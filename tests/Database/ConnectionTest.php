@@ -1,9 +1,7 @@
 <?php
 namespace Wandu\Database;
 
-use Doctrine\Common\Annotations\Reader;
 use Generator;
-use Wandu\Database\Exception\ClassNotFoundException;
 
 class ConnectionTest extends SakilaTestCase
 {
@@ -75,17 +73,5 @@ class ConnectionTest extends SakilaTestCase
             $interateCount++;
         }
         static::assertEquals(3, $interateCount);
-    }
-    
-    public function testFailToCreateRepository()
-    {
-        $connection = $this->connector->connect();
-        try {
-            $connection->createRepository('anything');
-            static::fail();
-        } catch (ClassNotFoundException $e) {
-            static::assertEquals(Reader::class, $e->getClassName());
-            static::assertContains('Class \'Doctrine\Common\Annotations\Reader\' not found in', $e->getMessage());
-        }
     }
 }

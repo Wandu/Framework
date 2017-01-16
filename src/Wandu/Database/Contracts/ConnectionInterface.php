@@ -4,21 +4,9 @@ namespace Wandu\Database\Contracts;
 interface ConnectionInterface
 {
     /**
-     * @return string
+     * @return $this
      */
-    public function getPrefix();
-
-    /**
-     * @param string $table
-     * @return \Wandu\Database\QueryBuilder
-     */
-    public function createQueryBuilder($table);
-
-    /**
-     * @param string $className
-     * @return \Wandu\Database\Contracts\RepositoryInterface
-     */
-    public function createRepository($className);
+    public function connect();
 
     /**
      * @param string|callable|\Wandu\Database\Contracts\QueryInterface $query

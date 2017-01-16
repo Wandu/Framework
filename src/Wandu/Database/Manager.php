@@ -1,48 +1,35 @@
 <?php
 namespace Wandu\Database;
 
-use ArrayAccess;
-use Wandu\Database\Connector\MysqlConnector;
+use Wandu\Database\Connection\MysqlConnection;
 use Wandu\Database\Contracts\ConnectionInterface;
-use Wandu\Database\Contracts\ConnectorInterface;
 use Wandu\Database\Exception\DriverNotFoundException;
 
 class Manager
 {
-    /** @var \ArrayAccess */
-    protected $container;
-
     /** @var \Wandu\Database\Contracts\ConnectionInterface[] */
     protected $connections = [];
 
     /**
-     * @param \ArrayAccess $container
-     */
-    public function __construct(ArrayAccess $container = null)
-    {
-        $this->container = $container;
-    }
-
-    /**
-     * @param array|\Wandu\Database\Contracts\ConnectorInterface $information
+     * @param array|\Wandu\Database\Configuration|\Wandu\Database\Contracts\ConnectionInterface $connection
      * @param string $name
      * @return \Wandu\Database\Contracts\ConnectionInterface
      */
-    public function connect($information, $name = 'default')
+    public function connect($connection, $name = 'default')
     {
-        if (!$information instanceof ConnectorInterface) {
-            $information = $this->getConnectorFromConfig($information);
+        if (!$connection instanceof Configuration) {
+            $connection = new Configuration($connection);
         }
-        return $this->setConnection($information->connect($this->container), $name);
-    }
-
-    /**
-     * @param \Wandu\Database\Contracts\ConnectionInterface $connection
-     * @param string $name
-     * @return \Wandu\Database\Contracts\ConnectionInterface
-     */
-    public function setConnection(ConnectionInterface $connection, $name = 'default')
-    {
+        if (!$connection instanceof ConnectionInterface) {
+            switch ($connection->getDriver()) {
+                case Configuration::DRIVER_MYSQL:
+                    $connection = new MysqlConnection($connection);
+                    break;
+                default:
+                    throw new DriverNotFoundException($connection->getDriver());
+            }
+        }
+        $connection->connect();
         return $this->connections[$name] = $connection;
     }
 
@@ -50,24 +37,8 @@ class Manager
      * @param string $name
      * @return \Wandu\Database\Contracts\ConnectionInterface
      */
-    public function getConnection($name = 'defeault')
+    public function connection($name = 'default')
     {
         return isset($this->connections[$name]) ? $this->connections[$name] : null;
-    }
-
-    /**
-     * @param array $config
-     * @return \Wandu\Database\Contracts\ConnectorInterface
-     */
-    private function getConnectorFromConfig(array $config)
-    {
-        if (!isset($config['driver'])) {
-            throw new DriverNotFoundException();
-        }
-        switch ($config['driver']) {
-            case 'mysql':
-                return new MysqlConnector($config);
-        }
-        throw new DriverNotFoundException($config['driver']);
     }
 }

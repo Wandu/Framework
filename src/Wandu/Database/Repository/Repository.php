@@ -8,6 +8,7 @@ use stdClass;
 use Wandu\Database\Contracts\ConnectionInterface;
 use Wandu\Database\Exception\IdentifierNotFoundException;
 use Wandu\Database\Query\SelectQuery;
+use Wandu\Database\QueryBuilder;
 
 class Repository
 {
@@ -16,6 +17,9 @@ class Repository
     
     /** @var \Wandu\Database\Repository\RepositorySettings */
     protected $settings;
+    
+    /** @var \Wandu\Database\QueryBuilder */
+    protected $queryBuilder;
     
     /**
      * Repository constructor.
@@ -26,6 +30,7 @@ class Repository
     {
         $this->connection = $connection;
         $this->settings = $settings;
+        $this->queryBuilder = new QueryBuilder($settings->getTable());
     }
 
     /**
@@ -35,7 +40,7 @@ class Repository
      */
     public function fetch($query = null, array $bindings = [])
     {
-        foreach ($this->connection->fetch($this->normalizeQuery($query), $bindings) as $row) {
+        foreach ($this->connection->fetch($this->normalizeSelectQuery($query), $bindings) as $row) {
             yield $this->hydrate($row);
         }
     }
@@ -47,7 +52,7 @@ class Repository
      */
     public function first($query = null, array $bindings = [])
     {
-        return $this->hydrate($this->connection->first($this->normalizeQuery($query), $bindings));
+        return $this->hydrate($this->connection->first($this->normalizeSelectQuery($query), $bindings));
     }
 
     /**
@@ -76,8 +81,7 @@ class Repository
             if ($identifierKey === $propertyName) continue;
             $attributesToStore[$columnName] = $this->pickProperty($this->getPropertyReflection($propertyName), $entity);
         }
-        $queryBuilder = $this->connection->createQueryBuilder($this->settings->getTable());
-        $rowAffected = $this->query($queryBuilder->insert($attributesToStore));
+        $rowAffected = $this->query($this->queryBuilder->insert($attributesToStore));
         if ($this->settings->isIncrements()) {
             $lastInsertId = $this->connection->getLastInsertId();
             $this->injectProperty($this->getPropertyReflection($identifierKey), $entity, $lastInsertId);
@@ -104,8 +108,7 @@ class Repository
             $attributesToStore[$columnName] = $this->pickProperty($this->getPropertyReflection($propertyName), $entity);
         }
 
-        $queryBuilder = $this->connection->createQueryBuilder($this->settings->getTable());
-        return $this->query($queryBuilder->update($attributesToStore)->where($columns[$identifierKey], $identifier));
+        return $this->query($this->queryBuilder->update($attributesToStore)->where($columns[$identifierKey], $identifier));
     }
 
     /**
@@ -122,8 +125,7 @@ class Repository
         if (!$identifier) {
             throw new IdentifierNotFoundException();
         }
-        $queryBuilder = $this->connection->createQueryBuilder($this->settings->getTable());
-        $affectedRows = $this->query($queryBuilder->delete()->where($columns[$identifierKey], $identifier));
+        $affectedRows = $this->query($this->queryBuilder->delete()->where($columns[$identifierKey], $identifier));
         $this->injectProperty($this->getPropertyReflection($identifierKey), $entity, null);
         return $affectedRows;
     }
@@ -173,11 +175,11 @@ class Repository
      * @param string|callable|\Wandu\Database\Contracts\QueryInterface $query
      * @return string|\Wandu\Database\Contracts\QueryInterface
      */
-    private function normalizeQuery($query = null)
+    private function normalizeSelectQuery($query = null)
     {
         if (!isset($query) || is_callable($query)) {
             $connection = $this->connection;
-            $queryBuilder = $connection->createQueryBuilder($this->settings->getTable())->select();
+            $queryBuilder = $this->queryBuilder->select();
             if (!isset($query)) {
                 return $queryBuilder;
             }

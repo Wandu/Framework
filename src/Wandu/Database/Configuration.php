@@ -1,40 +1,42 @@
 <?php
-namespace Wandu\Database\Connector;
+namespace Wandu\Database;
 
-use ArrayAccess;
 use PDO;
-use Wandu\Database\Connection\MysqlConnection;
-use Wandu\Database\Contracts\ConnectorInterface;
 
-class MysqlConnector implements ConnectorInterface
+class Configuration
 {
+    const DRIVER_MYSQL = 'mysql';
+    
+    /** @var string */
+    protected $driver = 'mysql';
+    
     /** @var string */
     protected $host = 'localhost';
-    
+
     /** @var int */
     protected $port = 4403;
-    
+
     /** @var string */
     protected $username = 'root';
-    
+
     /** @var string */
     protected $password = '';
-    
+
     /** @var string */
-    protected $database;
-    
+    protected $database = null;
+
     /** @var string */
     protected $charset;
-    
+
     /** @var string */
     protected $collation;
-    
+
     /** @var string */
     protected $prefix = '';
-    
+
     /** @var string */
     protected $timezone;
-    
+
     /** @var array */
     protected $options = [
         PDO::ATTR_CASE => PDO::CASE_NATURAL,
@@ -55,47 +57,36 @@ class MysqlConnector implements ConnectorInterface
     }
 
     /**
-     * {@inheritdoc} 
+     * @return string
      */
-    public function connect(ArrayAccess $container = null)
+    public function getDriver()
     {
-        $connection = $this->createPdo();
-        $this->applyCharset($connection);
-        $this->applyTimezone($connection);
-        return new MysqlConnection($connection, $container, $this->prefix);
+        return $this->driver;
     }
 
     /**
-     * @param \PDO $connection
+     * @return string
      */
-    protected function applyCharset(PDO $connection)
+    public function getHost()
     {
-        if ($this->charset) {
-            $names = "SET NAMES '{$this->charset}'";
-            if ($this->collation) {
-                $names .= " COLLATE '{$this->collation}'";
-            }
-            $connection->prepare($names)->execute();
-        }
+        return $this->host;
     }
 
     /**
-     * @param \PDO $connection
+     * @return int
      */
-    protected function applyTimezone(PDO $connection)
+    public function getPort()
     {
-        if ($this->timezone) {
-            $connection->prepare("SET time_zone='{$this->timezone}'")->execute();
-        }
+        return $this->port;
     }
-
+    
     /**
      * @return \PDO
      */
-    protected function createPdo()
+    public function createPdo()
     {
-        return new PDO(
-            "mysql:host={$this->host};port={$this->port};dbname={$this->database}",
+        $pdo = new PDO(
+            "{$this->driver}:host={$this->host};port={$this->port};dbname={$this->database}",
             $this->username,
             $this->password,
             $this->options + [
@@ -106,5 +97,32 @@ class MysqlConnector implements ConnectorInterface
                 PDO::ATTR_EMULATE_PREPARES => false,
             ]
         );
+        $this->applyCharset($pdo);
+        $this->applyTimezone($pdo);
+        return $pdo;
+    }
+
+    /**
+     * @param \PDO $pdo
+     */
+    protected function applyCharset(PDO $pdo)
+    {
+        if ($this->charset) {
+            $names = "SET NAMES '{$this->charset}'";
+            if ($this->collation) {
+                $names .= " COLLATE '{$this->collation}'";
+            }
+            $pdo->prepare($names)->execute();
+        }
+    }
+
+    /**
+     * @param \PDO $pdo
+     */
+    protected function applyTimezone(PDO $pdo)
+    {
+        if ($this->timezone) {
+            $pdo->prepare("SET time_zone='{$this->timezone}'")->execute();
+        }
     }
 }
