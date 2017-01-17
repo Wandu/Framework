@@ -1,11 +1,16 @@
 <?php
-namespace Wandu\Foundation {
+namespace Wandu\Foundation
+{
+
+    use function Wandu\DI\container;
+
     /**
-     * @return \Wandu\Foundation\Application
+     * @deprecated use function Wandu\DI\container
+     * @return \Wandu\DI\ContainerInterface
      */
     function app()
     {
-        return Application::$app;
+        return container();
     }
 
     /**
@@ -15,7 +20,7 @@ namespace Wandu\Foundation {
      */
     function config($name, $default = null)
     {
-        return app()->get('config')->get($name, $default);
+        return container()->get('config')->get($name, $default);
     }
 
     /**
@@ -29,14 +34,17 @@ namespace Wandu\Foundation {
                 return path($path);
             }, $path);
         }
-        return app()->get('base_path') . '/' . $path;
+        if (container()->has('base_path')) {
+            return container()->get('base_path') . '/' . $path;
+        }
+        return $path;
     }
 }
 
-namespace Wandu\View {
-
-    use Wandu\Foundation\Application;
+namespace Wandu\View
+{
     use Wandu\View\Contracts\RenderInterface;
+    use function Wandu\DI\container;
 
     /**
      * @param string $template
@@ -46,6 +54,6 @@ namespace Wandu\View {
      */
     function render($template, array $attributes = [], $basePath = null)
     {
-        return Application::$app[RenderInterface::class]->render($template, $attributes, $basePath);
+        return container()->get(RenderInterface::class)->render($template, $attributes, $basePath);
     }
 }

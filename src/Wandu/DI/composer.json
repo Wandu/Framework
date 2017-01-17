@@ -11,7 +11,10 @@
     "autoload": {
         "psr-4": {
             "Wandu\\DI\\": ""
-        }
+        },
+        "files" : [
+            "functions.php"
+        ]
     },
     "provide": {
         "container-interop/container-interop-implementation": "^1.1"

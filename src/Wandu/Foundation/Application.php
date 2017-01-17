@@ -12,9 +12,6 @@ class Application extends Container
     /** @var \Wandu\Foundation\Contracts\KernelInterface */
     protected $kernel;
 
-    /** @var \Wandu\Foundation\Application */
-    public static $app;
-
     /**
      * @param \Wandu\Foundation\Contracts\KernelInterface $kernel
      */
@@ -45,15 +42,5 @@ class Application extends Container
     {
         $this->boot();
         return $this->kernel->execute($this);
-    }
-
-    /**
-     * @return \Wandu\Foundation\Application
-     */
-    public function setAsGlobal()
-    {
-        $oldApp = static::$app;
-        static::$app = $this;
-        return $oldApp;
     }
 }

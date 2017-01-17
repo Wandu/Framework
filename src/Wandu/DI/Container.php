@@ -24,6 +24,9 @@ use Wandu\Reflection\ReflectionCallable;
 
 class Container implements ContainerInterface
 {
+    /** @var \Wandu\DI\ContainerInterface */
+    public static $instance;
+    
     /** @var \Wandu\DI\Containee\ContaineeAbstract[] */
     protected $containees = [];
     
@@ -45,6 +48,16 @@ class Container implements ContainerInterface
         $this->instance(ContainerInterface::class, $this)->freeze();
         $this->instance(InteropContainerInterface::class, $this)->freeze();
         $this->instance('container', $this)->freeze();
+    }
+
+    /**
+     * @return \Wandu\DI\ContainerInterface
+     */
+    public function setAsGlobal()
+    {
+        $oldApp = static::$instance;
+        static::$instance = $this;
+        return $oldApp;
     }
 
     public function __clone()
