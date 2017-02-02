@@ -42,6 +42,22 @@ class Route
     }
 
     /**
+     * @param string|array $middlewares
+     * @param bool $overwrite
+     * @return \Wandu\Router\Route
+     */
+    public function middleware($middlewares, $overwrite = false)
+    {
+        if (is_string($middlewares)) {
+            $middlewares = [$middlewares];
+        }
+        $this->middlewares = $overwrite
+            ? $middlewares
+            : array_merge($this->middlewares, $middlewares);
+        return $this;
+    }
+
+    /**
      * @param \Psr\Http\Message\ServerRequestInterface $request
      * @param \Wandu\Router\Contracts\ClassLoaderInterface|null $loader
      * @param \Wandu\Router\Contracts\ResponsifierInterface|null $responsifier

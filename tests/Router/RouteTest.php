@@ -23,9 +23,9 @@ class RouteTest extends TestCase
         $contents = ob_get_contents();
         ob_end_clean();
 
-        $this->assertEquals('call!', $contents);
-        $this->assertInstanceOf(ResponseInterface::class, $response);
-        $this->assertEquals('[GET] index@TestRouteController', $response->getBody()->__toString());
+        static::assertEquals('call!', $contents);
+        static::assertInstanceOf(ResponseInterface::class, $response);
+        static::assertEquals('[GET] index@TestRouteController', $response->getBody()->__toString());
     }
 
     public function testExecuteWithMiddleware()
@@ -41,9 +41,27 @@ class RouteTest extends TestCase
         $contents = ob_get_contents();
         ob_end_clean();
 
-        $this->assertEquals('call!', $contents);
-        $this->assertInstanceOf(ResponseInterface::class, $response);
-        $this->assertEquals('[GET] auth success; [GET] index@TestRouteController', $response->getBody()->__toString());
+        static::assertEquals('call!', $contents);
+        static::assertInstanceOf(ResponseInterface::class, $response);
+        static::assertEquals('[GET] auth success; [GET] index@TestRouteController', $response->getBody()->__toString());
+    }
+
+    public function testExecuteWithMiddlewareViaChain()
+    {
+        $route = new Route(TestRouteController::class, 'index');
+        
+        $route->middleware(TestAuthSuccessMiddleware::class);
+
+        $request = $this->createRequest('GET', '/');
+
+        ob_start();
+        $response = $route->execute($request, null, new WanduResponsifier());
+        $contents = ob_get_contents();
+        ob_end_clean();
+
+        static::assertEquals('call!', $contents);
+        static::assertInstanceOf(ResponseInterface::class, $response);
+        static::assertEquals('[GET] auth success; [GET] index@TestRouteController', $response->getBody()->__toString());
     }
 
     public function testExecuteWithPreventedMiddleware()
@@ -61,9 +79,9 @@ class RouteTest extends TestCase
         $contents = ob_get_contents();
         ob_end_clean();
 
-        $this->assertEquals('', $contents);
-        $this->assertInstanceOf(ResponseInterface::class, $response);
-        $this->assertEquals('Fail...', $response->getBody()->__toString());
+        static::assertEquals('', $contents);
+        static::assertInstanceOf(ResponseInterface::class, $response);
+        static::assertEquals('Fail...', $response->getBody()->__toString());
     }
 }
 

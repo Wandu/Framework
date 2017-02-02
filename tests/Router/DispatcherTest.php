@@ -2,7 +2,6 @@
 namespace Wandu\Router;
 
 use Closure;
-use Mockery;
 use Psr\Http\Message\ServerRequestInterface;
 use Wandu\Http\Psr\Stream\StringStream;
 use Wandu\Router\ClassLoader\DefaultLoader;

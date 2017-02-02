@@ -25,7 +25,7 @@ class CachedDispatcherTest extends TestCase
         $dispatcher->dispatch($this->createRequest('GET', '/admin'));
         $dispatcher->dispatch($this->createRequest('GET', '/admin'));
 
-        $this->assertEquals(3, $count);
+        static::assertEquals(3, $count);
     }
 
     public function testDispatchWithCache()
@@ -45,7 +45,7 @@ class CachedDispatcherTest extends TestCase
         $dispatcher->dispatch($this->createRequest('GET', '/admin'));
         $dispatcher->dispatch($this->createRequest('GET', '/admin'));
 
-        $this->assertEquals(1, $count);
+        static::assertEquals(1, $count);
     }
 
     public function testFlush()
@@ -63,10 +63,12 @@ class CachedDispatcherTest extends TestCase
 
         $dispatcher->dispatch($this->createRequest('GET', '/admin'));
         $dispatcher->dispatch($this->createRequest('GET', '/admin'));
+        $dispatcher->dispatch($this->createRequest('GET', '/admin'));
+        $dispatcher->dispatch($this->createRequest('GET', '/admin'));
         $dispatcher->flush();
         $dispatcher->dispatch($this->createRequest('GET', '/admin'));
 
-        $this->assertEquals(2, $count);
+        static::assertEquals(2, $count);
     }
 }
 
