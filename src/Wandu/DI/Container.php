@@ -380,17 +380,19 @@ class Container implements ContainerInterface
         }
         
         $autoWires = [];
-        if (
-            $reflectionFunction instanceof ReflectionMethod &&
-            $this->containees[$reflectionFunction->getDeclaringClass()->getName()]->isWireEnabled()
-        ) {
-            $autoWires = $this->getAutoWiresFromMethod($reflectionFunction);
+        if ($reflectionFunction instanceof ReflectionMethod) {
+            $declaredClassName = $reflectionFunction->getDeclaringClass()->getName();
+            if (isset($this->containees[$declaredClassName]) && $this->containees[$declaredClassName]->isWireEnabled()) {
+                $autoWires = $this->getAutoWiresFromMethod($reflectionFunction);
+            }
         } elseif (
             $reflectionFunction instanceof ReflectionCallable &&
-            $reflectionFunction->getRawReflection() instanceof ReflectionMethod &&
-            $this->containees[$reflectionFunction->getRawReflection()->getDeclaringClass()->getName()]->isWireEnabled()
+            $reflectionFunction->getRawReflection() instanceof ReflectionMethod
         ) {
-            $autoWires = $this->getAutoWiresFromMethod($reflectionFunction->getRawReflection());
+            $declaredClassName = $reflectionFunction->getRawReflection()->getDeclaringClass()->getName();
+            if (isset($this->containees[$declaredClassName]) && $this->containees[$declaredClassName]->isWireEnabled()) {
+                $autoWires = $this->getAutoWiresFromMethod($reflectionFunction->getRawReflection());
+            }
         }
         
         try {
