@@ -1,13 +1,11 @@
 <?php
-namespace Wandu\Http\Cookie;
+namespace Wandu\Http\Parameters;
 
 use Mockery;
+use Psr\Http\Message\ServerRequestInterface;
 use Traversable;
-use Wandu\Http\Parameters\ParameterTest;
+use Wandu\Http\Cookie\Cookie;
 
-/**
- * @deprecated
- */
 class CookieJarTest extends ParameterTest
 {
     /** @var \Wandu\Http\Cookie\CookieJar */
@@ -24,27 +22,36 @@ class CookieJarTest extends ParameterTest
 
     public function setUp()
     {
-        $this->param1 = new CookieJar([
+        $request = Mockery::mock(ServerRequestInterface::class);
+        $request->shouldReceive('getCookieParams')->andReturn([
             'string' => 'string!',
             'number' => '10',
         ]);
-        $this->param2 = new CookieJar([
+        $this->param1 = new CookieJar($request);
+
+        $request = Mockery::mock(ServerRequestInterface::class);
+        $request->shouldReceive('getCookieParams')->andReturn([
             'null' => null,
             'empty' => '',
             'false' => false,
         ]);
+        $this->param2 = new CookieJar($request);
 
-        $this->param3 = new CookieJar([
+        $request = Mockery::mock(ServerRequestInterface::class);
+        $request->shouldReceive('getCookieParams')->andReturn([
             'string1' => 'string 1!',
             'string2' => 'string 2!',
-        ], new CookieJar([
+        ]);
+        $this->param3 = new CookieJar($request, new Parameter([
             'string1' => 'string 1 fallback!',
             'fallback' => 'fallback!',
         ]));
 
-        $this->cookies = new CookieJar([
+        $request = Mockery::mock(ServerRequestInterface::class);
+        $request->shouldReceive('getCookieParams')->andReturn([
             'user' => '0000-1111-2222-3333',
         ]);
+        $this->cookies = new CookieJar($request);
     }
 
     public function tearDown()
@@ -62,7 +69,7 @@ class CookieJarTest extends ParameterTest
     {
         // first
         static::assertEquals('0000-1111-2222-3333', $this->cookies->get('user'));
-        static::asserttrue($this->cookies->has('user'));
+        static::assertTrue($this->cookies->has('user'));
 
         static::assertNull($this->cookies->get('_new'));
         static::assertFalse($this->cookies->has('_new'));
