@@ -3,7 +3,7 @@ namespace Wandu\Router\Middleware;
 
 use Closure;
 use Psr\Http\Message\ServerRequestInterface;
-use SessionHandler;
+use SessionHandlerInterface;
 use Wandu\Http\Exception\HttpException;
 use Wandu\Http\Parameters\CookieJar;
 use Wandu\Http\Parameters\Session;
@@ -12,17 +12,17 @@ use Wandu\Router\Contracts\MiddlewareInterface;
 
 class Sessionify implements MiddlewareInterface
 {
-    /** @var \SessionHandler */
+    /** @var \SessionHandlerInterface */
     protected $handler;
     
     /** @var \Wandu\Http\Session\Configuration */
     protected $config;
 
     /**
-     * @param \SessionHandler $handler
+     * @param \SessionHandlerInterface $handler
      * @param \Wandu\Http\Session\Configuration $config
      */
-    public function __construct(SessionHandler $handler, Configuration $config = null)
+    public function __construct(SessionHandlerInterface $handler, Configuration $config = null)
     {
         $this->handler = $handler;
         $this->config = $config;

@@ -26,7 +26,7 @@ class DatabaseServiceProvider implements ServiceProviderInterface
         });
         $app->alias('database', Manager::class);
         $app->closure(ConnectionInterface::class, function (Manager $manager) {
-            return $manager->getConnection();
+            return $manager->connection();
         });
         $app->alias('connection', ConnectionInterface::class);
 

@@ -15,7 +15,7 @@ class MigrateAdapter implements MigrateAdapterInterface
     public function __construct(Manager $manager, Configuration $config)
     {
         $this->tableName = $config->getTable();
-        $this->connection = $manager->getConnection($config->getConnection());
+        $this->connection = $manager->connection($config->getConnection());
     }
 
     /**
