@@ -144,11 +144,7 @@ class Container implements ContainerInterface
     public function containee($name)
     {
         if (!array_key_exists($name, $this->containees)) {
-            if (class_exists($name)) {
-                $this->bind($name);
-            } else {
-                throw new NullReferenceException($name);
-            }
+            throw new NullReferenceException($name);
         }
         return $this->containees[$name];
     }
@@ -158,7 +154,15 @@ class Container implements ContainerInterface
      */
     public function get($name)
     {
-        $instance = $this->containee($name)->get($this);
+        try {
+            $instance = $this->containee($name)->get($this);
+        } catch (NullReferenceException $e) {
+            if (!class_exists($name)) {
+                throw $e;
+            }
+            $instance = $this->create($name);
+            $this->instance($name, $instance);
+        }
         if ($this->containees[$name]->isWireEnabled()) {
             $this->applyWire($instance);
         }

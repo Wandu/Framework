@@ -104,7 +104,7 @@ class CallTest extends PHPUnit_Framework_TestCase
         static::assertSame($param4, $result[3]);
     }
     
-    public function testS()
+    public function testCallCallable()
     {
         $container = new Container();
 
@@ -144,10 +144,39 @@ class CallTest extends PHPUnit_Framework_TestCase
         $result = $container->call([CallTestInvokers::class, 'callViaStaticCallMagicMethod'], ['param8', 'param9']);
         static::assertEquals(['__callStatic', 'callViaStaticCallMagicMethod', ['param8', 'param9']], $result);
     }
+
+
+    public function testCallWithOnlyAlias()
+    {
+        $container = new Container();
+        $container->alias(CallTestCallWithOnlyAliasInterface::class, CallTestCallWithOnlyAlias::class);
+
+        try {
+            $container->call(function (CallTestCallWithOnlyAliasInterface $depend) {
+                return $depend;
+            });
+            static::fail();
+        } catch (CannotResolveException $e) {
+        }
+
+        $expected = new CallTestCallWithOnlyAlias(1111);
+        
+        $actual = $container->with([
+            CallTestCallWithOnlyAlias::class => $expected
+        ])->call(function (CallTestCallWithOnlyAliasInterface $depend) {
+            return $depend;
+        });
+        static::assertSame($expected, $actual);
+    }
 }
 
 interface CallTestDependencyInterface {}
 class CallTestDependency implements CallTestDependencyInterface {}
+
+interface CallTestCallWithOnlyAliasInterface {}
+class CallTestCallWithOnlyAlias implements CallTestCallWithOnlyAliasInterface {
+    public function __construct($param) {}
+}
 
 function callTestFunctionHasTypeParam(CallTestDependencyInterface $param) { return $param; }
 function callTestFunctionHasParam($param) { return $param; }
