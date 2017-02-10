@@ -3,29 +3,29 @@ namespace Wandu\Router\Middleware;
 
 use Closure;
 use Psr\Http\Message\ServerRequestInterface;
-use Wandu\Http\Cookie\CookieJarFactory;
+use SessionHandler;
 use Wandu\Http\Exception\HttpException;
-use Wandu\Http\Session\SessionFactory;
+use Wandu\Http\Parameters\CookieJar;
+use Wandu\Http\Parameters\Session;
+use Wandu\Http\Session\Configuration;
 use Wandu\Router\Contracts\MiddlewareInterface;
 
 class Sessionify implements MiddlewareInterface
 {
-    /** @var \Wandu\Http\Cookie\CookieJarFactory */
-    protected $cookieJarFactory;
-
-    /** @var \Wandu\Http\Session\SessionFactory */
-    protected $sessionFactory;
+    /** @var \SessionHandler */
+    protected $handler;
+    
+    /** @var \Wandu\Http\Session\Configuration */
+    protected $config;
 
     /**
-     * @param \Wandu\Http\Cookie\CookieJarFactory $cookieJarFactory
-     * @param \Wandu\Http\Session\SessionFactory $sessionFactory
+     * @param \SessionHandler $handler
+     * @param \Wandu\Http\Session\Configuration $config
      */
-    public function __construct(
-        CookieJarFactory $cookieJarFactory,
-        SessionFactory $sessionFactory
-    ) {
-        $this->cookieJarFactory = $cookieJarFactory;
-        $this->sessionFactory = $sessionFactory;
+    public function __construct(SessionHandler $handler, Configuration $config = null)
+    {
+        $this->handler = $handler;
+        $this->config = $config;
     }
 
     /**
@@ -33,8 +33,8 @@ class Sessionify implements MiddlewareInterface
      */
     public function __invoke(ServerRequestInterface $request, Closure $next)
     {
-        $cookieJar = $this->cookieJarFactory->fromServerRequest($request);
-        $session = $this->sessionFactory->fromCookieJar($cookieJar);
+        $cookieJar = new CookieJar($request);
+        $session = new Session($cookieJar, $this->handler, $this->config);
 
         $request = $request
             ->withAttribute('cookie', $cookieJar)
@@ -45,12 +45,13 @@ class Sessionify implements MiddlewareInterface
             $response = $next($request);
         } catch (HttpException $exception) {
             $response = $exception->getResponse();
-            $this->sessionFactory->toCookieJar($session, $cookieJar);
-            $exception->setResponse($this->cookieJarFactory->toResponse($cookieJar, $response));
+            
+            $session->applyToCookieJar($cookieJar);
+            $exception->setResponse($cookieJar->applyToResponse($response));
             throw $exception;
         }
 
-        $this->sessionFactory->toCookieJar($session, $cookieJar);
-        return $this->cookieJarFactory->toResponse($cookieJar, $response);
+        $session->applyToCookieJar($cookieJar);
+        return $cookieJar->applyToResponse($response);
     }
 }

@@ -6,19 +6,18 @@ use PHPUnit_Framework_TestCase;
 use Psr\Http\Message\ServerRequestInterface;
 use Wandu\DI\Container;
 use Wandu\DI\ContainerInterface;
-use Wandu\DI\Exception\CannotFindParameterException;
 use Wandu\DI\Exception\CannotResolveException;
 use Wandu\Http\Contracts\CookieJarInterface;
 use Wandu\Http\Contracts\ParsedBodyInterface;
 use Wandu\Http\Contracts\QueryParamsInterface;
 use Wandu\Http\Contracts\ServerParamsInterface;
 use Wandu\Http\Contracts\SessionInterface;
-use Wandu\Http\Cookie\CookieJar;
+use Wandu\Http\Parameters\CookieJar;
 use Wandu\Http\Parameters\ParsedBody;
 use Wandu\Http\Parameters\QueryParams;
 use Wandu\Http\Parameters\ServerParams;
+use Wandu\Http\Parameters\Session;
 use Wandu\Http\Psr\ServerRequest;
-use Wandu\Http\Session\Session;
 use Wandu\Router\Exception\HandlerNotFoundException;
 
 class WanduLoaderTest extends PHPUnit_Framework_TestCase
@@ -106,8 +105,8 @@ class WanduLoaderTest extends PHPUnit_Framework_TestCase
         $request = $request->withAttribute('server_params', new ServerParams($request));
         $request = $request->withAttribute('query_params', new QueryParams());
         $request = $request->withAttribute('parsed_body', new ParsedBody());
-        $request = $request->withAttribute('cookie', new CookieJar([]));
-        $request = $request->withAttribute('session', new Session('id', []));
+        $request = $request->withAttribute('cookie', Mockery::mock(CookieJar::class));
+        $request = $request->withAttribute('session', Mockery::mock(Session::class));
 
         static::assertTrue($loader->call($request, $instance, 'equalCookie'));
         static::assertTrue($loader->call($request, $instance, 'equalSession'));

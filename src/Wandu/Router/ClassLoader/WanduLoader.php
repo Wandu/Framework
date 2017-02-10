@@ -3,18 +3,17 @@ namespace Wandu\Router\ClassLoader;
 
 use Psr\Http\Message\ServerRequestInterface;
 use Wandu\DI\ContainerInterface;
-use Wandu\Http\Attribute\LazyAttribute;
 use Wandu\Http\Contracts\CookieJarInterface;
 use Wandu\Http\Contracts\ParsedBodyInterface;
 use Wandu\Http\Contracts\QueryParamsInterface;
 use Wandu\Http\Contracts\ServerParamsInterface;
 use Wandu\Http\Contracts\SessionInterface;
-use Wandu\Http\Cookie\CookieJar;
+use Wandu\Http\Parameters\CookieJar;
 use Wandu\Http\Parameters\ParsedBody;
 use Wandu\Http\Parameters\QueryParams;
 use Wandu\Http\Parameters\ServerParams;
+use Wandu\Http\Parameters\Session;
 use Wandu\Http\Psr\ServerRequest;
-use Wandu\Http\Session\Session;
 use Wandu\Router\Contracts\ClassLoaderInterface;
 use Wandu\Router\Exception\HandlerNotFoundException;
 
@@ -65,8 +64,8 @@ class WanduLoader implements ClassLoaderInterface
      */
     private function bindParameter(ContainerInterface $container, ServerRequestInterface $request)
     {
-        if ($queryParams = $request->getAttribute('server_params')) {
-            $container->instance(ServerParams::class, $queryParams);
+        if ($serverParams = $request->getAttribute('server_params')) {
+            $container->instance(ServerParams::class, $serverParams);
             $container->alias(ServerParamsInterface::class, ServerParams::class);
             $container->alias('server_params', ServerParams::class);
         }

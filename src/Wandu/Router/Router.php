@@ -1,7 +1,6 @@
 <?php
 namespace Wandu\Router;
 
-use FastRoute\DataGenerator;
 use FastRoute\DataGenerator\GroupCountBased as GCBDataGenerator;
 use FastRoute\RouteCollector;
 use FastRoute\RouteParser\Std;
@@ -103,6 +102,16 @@ class Router
         $handler($this);
     }
 
+    public function resource($className, $except = [], $only = [])
+    {
+        $this->get('', $className, 'index');
+        $this->get('/create', $className, 'create');
+        $this->post('', $className, 'store');
+        $this->get('/{id}', $className, 'show');
+        $this->put('/{id}', $className, 'update');
+        $this->delete('/{id}', $className, 'destroy');
+    }
+    
     /**
      * @param array $methods
      * @param string $path

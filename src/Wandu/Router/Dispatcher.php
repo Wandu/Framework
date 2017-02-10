@@ -73,9 +73,7 @@ class Dispatcher
         } else {
             $router = new Router;
             if ($this->routes) {
-                $router->middleware($this->config->getMiddleware(), function (Router $router) {
-                    $router->append($this->routes);
-                });
+                $router->middleware($this->config->getMiddleware(), $this->routes);
             }
             $dispatchData = $router->getCollector()->getData();
             $routes = $router->getRoutes();

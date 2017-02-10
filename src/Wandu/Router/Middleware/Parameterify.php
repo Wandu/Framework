@@ -9,6 +9,9 @@ use Wandu\Http\Parameters\QueryParams;
 use Wandu\Http\Parameters\ServerParams;
 use Wandu\Router\Contracts\MiddlewareInterface;
 
+/**
+ * @deprecated use DI container
+ */
 class Parameterify implements MiddlewareInterface
 {
     /**
