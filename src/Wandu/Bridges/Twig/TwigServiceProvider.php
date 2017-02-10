@@ -7,7 +7,6 @@ use Wandu\DI\ContainerInterface;
 use Wandu\DI\ServiceProviderInterface;
 use Wandu\View\Contracts\RenderInterface;
 use function Wandu\Foundation\config;
-use function Wandu\Foundation\path;
 
 class TwigServiceProvider implements ServiceProviderInterface
 {
@@ -17,11 +16,11 @@ class TwigServiceProvider implements ServiceProviderInterface
     public function register(ContainerInterface $app)
     {
         $app->closure(Twig_Environment::class, function () {
-            $loader = new Twig_Loader_Filesystem(path(config('view.path')));
+            $loader = new Twig_Loader_Filesystem(config('view.path'));
             $options = [];
             $cachePath = config('view.cache');
             if ($cachePath) {
-                $options['cache'] = path($cachePath);
+                $options['cache'] = $cachePath;
             }
             return new Twig_Environment($loader, $options);
         });

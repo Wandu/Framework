@@ -5,7 +5,6 @@ use Wandu\DI\ContainerInterface;
 use Wandu\DI\ServiceProviderInterface;
 use Wandu\View\Contracts\RenderInterface;
 use function Wandu\Foundation\config;
-use function Wandu\Foundation\path;
 
 class PhpViewServiceProvider implements ServiceProviderInterface
 {
@@ -15,7 +14,7 @@ class PhpViewServiceProvider implements ServiceProviderInterface
     public function register(ContainerInterface $app)
     {
         $app->closure(RenderInterface::class, function () {
-            return new PhpView(path(config('view.path')));
+            return new PhpView(config('view.path'));
         });
     }
 

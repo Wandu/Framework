@@ -34,7 +34,7 @@ namespace Wandu\Foundation
                 return path($path);
             }, $path);
         }
-        if (container()->has('base_path')) {
+        if ($path[0] !== '/' && container()->has('base_path')) {
             return container()->get('base_path') . '/' . $path;
         }
         return $path;
