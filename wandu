@@ -13,29 +13,15 @@ while (!file_exists($autoloadPath . '/vendor/autoload.php')) {
     $autoloadPath = dirname($autoloadPath);
 }
 
-define('WANDU_BASE_PATH', $autoloadPath);
-require_once WANDU_BASE_PATH . '/vendor/autoload.php';
+require_once $autoloadPath . '/vendor/autoload.php';
 chdir($autoloadPath);
 unset($autoloadPath);
 
-$appPath = realpath(getcwd());
-while (!file_exists($appPath . '/.wandu.php')) {
-    if ($appPath == '/' || !$appPath) {
-        $appPath = null;
-        break;
-    }
-    $appPath = dirname($appPath);
-}
-
-if (isset($appPath)) {
-    $definition = require $appPath . '/.wandu.php';
+if (file_exists('.wandu.php')) {
+    $definition = require '.wandu.php';
 } else {
     $definition = new NeedInstallDefinition();
 }
-define('WANDU_APP_PATH', $appPath);
-unset($appPath);
 
 $app = new Application(new ConsoleKernel($definition));
-$app->instance('base_path', WANDU_BASE_PATH);
-$app->instance('app_path', WANDU_APP_PATH);
 exit($app->execute());

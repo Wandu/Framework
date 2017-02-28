@@ -3,6 +3,17 @@ composer.lock
 /vendor
 /labs
 
+# test install
+/app
+/cache
+/migrations
+/public
+/views
+/src/Http
+/.wandu.php
+/src/ApplicationDefinition.php
+/src/ApplicationServiceProvider.php
+
 # test stub files
 /tests/Http/Session/Handler/sessions
 /tests/Installation/Commands/project

@@ -12,27 +12,17 @@ while (!file_exists($autoloadPath . '/vendor/autoload.php')) {
     $autoloadPath = dirname($autoloadPath);
 }
 
-define('WANDU_BASE_PATH', $autoloadPath);
-require_once WANDU_BASE_PATH . '/vendor/autoload.php';
+require_once $autoloadPath . '/vendor/autoload.php';
 chdir($autoloadPath);
 unset($autoloadPath);
 
-$appPath = realpath(getcwd());
-while (!file_exists($appPath . '/.wandu.php')) {
-    if ($appPath == '/' || !$appPath) {
-        header('HTTP/1.1 500 Internal Server Error');
-        echo "cannot find .wandu.php. you may re-install wandu.";
-        exit(-1);
-    }
-    $appPath = dirname($appPath);
+if (!file_exists('.wandu.php')) {
+    header('HTTP/1.1 500 Internal Server Error');
+    echo "cannot find .wandu.php. you may re-install wandu.";
+    exit(-1);
 }
 
-$definition = require $appPath . '/.wandu.php';
-
-define('WANDU_APP_PATH', $appPath);
-unset($appPath);
+$definition = require '.wandu.php';
 
 $app = new Application(new HttpRouterKernel($definition));
-$app->instance('base_path', WANDU_BASE_PATH);
-$app->instance('app_path', WANDU_APP_PATH);
 exit($app->execute());

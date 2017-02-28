@@ -8,8 +8,6 @@ use Symfony\Component\Process\PhpExecutableFinder;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Process\ProcessUtils;
 use Wandu\Console\Command;
-use Wandu\DI\ContainerInterface;
-use Wandu\Installation\Replacers\OriginReplacer;
 use Wandu\Installation\SkeletonBuilder;
 
 class InstallCommand extends Command
@@ -19,19 +17,7 @@ class InstallCommand extends Command
 
     /** @var \Symfony\Component\Console\Style\SymfonyStyle */
     protected $io;
-
-    /** @var string */
-    protected $basePath;
-
-    /** @var string */
-    protected $appPath;
-
-    public function __construct(ContainerInterface $container)
-    {
-        $this->basePath = $container['base_path'];
-        $this->appPath = $container['app_path'];
-    }
-
+    
     /**
      * {@inheritdoc}
      */
@@ -43,51 +29,31 @@ class InstallCommand extends Command
 
     public function execute()
     {
-        if (file_exists($this->appPath . '/.wandu.php')) {
+        if (file_exists('.wandu.php')) {
             throw new \RuntimeException('already installed. if you want to re-install, remove the ".wandu.php" file!');
         }
 
         $this->output->writeln('Hello, <info>Welcome to Wandu Framework!</info>');
 
-        $composerFile = $this->basePath . '/composer.json';
-
-        $appBasePath = $this->askAppBasePath('install path?', $this->basePath);
+        $appBasePath = getcwd(); //static::filterPath($this->askAppBasePath('install path?', $basePath));
         $appNamespace = $this->askAppNamespace('app namespace?', 'Wandu\\App');
-
-//        $templateEngine = $this->io->choice(
-//            'template engine?',
-//            ['php' => 'PHP', 'twig' => 'Twig(Sensio Labs)', 'latte' => 'Latte(Nette)', ],
-//            'PHP'
-//        );
-//
-//        $database = $this->io->choice(
-//            'orm(database)?',
-//            ['none' => 'None', 'eloquent' => 'Eloquent(Laravel)', ],
-//            'None'
-//        );
-
-        $path = str_replace($this->basePath, '', $appBasePath);
-        $path = ltrim($path ? $path . '/' : '', '/');
-
-        $this->install($appBasePath, $appNamespace, $path);
+        
+        $this->install($appBasePath, $appNamespace);
 
         // set composer
-        $this->saveAutoloadToComposer($appNamespace, $composerFile, $path);
+        $this->saveAutoloadToComposer($appNamespace);
 
         // run composer
-        $this->runDumpAutoload($composerFile);
+        $this->runDumpAutoload();
 
         $this->output->writeln("<info>Install Complete!</info>");
     }
 
-    protected function install($appBasePath, $appNamespace, $path)
+    protected function install($appBasePath, $appNamespace)
     {
         $installer = new SkeletonBuilder($appBasePath, __DIR__ . '/../skeleton');
-
         $replacers = [
             'YourOwnApp' => $appNamespace,
-            '{path}' => $path,
-            '%%origin%%' => new OriginReplacer(),
         ];
         $installer->build($replacers);
 
@@ -106,25 +72,24 @@ PHP
         );
     }
     
-    protected function runDumpAutoload($composerFile)
+    protected function runDumpAutoload()
     {
-        $basePath = dirname($composerFile);
-        if (file_exists($basePath . '/composer.phar')) {
+        if (file_exists('composer.phar')) {
             $binary = ProcessUtils::escapeArgument((new PhpExecutableFinder)->find(false));
             $composer = "{$binary} composer.phar";
         } else {
             $composer = 'composer';
         }
-        (new Process("{$composer} dump-autoload", $basePath))->run();
+        (new Process("{$composer} dump-autoload", getcwd()))->run();
     }
 
-    protected function saveAutoloadToComposer($appNamespace, $composerFile, $path = '')
+    protected function saveAutoloadToComposer($appNamespace)
     {
         $this->output->write("save autoload setting to composer... ");
 
         $composerJson = [];
-        if (file_exists($composerFile)) {
-            $composerJson = json_decode(file_get_contents($composerFile), true);
+        if (file_exists('composer.json')) {
+            $composerJson = json_decode(file_get_contents('composer.json'), true);
             if (json_last_error()) {
                 $composerJson = [];
             }
@@ -136,9 +101,9 @@ PHP
         if (!isset($composerJson['autoload']['psr-4'])) {
             $composerJson['autoload']['psr-4'] = [];
         }
-        $composerJson['autoload']['psr-4'][$appNamespace . '\\'] = $path . 'src/';
+        $composerJson['autoload']['psr-4'][$appNamespace . '\\'] = 'src/';
         file_put_contents(
-            $composerFile,
+            'composer.json',
             json_encode($composerJson, JSON_UNESCAPED_SLASHES|JSON_PRETTY_PRINT) . "\n"
         );
         $this->output->writeln("<info>ok</info>");
@@ -151,19 +116,45 @@ PHP
         });
     }
 
+    /**
+     * @param string $message
+     * @param string $default
+     * @return string
+     */
     protected function askAppBasePath($message, $default)
     {
-        $appBasePath = $this->io->ask($message, $default);
-        if ($appBasePath[0] === '~') {
+        if (function_exists('posix_getuid')) {
+            $info = posix_getpwuid(posix_getuid());
+            $default = str_replace($info['dir'], '~', $default);
+        }
+        return $this->io->ask($message, $default);
+    }
+
+    /**
+     * @param string $path
+     * @return string
+     */
+    static protected function filterPath($path)
+    {
+        if ($path[0] === '~') {
             if (!function_exists('posix_getuid')) {
-                throw new \InvalidArgumentException('cannot use tilde(~) character in your php enviroment.');
+                throw new \InvalidArgumentException('cannot use tilde(~) character in your php environment.');
             }
             $info = posix_getpwuid(posix_getuid());
-            $appBasePath = str_replace('~', $info['dir'], $appBasePath);
+            $path = str_replace('~', $info['dir'], $path);
         }
-        if ($appBasePath[0] !== '/') {
-            $appBasePath = $this->basePath . "/{$appBasePath}";
+
+        $basePath = getcwd();
+        if ($path === $basePath) {
+            $path = '.';
+        } elseif (strpos($path, $basePath) === 0) {
+            $path = str_replace("{$basePath}/", './', $path);
+        } elseif ($path[0] === '/' || strpos($path, './') === 0) {
+        } elseif (strpos($path, '..') === 0) {
+            $path = realpath($basePath . '/' . $path);
+        } else {
+            $path = './' . $path;
         }
-        return rtrim($appBasePath, '/');
+        return rtrim($path, '/');
     }
 }
