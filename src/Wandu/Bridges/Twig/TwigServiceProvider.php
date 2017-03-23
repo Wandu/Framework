@@ -16,17 +16,17 @@ class TwigServiceProvider implements ServiceProviderInterface
     public function register(ContainerInterface $app)
     {
         $app->closure(Twig_Environment::class, function () {
-            $loader = new Twig_Loader_Filesystem(config('view.path'));
-            $options = [];
+            $loader = new Twig_Loader_Filesystem(config('twig.path', config('view.path')));
+            $options = [
+                'auto_reload' => true,
+            ];
             $cachePath = config('view.cache');
             if ($cachePath) {
                 $options['cache'] = $cachePath;
             }
             return new Twig_Environment($loader, $options);
         });
-        $app->closure(RenderInterface::class, function ($app) {
-            return new TwigView($app[Twig_Environment::class]);
-        });
+        $app->bind(RenderInterface::class, TwigView::class);
     }
 
     /**
