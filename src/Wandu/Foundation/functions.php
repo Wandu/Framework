@@ -1,7 +1,6 @@
 <?php
 namespace Wandu\Foundation
 {
-
     use function Wandu\DI\container;
 
     /**
@@ -24,6 +23,7 @@ namespace Wandu\Foundation
     }
 
     /**
+     * @deprecated
      * @param string|array $path
      * @return string|array
      */
