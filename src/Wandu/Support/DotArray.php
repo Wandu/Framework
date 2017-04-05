@@ -159,5 +159,5 @@ class DotArray implements ArrayAccess
     public function offsetUnset($offset)
     {
         $this->remove($offset);
-    }    
+    }
 }

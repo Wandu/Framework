@@ -1,11 +1,56 @@
 <?php
 namespace Wandu\Http\Parameters;
 
+use Mockery;
 use PHPUnit_Framework_TestCase;
 use Wandu\Support\Exception\CannotCallMethodException;
 
 class ParameterTest extends PHPUnit_Framework_TestCase
 {
+    /** @var array */
+    protected $param1Attributes = [
+        'string' => 'string!',
+        'number' => '10',
+        'array' => [
+            'null' => null,
+            'empty' => '',
+            'false' => false,
+        ],
+        'array_of_array' => [
+            [
+                'string' => 'string!',
+                'number' => '10',
+            ],
+            [
+                'string' => 'string!!',
+                'number' => '11',
+            ],
+            [
+                'string' => 'string!!!',
+                'number' => '12',
+            ],
+        ],
+    ];
+    
+    /** @var array */
+    protected $param2Attributes = [
+        'null' => null,
+        'empty' => '',
+        'false' => false,
+    ];
+    
+    /** @var array */
+    protected $param3Attributes = [
+        'string1' => 'string 1!',
+        'string2' => 'string 2!',
+    ];
+
+    /** @var array */
+    protected $param3FallbackAttributes = [
+        'string1' => 'string 1 fallback!',
+        'fallback' => 'fallback!',
+    ];
+    
     /** @var \Wandu\Http\Contracts\ParameterInterface */
     protected $param1;
 
@@ -17,50 +62,38 @@ class ParameterTest extends PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $this->param1 = new Parameter([
-            'string' => 'string!',
-            'number' => '10',
-        ]);
-        $this->param2 = new Parameter([
-            'null' => null,
-            'empty' => '',
-            'false' => false,
-        ]);
-        $this->param3 = new Parameter([
-            'string1' => 'string 1!',
-            'string2' => 'string 2!',
-        ], new Parameter([
-            'string1' => 'string 1 fallback!',
-            'fallback' => 'fallback!',
-        ]));
+        $this->param1 = new Parameter($this->param1Attributes);
+        $this->param2 = new Parameter($this->param2Attributes);
+        $this->param3 = new Parameter($this->param3Attributes, new Parameter($this->param3FallbackAttributes));
+    }
+    
+    public function tearDown()
+    {
+        Mockery::close();
     }
 
     public function testGet()
     {
-        $params = $this->param1;
+        static::assertSame('string!', $this->param1->get('string'));
+        static::assertSame('10', $this->param1->get('number'));
 
-        static::assertSame('string!', $params->get('string'));
-        static::assertSame('10', $params->get('number'));
-
-        static::assertNull($params->get('string.undefined'));
-        static::assertNull($params->get('number.undefined'));
+        static::assertNull($this->param1->get('string.undefined'));
+        static::assertNull($this->param1->get('number.undefined'));
     }
 
     public function testGetNull()
     {
-        $params = $this->param2;
-
         // not strict
-        static::assertEquals("Other Value!!", $params->get('undefined', "Other Value!!"));
-        static::assertEquals("Other Value!!", $params->get('null', "Other Value!!"));
-        static::assertEquals("Other Value!!", $params->get('empty', "Other Value!!"));
-        static::assertEquals("Other Value!!", $params->get('false', "Other Value!!"));
+        static::assertEquals("Other Value!!", $this->param2->get('undefined', "Other Value!!"));
+        static::assertEquals("Other Value!!", $this->param2->get('null', "Other Value!!"));
+        static::assertEquals("Other Value!!", $this->param2->get('empty', "Other Value!!"));
+        static::assertEquals("Other Value!!", $this->param2->get('false', "Other Value!!"));
 
         // strict
-        static::assertEquals("Other Value!!", $params->get('undefined', "Other Value!!", true));
-        static::assertEquals("Other Value!!", $params->get('null', "Other Value!!", true));
-        static::assertEquals("", $params->get('empty', "Other Value!!", true));
-        static::assertEquals(false, $params->get('false', "Other Value!!", true));
+        static::assertEquals("Other Value!!", $this->param2->get('undefined', "Other Value!!", true));
+        static::assertEquals("Other Value!!", $this->param2->get('null', "Other Value!!", true));
+        static::assertEquals("", $this->param2->get('empty', "Other Value!!", true));
+        static::assertEquals(false, $this->param2->get('false', "Other Value!!", true));
     }
 
     public function testHas()
@@ -76,34 +109,28 @@ class ParameterTest extends PHPUnit_Framework_TestCase
 
     public function testHasNull()
     {
-        $params = $this->param2;
-
-        static::assertFalse($params->has('undefined'));
-        static::assertFalse($params->has('null'));
-        static::assertTrue($params->has('empty'));
-        static::assertTrue($params->has('false'));
+        static::assertFalse($this->param2->has('undefined'));
+        static::assertFalse($this->param2->has('null'));
+        static::assertTrue($this->param2->has('empty'));
+        static::assertTrue($this->param2->has('false'));
     }
 
     public function testToArray()
     {
-        $params = $this->param2;
-
        static::assertSame([
            'null' => null,
            'empty' => '',
            'false' => false,
-        ], $params->toArray());
+        ], $this->param2->toArray());
     }
 
     public function testToArrayWithFallback()
     {
-        $params = $this->param3;
-
        static::assertSame([
             'string1' => 'string 1!',
             'string2' => 'string 2!',
             'fallback' => 'fallback!',
-        ], $params->toArray());
+        ], $this->param3->toArray());
     }
 
     public function testGetWithDefault()
@@ -206,62 +233,121 @@ class ParameterTest extends PHPUnit_Framework_TestCase
             ],
             $params->getMany(['undefined', 'null', 'false', 'empty'], true)
         );
-
-//        static::assertSame(
-//            [
-//                'string' => 'string!',
-//            ],
-//            $params->getMany(['string'])
-//        );
-//
-//        static::assertSame(
-//            [
-//                'string' => 'string!',
-//            ],
-//            $params->getMany(['string', 'unknown'])
-//        );
-//
-//        static::assertSame(
-//            [
-//                'string' => 'string!',
-//                'unknown' => null,
-//            ],
-//            $params->getMany(['string', 'unknown' => null])
-//        );
-//
-//        static::assertSame(
-//            [
-//                'string' => 'string!',
-//                'unknown' => false,
-//            ],
-//            $params->getMany(['string' => false, 'unknown' => false])
-//        );
     }
 
-    public function testArrayAccess()
+    public function testArrayAccessOffsetGet()
     {
-        /** @var \Wandu\Http\Contracts\ParameterInterface $params */
-        $params = $this->param1;
+        static::assertSame($this->param1->get('string'), $this->param1['string']);
+        static::assertSame($this->param1->get('unknown'), $this->param1['unknown']);
+        static::assertSame($this->param1->get('unknown', 'default'), $this->param1['unknown||default']);
 
-        static::assertSame('string!', $params['string']);
+        static::assertSame('string!', $this->param1['string']);
+        static::assertSame(null, $this->param1['unknown']);
+        static::assertSame('default', $this->param1['unknown||default']);
+    }
 
-        static::assertSame(null, $params['unknown']);
-        static::assertSame('default', $params['unknown||default']);
+    public function testArrayAccessOffsetExists()
+    {
+        static::assertSame($this->param1->has('string'), isset($this->param1['string']));
+        static::assertSame($this->param1->has('unknown'), isset($this->param1['unknown']));
 
-        static::assertTrue(isset($params['string']));
-        static::assertFalse(isset($params['unknown']));
+        static::assertTrue(isset($this->param1['string']));
+        static::assertFalse(isset($this->param1['unknown']));
+    }
 
+    public function testArrayAccessOffsetSet()
+    {
         try {
-            $params['string'] = 'string?';
+            $this->param1['string'] = 'string?';
             static::fail();
         } catch (CannotCallMethodException $e) {
             static::assertEquals('offsetSet', $e->getMethodName());
         }
+    }
+
+    public function testArrayAccessOffsetUnset()
+    {
         try {
-            unset($params['string']);
+            unset($this->param1['string']);
             static::fail();
         } catch (CannotCallMethodException $e) {
             static::assertEquals('offsetUnset', $e->getMethodName());
         }
+    }
+
+    public function testGetIterator()
+    {
+        static::assertSame([
+            'string',
+            'number',
+            'array',
+            'array_of_array',
+        ], array_keys(iterator_to_array($this->param1)));
+        static::assertSame([
+            'string!',
+            '10',
+            [
+                'null' => null,
+                'empty' => '',
+                'false' => false,
+            ],
+            [
+                [
+                    'string' => 'string!',
+                    'number' => '10',
+                ],
+                [
+                    'string' => 'string!!',
+                    'number' => '11',
+                ],
+                [
+                    'string' => 'string!!!',
+                    'number' => '12',
+                ],
+            ],
+        ], array_values(iterator_to_array($this->param1)));
+        
+        // with fallback
+        static::assertSame([
+            'string1',
+            'string2',
+            'fallback',
+        ], array_keys(iterator_to_array($this->param3)));
+        static::assertSame([
+            'string 1!',
+            'string 2!',
+            'fallback!',
+        ], array_values(iterator_to_array($this->param3)));
+    }
+
+    public function testGetWithDotSyntax()
+    {
+        static::assertSame([
+            'null' => null,
+            'empty' => '',
+            'false' => false,
+        ], $this->param1->get('array'));
+
+        // not strict
+        static::assertEquals("Other Value!!", $this->param1->get('array.undefined', "Other Value!!"));
+        static::assertEquals("Other Value!!", $this->param1->get('array.null', "Other Value!!"));
+        static::assertEquals("Other Value!!", $this->param1->get('array.empty', "Other Value!!"));
+        static::assertEquals("Other Value!!", $this->param1->get('array.false', "Other Value!!"));
+
+        // strict
+        static::assertEquals("Other Value!!", $this->param1->get('array.undefined', "Other Value!!", true));
+        static::assertEquals("Other Value!!", $this->param1->get('array.null', "Other Value!!", true));
+        static::assertEquals("", $this->param1->get('array.empty', "Other Value!!", true));
+        static::assertEquals(false, $this->param1->get('array.false', "Other Value!!", true));
+    }
+
+    public function testHasWithDotSyntax()
+    {
+        static::assertTrue($this->param1->has('array'));
+
+        static::assertFalse($this->param1->has('array.undefined'));
+        static::assertFalse($this->param1->has('array.null'));
+        static::assertTrue($this->param1->has('array.empty'));
+        static::assertTrue($this->param1->has('array.false'));
     }
 }

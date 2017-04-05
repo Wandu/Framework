@@ -2,14 +2,16 @@
 namespace Wandu\Http\Parameters;
 
 use Mockery;
-use PHPUnit_Framework_TestCase;
+use Psr\Http\Message\ServerRequestInterface;
 use Wandu\Http\Psr\ServerRequest;
 
-class ServerParamsTest extends PHPUnit_Framework_TestCase
+class ServerParamsTest extends ParameterTest
 {
-    public function tearDown()
+    public function setUp()
     {
-        Mockery::close();
+        $this->param1 = new ServerParams($this->createRequest($this->param1Attributes));
+        $this->param2 = new ServerParams($this->createRequest($this->param2Attributes));
+        $this->param3 = new ServerParams($this->createRequest($this->param3Attributes), new Parameter($this->param3FallbackAttributes));
     }
 
     public function testAccepts()
@@ -82,5 +84,16 @@ class ServerParamsTest extends PHPUnit_Framework_TestCase
 
         $serverParams = new ServerParams((new ServerRequest(['REMOTE_ADDR' => '0.0.0.3']))->withHeader('x-forwarded-for', '0.0.0.4'));
         static::assertEquals('0.0.0.4', $serverParams->getIpAddress()); // x-forwarded-for first
+    }
+
+    /**
+     * @param array $attributes
+     * @return \Psr\Http\Message\ServerRequestInterface
+     */
+    private function createRequest(array $attributes = [])
+    {
+        $request = Mockery::mock(ServerRequestInterface::class);
+        $request->shouldReceive('getServerParams')->andReturn($attributes);
+        return $request;
     }
 }

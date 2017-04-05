@@ -2,23 +2,25 @@
 namespace Wandu\Http\Parameters;
 
 use Mockery;
-use PHPUnit_Framework_TestCase;
 use Psr\Http\Message\ServerRequestInterface;
 
-class QueryParamsTest extends PHPUnit_Framework_TestCase
+class QueryParamsTest extends ParameterTest
 {
-    public function tearDown()
+    public function setUp()
     {
-        Mockery::close();
+        $this->param1 = new QueryParams($this->createRequest($this->param1Attributes));
+        $this->param2 = new QueryParams($this->createRequest($this->param2Attributes));
+        $this->param3 = new QueryParams($this->createRequest($this->param3Attributes), new Parameter($this->param3FallbackAttributes));
     }
 
-    public function testConstructor()
+    /**
+     * @param array $attributes
+     * @return \Psr\Http\Message\ServerRequestInterface
+     */
+    private function createRequest(array $attributes = [])
     {
         $request = Mockery::mock(ServerRequestInterface::class);
-        $request->shouldReceive('getQueryParams')->andReturn([]);
-
-        $parsedBody = new QueryParams($request);
-
-        static::assertEquals([], $parsedBody->toArray());
+        $request->shouldReceive('getQueryParams')->andReturn($attributes);
+        return $request;
     }
 }
