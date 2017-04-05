@@ -3,7 +3,7 @@
     "description": "Generator Friendly Database Library.",
     "license": "MIT",
     "require": {
-        "php": ">=5.6",
+        "php": ">=7.0",
         "wandu/collection": "^3.1",
         "wandu/di": "^3.1"
     },
