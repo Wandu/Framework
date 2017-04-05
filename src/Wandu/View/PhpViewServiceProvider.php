@@ -6,6 +6,9 @@ use Wandu\DI\ServiceProviderInterface;
 use Wandu\View\Contracts\RenderInterface;
 use function Wandu\Foundation\config;
 
+/**
+ * @deprecated use PhiewServiceProvider
+ */
 class PhpViewServiceProvider implements ServiceProviderInterface
 {
     /**
