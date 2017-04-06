@@ -18,6 +18,11 @@ class InstallCommand extends Command
     /** @var \Symfony\Component\Console\Style\SymfonyStyle */
     protected $io;
     
+    /** @var array */
+    protected $options = [
+        'namespace?' => 'default wandu app namespace',
+    ];
+    
     /**
      * {@inheritdoc}
      */
@@ -36,7 +41,10 @@ class InstallCommand extends Command
         $this->output->writeln('Hello, <info>Welcome to Wandu Framework!</info>');
 
         $appBasePath = getcwd(); //static::filterPath($this->askAppBasePath('install path?', $basePath));
-        $appNamespace = $this->askAppNamespace('app namespace?', 'Wandu\\App');
+
+        $appNamespace = $this->input->hasOption('namespace') ?
+            $this->input->getOption('namespace') :
+            $this->askAppNamespace('app namespace?', 'Wandu\\App');
         
         $this->install($appBasePath, $appNamespace);
 
@@ -53,7 +61,7 @@ class InstallCommand extends Command
     {
         $installer = new SkeletonBuilder($appBasePath, __DIR__ . '/../skeleton');
         $replacers = [
-            'YourOwnApp' => $appNamespace,
+            'WanduSkeleton' => $appNamespace,
         ];
         $installer->build($replacers);
 

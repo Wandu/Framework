@@ -5,8 +5,8 @@ use Wandu\DateTime\DateTimeServiceProvider;
 use Wandu\Event\EventServiceProvider;
 use Wandu\Http\HttpServiceProvider;
 use Wandu\Router\RouterServiceProvider;
-use Wandu\View\PhpViewServiceProvider;
-use YourOwnApp\ApplicationServiceProvider;
+use Wandu\View\PhiewServiceProvider;
+use WanduSkeleton\ApplicationServiceProvider;
 
 return [
     HttpServiceProvider::class,
@@ -14,7 +14,7 @@ return [
     EventServiceProvider::class,
     DateTimeServiceProvider::class,
     MigratorServiceProvider::class,
-    PhpViewServiceProvider::class,
+    PhiewServiceProvider::class,
     DatabaseServiceProvider::class,
     ApplicationServiceProvider::class,
 ];

@@ -1,7 +1,8 @@
 <?php
 use Wandu\Router\Router;
-use YourOwnApp\Http\Controllers\HelloWorldController;
+use WanduSkeleton\Http\Controllers\HelloWorldController;
 
 return function (Router $router) {
+    // your routes
     $router->get('/', HelloWorldController::class);
 };

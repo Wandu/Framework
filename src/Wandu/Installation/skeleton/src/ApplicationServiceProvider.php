@@ -1,5 +1,5 @@
 <?php
-namespace YourOwnApp;
+namespace WanduSkeleton;
 
 use Wandu\DI\ContainerInterface;
 use Wandu\DI\ServiceProviderInterface;

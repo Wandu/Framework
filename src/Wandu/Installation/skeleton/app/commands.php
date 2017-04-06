@@ -8,7 +8,7 @@ use Wandu\Database\Migrator\Commands\MigrateStatusCommand;
 use Wandu\Database\Migrator\Commands\MigrateUpCommand;
 
 return [
-    'psysh' => PsyshCommand::class,
+    'sh' => PsyshCommand::class,
     'migrate:create' => MigrateCreateCommand::class,
     'migrate:status' => MigrateStatusCommand::class,
     'migrate' => MigrateCommand::class,

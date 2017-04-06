@@ -1,5 +1,5 @@
 <?php
-namespace YourOwnApp\Http\Controllers;
+namespace WanduSkeleton\Http\Controllers;
 
 use Wandu\View;
 
