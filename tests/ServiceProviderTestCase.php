@@ -49,6 +49,7 @@ abstract class ServiceProviderTestCase extends PHPUnit_Framework_TestCase
         }
 
         $this->runRegister();
+        $this->runBoot();
 
         $refl = new ReflectionObject($this->app);
         $propertyRefl = $refl->getProperty('containees');
@@ -65,6 +66,7 @@ abstract class ServiceProviderTestCase extends PHPUnit_Framework_TestCase
     public function testCallRegisteredClasses()
     {
         $this->runRegister();
+        $this->runBoot();
 
         foreach ($this->getRegisterClasses() as $name => $class) {
             if (is_int($name)) {
