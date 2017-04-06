@@ -19,7 +19,6 @@ PIDS=()
 
 split_parallel Caster       $TAG & PIDS+=($!)
 split_parallel Collection   $TAG & PIDS+=($!)
-split_parallel Compiler     $TAG & PIDS+=($!)
 split_parallel Config       $TAG & PIDS+=($!)
 split_parallel Console      $TAG & PIDS+=($!)
 split_parallel Database     $TAG & PIDS+=($!)

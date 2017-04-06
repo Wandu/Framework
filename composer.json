@@ -45,7 +45,6 @@
             "src/Wandu/DI/functions.php",
             "src/Wandu/Foundation/functions.php",
             "src/Wandu/Http/functions.php",
-            "src/Wandu/Math/functions.php",
             "src/Wandu/Validator/functions.php"
         ]
     },
