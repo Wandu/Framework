@@ -4,6 +4,7 @@ namespace Wandu\Console\Symfony;
 use Symfony\Component\Console\Command\Command as SymfonyCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Wandu\Console\Command;
 use Wandu\Console\Exception\ConsoleException;
@@ -34,6 +35,16 @@ class CommandAdapter extends SymfonyCommand
                 $this->addArgument(substr($argument, 0, -2), InputArgument::IS_ARRAY, $description);
             } else {
                 $this->addArgument($argument, InputArgument::REQUIRED, $description);
+            }
+        }
+
+        foreach ($command->getOptions() as $option => $description) {
+            if (substr($option, -1) === '?') {
+                $this->addOption(substr($option, 0, -1), null, InputOption::VALUE_OPTIONAL, $description);
+            } elseif (substr($option, -2) === '[]') {
+                $this->addOption(substr($option, 0, -2), null, InputOption::VALUE_IS_ARRAY, $description);
+            } else {
+                $this->addOption($option, null, InputOption::VALUE_REQUIRED, $description);
             }
         }
     }
