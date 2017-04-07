@@ -1,11 +1,8 @@
 <?php
 namespace Wandu\Database;
 
-use Doctrine\Common\Annotations\AnnotationReader;
-use Doctrine\Common\Annotations\Reader;
 use PDO;
 use PHPUnit_Framework_TestCase;
-use Wandu\DI\Container;
 
 class SakilaTestCase extends PHPUnit_Framework_TestCase
 {
@@ -14,9 +11,6 @@ class SakilaTestCase extends PHPUnit_Framework_TestCase
     
     public function setUp()
     {
-        $container = new Container();
-        $container[Reader::class] = new AnnotationReader();
-        
         $manager = new Manager();
         $this->connection = $manager->connect([
             'username' => 'root',

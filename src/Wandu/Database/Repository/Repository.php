@@ -6,6 +6,7 @@ use ReflectionClass;
 use ReflectionProperty;
 use stdClass;
 use Wandu\Database\Contracts\ConnectionInterface;
+use Wandu\Database\Entity\Metadata;
 use Wandu\Database\Exception\IdentifierNotFoundException;
 use Wandu\Database\Query\SelectQuery;
 use Wandu\Database\QueryBuilder;
@@ -15,8 +16,8 @@ class Repository
     /** @var \Wandu\Database\Contracts\ConnectionInterface */
     protected $connection;
     
-    /** @var \Wandu\Database\Repository\RepositorySettings */
-    protected $settings;
+    /** @var \Wandu\Database\Entity\Metadata */
+    protected $meta;
     
     /** @var \Wandu\Database\QueryBuilder */
     protected $queryBuilder;
@@ -24,15 +25,31 @@ class Repository
     /**
      * Repository constructor.
      * @param \Wandu\Database\Contracts\ConnectionInterface $connection
-     * @param \Wandu\Database\Repository\RepositorySettings $settings
+     * @param \Wandu\Database\Entity\Metadata $meta
      */
-    public function __construct(ConnectionInterface $connection, RepositorySettings $settings)
+    public function __construct(ConnectionInterface $connection, Metadata $meta)
     {
         $this->connection = $connection;
-        $this->settings = $settings;
-        $this->queryBuilder = new QueryBuilder($settings->getTable());
+        $this->meta = $meta;
+        $this->query = new QueryBuilder($meta->getTable());
     }
 
+    /**
+     * @return \Wandu\Database\Contracts\ConnectionInterface
+     */
+    public function getConnection(): ConnectionInterface
+    {
+        return $this->connection;
+    }
+
+    /**
+     * @return \Wandu\Database\Entity\Metadata
+     */
+    public function getMeta(): Metadata
+    {
+        return $this->meta;
+    }
+    
     /**
      * @param string|callable|\Wandu\Database\Contracts\QueryInterface $query
      * @param array $bindings
@@ -62,8 +79,7 @@ class Repository
     public function find($identifier)
     {
         return $this->first(function (SelectQuery $select) use ($identifier) {
-            $columns = $this->settings->getColumns();
-            return $select->where($columns[$this->settings->getIdentifier()], $identifier);
+            return $select->where($this->meta->getPrimaryKey(), $identifier);
         });
     }
     
@@ -74,17 +90,23 @@ class Repository
     public function insert($entity)
     {
         $this->assertIsInstance($entity, __METHOD__);
-        $identifierKey = $this->settings->getIdentifier();
-        $columns = $this->settings->getColumns();
+        $primaryKey = $this->meta->getPrimaryKey();
+        $primaryProperty = null;
+        $columns = $this->meta->getColumns();
         $attributesToStore = [];
         foreach ($columns as $propertyName => $columnName) {
-            if ($identifierKey === $propertyName) continue;
+            if ($primaryKey === $columnName) {
+                $primaryProperty = $propertyName;
+                continue;
+            }
             $attributesToStore[$columnName] = $this->pickProperty($this->getPropertyReflection($propertyName), $entity);
         }
-        $rowAffected = $this->query($this->queryBuilder->insert($attributesToStore));
-        if ($this->settings->isIncrements()) {
+        $rowAffected = $this->query($this->query->insert($attributesToStore));
+        if ($this->meta->isIncrements()) {
             $lastInsertId = $this->connection->getLastInsertId();
-            $this->injectProperty($this->getPropertyReflection($identifierKey), $entity, $lastInsertId);
+            if ($primaryProperty) {
+                $this->injectProperty($this->getPropertyReflection($primaryProperty), $entity, $lastInsertId);
+            }
         }
         return $rowAffected;
     }
@@ -96,19 +118,19 @@ class Repository
     public function update($entity)
     {
         $this->assertIsInstance($entity, __METHOD__);
-        $identifierKey = $this->settings->getIdentifier();
-        $columns = $this->settings->getColumns();
-        $identifier = $this->pickProperty($this->getPropertyReflection($identifierKey), $entity);
-        if (!$identifier) {
-            throw new IdentifierNotFoundException();
-        }
+        $primaryKey = $this->meta->getPrimaryKey();
+        $columns = $this->meta->getColumns();
+
+        $identifier = $this->getIdentifier($entity);
         $attributesToStore = [];
         foreach ($columns as $propertyName => $columnName) {
-            if ($identifierKey === $propertyName) continue;
+            if ($primaryKey === $columnName) continue;
             $attributesToStore[$columnName] = $this->pickProperty($this->getPropertyReflection($propertyName), $entity);
         }
 
-        return $this->query($this->queryBuilder->update($attributesToStore)->where($columns[$identifierKey], $identifier));
+        return $this->query(
+            $this->query->update($attributesToStore)->where($primaryKey, $identifier)
+        );
     }
 
     /**
@@ -118,15 +140,14 @@ class Repository
     public function delete($entity)
     {
         $this->assertIsInstance($entity, __METHOD__);
-        $identifierKey = $this->settings->getIdentifier();
-        $columns = $this->settings->getColumns();
         
-        $identifier = $this->pickProperty($this->getPropertyReflection($identifierKey), $entity);
-        if (!$identifier) {
-            throw new IdentifierNotFoundException();
+        $primaryKey = $this->meta->getPrimaryKey();
+        $identifier = $this->getIdentifier($entity);
+
+        $affectedRows = $this->query($this->query->delete()->where($primaryKey, $identifier));
+        if ($identifierProperty = $this->meta->getPrimaryProperty()) {
+            $this->injectProperty($this->getPropertyReflection($identifierProperty), $entity, null);
         }
-        $affectedRows = $this->query($this->queryBuilder->delete()->where($columns[$identifierKey], $identifier));
-        $this->injectProperty($this->getPropertyReflection($identifierKey), $entity, null);
         return $affectedRows;
     }
 
@@ -149,9 +170,9 @@ class Repository
         if (!$attributes) {
             return null;
         }
-        $model = $this->settings->getModel();
-        $casts = $this->settings->getCasts();
-        $columns = $this->settings->getColumns(); // map
+        $model = $this->meta->getClass();
+        $casts = $this->meta->getCasts();
+        $columns = $this->meta->getColumns(); // map
 
         if ($model) {
             $classReflection = $this->getClassReflection();
@@ -172,6 +193,22 @@ class Repository
     }
 
     /**
+     * @param mixed $entity
+     * @return string|int
+     */
+    private function getIdentifier($entity)
+    {
+        $identifier = null;
+        if ($identifierProperty = $this->meta->getPrimaryProperty()) {
+            $identifier = $this->pickProperty($this->getPropertyReflection($identifierProperty), $entity);
+        }
+        if (!$identifier) {
+            throw new IdentifierNotFoundException();
+        }
+        return $identifier;
+    }
+
+    /**
      * @param string|callable|\Wandu\Database\Contracts\QueryInterface $query
      * @return string|\Wandu\Database\Contracts\QueryInterface
      */
@@ -179,7 +216,7 @@ class Repository
     {
         if (!isset($query) || is_callable($query)) {
             $connection = $this->connection;
-            $queryBuilder = $this->queryBuilder->select();
+            $queryBuilder = $this->query->select();
             if (!isset($query)) {
                 return $queryBuilder;
             }
@@ -236,7 +273,7 @@ class Repository
     {
         static $reflection;
         if (!isset($reflection)) {
-            $model = $this->settings->getModel();
+            $model = $this->meta->getClass();
             return $reflection = new ReflectionClass($model ? $model : 'stdClass');
         }
         return $reflection;

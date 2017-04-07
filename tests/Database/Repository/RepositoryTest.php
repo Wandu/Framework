@@ -2,6 +2,8 @@
 namespace Wandu\Database\Repository;
 
 use Doctrine\Common\Annotations\AnnotationReader;
+use Wandu\Database\Entity\Metadata;
+use Wandu\Database\Entity\MetadataReader;
 use Wandu\Database\Exception\IdentifierNotFoundException;
 use Wandu\Database\Query\SelectQuery;
 use Wandu\Database\QueryBuilder;
@@ -18,14 +20,16 @@ class RepositoryTest extends SakilaTestCase
     public function setUp()
     {
         parent::setUp();
-        $settings = RepositorySettings::fromAnnotation(SakilaActor::class, new AnnotationReader());
-        $this->repository = new Repository($this->connection, $settings);
+        $metadataFactory = new MetadataReader(new AnnotationReader());
+        $metadata = $metadataFactory->getMetadataFrom(SakilaActor::class);
+        $this->repository = new Repository($this->connection, $metadata);
     }
     
     public function testFromAnnotation()
     {
-        static::assertEquals(new RepositorySettings('actor', [
-            'model' => SakilaActor::class,
+        $metadataFactory = new MetadataReader(new AnnotationReader());
+        static::assertEquals(new Metadata('actor', [
+            'class' => SakilaActor::class,
             'columns' => [
                 'id' => 'actor_id',
                 'firstName' => 'first_name',
@@ -38,9 +42,9 @@ class RepositoryTest extends SakilaTestCase
                 'lastName' => 'string',
                 'lastUpdate' => 'string',
             ],
-            'identifier' => 'id',
+            'primaryKey' => 'actor_id',
             'increments' => true,
-        ]), RepositorySettings::fromAnnotation(SakilaActor::class, new AnnotationReader()));
+        ]), $metadataFactory->getMetadataFrom(SakilaActor::class));
     }
     
     public function provideSelectQueries()

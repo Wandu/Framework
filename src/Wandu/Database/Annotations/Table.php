@@ -19,7 +19,7 @@ class Table
     /**
      * @var string
      */
-    public $identifier = 'id';
+    public $primaryKey = 'id';
 
     /**
      * @var bool

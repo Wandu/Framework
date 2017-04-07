@@ -5,9 +5,9 @@ use Wandu\Database\Annotations\Column;
 use Wandu\Database\Annotations\Table;
 
 /**
- * @Table(name="actor", primaryKey="actor_id", increments=true)
+ * @Table(name="film", primaryKey="film_id", increments=true)
  */
-class SakilaActor
+class SakilaFilm
 {
     /**
      * @Column(name="actor_id", cast="integer")
