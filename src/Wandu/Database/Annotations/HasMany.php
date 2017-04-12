@@ -6,28 +6,23 @@ use Doctrine\Common\Annotations\Annotation\Target;
 
 /**
  * @Annotation
- * @Target({"CLASS"})
+ * @Target({"PROPERTY"})
  */
-class Table
+class HasMany
 {
     /**
      * @Required
      * @var string
      */
-    public $name;
+    public $related;
 
     /**
      * @var string
      */
-    public $primaryKey = 'id';
-
-    /**
-     * @var bool
-     */
-    public $increments = true;
+    public $foreignKey = 'string';
 
     /**
      * @var string
      */
-    public $connection = 'default';
+    public $localKey = 'id';
 }

@@ -1,7 +1,10 @@
 <?php
 namespace Wandu\Database;
 
+use Doctrine\Common\Annotations\AnnotationRegistry;
 use Wandu\Database\Contracts\ConnectionInterface;
+use Wandu\Database\Contracts\Entity\MetadataReaderInterface;
+use Wandu\Database\Entity\MetadataReader;
 use Wandu\Database\Migrator\MigrateAdapter;
 use Wandu\Database\Migrator\MigrateAdapterInterface;
 use Wandu\Database\Migrator\MigrateTemplate;
@@ -17,8 +20,9 @@ class DatabaseServiceProvider implements ServiceProviderInterface
      */
     public function register(ContainerInterface $app)
     {
-        $app->closure(Manager::class, function () {
-            $manager = new Manager();
+        $app->bind(MetadataReaderInterface::class, MetadataReader::class);
+        $app->closure(Manager::class, function (MetadataReaderInterface $reader) {
+            $manager = new Manager($reader);
             foreach (config('database.connections', []) as $name => $connection) {
                 $manager->connect($connection, $name);
             }
@@ -39,5 +43,6 @@ class DatabaseServiceProvider implements ServiceProviderInterface
      */
     public function boot(ContainerInterface $app)
     {
+        AnnotationRegistry::registerLoader('class_exists');
     }
 }

@@ -8,11 +8,15 @@ use stdClass;
 use Wandu\Database\Contracts\ConnectionInterface;
 use Wandu\Database\Entity\Metadata;
 use Wandu\Database\Exception\IdentifierNotFoundException;
+use Wandu\Database\Manager;
 use Wandu\Database\Query\SelectQuery;
 use Wandu\Database\QueryBuilder;
 
 class Repository
 {
+    /** @var \Wandu\Database\Manager */
+    protected $manager;
+    
     /** @var \Wandu\Database\Contracts\ConnectionInterface */
     protected $connection;
     
@@ -22,24 +26,23 @@ class Repository
     /** @var \Wandu\Database\QueryBuilder */
     protected $queryBuilder;
     
+    /** @var \ReflectionClass */
+    protected $reflClass;
+    
+    /** @var \ReflectionProperty[] */
+    protected $refProperties = [];
+    
     /**
      * Repository constructor.
-     * @param \Wandu\Database\Contracts\ConnectionInterface $connection
+     * @param \Wandu\Database\Manager $manager
      * @param \Wandu\Database\Entity\Metadata $meta
      */
-    public function __construct(ConnectionInterface $connection, Metadata $meta)
+    public function __construct(Manager $manager, Metadata $meta)
     {
-        $this->connection = $connection;
+        $this->manager = $manager;
+        $this->connection = $manager->connection($meta->getConnection());
         $this->meta = $meta;
         $this->query = new QueryBuilder($meta->getTable());
-    }
-
-    /**
-     * @return \Wandu\Database\Contracts\ConnectionInterface
-     */
-    public function getConnection(): ConnectionInterface
-    {
-        return $this->connection;
     }
 
     /**
@@ -118,12 +121,11 @@ class Repository
     public function update($entity)
     {
         $this->assertIsInstance($entity, __METHOD__);
-        $primaryKey = $this->meta->getPrimaryKey();
-        $columns = $this->meta->getColumns();
+        $primaryKey = $this->meta->getPrimaryKey(); 
 
         $identifier = $this->getIdentifier($entity);
         $attributesToStore = [];
-        foreach ($columns as $propertyName => $columnName) {
+        foreach ($this->meta->getColumns() as $propertyName => $columnName) {
             if ($primaryKey === $columnName) continue;
             $attributesToStore[$columnName] = $this->pickProperty($this->getPropertyReflection($propertyName), $entity);
         }
@@ -170,24 +172,19 @@ class Repository
         if (!$attributes) {
             return null;
         }
-        $model = $this->meta->getClass();
         $casts = $this->meta->getCasts();
-        $columns = $this->meta->getColumns(); // map
-
-        if ($model) {
-            $classReflection = $this->getClassReflection();
-            $entity = $classReflection->newInstanceWithoutConstructor();
-            foreach ($columns as $propertyName => $column) {
-                if (!isset($attributes[$column])) continue;
-                $value = isset($casts[$column]) ? $this->cast($attributes[$column], $casts[$column]) : $attributes[$column];
-                $this->injectProperty($this->getPropertyReflection($propertyName), $entity, $value);
+        $relations = $this->meta->getRelations();
+        $entity = $this->getClassReflection()->newInstanceWithoutConstructor();
+        foreach ($this->meta->getColumns() as $propertyName => $column) {
+            if (!isset($attributes[$column])) continue;
+            if (isset($relations[$propertyName])) {
+                $value = $relations[$propertyName]->getRelation($this->manager, $attributes[$column]);
+            } elseif (isset($casts[$column])) {
+                $value = $this->cast($attributes[$column], $casts[$column]);
+            } else {
+                $value = $attributes[$column];
             }
-        } else {
-            $entity = new stdClass();
-            foreach ($attributes as $name => $attribute) {
-                $value = isset($casts[$name]) ? $this->cast($attribute, $casts[$name]) : $attribute;
-                $entity->{$columns[$name]} = $value;
-            }
+            $this->injectProperty($this->getPropertyReflection($propertyName), $entity, $value);
         }
         return $entity;
     }
@@ -267,29 +264,26 @@ class Repository
     }
 
     /**
-     * @return \ReflectionClass
-     */
-    private function getClassReflection()
-    {
-        static $reflection;
-        if (!isset($reflection)) {
-            $model = $this->meta->getClass();
-            return $reflection = new ReflectionClass($model ? $model : 'stdClass');
-        }
-        return $reflection;
-    }
-
-    /**
      * @param string $name
      * @return \ReflectionProperty
      */
-    private function getPropertyReflection($name)
+    private function getPropertyReflection($name): ReflectionProperty
     {
-        static $reflections = [];
-        if (!isset($reflections[$name])) {
-            return $reflections[$name] = $this->getClassReflection()->getProperty($name);
+        if (!isset($this->refProperties[$name])) {
+            return $this->refProperties[$name] = $this->getClassReflection()->getProperty($name);
         }
-        return $reflections[$name];
+        return $this->refProperties[$name];
+    }
+
+    /**
+     * @return \ReflectionClass
+     */
+    private function getClassReflection(): ReflectionClass
+    {
+        if (!isset($this->reflClass)) {
+            return $this->reflClass = new ReflectionClass($this->meta->getClass());
+        }
+        return $this->reflClass;
     }
 
     /**
@@ -298,19 +292,11 @@ class Repository
      */
     private function assertIsInstance($entity, $method)
     {
-        if (!$this->isInstance($entity)) {
+        $class = $this->meta->getClass();
+        if (!$entity instanceof $class) {
             throw new InvalidArgumentException(
-                "Argument 1 passed to {$method}() must be of the type " . $this->getClassReflection()->getName()
+                "Argument 1 passed to {$method}() must be of the type " . $class
             );
         }
-    }
-    
-    /**
-     * @param mixed $entity
-     * @return boolean
-     */
-    private function isInstance($entity)
-    {
-        return $this->getClassReflection()->isInstance($entity);
     }
 }

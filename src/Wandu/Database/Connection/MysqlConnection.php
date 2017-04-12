@@ -37,25 +37,6 @@ class MysqlConnection implements ConnectionInterface
         return $this;
     }
 
-//    /**
-//     * {@inheritdoc}
-//     */
-//    public function createQueryBuilder($table)
-//    {
-//        return new QueryBuilder($this->getPrefix() . $table);
-//    }
-//
-//    /**
-//     * {@inheritdoc}
-//     */
-//    public function createRepository($className)
-//    {
-//        if (!$this->container || !$this->container[Reader::class]) {
-//            throw new ClassNotFoundException(Reader::class);
-//        }
-//        return new Repository($this, RepositorySettings::fromAnnotation($className, $this->container[Reader::class]));
-//    }
-
     /**
      * {@inheritdoc}
      */

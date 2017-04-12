@@ -4,6 +4,9 @@ namespace Wandu\Database\Entity;
 class Metadata
 {
     /** @var string */
+    protected $connection;
+    
+    /** @var string */
     protected $table;
     
     /** @var string */
@@ -14,6 +17,9 @@ class Metadata
     
     /** @var array */
     protected $casts = [];
+    
+    /** @var \Wandu\Database\Annotations\RelationInterface[] */
+    protected $relations = [];
     
     /** @var string */
     protected $primaryKey = 'id';
@@ -49,6 +55,14 @@ class Metadata
     /**
      * @return string
      */
+    public function getConnection(): string
+    {
+        return $this->connection;
+    }
+    
+    /**
+     * @return string
+     */
     public function getTable()
     {
         return $this->table;
@@ -68,6 +82,14 @@ class Metadata
     public function getColumns()
     {
         return $this->columns;
+    }
+
+    /**
+     * @return \Wandu\Database\Annotations\RelationInterface[]
+     */
+    public function getRelations(): array
+    {
+        return $this->relations;
     }
 
     /**

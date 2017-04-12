@@ -1,6 +1,7 @@
 <?php
 namespace Wandu\Database\Sakila;
 
+use Wandu\Database\Annotations\BelongTo;
 use Wandu\Database\Annotations\Column;
 use Wandu\Database\Annotations\Table;
 
@@ -10,88 +11,55 @@ use Wandu\Database\Annotations\Table;
 class SakilaFilm
 {
     /**
-     * @Column(name="actor_id", cast="integer")
+     * @Column(name="film_id", cast="integer")
      * @var int
      */
     private $id;
 
     /**
-     * @Column(name="first_name")
+     * @Column(name="title")
      * @var string
      */
-    private $firstName;
+    private $title;
 
     /**
-     * @Column(name="last_name")
+     * @Column(name="description")
      * @var string
      */
-    private $lastName;
+    private $description;
 
     /**
-     * @Column(name="last_update")
+     * @Column(name="release_year")
      * @var string
      */
-    private $lastUpdate;
+    private $releaseYear;
 
     /**
+     * @Column(name="language_id")
+     * @BelongTo(related=SakilaLanguage::class, key="language_id")
+     * @var \Wandu\Database\Sakila\SakilaLanguage
+     */
+    private $language;
+
+    /**
+     * SakilaFilm constructor.
      * @param int $id
-     * @param string $firstName
-     * @param string $lastName
-     * @param string $lastUpdate
+     * @param string $title
+     * @param string $description
+     * @param string $releaseYear
+     * @param \Wandu\Database\Sakila\SakilaLanguage $language
      */
-    public function __construct($id, $firstName, $lastName, $lastUpdate)
-    {
+    public function __construct(
+        $id,
+        $title,
+        $description,
+        $releaseYear,
+        SakilaLanguage $language
+    ) {
         $this->id = $id;
-        $this->firstName = $firstName;
-        $this->lastName = $lastName;
-        $this->lastUpdate = $lastUpdate;
-    }
-
-    /**
-     * @return int
-     */
-    public function getIdentifier()
-    {
-        return $this->id;
-    }
-
-    /**
-     * @return string
-     */
-    public function getFirstName()
-    {
-        return $this->firstName;
-    }
-
-    /**
-     * @return string
-     */
-    public function getLastName()
-    {
-        return $this->lastName;
-    }
-
-    /**
-     * @return string
-     */
-    public function getLastUpdate()
-    {
-        return $this->lastUpdate;
-    }
-
-    /**
-     * @param string $firstName
-     */
-    public function setFirstName($firstName)
-    {
-        $this->firstName = $firstName;
-    }
-
-    /**
-     * @param string $lastName
-     */
-    public function setLastName($lastName)
-    {
-        $this->lastName = $lastName;
+        $this->title = $title;
+        $this->description = $description;
+        $this->releaseYear = $releaseYear;
+        $this->language = $language;
     }
 }

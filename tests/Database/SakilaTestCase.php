@@ -1,18 +1,23 @@
 <?php
 namespace Wandu\Database;
 
+use Doctrine\Common\Annotations\AnnotationReader;
 use PDO;
 use PHPUnit_Framework_TestCase;
+use Wandu\Database\Entity\MetadataReader;
 
 class SakilaTestCase extends PHPUnit_Framework_TestCase
 {
+    /** @var \Wandu\Database\Manager */
+    protected $manager;
+    
     /** @var \Wandu\Database\Contracts\ConnectionInterface */
     protected $connection;
     
     public function setUp()
     {
-        $manager = new Manager();
-        $this->connection = $manager->connect([
+        $this->manager = new Manager(new MetadataReader(new AnnotationReader()));
+        $this->connection = $this->manager->connect([
             'username' => 'root',
             'password' => '',
             'database' => 'sakila',
