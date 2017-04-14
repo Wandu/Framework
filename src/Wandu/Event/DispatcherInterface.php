@@ -4,16 +4,18 @@ namespace Wandu\Event;
 interface DispatcherInterface
 {
     /**
-     * @param array $listeners
-     */
-    public function setListeners(array $listeners);
-
-    /**
-     * @param string $eventName
-     * @param string|callable $listenerName
+     * @param string $event
+     * @param string|callable $listener
      * @return self
      */
-    public function on($eventName, $listenerName);
+    public function on(string $event, $listener);
+
+    /**
+     * @param string $event
+     * @param string|callable $listener
+     * @return self
+     */
+    public function off(string $event, $listener = null);
 
     /**
      * @param \Wandu\Event\EventInterface $event

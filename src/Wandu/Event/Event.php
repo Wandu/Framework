@@ -1,6 +1,9 @@
 <?php
 namespace Wandu\Event;
 
+/**
+ * @deprecated
+ */
 class Event implements EventInterface
 {
     /**

@@ -35,7 +35,7 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
     }
 }
 
-class DispatcherTestEvent extends Event
+class DispatcherTestEvent implements EventInterface
 {
     private $callCount = 0;
     

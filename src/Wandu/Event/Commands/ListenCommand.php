@@ -9,6 +9,12 @@ class ListenCommand extends Command
 {
     const EXECUTE_TIMEOUT = 2;
 
+    /** @var \Wandu\Q\Queue */
+    protected $queue;
+    
+    /** @var \Wandu\Event\Dispatcher */
+    protected $dispatcher;
+    
     /** @var string */
     protected $description = "Listen queued events";
     

@@ -1,11 +1,10 @@
 <?php
 namespace Wandu\Event\Events;
 
-use Wandu\Event\Event;
+use Wandu\Event\EventInterface;
 use Wandu\Event\ViaQueue;
-use Wandu\Q\Queue;
 
-class Ping extends Event implements ViaQueue
+class Ping implements ViaQueue, EventInterface
 {
     /** @var string */
     protected $message;

@@ -28,7 +28,7 @@ class QueueEventTest extends PHPUnit_Framework_TestCase
     }
 }
 
-class ViaQueueEventTestEvent extends Event implements ViaQueue
+class ViaQueueEventTestEvent implements ViaQueue, EventInterface
 {
     private $callCount = 0;
 

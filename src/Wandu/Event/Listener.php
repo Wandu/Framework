@@ -1,8 +1,11 @@
 <?php
 namespace Wandu\Event;
 
-class Listener
+class Listener implements ListenerInterface
 {
+    /**
+     * {@inheritdoc}
+     */
     public function call(EventInterface $event)
     {
         if (method_exists($this, 'handle')) {
