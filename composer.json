@@ -75,6 +75,7 @@
     },
     "suggest": {
         "aws/aws-sdk-php": "for SQS queue in Wandu/Q",
+        "nesbot/carbon": "for datetime caster by CarbonCaster in Wandu/Caster",
         "pda/pheanstalk": "for Beanstalkd queue in Wandu/Q",
         "predis/predis": "for Redis session in Wandu/Http",
         "symfony/cache": "for the CachableMetadataRader cache in Wandu/Database"

@@ -1,7 +1,9 @@
 <?php
 namespace Wandu\Caster;
 
+use Carbon\Carbon;
 use PHPUnit_Framework_TestCase;
+use Wandu\Caster\Caster\CarbonCaster;
 
 class CasterTest extends PHPUnit_Framework_TestCase
 {
@@ -40,5 +42,21 @@ class CasterTest extends PHPUnit_Framework_TestCase
         } else {
             static::assertSame($output, $this->caster->cast($input, $cast));
         }
+    }
+    
+    public function testAddCaster()
+    {
+        try {
+            $this->caster->cast('2017-04-04', 'datetime');
+            static::fail();
+        } catch (UnsupportTypeException $e) {
+            static::assertEquals('unsupport type "datetime".', $e->getMessage());
+        }
+
+        $this->caster->addCaster('datetime', new CarbonCaster('Asia/Seoul'));
+        static::assertEquals(
+            new Carbon('2017-04-04', 'Asia/Seoul'),
+            $this->caster->cast('2017-04-04', 'datetime')
+        );
     }
 }

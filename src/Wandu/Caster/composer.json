@@ -11,6 +11,10 @@
             "Wandu\\Caster\\": ""
         }
     },
+    "suggest": {
+        "nesbot/carbon": "for datetime caster by CarbonCaster.",
+        "wandu/datetime": "for date caster by DateCaster, for time caster by TimeCaster."
+    },
     "extra": {
         "branch-alias": {
             "dev-master": "3.1-dev"
