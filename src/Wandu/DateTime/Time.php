@@ -44,7 +44,7 @@ class Time
      * @param \DateTimeZone|string|int $timezone
      * @return \Wandu\DateTime\Time
      */
-    public static function fromTimes($hours, $minutes = 0, $seconds = 0, $timezone = null)
+    public static function fromTimes(int $hours, int $minutes = 0, int $seconds = 0, $timezone = null)
     {
         return new Time($hours * 3600 + $minutes * 60 + $seconds, $timezone);
     }
@@ -104,7 +104,7 @@ class Time
     /**
      * @return int
      */
-    public function seconds()
+    public function seconds(): int
     {
         return (int)($this->timestamp % 60);
     }
@@ -112,7 +112,7 @@ class Time
     /**
      * @return int
      */
-    public function minutes()
+    public function minutes(): int
     {
         return (int)(floor($this->timestamp / 60) % 60);
     }
@@ -120,7 +120,7 @@ class Time
     /**
      * @return int
      */
-    public function hours()
+    public function hours(): int
     {
         return (int) floor($this->timestamp / 3600);
     }
