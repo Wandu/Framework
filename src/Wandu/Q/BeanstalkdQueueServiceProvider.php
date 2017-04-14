@@ -15,7 +15,7 @@ class BeanstalkdQueueServiceProvider implements ServiceProviderInterface
 {
     public function register(ContainerInterface $app)
     {
-        $app->closure(PheanstalkInterface::class, function ($app) {
+        $app->closure(PheanstalkInterface::class, function () {
             return new Pheanstalk(
                 config('queue.host', '127.0.0.1'),
                 config('queue.port', Pheanstalk::DEFAULT_PORT),
