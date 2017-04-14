@@ -1,97 +1,104 @@
 <?php
 namespace Wandu\Caster;
 
-class Caster implements CasterInterface
-{
-    /** @var array */
-    protected static $supportCasts = [
-        'string', 'int', 'integer', 'num', 'number', 'float', 'double', 'bool', 'boolean'
-    ];
+use Wandu\Caster\Caster\ArrayCaster;
+use Wandu\Caster\Caster\BooleanCatser;
+use Wandu\Caster\Caster\FloatCaster;
+use Wandu\Caster\Caster\IntegerCaster;
+use Wandu\Caster\Caster\StringCaster;
 
-    /** @var array */
-    protected $boolFalse = [
-        '0', 'false', 'False', 'FALSE', 'n', 'N', 'no', 'No', 'NO', 'off', 'Off', 'OFF'
-    ];
+class Caster implements CastManagerInterface
+{
+    /** @var \Wandu\Caster\CasterInterface[] */
+    protected $casters = [];
+
+    /**
+     * @param \Wandu\Caster\CasterInterface[] $casters
+     */
+    public function __construct(array $casters = [])
+    {
+        $this->casters = $casters + $this->getDefaultCasters();
+    }
 
     /**
      * {@inheritdoc}
      */
-    public function cast($value, $type)
+    public function addCaster(string $type, CasterInterface $caster)
     {
-        if (($p = strpos($type, '[]')) !== false) {
-            $value = $this->normalizeArray($value);
-            $type = substr($type, 0, $p);
+        $this->casters[$type] = $caster;
+    }
+    
+    /**
+     * {@inheritdoc}
+     */
+    public function cast($value, string $type)
+    {
+        $originType = $type;
+        if ($this->isNullable($type) && $value === null) {
+            return null;
+        }
+        $type = rtrim($type, '?'); // strip nullable
+        if ($this->isArrayable($type)) {
+            $type = substr($type, 0, -2); // strip []
             return array_map(function ($item) use ($type) {
                 return $this->cast($item, $type);
-            }, $value);
+            }, $this->getCaster('[]', $originType)->cast($value));
         }
-        if (strpos($type, '?') !== false) {
-            if ($value === null) {
-                return null;
-            }
-            $type = str_replace($type, '?', '');
+        return $this->getCaster($type, $originType)->cast($value);
+    }
+    
+    /**
+     * @param string $type
+     * @param string $originType
+     * @return \Wandu\Caster\CasterInterface
+     */
+    protected function getCaster(string $type, string $originType): CasterInterface
+    {
+        if (isset($this->casters[$type])) {
+            return $this->casters[$type];
         }
-        return $this->castPlainType($type, $value);
+        throw new UnsupportTypeException($originType);
+    }
+    
+    /**
+     * @param string $type
+     * @return bool
+     */
+    protected function isArrayable($type): bool
+    {
+        return substr($type, -2) === '[]';
+    }
+    
+    /**
+     * @param string $type
+     * @return bool
+     */
+    protected function isNullable($type): bool
+    {
+        return substr($type, -1) === '?';
     }
 
     /**
-     * @param mixed $value
-     * @return array
+     * @return \Wandu\Caster\CasterInterface[]
      */
-    private function normalizeArray($value)
+    protected function getDefaultCasters()
     {
-        if (is_array($value)) {
-            return $value;
-        }
-        if (strpos($value, ',') !== false) {
-            return explode(',', $value);
-        }
-        return [$value];
-    }
-
-    private function castPlainType($type, $value)
-    {
-        if ($value === null) {
-            switch ($type) {
-                case 'string':
-                    return '';
-                case 'int':
-                case 'integer':
-                    return 0;
-                case 'num':
-                case 'number':
-                case 'float':
-                case 'double':
-                    return (float) 0;
-                case 'bool':
-                case 'boolean':
-                    return false;
-            }
-        }
-
-        if (is_array($value)) {
-            $value = implode(',', $value);
-        }
-
-        switch ($type) {
-            case 'string':
-                return (string) $value;
-            case 'int':
-            case 'integer':
-                return (int) $value;
-            case 'num':
-            case 'number':
-            case 'float':
-            case 'double':
-                return (double) $value;
-            case 'bool':
-            case 'boolean':
-                if (in_array($value, $this->boolFalse)) {
-                    return false;
-                }
-                return (bool) $value;
-        }
-
-        throw new UnsupportTypeException($type);
+        $integerCaster = new IntegerCaster();
+        $floatCaster = new FloatCaster();
+        $booleanCaster = new BooleanCatser();
+        $arrayCaster = new ArrayCaster();
+        return [
+            'string' => new StringCaster(),
+            'int' => $integerCaster,
+            'integer' => $integerCaster,
+            'num' => $floatCaster,
+            'number' => $floatCaster,
+            'float' => $floatCaster,
+            'double' => $floatCaster,
+            'bool' => $booleanCaster,
+            'boolean' => $booleanCaster,
+            'array' => $arrayCaster,
+            '[]' => $arrayCaster, // special caster
+        ];
     }
 }

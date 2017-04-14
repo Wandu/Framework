@@ -1,14 +1,13 @@
 <?php
 namespace Wandu\Caster;
 
-use Mockery;
 use PHPUnit_Framework_TestCase;
 
 class CasterTest extends PHPUnit_Framework_TestCase
 {
     use CastProviderTrait;
 
-    /** @var \Wandu\Caster\CasterInterface */
+    /** @var \Wandu\Caster\CastManagerInterface */
     protected $caster;
 
     public function setUp()
@@ -26,20 +25,20 @@ class CasterTest extends PHPUnit_Framework_TestCase
             if ($output instanceof \Exception) {
                 try {
                     $this->caster->cast($input, $cast);
-                    $this->fail();
+                    static::fail();
                 } catch (\Exception $e) {
-                    $this->assertEquals($output->getMessage(), $e->getMessage());
-                    $this->assertSame(get_class($output), get_class($e));
+                    static::assertEquals($output->getMessage(), $e->getMessage());
+                    static::assertSame(get_class($output), get_class($e));
                 }
             } else {
-                $this->assertInstanceOf(
+                static::assertInstanceOf(
                     \stdClass::class,
                     $this->caster->cast($input, $cast)
                 );
-                $this->assertEquals($output, $this->caster->cast($input, $cast));
+                static::assertEquals($output, $this->caster->cast($input, $cast));
             }
         } else {
-            $this->assertSame($output, $this->caster->cast($input, $cast));
+            static::assertSame($output, $this->caster->cast($input, $cast));
         }
     }
 }

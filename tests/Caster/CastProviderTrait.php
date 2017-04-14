@@ -11,12 +11,17 @@ trait CastProviderTrait
             [['10', '20', '30'], 'int[]', [10, 20, 30]],
             [['10', '20', '30'], 'integer[]', [10, 20, 30]],
             [['10', '20', '30'], 'string[]', ['10', '20', '30']],
-            [['10', '20', '30'], 'string', '10,20,30'],
+            [['10', '20', '30'], 'string', '["10","20","30"]'],
 
             ['10,20,30', 'int[]', [10, 20, 30]],
             ['10,20,30', 'integer[]', [10, 20, 30]],
             ['10,20,30', 'string[]', ['10', '20', '30']],
             ['10,20,30', 'string', '10,20,30'],
+
+            ['["10","20","30"]', 'int[]', [10, 20, 30]],
+            ['["10","20","30"]', 'integer[]', [10, 20, 30]],
+            ['["10","20","30"]', 'string[]', ['10', '20', '30']],
+            ['["10","20","30"]', 'string', '["10","20","30"]'],
 
             ['10', 'int[]', [10]],
             ['10', 'integer[]', [10]],
@@ -53,13 +58,48 @@ trait CastProviderTrait
             [null, 'bool?', null],
             [null, 'boolean?', null],
 
-//            [null, 'string[]?', null],
-//            [null, 'int[]?', null],
-//            [null, 'number[]?', null],
-//            [null, 'float[]?', null],
-//            [null, 'double[]?', null],
-//            [null, 'bool[]?', null],
-//            [null, 'boolean[]?', null],
+            ['', 'string', ''],
+            ['', 'int', 0],
+            ['', 'double', 0.0],
+            ['', 'bool', false],
+
+            [0, 'string', '0'],
+            [0, 'int', 0],
+            [0, 'double', 0.0],
+            [0, 'bool', false],
+
+            [0.0, 'string', '0'],
+            [0.0, 'int', 0],
+            [0.0, 'double', 0.0],
+            [0.0, 'bool', false],
+
+            [false, 'string', 'false'],
+            [true, 'string', 'true'],
+            [false, 'int', 0],
+            [false, 'double', 0.0],
+            [false, 'bool', false],
+
+            ['10', 'int[]?', [10]],
+            ['10', 'int?[]', [10]],
+
+            ['[10,20,null]', 'int[]?', [10, 20, 0]],
+            ['[10,20,null]', 'int?[]', [10, 20, null]],
+
+            [null, 'string[]?', null],
+            [null, 'int[]?', null],
+            [null, 'number[]?', null],
+            [null, 'float[]?', null],
+            [null, 'double[]?', null],
+            [null, 'bool[]?', null],
+            [null, 'boolean[]?', null],
+
+            [null, 'string?[]', []],
+            [null, 'int?[]', []],
+            [null, 'number?[]', []],
+            [null, 'float?[]', []],
+            [null, 'double?[]', []],
+            [null, 'bool?[]', []],
+            [null, 'boolean?[]', []],
         ];
     }
 }
