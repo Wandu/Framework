@@ -45,16 +45,16 @@ class ArrayListTest extends PHPUnit_Framework_TestCase
         ];
     }
 
-    public function testGeneratorRunOnlyOne()
+    public function testGenerator()
     {
         $expected = <<<TEXT
-loop start
 generator start
+generator end
+loop start
 0 : 0
 1 : 1
 2 : 4
 3 : 9
-generator end
 loop start
 0 : 0
 1 : 1

@@ -7,9 +7,6 @@ use Wandu\Collection\Contracts\ListInterface;
 
 class ArrayList implements ListInterface
 {
-    /** @var \Traversable */
-    protected $iterator;
-
     /** @var array */
     protected $items;
 
@@ -19,7 +16,7 @@ class ArrayList implements ListInterface
     public function __construct($items = [])
     {
         if ($items instanceof Traversable) {
-            $this->iterator = $items; // for lazy iterate
+            $this->items = iterator_to_array($items); // for lazy iterate
         } else {
             $this->items = array_values($items);
         }
@@ -71,7 +68,6 @@ class ArrayList implements ListInterface
      */
     public function all()
     {
-        $this->executeIterator();
         return $this->items;
     }
 
@@ -80,7 +76,6 @@ class ArrayList implements ListInterface
      */
     public function count()
     {
-        $this->executeIterator();
         return count($this->items);
     }
 
@@ -97,14 +92,6 @@ class ArrayList implements ListInterface
      */
     public function getIterator()
     {
-        if (isset($this->iterator)) {
-            $this->items = [];
-            foreach ($this->iterator as $item) {
-                yield $this->items[] = $item;
-            }
-            $this->iterator = null;
-            return;
-        }
         foreach ($this->items as $item) {
             yield $item;
         }
@@ -115,7 +102,6 @@ class ArrayList implements ListInterface
      */
     public function offsetExists($offset)
     {
-        $this->executeIterator();
         return isset($this->items[$offset]);
     }
 
@@ -149,7 +135,6 @@ class ArrayList implements ListInterface
      */
     public function serialize()
     {
-        $this->executeIterator();
         return serialize($this->items);
     }
 
@@ -166,7 +151,6 @@ class ArrayList implements ListInterface
      */
     public function clear()
     {
-        $this->iterator = null;
         $this->items = [];
     }
 
@@ -175,7 +159,6 @@ class ArrayList implements ListInterface
      */
     public function contains(...$values)
     {
-        $this->executeIterator();
         foreach ($values as $value) {
             if (!in_array($value, $this->items, true)) {
                 return false;
@@ -189,7 +172,6 @@ class ArrayList implements ListInterface
      */
     public function get($key, $default = null)
     {
-        $this->executeIterator();
         return array_key_exists($key, $this->items) ? $this->items[$key] : $default;
     }
 
@@ -198,7 +180,6 @@ class ArrayList implements ListInterface
      */
     public function set($key, $value)
     {
-        $this->executeIterator();
         if (isset($key)) {
             $this->items[(int) $key] = $value;
         } else {
@@ -211,7 +192,6 @@ class ArrayList implements ListInterface
      */
     public function remove(...$keys)
     {
-        $this->executeIterator();
         foreach ($keys as $key) {
             unset($this->items[$key]);
         }
@@ -223,7 +203,6 @@ class ArrayList implements ListInterface
      */
     public function has(...$keys)
     {
-        $this->executeIterator();
         foreach ($keys as $key) {
             if (!array_key_exists($key, $this->items)) {
                 return false;
@@ -237,7 +216,6 @@ class ArrayList implements ListInterface
      */
     public function filter(callable $handler = null)
     {
-        $this->executeIterator();
         if ($handler) {
             if (defined("ARRAY_FILTER_USE_BOTH")) {
                 return new ArrayList(array_values(array_filter($this->items, $handler, ARRAY_FILTER_USE_BOTH)));
@@ -253,7 +231,6 @@ class ArrayList implements ListInterface
      */
     public function map(callable $handler)
     {
-        $this->executeIterator();
         return new ArrayList(array_map($handler, $this->items, array_keys($this->items)));
     }
 
@@ -302,7 +279,6 @@ class ArrayList implements ListInterface
      */
     public function combine(ListInterface $list)
     {
-        $this->executeIterator();
         return new ArrayMap(array_combine($this->items, $list->all()));
     }
 
@@ -311,7 +287,6 @@ class ArrayList implements ListInterface
      */
     public function first(callable $handler = null, $default = null)
     {
-        $this->executeIterator();
         if ($handler) {
             foreach ($this->items as $key => $item) {
                 if (call_user_func($handler, $item, $key)) {
@@ -328,7 +303,6 @@ class ArrayList implements ListInterface
      */
     public function last(callable $handler = null, $default = null)
     {
-        $this->executeIterator();
         if ($handler) {
             $length = count($this->items);
             for ($i = 0; $i < $length; $i++) {
@@ -348,7 +322,6 @@ class ArrayList implements ListInterface
      */
     public function intersect(ListInterface $list)
     {
-        $this->executeIterator();
         return new ArrayList(array_intersect($this->items, $list->all()));
     }
 
@@ -357,7 +330,6 @@ class ArrayList implements ListInterface
      */
     public function union(ListInterface $list)
     {
-        $this->executeIterator();
         return new ArrayList(array_unique_union($this->items, $list->all()));
     }
 
@@ -366,7 +338,6 @@ class ArrayList implements ListInterface
      */
     public function merge(ListInterface $list)
     {
-        $this->executeIterator();
         return new ArrayList(array_merge($this->items, $list->all()));
     }
 
@@ -375,7 +346,6 @@ class ArrayList implements ListInterface
      */
     public function implode($glue = null)
     {
-        $this->executeIterator();
         return implode($glue, $this->items);
     }
 
@@ -392,7 +362,6 @@ class ArrayList implements ListInterface
      */
     public function pop()
     {
-        $this->executeIterator();
         return array_pop($this->items);
     }
 
@@ -401,7 +370,6 @@ class ArrayList implements ListInterface
      */
     public function push(...$values)
     {
-        $this->executeIterator();
         $this->items = array_merge($this->items, $values);
         return $this;
     }
@@ -411,7 +379,6 @@ class ArrayList implements ListInterface
      */
     public function shift()
     {
-        $this->executeIterator();
         return array_shift($this->items);
     }
 
@@ -420,7 +387,6 @@ class ArrayList implements ListInterface
      */
     public function unshift(...$values)
     {
-        $this->executeIterator();
         $this->items = array_merge(array_reverse($values), $this->items);
         return $this;
     }
@@ -430,7 +396,6 @@ class ArrayList implements ListInterface
      */
     public function reverse()
     {
-        $this->executeIterator();
         return new ArrayList(array_reverse($this->items));
     }
 
@@ -439,7 +404,6 @@ class ArrayList implements ListInterface
      */
     public function shuffle()
     {
-        $this->executeIterator();
         $items = $this->items;
         shuffle($items);
         return new ArrayList($items);
@@ -450,7 +414,6 @@ class ArrayList implements ListInterface
      */
     public function sort(callable $callback = null)
     {
-        $this->executeIterator();
         $items = $this->items;
         if ($callback) {
             usort($items, $callback);
@@ -465,7 +428,6 @@ class ArrayList implements ListInterface
      */
     public function slice($offset, $length = null)
     {
-        $this->executeIterator();
         return new ArrayList(array_slice($this->items, $offset, $length));
     }
 
@@ -474,7 +436,6 @@ class ArrayList implements ListInterface
      */
     public function splice($offset, $length = null, $replacement = null)
     {
-        $this->executeIterator();
         if ($length) {
             return new ArrayList(array_splice($this->items, $offset, $length, $replacement));
         }
@@ -486,7 +447,6 @@ class ArrayList implements ListInterface
      */
     public function unique()
     {
-        $this->executeIterator();
         return new ArrayList(array_unique($this->items));
     }
     
@@ -509,13 +469,5 @@ class ArrayList implements ListInterface
             }
         }
         throw new InvalidArgumentException("Argument {$order} passed to {$method} must be null or an integer less than the size of the list");
-    }
-    
-    private function executeIterator()
-    {
-        if (isset($this->iterator)) {
-            $this->items = iterator_to_array($this->iterator);
-            $this->iterator = null;
-        }
     }
 }
