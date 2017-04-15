@@ -4,8 +4,9 @@ namespace Wandu\Database\Repository;
 use InvalidArgumentException;
 use ReflectionClass;
 use ReflectionProperty;
-use stdClass;
-use Wandu\Database\Contracts\ConnectionInterface;
+use Wandu\Caster\CastManagerInterface;
+use Wandu\Collection\ArrayList;
+use Wandu\Collection\Contracts\ListInterface;
 use Wandu\Database\Entity\Metadata;
 use Wandu\Database\Exception\IdentifierNotFoundException;
 use Wandu\Database\Manager;
@@ -23,6 +24,9 @@ class Repository
     /** @var \Wandu\Database\Entity\Metadata */
     protected $meta;
     
+    /** @var \Wandu\Caster\CastManagerInterface */
+    protected $caster;
+    
     /** @var \Wandu\Database\QueryBuilder */
     protected $queryBuilder;
     
@@ -32,16 +36,15 @@ class Repository
     /** @var \ReflectionProperty[] */
     protected $refProperties = [];
     
-    /**
-     * Repository constructor.
-     * @param \Wandu\Database\Manager $manager
-     * @param \Wandu\Database\Entity\Metadata $meta
-     */
-    public function __construct(Manager $manager, Metadata $meta)
+    /** @var array */
+    protected static $entityCache = [];
+    
+    public function __construct(Manager $manager, Metadata $meta, CastManagerInterface $caster)
     {
         $this->manager = $manager;
         $this->connection = $manager->connection($meta->getConnection());
         $this->meta = $meta;
+        $this->caster = $caster;
         $this->query = new QueryBuilder($meta->getTable());
     }
 
@@ -68,6 +71,16 @@ class Repository
     /**
      * @param string|callable|\Wandu\Database\Contracts\QueryInterface $query
      * @param array $bindings
+     * @return \Wandu\Collection\Contracts\ListInterface
+     */
+    public function all($query = null, array $bindings = []): ListInterface
+    {
+        return new ArrayList($this->fetch($query, $bindings));
+    }
+
+    /**
+     * @param string|callable|\Wandu\Database\Contracts\QueryInterface $query
+     * @param array $bindings
      * @return object
      */
     public function first($query = null, array $bindings = [])
@@ -85,6 +98,17 @@ class Repository
             return $select->where($this->meta->getPrimaryKey(), $identifier);
         });
     }
+
+    /**
+     * @param array $identifiers
+     * @return \Wandu\Collection\Contracts\ListInterface
+     */
+    public function findMany(array $identifiers = []): ListInterface
+    {
+        return $this->all(function (SelectQuery $select) use ($identifiers) {
+            return $select->where($this->meta->getPrimaryKey(), 'IN', $identifiers);
+        });
+    }
     
     /**
      * @param object $entity
@@ -97,12 +121,12 @@ class Repository
         $primaryProperty = null;
         $columns = $this->meta->getColumns();
         $attributesToStore = [];
-        foreach ($columns as $propertyName => $columnName) {
-            if ($primaryKey === $columnName) {
+        foreach ($columns as $propertyName => $column) {
+            if ($primaryKey === $column->name) {
                 $primaryProperty = $propertyName;
                 continue;
             }
-            $attributesToStore[$columnName] = $this->pickProperty($this->getPropertyReflection($propertyName), $entity);
+            $attributesToStore[$column->name] = $this->pickProperty($this->getPropertyReflection($propertyName), $entity);
         }
         $rowAffected = $this->query($this->query->insert($attributesToStore));
         if ($this->meta->isIncrements()) {
@@ -125,9 +149,9 @@ class Repository
 
         $identifier = $this->getIdentifier($entity);
         $attributesToStore = [];
-        foreach ($this->meta->getColumns() as $propertyName => $columnName) {
-            if ($primaryKey === $columnName) continue;
-            $attributesToStore[$columnName] = $this->pickProperty($this->getPropertyReflection($propertyName), $entity);
+        foreach ($this->meta->getColumns() as $propertyName => $column) {
+            if ($primaryKey === $column->name) continue;
+            $attributesToStore[$column->name] = $this->pickProperty($this->getPropertyReflection($propertyName), $entity);
         }
 
         return $this->query(
@@ -172,20 +196,28 @@ class Repository
         if (!$attributes) {
             return null;
         }
+        $entityCacheId = $this->meta->getClass() . '#' . $attributes[$this->meta->getPrimaryKey()];
+        if (isset(static::$entityCache[$entityCacheId])) return static::$entityCache[$entityCacheId];
+
         $casts = $this->meta->getCasts();
         $relations = $this->meta->getRelations();
         $entity = $this->getClassReflection()->newInstanceWithoutConstructor();
+
+        static::$entityCache[$entityCacheId] = $entity;
+
         foreach ($this->meta->getColumns() as $propertyName => $column) {
-            if (!isset($attributes[$column])) continue;
+            if (!isset($attributes[$column->name])) continue;
             if (isset($relations[$propertyName])) {
-                $value = $relations[$propertyName]->getRelation($this->manager, $attributes[$column]);
-            } elseif (isset($casts[$column])) {
-                $value = $this->cast($attributes[$column], $casts[$column]);
+                $value = $relations[$propertyName]->getRelation($this->manager, $attributes[$column->name]);
+            } elseif (isset($casts[$propertyName])) {
+                $value = $this->caster->cast($attributes[$column->name], $casts[$propertyName]->type);
             } else {
-                $value = $attributes[$column];
+                $value = $attributes[$column->name];
             }
             $this->injectProperty($this->getPropertyReflection($propertyName), $entity, $value);
         }
+
+        unset(static::$entityCache[$entityCacheId]);
         return $entity;
     }
 
@@ -222,23 +254,6 @@ class Repository
             }
         }
         return $query;
-    }
-    
-    private function cast($value, $type)
-    {
-        // "string", "integer", "float", "boolean", "array", "datetime", "date", "time"
-        switch ($type) {
-            case 'string':
-                return (string) $value;
-            case 'integer':
-                return (int) $value;
-            case 'float':
-                return (float) $value;
-            case 'boolean':
-                return (bool) $value;
-            default:
-                return $value;
-        }
     }
     
     /**

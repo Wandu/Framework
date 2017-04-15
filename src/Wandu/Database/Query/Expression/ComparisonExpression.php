@@ -36,7 +36,7 @@ class ComparisonExpression implements ExpressionInterface
     public function __construct($name, $operator, $value)
     {
         $this->name = $name;
-        $this->operator = $operator;
+        $this->operator = strtoupper($operator);
         $this->value = $value;
     }
 
@@ -45,6 +45,9 @@ class ComparisonExpression implements ExpressionInterface
      */
     public function toSql()
     {
+        if ($this->operator === 'IN') {
+            return Helper::stringRepeat(', ', '?', count($this->value), Helper::normalizeName($this->name) . " {$this->operator} (", ")");
+        }
         return Helper::normalizeName($this->name) . " {$this->operator} ?";
     }
 

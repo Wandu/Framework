@@ -1,6 +1,7 @@
 <?php
 namespace Wandu\Database\Sakila;
 
+use Wandu\Database\Annotations\Cast;
 use Wandu\Database\Annotations\Column;
 use Wandu\Database\Annotations\Table;
 
@@ -10,25 +11,26 @@ use Wandu\Database\Annotations\Table;
 class SakilaActor
 {
     /**
-     * @Column(name="actor_id", cast="integer")
+     * @Column("actor_id")
+     * @Cast("integer")
      * @var int
      */
     private $id;
 
     /**
-     * @Column(name="first_name")
+     * @Column("first_name")
      * @var string
      */
     private $firstName;
 
     /**
-     * @Column(name="last_name")
+     * @Column("last_name")
      * @var string
      */
     private $lastName;
 
     /**
-     * @Column(name="last_update")
+     * @Column("last_update")
      * @var string
      */
     private $lastUpdate;

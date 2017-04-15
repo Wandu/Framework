@@ -1,8 +1,9 @@
 <?php
 namespace Wandu\Database\Sakila;
 
-use Wandu\Database\Annotations\BelongTo;
+use Wandu\Database\Annotations\Cast;
 use Wandu\Database\Annotations\Column;
+use Wandu\Database\Annotations\HasOne;
 use Wandu\Database\Annotations\Table;
 
 /**
@@ -11,7 +12,8 @@ use Wandu\Database\Annotations\Table;
 class SakilaFilm
 {
     /**
-     * @Column(name="film_id", cast="integer")
+     * @Column(name="film_id")
+     * @Cast("integer")
      * @var int
      */
     private $id;
@@ -23,7 +25,7 @@ class SakilaFilm
     private $title;
 
     /**
-     * @Column(name="description")
+     * @Column("description")
      * @var string
      */
     private $description;
@@ -36,19 +38,11 @@ class SakilaFilm
 
     /**
      * @Column(name="language_id")
-     * @BelongTo(related=SakilaLanguage::class, key="language_id")
+     * @HasOne(related=SakilaLanguage::class, key="language_id")
      * @var \Wandu\Database\Sakila\SakilaLanguage
      */
     private $language;
 
-    /**
-     * SakilaFilm constructor.
-     * @param int $id
-     * @param string $title
-     * @param string $description
-     * @param string $releaseYear
-     * @param \Wandu\Database\Sakila\SakilaLanguage $language
-     */
     public function __construct(
         $id,
         $title,
@@ -61,5 +55,13 @@ class SakilaFilm
         $this->description = $description;
         $this->releaseYear = $releaseYear;
         $this->language = $language;
+    }
+
+    /**
+     * @return \Wandu\Database\Sakila\SakilaLanguage
+     */
+    public function getLanguage(): SakilaLanguage
+    {
+        return $this->language;
     }
 }

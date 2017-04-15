@@ -1,7 +1,9 @@
 <?php
 namespace Wandu\Database;
 
+use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\Common\Annotations\AnnotationRegistry;
+use Doctrine\Common\Annotations\Reader;
 use Wandu\Database\Contracts\ConnectionInterface;
 use Wandu\Database\Contracts\Entity\MetadataReaderInterface;
 use Wandu\Database\Entity\MetadataReader;
@@ -20,6 +22,7 @@ class DatabaseServiceProvider implements ServiceProviderInterface
      */
     public function register(ContainerInterface $app)
     {
+        $app->bind(Reader::class, AnnotationReader::class);
         $app->bind(MetadataReaderInterface::class, MetadataReader::class);
         $app->closure(Manager::class, function (MetadataReaderInterface $reader) {
             $manager = new Manager($reader);

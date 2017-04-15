@@ -11,21 +11,21 @@ class Metadata
     
     /** @var string */
     protected $class;
+
+    /** @var string */
+    protected $primaryKey = 'id';
+
+    /** @var bool */
+    protected $increments = true;
     
-    /** @var array */
+    /** @var \Wandu\Database\Annotations\Column[] */
     protected $columns = [];
     
-    /** @var array */
+    /** @var \Wandu\Database\Annotations\Cast[] */
     protected $casts = [];
     
     /** @var \Wandu\Database\Annotations\RelationInterface[] */
     protected $relations = [];
-    
-    /** @var string */
-    protected $primaryKey = 'id';
-    
-    /** @var bool */
-    protected $increments = true;
     
     /**
      * @example
@@ -41,12 +41,12 @@ class Metadata
      *     'primaryKey' => 'id',
      *     'increments' => true,
      * ]
-     * @param string $table
+     * @param string $class
      * @param array $settings
      */
-    public function __construct($table, array $settings = [])
+    public function __construct($class, array $settings = [])
     {
-        $this->table = $table;
+        $this->class = $class;
         foreach ($settings as $name => $setting) {
             $this->{$name} = $setting;
         }
@@ -77,7 +77,7 @@ class Metadata
     }
 
     /**
-     * @return array
+     * @return \Wandu\Database\Annotations\Column[]
      */
     public function getColumns()
     {
@@ -109,7 +109,7 @@ class Metadata
     }
 
     /**
-     * @return array
+     * @return \Wandu\Database\Annotations\Cast[]
      */
     public function getCasts()
     {
@@ -121,8 +121,8 @@ class Metadata
      */
     public function getPrimaryProperty()
     {
-        foreach ($this->columns as $propertyName => $columnName) {
-            if ($this->primaryKey === $columnName) {
+        foreach ($this->columns as $propertyName => $column) {
+            if ($this->primaryKey === $column->name) {
                 return $propertyName;
             }
         }

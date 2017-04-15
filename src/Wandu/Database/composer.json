@@ -5,6 +5,7 @@
     "require": {
         "php": ">=7.0",
         "doctrine/annotations": "~1.4",
+        "wandu/caster": "^3.1",
         "wandu/collection": "^3.1",
         "wandu/di": "^3.1"
     },

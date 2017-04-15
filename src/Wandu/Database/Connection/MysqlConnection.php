@@ -9,6 +9,9 @@ use Wandu\Collection\ArrayList;
 use Wandu\Database\Configuration;
 use Wandu\Database\Contracts\ConnectionInterface;
 use Wandu\Database\Contracts\QueryInterface;
+use Wandu\Database\Events\Connect;
+use Wandu\Database\Events\ExecuteQuery;
+use Wandu\Event\DispatcherInterface;
 
 class MysqlConnection implements ConnectionInterface
 {
@@ -18,12 +21,15 @@ class MysqlConnection implements ConnectionInterface
     /** @var \Wandu\Database\Configuration */
     protected $config;
 
-    /**
-     * @param \Wandu\Database\Configuration $config
-     */
-    public function __construct(Configuration $config)
-    {
+    /** @var \Wandu\Event\DispatcherInterface */
+    protected $dispatcher;
+    
+    public function __construct(
+        Configuration $config,
+        DispatcherInterface $dispatcher = null
+    ) {
         $this->config = $config;
+        $this->dispatcher = $dispatcher;
     }
 
     /**
@@ -33,6 +39,9 @@ class MysqlConnection implements ConnectionInterface
     {
         if (!$this->pdo) {
             $this->pdo = $this->config->createPdo();
+            if ($this->dispatcher) {
+                $this->dispatcher->trigger(new Connect());
+            }
         }
         return $this;
     }
@@ -42,8 +51,7 @@ class MysqlConnection implements ConnectionInterface
      */
     public function fetch($query, array $bindings = [])
     {
-        $statement = $this->prepare($query, $bindings);
-        $statement->execute();
+        $statement = $this->execute($query, $bindings);
         while ($row = $statement->fetch(PDO::FETCH_ASSOC)) {
             yield $row;
         }
@@ -62,9 +70,7 @@ class MysqlConnection implements ConnectionInterface
      */
     public function first($query, array $bindings = [])
     {
-        $statement = $this->prepare($query, $bindings);
-        $statement->execute();
-        $attributes = $statement->fetch(PDO::FETCH_ASSOC);
+        $attributes = $this->execute($query, $bindings)->fetch(PDO::FETCH_ASSOC);
         return $attributes ?: null;
     }
 
@@ -73,9 +79,7 @@ class MysqlConnection implements ConnectionInterface
      */
     public function query($query, array $bindings = [])
     {
-        $statement = $this->prepare($query, $bindings);
-        $statement->execute();
-        return $statement->rowCount();
+        return $this->execute($query, $bindings)->rowCount();
     }
 
     /**
@@ -109,7 +113,7 @@ class MysqlConnection implements ConnectionInterface
      * @param array $bindings
      * @return \PDOStatement
      */
-    protected function prepare($query, array $bindings = [])
+    protected function execute($query, array $bindings = [])
     {
         while (is_callable($query)) {
             $query = call_user_func($query);
@@ -120,9 +124,13 @@ class MysqlConnection implements ConnectionInterface
         }
         $statement = $this->pdo->prepare($query);
         $this->bindValues($statement, $bindings);
+        $statement->execute();
+        if ($this->dispatcher) {
+            $this->dispatcher->trigger(new ExecuteQuery($statement->queryString, $bindings));
+        }
         return $statement;
     }
-
+    
     /**
      * @param \PDOStatement $statement
      * @param array $bindings

@@ -1,7 +1,7 @@
 <?php
 namespace Wandu\Database\Annotations;
 
-use Doctrine\Common\Annotations\Annotation\Enum;
+use Doctrine\Common\Annotations\Annotation\Required;
 use Doctrine\Common\Annotations\Annotation\Target;
 
 /**
@@ -11,10 +11,8 @@ use Doctrine\Common\Annotations\Annotation\Target;
 class Cast
 {
     /**
-     * @Enum({"string", "integer", "float", "boolean", "array", "datetime", "date", "time"})
+     * @Required()
      * @var string
      */
     public $type = 'string';
-    
-    public $caster = '';
 }

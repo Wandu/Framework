@@ -3,8 +3,9 @@ namespace Wandu\Database\Entity;
 
 use Doctrine\Common\Annotations\Reader;
 use ReflectionClass;
-use Wandu\Database\Annotations\BelongTo;
+use Wandu\Database\Annotations\Cast;
 use Wandu\Database\Annotations\Column;
+use Wandu\Database\Annotations\RelationInterface;
 use Wandu\Database\Annotations\Table;
 use Wandu\Database\Contracts\Entity\MetadataReaderInterface;
 
@@ -23,14 +24,15 @@ class MetadataReader implements MetadataReaderInterface
      */
     public function getMetadataFrom(string $class): Metadata
     {
-        $settings = [
-            'class' => $class,
-        ];
+        $class = ltrim($class, '\\');
+        $settings = [];
+
         $classRefl = new ReflectionClass($class);
         $propertiesRefl = $classRefl->getProperties();
 
         /* @var \Wandu\Database\Annotations\Table $table */
         if ($table = $this->reader->getClassAnnotation($classRefl, Table::class)) {
+            $settings['table'] = $table->name;
             $settings['connection'] = $table->connection;
             $settings['primaryKey'] = $table->primaryKey;
             $settings['increments'] = $table->increments;
@@ -42,22 +44,18 @@ class MetadataReader implements MetadataReaderInterface
         foreach ($propertiesRefl as $propertyRefl) {
             foreach ($this->reader->getPropertyAnnotations($propertyRefl) as $prop) {
                 if ($prop instanceof Column) {
-                    $columns[$propertyRefl->name] = $prop->name;
-                    $casts[$propertyRefl->name] = $prop->cast;
-                } elseif ($prop instanceof BelongTo) {
+                    $columns[$propertyRefl->name] = $prop;
+                } elseif ($prop instanceof Cast) {
+                    $casts[$propertyRefl->name] = $prop;
+                } elseif ($prop instanceof RelationInterface) {
                     $relations[$propertyRefl->name] = $prop;
                 }
             }
         }
-        if (count($columns)) {
-            $settings['columns'] = $columns;
-        }
-        if (count($casts)) {
-            $settings['casts'] = $casts;
-        }
-        if (count($relations)) {
-            $settings['relations'] = $relations;
-        }
-        return new Metadata($table->name, $settings);
+        $settings['columns'] = $columns;
+        $settings['casts'] = $casts;
+        $settings['relations'] = $relations;
+
+        return new Metadata($class, $settings);
     }
 }

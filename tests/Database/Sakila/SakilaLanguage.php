@@ -1,6 +1,7 @@
 <?php
 namespace Wandu\Database\Sakila;
 
+use Wandu\Database\Annotations\Cast;
 use Wandu\Database\Annotations\Column;
 use Wandu\Database\Annotations\Table;
 
@@ -10,7 +11,8 @@ use Wandu\Database\Annotations\Table;
 class SakilaLanguage
 {
     /**
-     * @Column(name="language_id", cast="integer")
+     * @Column("language_id")
+     * @Cast("integer")
      * @var int
      */
     private $id;
@@ -22,17 +24,12 @@ class SakilaLanguage
     private $name;
 
     /**
-     * @Column(name="last_update", cast="datetime")
+     * @Column("last_update")
+     * @Cast("datetime")
      * @var string
      */
     private $lastUpdate;
 
-    /**
-     * SakilaLanguage constructor.
-     * @param int $id
-     * @param string $name
-     * @param string $lastUpdate
-     */
     public function __construct($id, $name, $lastUpdate)
     {
         $this->id = $id;
