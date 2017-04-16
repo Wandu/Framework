@@ -6,7 +6,7 @@ Wandu DI
 [![Total Downloads](https://poser.pugx.org/wandu/di/downloads.svg)](https://packagist.org/packages/wandu/di)
 [![License](https://poser.pugx.org/wandu/di/license.svg)](https://packagist.org/packages/wandu/di)
 
-Dependency Injection Container. Support Auto-Resolve and Auto-Wiring.
+Dependency Injection Container. Support Auto-Resolve and Auto-Wiring. Also Perfect Fit to PSR-11.
 
 inspired by [pimple](http://pimple.sensiolabs.org) and [Laravel Container](http://laravel.com/docs/5.1/container)
 

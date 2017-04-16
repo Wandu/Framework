@@ -1,9 +1,12 @@
 <?php
 namespace Wandu\DI\Exception;
 
+use Interop\Container\Exception\NotFoundException;
+use Psr\Container\NotFoundExceptionInterface;
 use RuntimeException;
+use Wandu\Reflection\ReflectionCallable;
 
-class CannotResolveException extends RuntimeException
+class CannotResolveException extends RuntimeException implements NotFoundExceptionInterface, NotFoundException
 {
     /** @var string */
     protected $class;
@@ -17,7 +20,14 @@ class CannotResolveException extends RuntimeException
      */
     public function __construct($class, $parameter)
     {
-        $this->message = "cannot resolve the \"{$parameter}\" parameter in the \"{$class}\" class.";
+        if (is_string($class) && class_exists($class)) {
+            $this->message = "cannot resolve the \"{$parameter}\" parameter in the \"{$class}\" class.";
+        } elseif (is_callable($class)) {
+            $refl = new ReflectionCallable($class);
+            $this->line = $refl->getStartLine();
+            $this->file = $refl->getFileName();
+            $this->message = "cannot resolve the \"{$parameter}\" parameter in the {$refl->getCallableName()}";
+        }
         $this->class = $class;
         $this->parameter = $parameter;
     }

@@ -5,6 +5,7 @@ use Closure;
 use Doctrine\Common\Annotations\Reader;
 use Exception;
 use Interop\Container\ContainerInterface as InteropContainerInterface;
+use Psr\Container\ContainerInterface as PsrContainerInterface;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionFunctionAbstract;
@@ -47,6 +48,7 @@ class Container implements ContainerInterface
         $this->instance(Container::class, $this)->freeze();
         $this->instance(ContainerInterface::class, $this)->freeze();
         $this->instance(InteropContainerInterface::class, $this)->freeze();
+        $this->instance(PsrContainerInterface::class, $this)->freeze();
         $this->instance('container', $this)->freeze();
     }
 
@@ -67,11 +69,13 @@ class Container implements ContainerInterface
             $this->containees[Container::class],
             $this->containees[ContainerInterface::class],
             $this->containees[InteropContainerInterface::class],
+            $this->containees[PsrContainerInterface::class],
             $this->containees['container']
         );
         $this->instance(Container::class, $this)->freeze();
         $this->instance(ContainerInterface::class, $this)->freeze();
         $this->instance(InteropContainerInterface::class, $this)->freeze();
+        $this->instance(PsrContainerInterface::class, $this)->freeze();
         $this->instance('container', $this)->freeze();
     }
 
@@ -343,7 +347,7 @@ class Container implements ContainerInterface
                 $this->getParameters(new ReflectionCallable($callee), $arguments)
             );
         } catch (CannotFindParameterException $e) {
-            throw new CannotResolveException(null, $e->getParameter());
+            throw new CannotResolveException($callee, $e->getParameter());
         }
     }
 
@@ -373,6 +377,7 @@ class Container implements ContainerInterface
      * @param \ReflectionFunctionAbstract $reflectionFunction
      * @param array $arguments
      * @return array
+     * @throws \Wandu\DI\Exception\CannotFindParameterException
      */
     protected function getParameters(ReflectionFunctionAbstract $reflectionFunction, array $arguments = [])
     {

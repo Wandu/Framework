@@ -1,12 +1,13 @@
 {
     "name": "wandu/di",
-    "description": "Dependency Injection Container. Support Auto-Resolve and Auto-Wiring.",
+    "description": "Dependency Injection Container. Support Auto-Resolve and Auto-Wiring. Also Perfect Fit to PSR-11.",
     "keywords": ["di", "ioc", "auto resolve", "auto wiring", "dependency injection", "wandu"],
     "license": "MIT",
     "require": {
         "php": ">=7.0",
-        "wandu/reflection": "^0.2",
-        "container-interop/container-interop": "^1.1"
+        "container-interop/container-interop": "^1.2",
+        "psr/container": "^1",
+        "wandu/reflection": "^0.3"
     },
     "autoload": {
         "psr-4": {
