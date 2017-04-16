@@ -42,8 +42,7 @@ class InstallCommand extends Command
 
         $appBasePath = getcwd(); //static::filterPath($this->askAppBasePath('install path?', $basePath));
 
-        $appNamespace = $this->input->hasOption('namespace') ?
-            $this->input->getOption('namespace') :
+        $appNamespace = $this->input->getOption('namespace') ?:
             $this->askAppNamespace('app namespace?', 'Wandu\\App');
         
         $this->install($appBasePath, $appNamespace);
