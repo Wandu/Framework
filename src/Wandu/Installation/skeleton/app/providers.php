@@ -1,4 +1,5 @@
 <?php
+use Wandu\Caster\CasterServiceProvider;
 use Wandu\Database\DatabaseServiceProvider;
 use Wandu\Database\Migrator\MigratorServiceProvider;
 use Wandu\DateTime\DateTimeServiceProvider;
@@ -16,6 +17,7 @@ return [
     DateTimeServiceProvider::class,
     MigratorServiceProvider::class,
     PhiewServiceProvider::class,
+    CasterServiceProvider::class,
     DatabaseServiceProvider::class,
 
     BeanstalkdQueueServiceProvider::class,

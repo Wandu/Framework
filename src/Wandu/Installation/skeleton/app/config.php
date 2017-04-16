@@ -3,6 +3,13 @@ return [
     'env' => 'develop',
     'debug' => true,
     'timezone' => 'UTC',
+    'caster' => [
+        'casters' => [
+            'datetime' => Wandu\Caster\Caster\CarbonCaster::class,
+            'date' => Wandu\Caster\Caster\DateCaster::class,
+            'time' => Wandu\Caster\Caster\TimeCaster::class,
+        ],
+    ],
     'database' => [
         'connections' => [
             'default' => [
