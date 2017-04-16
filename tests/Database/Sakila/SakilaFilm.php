@@ -3,7 +3,7 @@ namespace Wandu\Database\Sakila;
 
 use Wandu\Database\Annotations\Cast;
 use Wandu\Database\Annotations\Column;
-use Wandu\Database\Annotations\HasOne;
+use Wandu\Database\Annotations\RelatedToOne;
 use Wandu\Database\Annotations\Table;
 
 /**
@@ -38,7 +38,7 @@ class SakilaFilm
 
     /**
      * @Column(name="language_id")
-     * @HasOne(related=SakilaLanguage::class, key="language_id")
+     * @RelatedToOne(related=SakilaLanguage::class, key="language_id")
      * @var \Wandu\Database\Sakila\SakilaLanguage
      */
     private $language;

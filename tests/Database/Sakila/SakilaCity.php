@@ -3,7 +3,7 @@ namespace Wandu\Database\Sakila;
 
 use Wandu\Database\Annotations\Cast;
 use Wandu\Database\Annotations\Column;
-use Wandu\Database\Annotations\HasOne;
+use Wandu\Database\Annotations\RelatedToOne;
 use Wandu\Database\Annotations\Table;
 
 /**
@@ -33,7 +33,7 @@ class SakilaCity
 
     /**
      * @Column(name="country_id")
-     * @HasOne(related=\Wandu\Database\Sakila\SakilaCountry::class, key="country_id")
+     * @RelatedToOne(related=\Wandu\Database\Sakila\SakilaCountry::class, key="country_id")
      * @var \Wandu\Database\Sakila\SakilaCountry
      */
     private $country;

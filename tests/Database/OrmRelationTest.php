@@ -2,16 +2,13 @@
 namespace Wandu\Database;
 
 use Carbon\Carbon;
-use Illuminate\Database\Events\QueryExecuted;
-use Wandu\Collection\ArrayList;
+use Mockery;
 use Wandu\Database\Events\ExecuteQuery;
-use Wandu\Database\Query\SelectQuery;
 use Wandu\Database\Sakila\SakilaCity;
 use Wandu\Database\Sakila\SakilaCountry;
 use Wandu\Database\Sakila\SakilaFilm;
 use Wandu\Database\Sakila\SakilaLanguage;
 use Wandu\Event\Listener;
-use Mockery;
 
 class OrmRelationTest extends SakilaTestCase
 {
@@ -64,7 +61,7 @@ class OrmRelationTest extends SakilaTestCase
     public function testHasManyAndCircular()
     {
         $listener = Mockery::mock(Listener::class);
-        $listener->shouldReceive('call')->with(Mockery::type(ExecuteQuery::class))->times(5); // -_ㅠ..
+        $listener->shouldReceive('call')->with(Mockery::type(ExecuteQuery::class))->times(5); // -_ㅠ.. @todo it will be 2
 
         $this->dispatcher->on(ExecuteQuery::class, $listener);
 

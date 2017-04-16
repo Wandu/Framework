@@ -41,7 +41,8 @@
     },
     "autoload": {
         "psr-4": {
-            "Wandu\\": "src/Wandu/"
+            "Wandu\\": "src/Wandu/",
+            "Wandu\\Develop\\": "src/"
         },
         "files": [
             "src/Wandu/DI/functions.php",

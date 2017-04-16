@@ -10,7 +10,7 @@ use Wandu\Database\Query\SelectQuery;
  * @Annotation
  * @Target({"PROPERTY"})
  */
-class HasMany implements RelationInterface
+class RelatedToMany implements RelationInterface
 {
     /**
      * @Required
