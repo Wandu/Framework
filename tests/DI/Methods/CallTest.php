@@ -18,6 +18,7 @@ class CallTest extends PHPUnit_Framework_TestCase
             static::fail();
         } catch (CannotResolveException $e) {
             static::assertEquals(null, $e->getClass());
+            static::assertEquals(__NAMESPACE__ . '\\callTestFunctionHasTypeParam', $e->getCallee());
             static::assertEquals('param', $e->getParameter());
         }
 
@@ -38,6 +39,7 @@ class CallTest extends PHPUnit_Framework_TestCase
             static::fail();
         } catch (CannotResolveException $e) {
             static::assertEquals(null, $e->getClass());
+            static::assertEquals(__NAMESPACE__ . '\\callTestFunctionHasParam', $e->getCallee());
             static::assertEquals('param', $e->getParameter());
         }
 
@@ -58,6 +60,7 @@ class CallTest extends PHPUnit_Framework_TestCase
             static::fail();
         } catch (CannotResolveException $e) {
             static::assertEquals(null, $e->getClass());
+            static::assertEquals(__NAMESPACE__ . '\\callTestFunctionHasMultiParam', $e->getCallee());
             static::assertEquals('param1', $e->getParameter());
         }
 

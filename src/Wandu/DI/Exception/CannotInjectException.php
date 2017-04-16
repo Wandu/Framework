@@ -21,7 +21,7 @@ class CannotInjectException extends RuntimeException implements ContainerExcepti
     {
         $this->class = $class;
         $this->property = $property;
-        $this->message = "It cannot be injected; {$class}::\${$property}";
+        $this->message = "it cannot be injected; {$class}::\${$property}";
     }
 
     /**

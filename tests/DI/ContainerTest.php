@@ -239,7 +239,7 @@ class ContainerTest extends PHPUnit_Framework_TestCase
             $container->instance('instance', 'instance string changed 2');
             static::fail();
         } catch (CannotChangeException $exception) {
-            static::assertEquals('It cannot be changed; instance', $exception->getMessage());
+            static::assertEquals('it cannot be changed; "instance".', $exception->getMessage());
         }
         try {
             $container->closure('closure', function () {
@@ -247,13 +247,13 @@ class ContainerTest extends PHPUnit_Framework_TestCase
             });
             static::fail();
         } catch (CannotChangeException $exception) {
-            static::assertEquals('It cannot be changed; closure', $exception->getMessage());
+            static::assertEquals('it cannot be changed; "closure".', $exception->getMessage());
         }
         try {
             $container->alias('alias', 'closure');
             static::fail();
         } catch (CannotChangeException $exception) {
-            static::assertEquals('It cannot be changed; alias', $exception->getMessage());
+            static::assertEquals('it cannot be changed; "alias".', $exception->getMessage());
         }
 
         // also cannot remove
@@ -261,19 +261,19 @@ class ContainerTest extends PHPUnit_Framework_TestCase
             $container->offsetUnset('instance');
             static::fail();
         } catch (CannotChangeException $exception) {
-            static::assertEquals('It cannot be changed; instance', $exception->getMessage());
+            static::assertEquals('it cannot be changed; "instance".', $exception->getMessage());
         }
         try {
             $container->offsetUnset('closure');
             static::fail();
         } catch (CannotChangeException $exception) {
-            static::assertEquals('It cannot be changed; closure', $exception->getMessage());
+            static::assertEquals('it cannot be changed; "closure".', $exception->getMessage());
         }
         try {
             $container->offsetUnset('alias');
             static::fail();
         } catch (CannotChangeException $exception) {
-            static::assertEquals('It cannot be changed; alias', $exception->getMessage());
+            static::assertEquals('it cannot be changed; "alias".', $exception->getMessage());
         }
     }
     

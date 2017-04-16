@@ -18,4 +18,12 @@ class NullReferenceException extends RuntimeException implements NotFoundExcepti
         $this->class = $class;
         $this->message = "it was not found; \"{$class}\".";
     }
+
+    /**
+     * @return string
+     */
+    public function getClass()
+    {
+        return $this->class;
+    }
 }
