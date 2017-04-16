@@ -20,7 +20,12 @@ class EventServiceProvider implements ServiceProviderInterface
      */
     public function boot(ContainerInterface $app)
     {
-        $app->get(DispatcherInterface::class)->setListeners($this->listeners);
+        $dispatcher = $app->get(DispatcherInterface::class);
+        foreach ($this->listeners as $event => $listeners) {
+            foreach ($listeners as $listener) {
+                $dispatcher->on($event, $listener);
+            }
+        }
     }
 
     /**
