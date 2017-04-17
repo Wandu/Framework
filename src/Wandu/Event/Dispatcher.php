@@ -3,6 +3,7 @@ namespace Wandu\Event;
 
 use Interop\Container\ContainerInterface;
 use Wandu\Q\Queue;
+use RuntimeException;
 
 class Dispatcher implements DispatcherInterface
 {
@@ -51,7 +52,7 @@ class Dispatcher implements DispatcherInterface
         if ($event instanceof ViaQueue) {
             if (!$this->container->has(Queue::class)) {
                 // @todo fix error message
-                throw new \InvalidArgumentException('Cannot load queue.');
+                throw new RuntimeException('cannot load queue.');
             }
             $this->container->get(Queue::class)->enqueue([
                 'method' => 'event:execute',

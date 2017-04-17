@@ -18,25 +18,25 @@ class EventServiceProvider implements ServiceProviderInterface
     /**
      * {@inheritdoc}
      */
-    public function boot(ContainerInterface $app)
+    public function register(ContainerInterface $app)
     {
-        $dispatcher = $app->get(DispatcherInterface::class);
-        foreach ($this->listeners as $event => $listeners) {
-            foreach ($listeners as $listener) {
-                $dispatcher->on($event, $listener);
+        $app->closure(Dispatcher::class, function (ContainerInterface $container) {
+            $dispatcher = new Dispatcher($container);
+            foreach ($this->listeners as $event => $listeners) {
+                foreach ($listeners as $listener) {
+                    $dispatcher->on($event, $listener);
+                }
             }
-        }
+            return $dispatcher;
+        });
+        $app->alias(DispatcherInterface::class, Dispatcher::class);
+        $app->alias('event', Dispatcher::class);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function register(ContainerInterface $app)
+    public function boot(ContainerInterface $app)
     {
-        $app->closure(Dispatcher::class, function (ContainerInterface $container) {
-            return new Dispatcher($container);
-        });
-        $app->alias(DispatcherInterface::class, Dispatcher::class);
-        $app->alias('event', Dispatcher::class);
     }
 }
