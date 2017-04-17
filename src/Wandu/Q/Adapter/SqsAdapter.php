@@ -13,23 +13,10 @@ class SqsAdapter implements AdapterInterface
 
     /** @var string */
     protected $url;
-
-    /**
-     * @param string $key
-     * @param string $secret
-     * @param string $region
-     * @param string $url
-     */
-    public function __construct($key, $secret, $region, $url)
+    
+    public function __construct(SqsClient $client, $url)
     {
-        $this->client = new SqsClient([
-            'version' => 'latest',
-            'credentials' => [
-                'key' => $key,
-                'secret' => $secret,
-            ],
-            'region' => $region,
-        ]);
+        $this->client = $client;
         $this->url = $url;
     }
 
