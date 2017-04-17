@@ -118,4 +118,11 @@ interface ContainerInterface extends ArrayAccess, PsrContainerInterface, Interop
      * @param array $properties
      */
     public function inject($object, array $properties = []);
+
+    /**
+     * @param string $name
+     * @param string $package
+     * @throws \Wandu\DI\Exception\RequirePackageException
+     */
+    public function assert($name, $package = null);
 }

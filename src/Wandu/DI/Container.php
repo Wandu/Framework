@@ -5,6 +5,8 @@ use Closure;
 use Doctrine\Common\Annotations\Reader;
 use Exception;
 use Interop\Container\ContainerInterface as InteropContainerInterface;
+use Interop\Container\Exception\ContainerException;
+use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface as PsrContainerInterface;
 use ReflectionClass;
 use ReflectionException;
@@ -21,6 +23,7 @@ use Wandu\DI\Exception\CannotChangeException;
 use Wandu\DI\Exception\CannotFindParameterException;
 use Wandu\DI\Exception\CannotResolveException;
 use Wandu\DI\Exception\NullReferenceException;
+use Wandu\DI\Exception\RequirePackageException;
 use Wandu\Reflection\ReflectionCallable;
 
 class Container implements ContainerInterface
@@ -359,6 +362,20 @@ class Container implements ContainerInterface
         $reflectionObject = new ReflectionObject($object);
         foreach ($properties as $property => $value) {
             $this->injectProperty($reflectionObject->getProperty($property), $object, $value);
+        }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function assert($name, $package = null)
+    {
+        try {
+            $this->get($name);
+        } catch (ContainerException $e) {
+            throw new RequirePackageException($name, $package);
+        } catch (ContainerExceptionInterface $e) {
+            throw new RequirePackageException($name, $package);
         }
     }
 
