@@ -5,7 +5,7 @@ use Wandu\Database\Migrator\MigratorServiceProvider;
 use Wandu\DateTime\DateTimeServiceProvider;
 use Wandu\Event\EventServiceProvider;
 use Wandu\Http\HttpServiceProvider;
-use Wandu\Q\BeanstalkdQueueServiceProvider;
+use Wandu\Q\QueueServiceProvider;
 use Wandu\Router\RouterServiceProvider;
 use Wandu\View\PhiewServiceProvider;
 use WanduSkeleton\ApplicationServiceProvider;
@@ -19,8 +19,7 @@ return [
     PhiewServiceProvider::class,
     CasterServiceProvider::class,
     DatabaseServiceProvider::class,
-
-    BeanstalkdQueueServiceProvider::class,
+    QueueServiceProvider::class,
 
     ApplicationServiceProvider::class,
 ];
