@@ -14,7 +14,7 @@ class DispatcherTest extends TestCase
     {
         $dispatcher = $this->createDispatcher();
         
-        $dispatcher = $dispatcher->withRoutes(function (Router $router) {
+        $dispatcher->setRoutes(function (Router $router) {
             $router->createRoute(['GET'], '/', TestDispatcherHomeController::class);
         });
 
@@ -28,7 +28,7 @@ class DispatcherTest extends TestCase
     {
         $dispatcher = $this->createDispatcher();
 
-        $dispatcher = $dispatcher->withRoutes(function (Router $router) {
+        $dispatcher->setRoutes(function (Router $router) {
             $router->createRoute(['GET'], '/admin', TestDispatcherAdminController::class, 'index');
             $router->createRoute(['POST'], '/admin', TestDispatcherAdminController::class, 'action');
         });
@@ -55,7 +55,7 @@ class DispatcherTest extends TestCase
     {
         $dispatcher = $this->createDispatcher();
 
-        $dispatcher = $dispatcher->withRoutes(function (Router $router) {
+        $dispatcher->setRoutes(function (Router $router) {
             $router->createRoute(['GET'], '/admin/index', TestDispatcherAdminController::class, 'index');
             $router->createRoute(['GET'], '/admin/action', TestDispatcherAdminController::class, 'action');
         });
@@ -74,7 +74,7 @@ class DispatcherTest extends TestCase
     {
         $dispatcher = $this->createDispatcher();
 
-        $dispatcher = $dispatcher->withRoutes(function (Router $router) {
+        $dispatcher->setRoutes(function (Router $router) {
             $router->createRoute(['GET'], '/admin/users/{user}', TestDispatcherAdminController::class, 'users');
         });
 
@@ -92,7 +92,7 @@ class DispatcherTest extends TestCase
     {
         $dispatcher = $this->createDispatcher();
 
-        $dispatcher = $dispatcher->withRoutes(function (Router $router) {
+        $dispatcher->setRoutes(function (Router $router) {
             $router->createRoute(['GET'], '/', TestDispatcherHomeController::class, 'index');
             $router->group([
                 'prefix' => '/admin',
@@ -133,7 +133,7 @@ class DispatcherTest extends TestCase
     {
         $dispatcher = $this->createDispatcher();
 
-        $dispatcher = $dispatcher->withRoutes(function (Router $router) {
+        $dispatcher->setRoutes(function (Router $router) {
             $router->createRoute(['GET'], '/', TestDispatcherHomeController::class, 'index');
             $router->prefix('/admin', function (Router $router) {
                 $router->createRoute(['GET'], '/', TestDispatcherAdminController::class, 'index');
@@ -171,7 +171,7 @@ class DispatcherTest extends TestCase
     {
         $dispatcher = $this->createDispatcher();
 
-        $dispatcher = $dispatcher->withRoutes(function (Router $router) {
+        $dispatcher->setRoutes(function (Router $router) {
             $router->middleware([TestDispatcherMiddleware::class], function (Router $router) {
                 $router->createRoute(['GET'], '/admin', TestDispatcherAdminController::class, 'index');
                 $router->createRoute(['POST'], '/admin', TestDispatcherAdminController::class, 'action');
@@ -201,7 +201,8 @@ class DispatcherTest extends TestCase
 
     public function testVirtualMethodDisabled()
     {
-        $dispatcher = (new Dispatcher(new DefaultLoader()))->withRoutes(function (Router $router) {
+        $dispatcher = new Dispatcher(new DefaultLoader());
+        $dispatcher->setRoutes(function (Router $router) {
             $router->createRoute(['PUT'], '/', TestDispatcherHomeController::class);
         });
 
@@ -225,7 +226,7 @@ class DispatcherTest extends TestCase
         $dispatcher = $this->createDispatcher([
             'virtual_method_enabled' => true,
         ]);
-        $dispatcher = $dispatcher->withRoutes(function (Router $router) {
+        $dispatcher->setRoutes(function (Router $router) {
             $router->createRoute(['PUT'], '/', TestDispatcherHomeController::class);
         });
 
@@ -248,7 +249,7 @@ class DispatcherTest extends TestCase
         $dispatcher = $this->createDispatcher([
             'virtual_method_enabled' => true,
         ]);
-        $dispatcher = $dispatcher->withRoutes(function (Router $router) {
+        $dispatcher->setRoutes(function (Router $router) {
             $router->createRoute(['PUT'], '/', TestDispatcherHomeController::class);
         });
 

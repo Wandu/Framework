@@ -47,6 +47,7 @@ class Dispatcher
     }
 
     /**
+     * @deprecated use setRoutes
      * @param \Closure $routes
      * @return \Wandu\Router\Dispatcher
      */
@@ -55,6 +56,14 @@ class Dispatcher
         $inst = clone $this;
         $inst->routes = $routes;
         return $inst;
+    }
+
+    /**
+     * @param \Closure $routes
+     */
+    public function setRoutes(Closure $routes)
+    {
+        $this->routes = $routes;
     }
 
     /**

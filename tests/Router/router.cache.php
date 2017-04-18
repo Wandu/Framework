@@ -20,6 +20,7 @@
   array (
     'GET,HEAD/admin' => 
     Wandu\Router\Route::__set_state(array(
+       'name' => NULL,
        'className' => 'Wandu\\Router\\TestCachedDispatcherController',
        'methodName' => 'index',
        'middlewares' => 

@@ -12,7 +12,8 @@ class Issue2Test extends TestCase
 {
     public function testDispatch()
     {
-        $dispatcher = (new Dispatcher(new DefaultLoader()))->withRoutes(function (Router $router) {
+        $dispatcher = (new Dispatcher(new DefaultLoader()));
+        $dispatcher->setRoutes(function (Router $router) {
             $router->createRoute(['GET'], '/', TestIssue2Controller::class, 'wrong');
         });
 

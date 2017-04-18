@@ -16,7 +16,7 @@ class CachedDispatcherTest extends TestCase
         $dispatcher = $this->createDispatcher();
 
         $count = 0;
-        $dispatcher = $dispatcher->withRoutes(function (Router $router) use (&$count) {
+        $dispatcher->setRoutes(function (Router $router) use (&$count) {
             $count++;
             $router->get('admin', TestCachedDispatcherController::class, 'index');
         });
@@ -36,7 +36,7 @@ class CachedDispatcherTest extends TestCase
         ]);
 
         $count = 0;
-        $dispatcher = $dispatcher->withRoutes(function (Router $router) use (&$count) {
+        $dispatcher->setRoutes(function (Router $router) use (&$count) {
             $count++;
             $router->get('admin', TestCachedDispatcherController::class, 'index');
         });
@@ -56,7 +56,7 @@ class CachedDispatcherTest extends TestCase
         ]);
 
         $count = 0;
-        $dispatcher = $dispatcher->withRoutes(function (Router $router) use (&$count) {
+        $dispatcher->setRoutes(function (Router $router) use (&$count) {
             $count++;
             $router->get('admin', TestCachedDispatcherController::class, 'index');
         });
