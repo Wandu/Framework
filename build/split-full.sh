@@ -11,7 +11,6 @@ git subsplit publish --heads="master 3.0" src/Wandu/DI:git@github.com:Wandu/DI.g
 git subsplit publish --heads="master 3.0" src/Wandu/Event:git@github.com:Wandu/Event.git
 git subsplit publish --heads="master 3.0" src/Wandu/Foundation:git@github.com:Wandu/Foundation.git
 git subsplit publish --heads="master 3.0" src/Wandu/Http:git@github.com:Wandu/Http.git
-git subsplit publish --heads="master 3.0" src/Wandu/Installation:git@github.com:Wandu/Installation.git
 git subsplit publish --heads="master 3.0" src/Wandu/Q:git@github.com:Wandu/Q.git
 git subsplit publish --heads="master 3.0" src/Wandu/Router:git@github.com:Wandu/Router.git
 git subsplit publish --heads="master 3.0" src/Wandu/Support:git@github.com:Wandu/Support.git
