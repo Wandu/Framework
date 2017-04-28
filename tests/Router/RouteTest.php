@@ -2,7 +2,6 @@
 namespace Wandu\Router;
 
 use Closure;
-use Mockery;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Wandu\Http\Psr\Stream\StringStream;
@@ -66,8 +65,6 @@ class RouteTest extends TestCase
 
     public function testExecuteWithPreventedMiddleware()
     {
-        
-        
         $route = new Route(TestRouteController::class, 'index', [
             TestAuthFailMiddleware::class
         ]);
@@ -87,7 +84,7 @@ class RouteTest extends TestCase
 
 class TestRouteController
 {
-    public function index(ServerRequestInterface $request)
+    static public function index(ServerRequestInterface $request)
     {
         echo "call!";
         return "[{$request->getMethod()}] index@TestRouteController";
