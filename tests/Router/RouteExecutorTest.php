@@ -2,7 +2,6 @@
 namespace Wandu\Router;
 
 use Closure;
-use Mockery;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Wandu\Router\Contracts\MiddlewareInterface;
@@ -21,9 +20,9 @@ class RouteExecutorTest extends TestCase
             []
         );
 
-        $this->assertInstanceOf(ResponseInterface::class, $response);
-        $this->assertEquals('index', $response->getBody()->__toString());
-        $this->assertEquals(
+        static::assertInstanceOf(ResponseInterface::class, $response);
+        static::assertEquals('index', $response->getBody()->__toString());
+        static::assertEquals(
             '',
             $response->getHeaderLine('x-via-proxy')
         );
@@ -42,9 +41,9 @@ class RouteExecutorTest extends TestCase
             ]
         );
 
-        $this->assertInstanceOf(ResponseInterface::class, $response);
-        $this->assertEquals('index', $response->getBody()->__toString());
-        $this->assertEquals(
+        static::assertInstanceOf(ResponseInterface::class, $response);
+        static::assertEquals('index', $response->getBody()->__toString());
+        static::assertEquals(
             TestRouterExecutorProxyMiddleware::class,
             $response->getHeaderLine('x-via-proxy')
         );
@@ -63,9 +62,9 @@ class RouteExecutorTest extends TestCase
             ]
         );
 
-        $this->assertInstanceOf(ResponseInterface::class, $response);
-        $this->assertEquals('Fail', $response->getBody()->__toString());
-        $this->assertEquals(400, $response->getStatusCode());
+        static::assertInstanceOf(ResponseInterface::class, $response);
+        static::assertEquals('Fail', $response->getBody()->__toString());
+        static::assertEquals(400, $response->getStatusCode());
     }
 }
 
@@ -89,7 +88,7 @@ class TestRouterExecutorFailMiddleware implements MiddlewareInterface
 
 class TestRouterExecutorController
 {
-    public function index(ServerRequestInterface $request)
+    static public function index(ServerRequestInterface $request)
     {
         return response()->create('index');
     }
