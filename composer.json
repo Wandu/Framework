@@ -7,15 +7,13 @@
         "psr7"
     ],
     "license": "MIT",
-    "bin": [
-        "./wandu"
-    ],
     "require": {
         "php": ">=7.0",
         "psr/container": "^1",
         "psr/http-message": "^1",
         "container-interop/container-interop": "^1.2",
         "doctrine/annotations": "~1.4",
+        "doctrine/cache": "^1.6",
         "nikic/fast-route": "^1.2",
         "wandu/reflection": "^0.3",
         "wandu/fastelper": "^0.1.0",
