@@ -25,7 +25,6 @@ class DeployTest extends PHPUnit_Framework_TestCase
         'src/Wandu/Event/composer.json',
         'src/Wandu/Foundation/composer.json',
         'src/Wandu/Http/composer.json',
-        'src/Wandu/Installation/composer.json',
         'src/Wandu/Q/composer.json',
         'src/Wandu/Router/composer.json',
         'src/Wandu/Support/composer.json',
