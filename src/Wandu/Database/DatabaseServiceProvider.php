@@ -2,7 +2,6 @@
 namespace Wandu\Database;
 
 use Doctrine\Common\Annotations\AnnotationReader;
-use Doctrine\Common\Annotations\AnnotationRegistry;
 use Doctrine\Common\Annotations\Reader;
 use Wandu\Caster\CastManagerInterface;
 use Wandu\Database\Contracts\ConnectionInterface;
@@ -47,6 +46,5 @@ class DatabaseServiceProvider implements ServiceProviderInterface
      */
     public function boot(ContainerInterface $app)
     {
-        AnnotationRegistry::registerLoader('class_exists');
     }
 }
