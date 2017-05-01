@@ -16,5 +16,4 @@ composer.lock
 
 # test stub files
 /tests/Http/Session/Handler/sessions
-/tests/Installation/Commands/project
-/tests/Installation/target
+/tests/Router/router.cache.php
