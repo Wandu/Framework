@@ -22,6 +22,20 @@ trait Assertions
         }
         PHPUnit_Framework_Assert::assertEquals($expected, $contents, $message);
     }
+    
+    public static function assertExceptionEquals($expected, Closure $closure, $message = '')
+    {
+        try {
+            $closure();
+        } catch (Exception $e) {
+            PHPUnit_Framework_Assert::assertEquals($expected, $e, $message);
+            return;
+        } catch (Throwable $e) {
+            PHPUnit_Framework_Assert::assertEquals($expected, $e, $message);
+            return;
+        }
+        PHPUnit_Framework_Assert::fail($message);
+    }
 
     public static function assertExceptionInstanceOf($expected, Closure $closure, $message = '')
     {
