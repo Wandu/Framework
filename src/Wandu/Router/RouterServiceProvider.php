@@ -3,9 +3,9 @@ namespace Wandu\Router;
 
 use Wandu\DI\ContainerInterface;
 use Wandu\DI\ServiceProviderInterface;
-use Wandu\Router\ClassLoader\WanduLoader;
 use Wandu\Router\Contracts\LoaderInterface;
 use Wandu\Router\Contracts\ResponsifierInterface;
+use Wandu\Router\Loader\WanduLoader;
 use Wandu\Router\Middleware\Sessionify;
 use Wandu\Router\Responsifier\WanduResponsifier;
 use function Wandu\Foundation\config;

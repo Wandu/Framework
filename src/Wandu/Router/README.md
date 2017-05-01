@@ -14,21 +14,6 @@ FastRoute with PSR-7 Wrapper Library.
 composer require wandu/router
 ```
 
-##
-
-/users/:id
-/users
-/users/:id/comments
-=> 
-
-~^
-    /users/(?:
-        /([^/]+)
-      | ()
-      | /([^/]+)/comments
-    )
-$~x
-
 ## Websites
 
 - [wandu.github.io/#router](https://wandu.github.io/#router)

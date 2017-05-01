@@ -4,7 +4,7 @@ namespace Wandu\Router;
 use Mockery;
 use PHPUnit_Framework_TestCase;
 use Psr\Http\Message\ServerRequestInterface;
-use Wandu\Router\ClassLoader\DefaultLoader;
+use Wandu\Router\Loader\DefaultLoader;
 use Wandu\Router\Responsifier\WanduResponsifier;
 
 class TestCase extends PHPUnit_Framework_TestCase

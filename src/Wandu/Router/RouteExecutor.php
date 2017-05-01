@@ -2,7 +2,7 @@
 namespace Wandu\Router;
 
 use Psr\Http\Message\ServerRequestInterface;
-use Wandu\Router\ClassLoader\DefaultLoader;
+use Wandu\Router\Loader\DefaultLoader;
 use Wandu\Router\Contracts\LoaderInterface;
 use Wandu\Router\Contracts\ResponsifierInterface;
 use Wandu\Router\Responsifier\NullResponsifier;

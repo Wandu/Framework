@@ -1,10 +1,9 @@
 <?php
 namespace Wandu\Router\Issues;
 
-use Mockery;
-use Wandu\Router\ClassLoader\DefaultLoader;
 use Wandu\Router\Dispatcher;
 use Wandu\Router\Exception\HandlerNotFoundException;
+use Wandu\Router\Loader\DefaultLoader;
 use Wandu\Router\Router;
 use Wandu\Router\TestCase;
 

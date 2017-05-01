@@ -5,12 +5,11 @@ use Closure;
 use Psr\Http\Message\ServerRequestInterface;
 use Wandu\Assertions;
 use Wandu\Http\Psr\Stream\StringStream;
-use Wandu\Router\ClassLoader\DefaultLoader;
 use Wandu\Router\Contracts\MiddlewareInterface;
 use Wandu\Router\Exception\CannotGetPathException;
 use Wandu\Router\Exception\MethodNotAllowedException;
 use Wandu\Router\Exception\RouteNotFoundException;
-use Wandu\Router\Responsifier\WanduResponsifier;
+use Wandu\Router\Loader\DefaultLoader;
 
 class DispatcherTest extends TestCase
 {

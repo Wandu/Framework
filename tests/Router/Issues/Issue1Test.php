@@ -2,10 +2,9 @@
 namespace Wandu\Router\Issues;
 
 use Closure;
-use Mockery;
 use Psr\Http\Message\ServerRequestInterface;
-use Wandu\Router\ClassLoader\DefaultLoader;
 use Wandu\Router\Contracts\MiddlewareInterface;
+use Wandu\Router\Loader\DefaultLoader;
 use Wandu\Router\Responsifier\WanduResponsifier;
 use Wandu\Router\Route;
 use Wandu\Router\TestCase;

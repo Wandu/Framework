@@ -1,5 +1,5 @@
 <?php
-namespace Wandu\Router\ClassLoader;
+namespace Wandu\Router\Loader;
 
 use Psr\Http\Message\ServerRequestInterface;
 use Wandu\Router\Contracts\LoaderInterface;

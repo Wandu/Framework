@@ -1,5 +1,5 @@
 <?php
-namespace Wandu\Router\ClassLoader;
+namespace Wandu\Router\Loader;
 
 use ArrayAccess;
 use Psr\Http\Message\ServerRequestInterface;

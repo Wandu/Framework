@@ -1,5 +1,5 @@
 <?php
-namespace Wandu\Router\ClassLoader;
+namespace Wandu\Router\Loader;
 
 use Closure;
 use Mockery;
