@@ -8,12 +8,12 @@ use Psr\Http\Message\ServerRequestInterface;
 use Wandu\Assertions;
 use Wandu\DI\Container;
 use Wandu\DI\ContainerInterface;
-use Wandu\DI\Exception\CannotResolveException;
 use Wandu\Http\Contracts\CookieJarInterface;
 use Wandu\Http\Contracts\ParsedBodyInterface;
 use Wandu\Http\Contracts\QueryParamsInterface;
 use Wandu\Http\Contracts\ServerParamsInterface;
 use Wandu\Http\Contracts\SessionInterface;
+use Wandu\Http\HttpServiceProvider;
 use Wandu\Http\Parameters\CookieJar;
 use Wandu\Http\Parameters\ParsedBody;
 use Wandu\Http\Parameters\QueryParams;
@@ -74,26 +74,32 @@ class WanduLoaderTest extends PHPUnit_Framework_TestCase
 
     public function testCookieAndSession()
     {
-        $loader = new WanduLoader(new Container());
+        $container = new Container();
+
+        $provider = new HttpServiceProvider();
+        $provider->register($container);
+        
+        $loader = new WanduLoader($container);
 
         $request = new ServerRequest();
 
-        static::assertExceptionInstanceOf(CannotResolveException::class, function () use ($loader, $request) {
-            $loader->execute(WanduLoaderTestController::class, 'equalQueryParams', $request);
-        });
-        static::assertExceptionInstanceOf(CannotResolveException::class, function () use ($loader, $request) {
-            $loader->execute(WanduLoaderTestController::class, 'equalParsedBody', $request);
-        });
-        static::assertExceptionInstanceOf(CannotResolveException::class, function () use ($loader, $request) {
-            $loader->execute(WanduLoaderTestController::class, 'equalCookie', $request);
-        });
-        static::assertExceptionInstanceOf(CannotResolveException::class, function () use ($loader, $request) {
-            $loader->execute(WanduLoaderTestController::class, 'equalSession', $request);
-        });
+        static::assertTrue($loader->execute(WanduLoaderTestController::class, 'equalServerParams', $request));
+        static::assertTrue($loader->execute(WanduLoaderTestController::class, 'equalQueryParams', $request));
+        static::assertTrue($loader->execute(WanduLoaderTestController::class, 'equalParsedBody', $request));
 
-        $request = $request->withAttribute('server_params', new ServerParams($request));
-        $request = $request->withAttribute('query_params', new QueryParams());
-        $request = $request->withAttribute('parsed_body', new ParsedBody());
+        static::assertExceptionMessageEquals(
+            'Argument 1 passed to Wandu\Router\Loader\WanduLoaderTestController::equalCookie() must be an instance of Wandu\Http\Parameters\CookieJar, null given',
+            function () use ($loader, $request) {
+                $loader->execute(WanduLoaderTestController::class, 'equalCookie', $request);
+            }
+        );
+        static::assertExceptionMessageEquals(
+            'Argument 1 passed to Wandu\Router\Loader\WanduLoaderTestController::equalSession() must be an instance of Wandu\Http\Parameters\Session, null given',
+            function () use ($loader, $request) {
+                $loader->execute(WanduLoaderTestController::class, 'equalSession', $request);
+            }
+        );
+
         $request = $request->withAttribute('cookie', Mockery::mock(CookieJar::class));
         $request = $request->withAttribute('session', Mockery::mock(Session::class));
 
@@ -131,7 +137,6 @@ class WanduLoaderTestController
         ContainerInterface $container
     ) {
         return $queryParams === $queryParamsInterface
-            && $queryParams === $request->getAttribute('query_params')
             && $container->get('request') === $request
             && $container->get(ServerRequest::class) === $request
             && $container->get(ServerRequestInterface::class) === $request;
@@ -144,7 +149,6 @@ class WanduLoaderTestController
         ContainerInterface $container
     ) {
         return $serverParams === $serverParamsInterface
-            && $serverParams === $request->getAttribute('server_params')
             && $container->get('request') === $request
             && $container->get(ServerRequest::class) === $request
             && $container->get(ServerRequestInterface::class) === $request;
@@ -157,7 +161,6 @@ class WanduLoaderTestController
         ContainerInterface $container
     ) {
         return $parsedBody === $parsedBodyInterface
-            && $parsedBody === $request->getAttribute('parsed_body')
             && $container->get('request') === $request
             && $container->get(ServerRequest::class) === $request
             && $container->get(ServerRequestInterface::class) === $request;
@@ -170,7 +173,6 @@ class WanduLoaderTestController
         ContainerInterface $container
     ) {
         return $cookie === $cookieInterface
-            && $cookie === $request->getAttribute('cookie')
             && $container->get('request') === $request
             && $container->get(ServerRequest::class) === $request
             && $container->get(ServerRequestInterface::class) === $request;
@@ -183,7 +185,6 @@ class WanduLoaderTestController
         ContainerInterface $container
     ) {
         return $session === $sessionInterface
-            && $session === $request->getAttribute('session')
             && $container->get('request') === $request
             && $container->get(ServerRequest::class) === $request
             && $container->get(ServerRequestInterface::class) === $request;
