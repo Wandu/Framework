@@ -1,7 +1,9 @@
 <?php
 namespace Wandu\Router\ClassLoader;
 
+use Exception;
 use Psr\Http\Message\ServerRequestInterface;
+use Throwable;
 use Wandu\DI\ContainerInterface;
 use Wandu\Http\Contracts\CookieJarInterface;
 use Wandu\Http\Contracts\ParsedBodyInterface;
@@ -14,10 +16,11 @@ use Wandu\Http\Parameters\QueryParams;
 use Wandu\Http\Parameters\ServerParams;
 use Wandu\Http\Parameters\Session;
 use Wandu\Http\Psr\ServerRequest;
-use Wandu\Router\Contracts\ClassLoaderInterface;
+use Wandu\Router\Contracts\LoaderInterface;
+use Wandu\Router\Contracts\MiddlewareInterface;
 use Wandu\Router\Exception\HandlerNotFoundException;
 
-class WanduLoader implements ClassLoaderInterface
+class WanduLoader implements LoaderInterface
 {
     /** @var \Wandu\DI\ContainerInterface */
     protected $container;
@@ -33,21 +36,31 @@ class WanduLoader implements ClassLoaderInterface
     /**
      * {@inheritdoc}
      */
-    public function create($className)
+    public function middleware($className): MiddlewareInterface
     {
-        if (!class_exists($className)) {
+        try {
+            return $this->container->create($className);
+        } catch (Exception $e) {
+            throw new HandlerNotFoundException($className);
+        } catch (Throwable $e) {
             throw new HandlerNotFoundException($className);
         }
-        return $this->container->create($className);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function call(ServerRequestInterface $request, $object, $methodName)
+    public function execute($className, $methodName, ServerRequestInterface $request)
     {
+        try {
+            $object = $this->container->get($className);
+        } catch (Exception $e) {
+            throw new HandlerNotFoundException($className, $methodName);
+        } catch (Throwable $e) {
+            throw new HandlerNotFoundException($className, $methodName);
+        }
         if (!method_exists($object, $methodName) && !method_exists($object, '__call')) {
-            throw new HandlerNotFoundException(get_class($object), $methodName);
+            throw new HandlerNotFoundException($className, $methodName);
         }
         // instance container
         $container = $this->container->with(); // clone

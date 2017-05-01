@@ -2,6 +2,8 @@
 namespace Wandu\Router\Path;
 
 use PHPUnit\Framework\TestCase;
+use Wandu\Assertions;
+use Wandu\Router\Exception\CannotGetPathException;
 
 /**
  * path parser support rules from path-to-regexp of npm.
@@ -11,6 +13,8 @@ use PHPUnit\Framework\TestCase;
  */
 class PatternTest extends TestCase 
 {
+    use Assertions;
+    
     public function testSimple()
     {
         $pattern = new Pattern(":foo");
@@ -19,6 +23,8 @@ class PatternTest extends TestCase
                 ['foo', '[^/]+'],
             ]
         ], $pattern->parse());
+        static::assertSame('30', $pattern->path(['foo' => 30]));
+        static::assertSame('hello%20world', $pattern->path(['foo' => "hello world"]));
 
         $pattern = new Pattern("foo");
         static::assertSame([
@@ -26,6 +32,8 @@ class PatternTest extends TestCase
                 'foo',
             ],
         ], $pattern->parse());
+        static::assertSame('foo?foo=30', $pattern->path(['foo' => 30]));
+        static::assertSame('foo?foo=hello%20world', $pattern->path(['foo' => "hello world"]));
     }
     
     public function testNamedParams()
@@ -40,17 +48,30 @@ class PatternTest extends TestCase
                 ['bar', '[^/]+'],
             ],
         ], $pattern->parse());
+        static::assertSame('/1111/2222', $pattern->path(['foo' => 1111, 'bar' => 2222]));
+        static::assertExceptionEquals(new CannotGetPathException(['foo', 'bar']), function () use ($pattern) {
+            $pattern->path(['foo' => 1111]);
+        });
+        static::assertExceptionEquals(new CannotGetPathException(['foo', 'bar']), function () use ($pattern) {
+            $pattern->path(['bar' => 1111]);
+        });
+        static::assertExceptionEquals(new CannotGetPathException(['foo', 'bar']), function () use ($pattern) {
+            $pattern->path();
+        });
 
         $pattern = new Pattern('/(apple-)?icon-:res(\d+).png'); // safe => '/icon-76.png', ['res => 76]
         static::assertSame([
             [
-                '/',
-                ['', '(?:apple-)?'],
+                ['', '(?:\/apple-)?'],
                 'icon-',
                 ['res', '\d+'],
                 '.png',
             ],
         ], $pattern->parse());
+        static::assertSame('/icon-30.png', $pattern->path(['res' => 30]));
+        static::assertExceptionEquals(new CannotGetPathException(['res']), function () use ($pattern) {
+            $pattern->path(['foo' => 1111]);
+        });
     }
     
     public function testOptionalParams()
@@ -68,6 +89,8 @@ class PatternTest extends TestCase
                 ['bar', '[^/]+'],
             ],
         ], $pattern->parse());
+        static::assertSame('/1111', $pattern->path(['foo' => 1111]));
+        static::assertSame('/1111/2222', $pattern->path(['foo' => 1111, 'bar' => 2222]));
     }
     
     public function testCustomMatchParams()
@@ -90,10 +113,10 @@ class PatternTest extends TestCase
             [
                 '/',
                 ['foo', '[^/]+'],
-                '/',
-                ['', '(?:.*)'],
+                ['', '(?:\/.*)'],
             ],
         ], $pattern->parse());
+        static::assertSame('/1111', $pattern->path(['foo' => 1111]));
     }
     
     public function testAsterisk()
@@ -106,6 +129,7 @@ class PatternTest extends TestCase
                 ['', '\/.*'],
             ],
         ], $pattern->parse());
+        static::assertSame('/foo', $pattern->path());
 
         $pattern = new Pattern('/foo-*');
 
@@ -115,5 +139,6 @@ class PatternTest extends TestCase
                 ['', '.*'],
             ],
         ], $pattern->parse());
+        static::assertSame('/foo-', $pattern->path());
     }
 }

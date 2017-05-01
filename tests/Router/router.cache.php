@@ -5,11 +5,11 @@
     array (
       'GET' => 
       array (
-        '/admin' => 'GET,HEAD/admin',
+        '/admin' => 'HANDLER5906f6392cb95',
       ),
       'HEAD' => 
       array (
-        '/admin' => 'GET,HEAD/admin',
+        '/admin' => 'HANDLER5906f6392cbc2',
       ),
     ),
     1 => 
@@ -18,14 +18,28 @@
   ),
   'routes' => 
   array (
-    'GET,HEAD/admin' => 
+    'HANDLER5906f6392cb95' => 
     Wandu\Router\Route::__set_state(array(
-       'name' => NULL,
        'className' => 'Wandu\\Router\\TestCachedDispatcherController',
        'methodName' => 'index',
        'middlewares' => 
       array (
       ),
+       'host' => NULL,
+       'name' => NULL,
     )),
+    'HANDLER5906f6392cbc2' => 
+    Wandu\Router\Route::__set_state(array(
+       'className' => 'Wandu\\Router\\TestCachedDispatcherController',
+       'methodName' => 'index',
+       'middlewares' => 
+      array (
+      ),
+       'host' => NULL,
+       'name' => NULL,
+    )),
+  ),
+  'named_routes' => 
+  array (
   ),
 );

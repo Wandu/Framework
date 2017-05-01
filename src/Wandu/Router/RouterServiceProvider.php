@@ -4,7 +4,7 @@ namespace Wandu\Router;
 use Wandu\DI\ContainerInterface;
 use Wandu\DI\ServiceProviderInterface;
 use Wandu\Router\ClassLoader\WanduLoader;
-use Wandu\Router\Contracts\ClassLoaderInterface;
+use Wandu\Router\Contracts\LoaderInterface;
 use Wandu\Router\Contracts\ResponsifierInterface;
 use Wandu\Router\Middleware\Sessionify;
 use Wandu\Router\Responsifier\WanduResponsifier;
@@ -18,7 +18,7 @@ class RouterServiceProvider implements  ServiceProviderInterface
 
     public function register(ContainerInterface $app)
     {
-        $app->bind(ClassLoaderInterface::class, WanduLoader::class);
+        $app->bind(LoaderInterface::class, WanduLoader::class);
         $app->bind(ResponsifierInterface::class, WanduResponsifier::class);
         $app->closure(Configuration::class, function () {
             return new Configuration([

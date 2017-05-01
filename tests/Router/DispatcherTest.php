@@ -3,13 +3,19 @@ namespace Wandu\Router;
 
 use Closure;
 use Psr\Http\Message\ServerRequestInterface;
+use Wandu\Assertions;
 use Wandu\Http\Psr\Stream\StringStream;
 use Wandu\Router\ClassLoader\DefaultLoader;
 use Wandu\Router\Contracts\MiddlewareInterface;
+use Wandu\Router\Exception\CannotGetPathException;
 use Wandu\Router\Exception\MethodNotAllowedException;
+use Wandu\Router\Exception\RouteNotFoundException;
+use Wandu\Router\Responsifier\WanduResponsifier;
 
 class DispatcherTest extends TestCase
 {
+    use Assertions;
+    
     public function testSimpleDispatcher()
     {
         $dispatcher = $this->createDispatcher();
@@ -75,7 +81,7 @@ class DispatcherTest extends TestCase
         $dispatcher = $this->createDispatcher();
 
         $dispatcher->setRoutes(function (Router $router) {
-            $router->createRoute(['GET'], '/admin/users/{user}', TestDispatcherAdminController::class, 'users');
+            $router->createRoute(['GET'], '/admin/users/:user', TestDispatcherAdminController::class, 'users');
         });
 
         $request = $this->createRequest('GET', '/admin/users/37');
@@ -100,7 +106,7 @@ class DispatcherTest extends TestCase
             ], function (Router $router) {
                 $router->createRoute(['GET'], '/', TestDispatcherAdminController::class, 'index');
                 $router->createRoute(['POST'], '/', TestDispatcherAdminController::class, 'action');
-                $router->createRoute(['GET'], '/users/{user}', TestDispatcherAdminController::class, 'users');
+                $router->createRoute(['GET'], '/users/:user', TestDispatcherAdminController::class, 'users');
             });
         });
 
@@ -138,7 +144,7 @@ class DispatcherTest extends TestCase
             $router->prefix('/admin', function (Router $router) {
                 $router->createRoute(['GET'], '/', TestDispatcherAdminController::class, 'index');
                 $router->createRoute(['POST'], '/', TestDispatcherAdminController::class, 'action');
-                $router->createRoute(['GET'], '/users/{user}', TestDispatcherAdminController::class, 'users');
+                $router->createRoute(['GET'], '/users/:user', TestDispatcherAdminController::class, 'users');
             });
         });
 
@@ -175,7 +181,7 @@ class DispatcherTest extends TestCase
             $router->middleware([TestDispatcherMiddleware::class], function (Router $router) {
                 $router->createRoute(['GET'], '/admin', TestDispatcherAdminController::class, 'index');
                 $router->createRoute(['POST'], '/admin', TestDispatcherAdminController::class, 'action');
-                $router->createRoute(['GET'], '/admin/users/{user}', TestDispatcherAdminController::class, 'users');
+                $router->createRoute(['GET'], '/admin/users/:user', TestDispatcherAdminController::class, 'users');
             });
         });
 
@@ -266,11 +272,37 @@ class DispatcherTest extends TestCase
             $dispatcher->dispatch($request)->getBody()->__toString()
         );
     }
+
+    public function testRouteName()
+    {
+        $dispatcher = $this->createDispatcher();
+
+        $dispatcher->setRoutes(function (Router $router) {
+            $router->get('/admin', "DummyController", 'index')->name('admin.index');
+            $router->post('/admin', "DummyController", 'store')->name('admin.store');
+            $router->get('/users/:id', "DummyController", 'show')->name('users.show');
+        });
+        
+        static::assertExceptionEquals(new RouteNotFoundException('Route "admin.unknown" not found.'), function () use ($dispatcher) {
+            $dispatcher->getPath('admin.unknown');
+        });
+
+        static::assertSame('/admin', $dispatcher->getPath('admin.index'));
+        static::assertSame('/admin', $dispatcher->getPath('admin.store'));
+
+        static::assertSame('/users/10', $dispatcher->getPath('users.show', ['id' => 10]));
+        
+        static::assertExceptionEquals(new CannotGetPathException(['id']), function () use ($dispatcher) {
+            static::assertSame('/users', $dispatcher->getPath('users.show'));
+        });
+
+        static::assertSame('/users/10?other=something', $dispatcher->getPath('users.show', ['id' => 10, 'other' => 'something']));
+    }
 }
 
 class TestDispatcherHomeController
 {
-    public function index(ServerRequestInterface $request)
+    static public function index(ServerRequestInterface $request)
     {
         return "[{$request->getMethod()}] index@Home";
     }
@@ -278,17 +310,17 @@ class TestDispatcherHomeController
 
 class TestDispatcherAdminController
 {
-    public function index(ServerRequestInterface $request)
+    static public function index(ServerRequestInterface $request)
     {
         return "[{$request->getMethod()}] index@Admin";
     }
 
-    public function action(ServerRequestInterface $request)
+    static public function action(ServerRequestInterface $request)
     {
         return "[{$request->getMethod()}] action@Admin";
     }
 
-    public function users(ServerRequestInterface $request)
+    static public function users(ServerRequestInterface $request)
     {
         return "[{$request->getMethod()}] users/{$request->getAttribute('user')}@Admin";
     }

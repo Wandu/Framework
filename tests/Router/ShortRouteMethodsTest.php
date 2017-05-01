@@ -1,7 +1,6 @@
 <?php
 namespace Wandu\Router;
 
-use Mockery;
 use Psr\Http\Message\ServerRequestInterface;
 use Wandu\Router\Exception\MethodNotAllowedException;
 
@@ -16,7 +15,7 @@ class ShortRouteMethods extends TestCase
 
         // success
         foreach (['GET', 'HEAD'] as $method) {
-            $this->assertEquals("[{$method}] index@Home", $dispatcher->dispatch(
+            static::assertEquals("[{$method}] index@Home", $dispatcher->dispatch(
                 $this->createRequest($method, '/')
             )->getBody()->__toString());
         }
@@ -26,7 +25,7 @@ class ShortRouteMethods extends TestCase
                 $dispatcher->dispatch(
                     $this->createRequest($method, '/')
                 );
-                $this->fail();
+                static::fail();
             } catch (MethodNotAllowedException $e) {
             }
         }
@@ -41,7 +40,7 @@ class ShortRouteMethods extends TestCase
 
         // success
         foreach (['POST'] as $method) {
-            $this->assertEquals("[{$method}] index@Home", $dispatcher->dispatch(
+            static::assertEquals("[{$method}] index@Home", $dispatcher->dispatch(
                 $this->createRequest($method, '/')
             )->getBody()->__toString());
         }
@@ -51,7 +50,7 @@ class ShortRouteMethods extends TestCase
                 $dispatcher->dispatch(
                     $this->createRequest($method, '/')
                 );
-                $this->fail();
+                static::fail();
             } catch (MethodNotAllowedException $e) {
             }
         }
@@ -66,7 +65,7 @@ class ShortRouteMethods extends TestCase
 
         // success
         foreach (['PUT'] as $method) {
-            $this->assertEquals("[{$method}] index@Home", $dispatcher->dispatch(
+            static::assertEquals("[{$method}] index@Home", $dispatcher->dispatch(
                 $this->createRequest($method, '/')
             )->getBody()->__toString());
         }
@@ -76,7 +75,7 @@ class ShortRouteMethods extends TestCase
                 $dispatcher->dispatch(
                     $this->createRequest($method, '/')
                 );
-                $this->fail();
+                static::fail();
             } catch (MethodNotAllowedException $e) {
             }
         }
@@ -91,7 +90,7 @@ class ShortRouteMethods extends TestCase
 
         // success
         foreach (['DELETE'] as $method) {
-            $this->assertEquals("[{$method}] index@Home", $dispatcher->dispatch(
+            static::assertEquals("[{$method}] index@Home", $dispatcher->dispatch(
                 $this->createRequest($method, '/')
             )->getBody()->__toString());
         }
@@ -101,7 +100,7 @@ class ShortRouteMethods extends TestCase
                 $dispatcher->dispatch(
                     $this->createRequest($method, '/')
                 );
-                $this->fail();
+                static::fail();
             } catch (MethodNotAllowedException $e) {
             }
         }
@@ -116,7 +115,7 @@ class ShortRouteMethods extends TestCase
 
         // success
         foreach (['OPTIONS'] as $method) {
-            $this->assertEquals("[{$method}] index@Home", $dispatcher->dispatch(
+            static::assertEquals("[{$method}] index@Home", $dispatcher->dispatch(
                 $this->createRequest($method, '/')
             )->getBody()->__toString());
         }
@@ -126,7 +125,7 @@ class ShortRouteMethods extends TestCase
                 $dispatcher->dispatch(
                     $this->createRequest($method, '/')
                 );
-                $this->fail();
+                static::fail();
             } catch (MethodNotAllowedException $e) {
             }
         }
@@ -141,7 +140,7 @@ class ShortRouteMethods extends TestCase
 
         // success
         foreach (['PATCH'] as $method) {
-            $this->assertEquals("[{$method}] index@Home", $dispatcher->dispatch(
+            static::assertEquals("[{$method}] index@Home", $dispatcher->dispatch(
                 $this->createRequest($method, '/')
             )->getBody()->__toString());
         }
@@ -151,7 +150,7 @@ class ShortRouteMethods extends TestCase
                 $dispatcher->dispatch(
                     $this->createRequest($method, '/')
                 );
-                $this->fail();
+                static::fail();
             } catch (MethodNotAllowedException $e) {
             }
         }
@@ -166,7 +165,7 @@ class ShortRouteMethods extends TestCase
 
         // success
         foreach (['GET', 'HEAD', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'] as $method) {
-            $this->assertEquals("[{$method}] index@Home", $dispatcher->dispatch(
+            static::assertEquals("[{$method}] index@Home", $dispatcher->dispatch(
                 $this->createRequest($method, '/')
             )->getBody()->__toString());
         }
@@ -176,7 +175,7 @@ class ShortRouteMethods extends TestCase
 
 class TestShortRouteMethodController
 {
-    public function index(ServerRequestInterface $request)
+    static public function index(ServerRequestInterface $request)
     {
         return "[{$request->getMethod()}] index@Home";
     }

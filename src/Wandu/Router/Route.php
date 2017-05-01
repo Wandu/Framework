@@ -14,16 +14,14 @@ class Route
     public static function __set_state(array $dataSet)
     {
         return new static(
-            $dataSet['name'],
             $dataSet['className'],
             $dataSet['methodName'],
-            $dataSet['middlewares']
+            $dataSet['middlewares'],
+            $dataSet['host'] ?? null,
+            $dataSet['name'] ?? null
         );
     }
 
-    /** @var string */
-    protected $name;
-    
     /** @var string */
     protected $className;
 
@@ -33,17 +31,25 @@ class Route
     /** @var array */
     protected $middlewares;
 
+    /** @var string */
+    protected $host;
+
+    /** @var string */
+    protected $name;
+
     /**
      * @param string $className
      * @param string $methodName
      * @param array $middlewares
+     * @param string $host
      * @param string $name
      */
-    public function __construct($className, $methodName, array $middlewares = [], $name = null)
+    public function __construct($className, $methodName, array $middlewares = [], $host = null, $name = null)
     {
         $this->className = $className;
         $this->methodName = $methodName;
         $this->middlewares = $middlewares;
+        $this->host = $host;
         $this->name = $name;
     }
 
@@ -74,13 +80,32 @@ class Route
     }
 
     /**
+     * @internal
      * @return string
      */
-    public function getName(): string
+    public function getName()
     {
         return $this->name;
     }
 
+    /**
+     * @param string $host
+     * @return \Wandu\Router\Route|self
+     */
+    public function host(string $host)
+    {
+        $this->host = $host;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getHost()
+    {
+        return $this->host;
+    }
+    
     /**
      * @param \Psr\Http\Message\ServerRequestInterface $request
      * @param \Wandu\Router\Contracts\LoaderInterface|null $loader

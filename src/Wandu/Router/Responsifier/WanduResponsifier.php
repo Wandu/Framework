@@ -17,6 +17,7 @@ class WanduResponsifier implements ResponsifierInterface
         if ($response instanceof ResponseInterface) {
             return $response;
         }
+        
         if (!isset($response)) {
             $response = '';
         }

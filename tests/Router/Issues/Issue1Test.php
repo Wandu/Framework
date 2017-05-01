@@ -27,7 +27,7 @@ class Issue1Test extends TestCase
         ]);
 
         $response = $route->execute($request, new DefaultLoader(), new WanduResponsifier());
-        $this->assertEquals(
+        static::assertEquals(
             'login@Issue1, cookie={"name":"wan2land"}',
             $response->getBody()->__toString()
         );
@@ -48,7 +48,7 @@ class TestIssue1Middleware implements MiddlewareInterface
 
 class TestIssue1Controller
 {
-    public function login(ServerRequestInterface $request)
+    static public function login(ServerRequestInterface $request)
     {
         return "login@Issue1, cookie=" . json_encode($request->getAttribute('cookie', []));
     }

@@ -3,19 +3,19 @@ namespace Wandu\Router\Contracts;
 
 use Psr\Http\Message\ServerRequestInterface;
 
-interface ClassLoaderInterface
+interface LoaderInterface
 {
     /**
      * @param string $className
-     * @return object
+     * @return \Wandu\Router\Contracts\MiddlewareInterface
      */
-    public function create($className);
+    public function middleware($className): MiddlewareInterface;
 
     /**
-     * @param \Psr\Http\Message\ServerRequestInterface $request
-     * @param object $object
+     * @param string $className
      * @param string $methodName
+     * @param \Psr\Http\Message\ServerRequestInterface $request
      * @return mixed
      */
-    public function call(ServerRequestInterface $request, $object, $methodName);
+    public function execute($className, $methodName, ServerRequestInterface $request);
 }

@@ -1,9 +1,11 @@
 <?php
 namespace Wandu\Router\ClassLoader;
 
+use Closure;
 use Mockery;
 use PHPUnit_Framework_TestCase;
 use Psr\Http\Message\ServerRequestInterface;
+use Wandu\Assertions;
 use Wandu\DI\Container;
 use Wandu\DI\ContainerInterface;
 use Wandu\DI\Exception\CannotResolveException;
@@ -18,10 +20,13 @@ use Wandu\Http\Parameters\QueryParams;
 use Wandu\Http\Parameters\ServerParams;
 use Wandu\Http\Parameters\Session;
 use Wandu\Http\Psr\ServerRequest;
+use Wandu\Router\Contracts\MiddlewareInterface;
 use Wandu\Router\Exception\HandlerNotFoundException;
 
 class WanduLoaderTest extends PHPUnit_Framework_TestCase
 {
+    use Assertions;
+    
     public function tearDown()
     {
         Mockery::close();
@@ -31,20 +36,16 @@ class WanduLoaderTest extends PHPUnit_Framework_TestCase
     {
         $loader = new WanduLoader(new Container());
 
-        static::assertInstanceOf(TestStubInLoader::class, $loader->create(TestStubInLoader::class));
+        static::assertInstanceOf(WanduLoaderTestMiddleware::class, $loader->middleware(WanduLoaderTestMiddleware::class));
     }
 
     public function testCreateFail()
     {
         $loader = new WanduLoader(new Container());
 
-        try {
-            $loader->create('ThereIsNoClass');
-            static::fail();
-        } catch (HandlerNotFoundException $exception) {
-            static::assertEquals('ThereIsNoClass', $exception->getClassName());
-            static::assertNull($exception->getMethodName());
-        }
+        static::assertExceptionEquals(new HandlerNotFoundException('ThereIsNoClass'), function () use ($loader) {
+            $loader->middleware('ThereIsNoClass');
+        });
     }
 
     public function testCall()
@@ -52,11 +53,10 @@ class WanduLoaderTest extends PHPUnit_Framework_TestCase
         $loader = new WanduLoader(new Container());
 
         $request = new ServerRequest();
-        $instance = new TestStubInLoader();
 
         static::assertEquals(
             'callFromLoader@StubInLoader',
-            $loader->call($request, $instance, 'callFromLoader')
+            $loader->execute(WanduLoaderTestController::class, 'callFromLoader', $request)
         );
     }
 
@@ -65,11 +65,10 @@ class WanduLoaderTest extends PHPUnit_Framework_TestCase
         $loader = new WanduLoader(new Container());
 
         $request = new ServerRequest();
-        $instance = new TestStubInLoader();
 
         static::assertEquals(
             '__call->callFromMagicMethod@StubInLoader',
-            $loader->call($request, $instance, 'callFromMagicMethod')
+            $loader->execute(WanduLoaderTestController::class, 'callFromMagicMethod', $request)
         );
     }
 
@@ -78,29 +77,19 @@ class WanduLoaderTest extends PHPUnit_Framework_TestCase
         $loader = new WanduLoader(new Container());
 
         $request = new ServerRequest();
-        $instance = new TestStubInLoader();
 
-        // error
-        try {
-            $loader->call($request, $instance, 'equalQueryParams');
-            static::fail();
-        } catch (CannotResolveException $e) {
-        }
-        try {
-            $loader->call($request, $instance, 'equalParsedBody');
-            static::fail();
-        } catch (CannotResolveException $e) {
-        }
-        try {
-            $loader->call($request, $instance, 'equalCookie');
-            static::fail();
-        } catch (CannotResolveException $e) {
-        }
-        try {
-            $loader->call($request, $instance, 'equalSession');
-            static::fail();
-        } catch (CannotResolveException $e) {
-        }
+        static::assertExceptionInstanceOf(CannotResolveException::class, function () use ($loader, $request) {
+            $loader->execute(WanduLoaderTestController::class, 'equalQueryParams', $request);
+        });
+        static::assertExceptionInstanceOf(CannotResolveException::class, function () use ($loader, $request) {
+            $loader->execute(WanduLoaderTestController::class, 'equalParsedBody', $request);
+        });
+        static::assertExceptionInstanceOf(CannotResolveException::class, function () use ($loader, $request) {
+            $loader->execute(WanduLoaderTestController::class, 'equalCookie', $request);
+        });
+        static::assertExceptionInstanceOf(CannotResolveException::class, function () use ($loader, $request) {
+            $loader->execute(WanduLoaderTestController::class, 'equalSession', $request);
+        });
 
         $request = $request->withAttribute('server_params', new ServerParams($request));
         $request = $request->withAttribute('query_params', new QueryParams());
@@ -108,15 +97,22 @@ class WanduLoaderTest extends PHPUnit_Framework_TestCase
         $request = $request->withAttribute('cookie', Mockery::mock(CookieJar::class));
         $request = $request->withAttribute('session', Mockery::mock(Session::class));
 
-        static::assertTrue($loader->call($request, $instance, 'equalCookie'));
-        static::assertTrue($loader->call($request, $instance, 'equalSession'));
-        static::assertTrue($loader->call($request, $instance, 'equalServerParams'));
-        static::assertTrue($loader->call($request, $instance, 'equalQueryParams'));
-        static::assertTrue($loader->call($request, $instance, 'equalParsedBody'));
+        static::assertTrue($loader->execute(WanduLoaderTestController::class, 'equalCookie', $request));
+        static::assertTrue($loader->execute(WanduLoaderTestController::class, 'equalSession', $request));
+        static::assertTrue($loader->execute(WanduLoaderTestController::class, 'equalServerParams', $request));
+        static::assertTrue($loader->execute(WanduLoaderTestController::class, 'equalQueryParams', $request));
+        static::assertTrue($loader->execute(WanduLoaderTestController::class, 'equalParsedBody', $request));
     }
 }
 
-class TestStubInLoader
+class WanduLoaderTestMiddleware implements MiddlewareInterface
+{
+    public function __invoke(ServerRequestInterface $request, Closure $next)
+    {
+    }
+}
+
+class WanduLoaderTestController
 {
     public function __call($name, $arguments = [])
     {

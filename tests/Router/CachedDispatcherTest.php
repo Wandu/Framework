@@ -16,16 +16,16 @@ class CachedDispatcherTest extends TestCase
         $dispatcher = $this->createDispatcher();
 
         $count = 0;
-        $dispatcher->setRoutes(function (Router $router) use (&$count) {
+        $routes = function (Router $router) use (&$count) {
             $count++;
             $router->get('admin', TestCachedDispatcherController::class, 'index');
-        });
+        };
+        $dispatcher->setRoutes($routes);
+        $dispatcher->setRoutes($routes);
+        $dispatcher->setRoutes($routes);
+        $dispatcher->setRoutes($routes);
 
-        $dispatcher->dispatch($this->createRequest('GET', '/admin'));
-        $dispatcher->dispatch($this->createRequest('GET', '/admin'));
-        $dispatcher->dispatch($this->createRequest('GET', '/admin'));
-
-        static::assertEquals(3, $count);
+        static::assertEquals(4, $count);
     }
 
     public function testDispatchWithCache()
@@ -36,14 +36,14 @@ class CachedDispatcherTest extends TestCase
         ]);
 
         $count = 0;
-        $dispatcher->setRoutes(function (Router $router) use (&$count) {
+        $routes = function (Router $router) use (&$count) {
             $count++;
             $router->get('admin', TestCachedDispatcherController::class, 'index');
-        });
-
-        $dispatcher->dispatch($this->createRequest('GET', '/admin'));
-        $dispatcher->dispatch($this->createRequest('GET', '/admin'));
-        $dispatcher->dispatch($this->createRequest('GET', '/admin'));
+        };
+        $dispatcher->setRoutes($routes);
+        $dispatcher->setRoutes($routes);
+        $dispatcher->setRoutes($routes);
+        $dispatcher->setRoutes($routes);
 
         static::assertEquals(1, $count);
     }
@@ -56,17 +56,18 @@ class CachedDispatcherTest extends TestCase
         ]);
 
         $count = 0;
-        $dispatcher->setRoutes(function (Router $router) use (&$count) {
+        $routes = function (Router $router) use (&$count) {
             $count++;
             $router->get('admin', TestCachedDispatcherController::class, 'index');
-        });
+        };
+        $dispatcher->setRoutes($routes);
+        $dispatcher->setRoutes($routes);
+        $dispatcher->setRoutes($routes);
+        $dispatcher->setRoutes($routes);
+        $dispatcher->setRoutes($routes);
 
-        $dispatcher->dispatch($this->createRequest('GET', '/admin'));
-        $dispatcher->dispatch($this->createRequest('GET', '/admin'));
-        $dispatcher->dispatch($this->createRequest('GET', '/admin'));
-        $dispatcher->dispatch($this->createRequest('GET', '/admin'));
         $dispatcher->flush();
-        $dispatcher->dispatch($this->createRequest('GET', '/admin'));
+        $dispatcher->setRoutes($routes);
 
         static::assertEquals(2, $count);
     }

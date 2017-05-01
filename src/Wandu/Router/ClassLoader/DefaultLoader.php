@@ -2,15 +2,16 @@
 namespace Wandu\Router\ClassLoader;
 
 use Psr\Http\Message\ServerRequestInterface;
-use Wandu\Router\Contracts\ClassLoaderInterface;
+use Wandu\Router\Contracts\LoaderInterface;
+use Wandu\Router\Contracts\MiddlewareInterface;
 use Wandu\Router\Exception\HandlerNotFoundException;
 
-class DefaultLoader implements ClassLoaderInterface
+class DefaultLoader implements LoaderInterface
 {
     /**
      * {@inheritdoc}
      */
-    public function create($className)
+    public function middleware($className): MiddlewareInterface
     {
         if (!class_exists($className)) {
             throw new HandlerNotFoundException($className);
@@ -21,11 +22,11 @@ class DefaultLoader implements ClassLoaderInterface
     /**
      * {@inheritdoc}
      */
-    public function call(ServerRequestInterface $request, $object, $methodName)
+    public function execute($className, $methodName, ServerRequestInterface $request)
     {
-        if (!method_exists($object, $methodName)) {
-            throw new HandlerNotFoundException(get_class($object), $methodName);
+        if (!method_exists($className, $methodName)) {
+            throw new HandlerNotFoundException($className, $methodName);
         }
-        return call_user_func([$object, $methodName], $request);
+        return call_user_func([$className, $methodName], $request);
     }
 }

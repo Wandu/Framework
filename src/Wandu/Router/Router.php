@@ -1,17 +1,10 @@
 <?php
 namespace Wandu\Router;
 
-use FastRoute\DataGenerator\GroupCountBased as GCBDataGenerator;
-use FastRoute\RouteCollector;
-use FastRoute\RouteParser\Std;
+use IteratorAggregate;
 
-class Router
+class Router implements IteratorAggregate
 {
-    use ShortRouterMethods;
-
-    /** @var \FastRoute\RouteCollector */
-    protected $collector;
-
     /** @var \Wandu\Router\Route[] */
     protected $routes = [];
 
@@ -21,27 +14,9 @@ class Router
     /** @var array */
     protected $middlewares = [];
 
-    public function __construct()
-    {
-        $this->collector = new RouteCollector(new Std(), new GCBDataGenerator());
-    }
-
-    /**
-     * @return \FastRoute\RouteCollector
-     */
-    public function getCollector()
-    {
-        return $this->collector;
-    }
-
-    /**
-     * @return \Wandu\Router\Route[]
-     */
-    public function getRoutes()
-    {
-        return $this->routes;
-    }
-
+    /** @var string */
+    protected $host;
+    
     /**
      * @param string $prefix
      * @param callable $handler
@@ -49,8 +24,10 @@ class Router
     public function prefix($prefix, callable $handler)
     {
         $beforePrefix = $this->prefix;
-        $this->prefix = $beforePrefix . $prefix ?: '/';
+        $this->prefix = "{$beforePrefix}/" . ($prefix ?? '');
+
         call_user_func($handler, $this);
+
         $this->prefix = $beforePrefix;
     }
 
@@ -60,12 +37,10 @@ class Router
      */
     public function middleware($middlewares, callable $handler)
     {
-        if (!is_array($middlewares)) {
-            $middlewares = [$middlewares];
-        }
+        $middlewares = array_filter((array) $middlewares);
         $beforeMiddlewares = $this->middlewares;
         $this->middlewares = array_merge($beforeMiddlewares, $middlewares);
-        $handler($this);
+        call_user_func($handler, $this);
         $this->middlewares = $beforeMiddlewares;
     }
 
@@ -75,23 +50,11 @@ class Router
      */
     public function group(array $attributes, callable $handler)
     {
-        $beforePrefix = $this->prefix;
-        $beforeMiddlewares = $this->middlewares;
-
-        if (isset($attributes['prefix'])) {
-            $this->prefix = $beforePrefix . $attributes['prefix'] ?: '/';
-        }
-        if (isset($attributes['middleware'])) {
-            if (!is_array($attributes['middleware'])) {
-                $attributes['middleware'] = [$attributes['middleware']];
-            }
-            $this->middlewares = array_merge($beforeMiddlewares, $attributes['middleware']);
-        }
-
-        $handler($this);
-
-        $this->prefix = $beforePrefix;
-        $this->middlewares = $beforeMiddlewares;
+        $this->prefix($attributes['prefix'] ?? '', function () use ($attributes, $handler) {
+            $this->middleware($attributes['middleware'] ?? [], function () use ($attributes, $handler) {
+                call_user_func($handler, $this);
+            });
+        });
     }
 
     /**
@@ -99,17 +62,109 @@ class Router
      */
     public function append(callable $handler)
     {
-        $handler($this);
+        call_user_func($handler, $this);
     }
 
     public function resource($className, $except = [], $only = [])
     {
         $this->get('', $className, 'index');
-        $this->get('/create', $className, 'create');
+        $this->get('create', $className, 'create');
         $this->post('', $className, 'store');
-        $this->get('/{id}', $className, 'show');
-        $this->put('/{id}', $className, 'update');
-        $this->delete('/{id}', $className, 'destroy');
+        $this->get('{id}', $className, 'show');
+        $this->put('{id}', $className, 'update');
+        $this->delete('{id}', $className, 'destroy');
+    }
+
+    /**
+     * @param string $path
+     * @param string $className
+     * @param string $methodName
+     * @param array $middlewares
+     * @return Route
+     */
+    public function get($path, $className, $methodName = 'index', array $middlewares = [])
+    {
+        return $this->createRoute(['GET', 'HEAD'], $path, $className, $methodName, $middlewares);
+    }
+
+    /**
+     * @param string $path
+     * @param string $className
+     * @param string $methodName
+     * @param array $middlewares
+     * @return Route
+     */
+    public function post($path, $className, $methodName = 'index', array $middlewares = [])
+    {
+        return $this->createRoute(['POST'], $path, $className, $methodName, $middlewares);
+    }
+
+    /**
+     * @param string $path
+     * @param string $className
+     * @param string $methodName
+     * @param array $middlewares
+     * @return Route
+     */
+    public function put($path, $className, $methodName = 'index', array $middlewares = [])
+    {
+        return $this->createRoute(['PUT'], $path, $className, $methodName, $middlewares);
+    }
+
+    /**
+     * @param string $path
+     * @param string $className
+     * @param string $methodName
+     * @param array $middlewares
+     * @return Route
+     */
+    public function delete($path, $className, $methodName = 'index', array $middlewares = [])
+    {
+        return $this->createRoute(['DELETE'], $path, $className, $methodName, $middlewares);
+    }
+
+    /**
+     * @param string $path
+     * @param string $className
+     * @param string $methodName
+     * @param array $middlewares
+     * @return Route
+     */
+    public function options($path, $className, $methodName = 'index', array $middlewares = [])
+    {
+        return $this->createRoute(['OPTIONS'], $path, $className, $methodName, $middlewares);
+    }
+
+    /**
+     * @param string $path
+     * @param string $className
+     * @param string $methodName
+     * @param array $middlewares
+     * @return Route
+     */
+    public function patch($path, $className, $methodName = 'index', array $middlewares = [])
+    {
+        return $this->createRoute(['PATCH'], $path, $className, $methodName, $middlewares);
+    }
+
+    /**
+     * @param string $path
+     * @param string $className
+     * @param string $methodName
+     * @param array $middlewares
+     * @return Route
+     */
+    public function any($path, $className, $methodName = 'index', array $middlewares = [])
+    {
+        return $this->createRoute([
+            'GET',
+            'HEAD',
+            'POST',
+            'PUT',
+            'DELETE',
+            'OPTIONS',
+            'PATCH'
+        ], $path, $className, $methodName, $middlewares);
     }
     
     /**
@@ -122,14 +177,24 @@ class Router
      */
     public function createRoute(array $methods, $path, $className, $methodName = 'index', array $middlewares = [])
     {
-        $path = '/' . trim($this->prefix . $path, '/');
-        if (!is_array($middlewares)) {
-            $middlewares = [$middlewares];
+        $path = trim("{$this->prefix}/{$path}", '/');
+        while(strpos($path, '//') !== false) {
+            $path = str_replace('//', '/', $path);
         }
+        $path = '/' . $path;
         $middlewares = array_merge($this->middlewares, $middlewares);
+        $route = new Route($className, $methodName, $middlewares);
+        $this->routes[] = [$methods, $path, $route];
+        return $route;
+    }
 
-        $handler = implode(',', $methods) . $path;
-        $this->collector->addRoute($methods, $path, $handler);
-        return $this->routes[$handler] = new Route($className, $methodName, $middlewares);
+    /**
+     * {@inheritdoc}
+     */
+    public function getIterator()
+    {
+        foreach ($this->routes as $route) {
+            yield $route;
+        }
     }
 }
