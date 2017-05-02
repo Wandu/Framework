@@ -2,14 +2,12 @@
 namespace Wandu\Router;
 
 use Closure;
+use FastRoute\DataGenerator\GroupCountBased as GCBGenerator;
 use FastRoute\Dispatcher as FastDispatcher;
 use FastRoute\Dispatcher\GroupCountBased as GCBDispatcher;
-use FastRoute\DataGenerator\GroupCountBased as GCBGenerator;
-use FastRoute\RouteParser\Std;
 use Psr\Http\Message\ServerRequestInterface;
 use Wandu\Router\Contracts\LoaderInterface;
 use Wandu\Router\Contracts\ResponsifierInterface;
-use Wandu\Router\Exception\CannotGetPathException;
 use Wandu\Router\Exception\MethodNotAllowedException;
 use Wandu\Router\Exception\RouteNotFoundException;
 use Wandu\Router\Path\Pattern;
