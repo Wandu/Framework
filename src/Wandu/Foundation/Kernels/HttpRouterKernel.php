@@ -73,7 +73,7 @@ class HttpRouterKernel extends KernelAbstract
     {
         $routes = isset($this->attributes['routes']) ? $this->attributes['routes'] : null;
         if ($routes) {
-            $dispatcher = $dispatcher->withRoutes($routes);
+            $dispatcher->setRoutes($routes);
         }
         return $dispatcher->dispatch($request);
     }

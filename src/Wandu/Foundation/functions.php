@@ -57,3 +57,26 @@ namespace Wandu\View
         return container()->get(RenderInterface::class)->render($template, $attributes, $basePath);
     }
 }
+
+namespace Wandu\Router
+{
+    use function Wandu\DI\container;
+
+    /**
+     * @return \Wandu\Router\Dispatcher
+     */
+    function dispatcher()
+    {
+        return container()->get(Dispatcher::class);
+    }
+    
+    /**
+     * @param string $name
+     * @param array $attributes
+     * @return string
+     */
+    function route(string $name, array $attributes = [])
+    {
+        return dispatcher()->getPath($name, $attributes);
+    }
+}
