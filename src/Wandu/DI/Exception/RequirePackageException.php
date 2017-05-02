@@ -1,11 +1,10 @@
 <?php
 namespace Wandu\DI\Exception;
 
-use Interop\Container\Exception\NotFoundException;
 use Psr\Container\NotFoundExceptionInterface;
 use RuntimeException;
 
-class RequirePackageException extends RuntimeException implements NotFoundExceptionInterface, NotFoundException
+class RequirePackageException extends RuntimeException implements NotFoundExceptionInterface
 {
     /** @var string */
     protected $class;

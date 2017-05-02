@@ -4,8 +4,6 @@ namespace Wandu\DI;
 use Closure;
 use Doctrine\Common\Annotations\Reader;
 use Exception;
-use Interop\Container\ContainerInterface as InteropContainerInterface;
-use Interop\Container\Exception\ContainerException;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface as PsrContainerInterface;
 use ReflectionClass;
@@ -50,7 +48,6 @@ class Container implements ContainerInterface
     {
         $this->instance(Container::class, $this)->freeze();
         $this->instance(ContainerInterface::class, $this)->freeze();
-        $this->instance(InteropContainerInterface::class, $this)->freeze();
         $this->instance(PsrContainerInterface::class, $this)->freeze();
         $this->instance('container', $this)->freeze();
     }
@@ -60,9 +57,9 @@ class Container implements ContainerInterface
      */
     public function setAsGlobal()
     {
-        $oldApp = static::$instance;
+        $instance = static::$instance;
         static::$instance = $this;
-        return $oldApp;
+        return $instance;
     }
 
     public function __clone()
@@ -71,13 +68,11 @@ class Container implements ContainerInterface
         unset(
             $this->containees[Container::class],
             $this->containees[ContainerInterface::class],
-            $this->containees[InteropContainerInterface::class],
             $this->containees[PsrContainerInterface::class],
             $this->containees['container']
         );
         $this->instance(Container::class, $this)->freeze();
         $this->instance(ContainerInterface::class, $this)->freeze();
-        $this->instance(InteropContainerInterface::class, $this)->freeze();
         $this->instance(PsrContainerInterface::class, $this)->freeze();
         $this->instance('container', $this)->freeze();
     }
@@ -372,8 +367,6 @@ class Container implements ContainerInterface
     {
         try {
             $this->get($name);
-        } catch (ContainerException $e) {
-            throw new RequirePackageException($name, $package);
         } catch (ContainerExceptionInterface $e) {
             throw new RequirePackageException($name, $package);
         }

@@ -1,11 +1,10 @@
 <?php
 namespace Wandu\DI\Exception;
 
-use Interop\Container\Exception\ContainerException;
 use Psr\Container\ContainerExceptionInterface;
 use RuntimeException;
 
-class CannotInjectException extends RuntimeException implements ContainerExceptionInterface, ContainerException 
+class CannotInjectException extends RuntimeException implements ContainerExceptionInterface 
 {
     /** @var string */
     protected $class;

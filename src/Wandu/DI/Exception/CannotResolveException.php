@@ -1,13 +1,12 @@
 <?php
 namespace Wandu\DI\Exception;
 
-use Interop\Container\Exception\NotFoundException;
 use Psr\Container\NotFoundExceptionInterface;
 use RuntimeException;
 use ReflectionClass;
 use Wandu\Reflection\ReflectionCallable;
 
-class CannotResolveException extends RuntimeException implements NotFoundExceptionInterface, NotFoundException
+class CannotResolveException extends RuntimeException implements NotFoundExceptionInterface
 {
     /** @var string */
     protected $class;

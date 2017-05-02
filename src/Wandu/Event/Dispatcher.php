@@ -1,13 +1,13 @@
 <?php
 namespace Wandu\Event;
 
-use Interop\Container\ContainerInterface;
+use Psr\Container\ContainerInterface;
 use Wandu\Q\Queue;
 use RuntimeException;
 
 class Dispatcher implements DispatcherInterface
 {
-    /** @var \Interop\Container\ContainerInterface */
+    /** @var \Psr\Container\ContainerInterface */
     protected $container;
 
     /** @var array|\Wandu\Event\ListenerInterface[][]|callable[][] */

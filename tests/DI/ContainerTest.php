@@ -2,7 +2,6 @@
 namespace Wandu\DI;
 
 use ArrayObject;
-use Interop\Container\ContainerInterface as InteropContainer;
 use Wandu\DI\Containee\ClosureContainee;
 use Wandu\DI\Exception\CannotChangeException;
 use Wandu\DI\Exception\NullReferenceException;
@@ -17,7 +16,6 @@ class ContainerTest extends PHPUnit_Framework_TestCase
         static::assertSame($container, $container->get('container'));
         static::assertSame($container, $container->get(Container::class));
         static::assertSame($container, $container->get(ContainerInterface::class));
-        static::assertSame($container, $container->get(InteropContainer::class));
     }
 
     public function testHas()
@@ -299,7 +297,6 @@ class ContainerTest extends PHPUnit_Framework_TestCase
 
         static::assertSame($container, $container->get(Container::class));
         static::assertSame($container, $container->get(ContainerInterface::class));
-        static::assertSame($container, $container->get(InteropContainer::class));
         static::assertSame($container, $container->get('container'));
 
         $addedInstance1 = new ArrayObject();
@@ -328,7 +325,6 @@ class ContainerTest extends PHPUnit_Framework_TestCase
 
         static::assertSame($otherContainer, $otherContainer->get(Container::class));
         static::assertSame($otherContainer, $otherContainer->get(ContainerInterface::class));
-        static::assertSame($otherContainer, $otherContainer->get(InteropContainer::class));
         static::assertSame($otherContainer, $otherContainer->get('container'));
     }
 }

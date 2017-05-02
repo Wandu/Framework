@@ -1,14 +1,14 @@
 <?php
 namespace Wandu\Console;
 
-use Interop\Container\ContainerInterface;
+use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\Application as SymfonyApplication;
 use Wandu\Console\Symfony\CommandAdapter;
 use Wandu\DI\Exception\NullReferenceException;
 
 class Dispatcher
 {
-    /** @var \Interop\Container\ContainerInterface */
+    /** @var \Psr\Container\ContainerInterface */
     protected $container;
 
     /** @var \Symfony\Component\Console\Application */
