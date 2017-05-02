@@ -19,7 +19,7 @@ class Assign implements MethodDecoratorInterface
     /** @Required @var string */
     public $target;
 
-    public function decorateMethodBeforeCreate(ReflectionMethod $reflector, ContainerInterface $container)
+    public function beforeCreateMethod(ReflectionMethod $reflector, ContainerInterface $container)
     {
         $containee = $container->containee($reflector->getDeclaringClass()->getName());
         $attributes = $containee->getAssign();

@@ -2,15 +2,13 @@
 namespace Wandu\DI\Containee;
 
 use Wandu\DI\ContainerInterface;
+use Wandu\Reflection\ReflectionCallable;
 
 class ClosureContainee extends ContaineeAbstract
 {
     /** @var callable */
     protected $handler;
     
-    /**
-     * @param callable $handler
-     */
     public function __construct(callable $handler)
     {
         $this->handler = $handler;
@@ -19,15 +17,11 @@ class ClosureContainee extends ContaineeAbstract
     /**
      * {@inheritdoc}
      */
-    public function get(ContainerInterface $container)
+    protected function create(ContainerInterface $container)
     {
-        $this->frozen = true;
-        if ($this->factoryEnabled) {
-            return $container->call($this->handler);
-        }
-        if (!isset($this->caching)) {
-            $this->caching = $object = $container->call($this->handler);
-        }
-        return $this->caching;
+        return call_user_func_array(
+            $this->handler,
+            $this->getParameters($container, new ReflectionCallable($this->handler))
+        );
     }
 }

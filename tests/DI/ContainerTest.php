@@ -2,12 +2,11 @@
 namespace Wandu\DI;
 
 use ArrayObject;
-use Wandu\DI\Containee\ClosureContainee;
+use PHPUnit\Framework\TestCase;
 use Wandu\DI\Exception\CannotChangeException;
 use Wandu\DI\Exception\NullReferenceException;
-use PHPUnit_Framework_TestCase;
 
-class ContainerTest extends PHPUnit_Framework_TestCase
+class ContainerTest extends TestCase 
 {
     public function testConstruct()
     {

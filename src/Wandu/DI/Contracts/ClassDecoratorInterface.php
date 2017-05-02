@@ -17,5 +17,5 @@ interface ClassDecoratorInterface
      * @param \ReflectionClass $reflector
      * @param \Wandu\DI\ContainerInterface $container
      */
-    public function onCreateClass($target, ReflectionClass $reflector, ContainerInterface $container);
+    public function afterCreateClass($target, ReflectionClass $reflector, ContainerInterface $container);
 }

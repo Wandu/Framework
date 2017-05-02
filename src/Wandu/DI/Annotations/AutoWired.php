@@ -21,7 +21,7 @@ class AutoWired implements PropertyDecoratorInterface
     /** @var string */
     public $to = null;
 
-    public function decoratePropertyBeforeCreate(ReflectionProperty $reflector, ContainerInterface $container)
+    public function beforeCreateProperty(ReflectionProperty $reflector, ContainerInterface $container)
     {
         // do nothing
     }

@@ -9,13 +9,6 @@ interface ContainerInterface extends ArrayAccess, PsrContainerInterface
 {
     /**
      * @param string $name
-     * @param array $arguments
-     * @return mixed
-     */
-    public function __call($name, array $arguments);
-
-    /**
-     * @param string $name
      * @return mixed
      */
     public function get($name);

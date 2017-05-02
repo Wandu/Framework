@@ -2,27 +2,16 @@
 namespace Wandu\DI;
 
 use Closure;
-use Doctrine\Common\Annotations\Reader;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface as PsrContainerInterface;
-use ReflectionClass;
-use ReflectionException;
-use ReflectionFunctionAbstract;
-use ReflectionMethod;
-use ReflectionObject;
-use Wandu\DI\Annotations\AutoWired;
 use Wandu\DI\Containee\BindContainee;
 use Wandu\DI\Containee\ClosureContainee;
 use Wandu\DI\Containee\InstanceContainee;
-use Wandu\DI\Contracts\ClassDecoratorInterface;
-use Wandu\DI\Contracts\MethodDecoratorInterface;
-use Wandu\DI\Contracts\PropertyDecoratorInterface;
 use Wandu\DI\Exception\CannotChangeException;
 use Wandu\DI\Exception\CannotFindParameterException;
 use Wandu\DI\Exception\CannotResolveException;
 use Wandu\DI\Exception\NullReferenceException;
 use Wandu\DI\Exception\RequirePackageException;
-use Wandu\Reflection\ReflectionCallable;
 
 class Container implements ContainerInterface
 {
@@ -32,9 +21,6 @@ class Container implements ContainerInterface
     /** @var \Wandu\DI\Containee\ContaineeAbstract[] */
     protected $containees = [];
 
-    /** @var array */
-    protected $instances = [];
-    
     /** @var \Wandu\DI\ServiceProviderInterface[] */
     protected $providers = [];
 
@@ -126,22 +112,23 @@ class Container implements ContainerInterface
     public function get($name)
     {
         try {
-//            if ($this->containees[$name]->isAnnotatedEnabled()) {
-//                $this->annotateBeforeCreate($name);
-//            }
-            $instance = $this->containee($name)->get($this);
-        } catch (NullReferenceException $e) {
-            if (!class_exists($name)) {
-                throw $e;
+            try {
+                $instance = $this->containee($name)->get($this);
+            } catch (NullReferenceException $e) {
+                if (!class_exists($name)) {
+                    throw $e;
+                }
+                $this->bind($name);
+                $instance = $this->containee($name)->get($this);
             }
-            $instance = $this->create($name);
-            $this->instance($name, $instance);
-        }
-        if ($this->containees[$name]->isAnnotatedEnabled()) {
-            $this->annotateAfterCreate($name, $instance);
-        }
-        foreach ($this->getExtenders($name) as $extender) {
-            $instance = $extender->__invoke($instance);
+            if ($this->containees[$name]->isAnnotatedEnabled()) {
+//            $this->annotateAfterCreate($name, $instance);
+            }
+            foreach ($this->getExtenders($name) as $extender) {
+                $instance = $extender->__invoke($instance);
+            }
+        } catch (CannotFindParameterException $e) {
+            throw new CannotResolveException($name, $e->getParameter());
         }
         return $instance;
     }
@@ -266,17 +253,11 @@ class Container implements ContainerInterface
      */
     public function create(string $className, array $arguments = [])
     {
-        $reflectionClass = new ReflectionClass($className);
-        $reflectionMethod = $reflectionClass->getConstructor();
-        if (!$reflectionMethod) {
-            return $reflectionClass->newInstance();
-        }
         try {
-            $parameters = $this->getParameters($reflectionMethod, $arguments);
+            return (new BindContainee($className))->assign($arguments)->get($this);
         } catch (CannotFindParameterException $e) {
             throw new CannotResolveException($className, $e->getParameter());
         }
-        return $reflectionClass->newInstanceArgs($parameters);
     }
 
     /**
@@ -285,10 +266,7 @@ class Container implements ContainerInterface
     public function call(callable $callee, array $arguments = [])
     {
         try {
-            return call_user_func_array(
-                $callee,
-                $this->getParameters(new ReflectionCallable($callee), $arguments)
-            );
+            return (new ClosureContainee($callee))->assign($arguments)->get($this);
         } catch (CannotFindParameterException $e) {
             throw new CannotResolveException($callee, $e->getParameter());
         }
@@ -346,163 +324,5 @@ class Container implements ContainerInterface
     {
         $this->destroy($name);
         return $this->containees[$name] = $containee;
-    }
-    
-    /**
-     * @param \ReflectionFunctionAbstract $reflectionFunction
-     * @param array $arguments
-     * @return array
-     * @throws \Wandu\DI\Exception\CannotFindParameterException
-     */
-    protected function getParameters(ReflectionFunctionAbstract $reflectionFunction, array $arguments = [])
-    {
-        $parametersToReturn = static::getSeqArray($arguments);
-
-        $reflectionParameters = array_slice($reflectionFunction->getParameters(), count($parametersToReturn));
-        if (!count($reflectionParameters)) {
-            return $parametersToReturn; 
-        }
-        
-        $autoWires = [];
-        if ($reflectionFunction instanceof ReflectionMethod) {
-            $declaredClassName = $reflectionFunction->getDeclaringClass()->getName();
-            if (isset($this->containees[$declaredClassName]) && $this->containees[$declaredClassName]->isWireEnabled()) {
-                $autoWires = $this->getAutoWiresFromMethod($reflectionFunction);
-            }
-        } elseif (
-            $reflectionFunction instanceof ReflectionCallable &&
-            $reflectionFunction->getRawReflection() instanceof ReflectionMethod
-        ) {
-            $declaredClassName = $reflectionFunction->getRawReflection()->getDeclaringClass()->getName();
-            if (isset($this->containees[$declaredClassName]) && $this->containees[$declaredClassName]->isWireEnabled()) {
-                $autoWires = $this->getAutoWiresFromMethod($reflectionFunction->getRawReflection());
-            }
-        }
-        
-        try {
-            /* @var \ReflectionParameter $param */
-            foreach ($reflectionParameters as $param) {
-                /*
-                 * #1. search in arguments by parameter name
-                 * #2. if parameter has type hint
-                 * #2.1. search in container by class name
-                 * #3. if autowired enabled
-                 * #3.1. search in container by autowired name
-                 * #4. if has default value, insert default value.
-                 * #5. exception
-                 */
-                $paramName = $param->getName();
-                if (array_key_exists($paramName, $arguments)) { // #1.
-                    $parametersToReturn[] = $arguments[$paramName];
-                    continue;
-                }
-                $paramClass = $param->getClass();
-                if ($paramClass) { // #2.
-                    $paramClassName = $paramClass->getName();
-                    if ($this->has($paramClassName)) { // #2.1.
-                        $parametersToReturn[] = $this->get($paramClassName);
-                        continue;
-                    }
-                }
-                if (array_key_exists($paramName, $autoWires) && $this->has($autoWires[$paramName])) {
-                    $parametersToReturn[] = $this->get($autoWires[$paramName]);
-                    continue;
-                }
-                if ($param->isDefaultValueAvailable()) { // #4.
-                    $parametersToReturn[] = $param->getDefaultValue();
-                    continue;
-                }
-                throw new CannotFindParameterException($paramName); // #5.
-            }
-        } catch (ReflectionException $e) {
-            throw new CannotFindParameterException($paramName);
-        }
-        return $parametersToReturn;
-    }
-
-    /**
-     * @param array $array
-     * @return array
-     */
-    protected static function getSeqArray(array $array)
-    {
-        $arrayToReturn = [];
-        foreach ($array as $key => $item) {
-            if (is_int($key)) {
-                $arrayToReturn[] = $item;
-            }
-        }
-        return $arrayToReturn;
-    }
-
-    protected function annotateBeforeCreate($className)
-    {
-        if (!class_exists($className)) return;
-        $reader = $this->get(Reader::class);
-        $reflClass = new ReflectionClass($className);
-
-        foreach ($reader->getClassAnnotations($reflClass) as $classAnnotation) {
-            if ($classAnnotation instanceof ClassDecoratorInterface) {
-                $classAnnotation->beforeCreateClass($reflClass, $this);
-            }
-        }
-        foreach ($reflClass->getProperties() as $reflProperty) {
-            foreach ($reader->getPropertyAnnotations($reflProperty) as $propertyAnnotation) {
-                if ($propertyAnnotation instanceof PropertyDecoratorInterface) {
-                    $propertyAnnotation->decoratePropertyBeforeCreate($reflProperty, $this);
-                }
-            }
-        }
-        foreach ($reflClass->getMethods() as $reflMethod) {
-            foreach ($reader->getMethodAnnotations($reflMethod) as $methodAnnotation) {
-                if ($methodAnnotation instanceof MethodDecoratorInterface) {
-                    $methodAnnotation->decorateMethodBeforeCreate($reflMethod, $this);
-                }
-            }
-        }
-    }
-    
-    protected function annotateAfterCreate($className, $instance)
-    {
-        if (!is_object($instance)) return;
-        $reader = $this->get(Reader::class);
-        $reflObject = new ReflectionObject($instance);
-        
-        foreach ($reader->getClassAnnotations($reflObject) as $classAnnotation) {
-            if ($classAnnotation instanceof ClassDecoratorInterface) {
-                $classAnnotation->onCreateClass($instance, $reflObject, $this);
-            }
-        }
-        foreach ($reflObject->getProperties() as $reflProperty) {
-            foreach ($reader->getPropertyAnnotations($reflProperty) as $propertyAnnotation) {
-                if ($propertyAnnotation instanceof PropertyDecoratorInterface) {
-                    $propertyAnnotation->decorateProperty($instance, $reflProperty, $this);
-                }
-            }
-        }
-        foreach ($reflObject->getMethods() as $reflMethod) {
-            foreach ($reader->getMethodAnnotations($reflMethod) as $methodAnnotation) {
-                if ($methodAnnotation instanceof MethodDecoratorInterface) {
-                    $methodAnnotation->afterCreateMethod($instance, $reflMethod, $this);
-                }
-            }
-        }
-    }
-
-    /**
-     * @param \ReflectionMethod $reflMethod
-     * @return array
-     */
-    protected function getAutoWiresFromMethod(ReflectionMethod $reflMethod)
-    {
-        $reader = $this->get(Reader::class);
-        class_exists(AutoWired::class); // pre-load for Annotation Reader
-        $autoWires = [];
-        foreach ($reader->getMethodAnnotations($reflMethod) as $annotation) {
-            if ($annotation instanceof AutoWired) {
-                $autoWires[$annotation->to] = $annotation->name;
-            }
-        }
-        return $autoWires;
     }
 }

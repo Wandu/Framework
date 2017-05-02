@@ -1,26 +1,14 @@
 <?php
-namespace Wandu\DI;
+namespace Wandu\DI\Containee;
 
+use PHPUnit\Framework\TestCase;
 use stdClass;
-use Wandu\DI\Exception\CannotChangeException;
-use PHPUnit_Framework_TestCase;
+use Wandu\Assertions;
+use Wandu\DI\Container;
 
-class ChainMethodsTest extends PHPUnit_Framework_TestCase
+class FactoryTest extends TestCase
 {
-    public function testFreeze()
-    {
-        $container = new Container();
-        
-        $container->instance('obj1', new stdClass);
-        $container->destroy('obj1');
-        
-        try {
-            $container->instance('obj2', new stdClass)->freeze();
-            $container->destroy('obj2');
-            static::fail();
-        } catch (CannotChangeException $e) {
-        }
-    }
+    use Assertions;
 
     public function testInstanceFactory()
     {
@@ -28,7 +16,7 @@ class ChainMethodsTest extends PHPUnit_Framework_TestCase
 
         $object1 = new stdClass();
         $container->instance('obj1', $object1);
-        
+
         // all same
         static::assertSame($object1, $container['obj1']);
         static::assertSame($object1, $container['obj1']);
@@ -43,7 +31,7 @@ class ChainMethodsTest extends PHPUnit_Framework_TestCase
 
         static::assertNotSame($object2, $object2_1);
         static::assertEquals($object2, $object2_1);
-        
+
         $object2_2 = $container['obj2'];
 
         static::assertNotSame($object2, $object2_2);
@@ -89,30 +77,30 @@ class ChainMethodsTest extends PHPUnit_Framework_TestCase
     public function testBindFactory()
     {
         $container = new Container();
-        
-        $container->bind(ChainMethodTestDependInterface::class, ChainMethodTestDepend::class);
+
+        $container->bind(FactoryTestIF::class, FactoryTestClass::class);
 
         // all same
-        $object1 = $container[ChainMethodTestDependInterface::class];
-        static::assertSame($object1, $container[ChainMethodTestDependInterface::class]);
-        static::assertSame($object1, $container[ChainMethodTestDependInterface::class]);
-        static::assertSame($object1, $container[ChainMethodTestDependInterface::class]);
+        $object1 = $container[FactoryTestIF::class];
+        static::assertSame($object1, $container[FactoryTestIF::class]);
+        static::assertSame($object1, $container[FactoryTestIF::class]);
+        static::assertSame($object1, $container[FactoryTestIF::class]);
 
         // reset
         $container = new Container();
-        
+
         $container
-            ->bind(ChainMethodTestDependInterface::class, ChainMethodTestDepend::class)
+            ->bind(FactoryTestIF::class, FactoryTestClass::class)
             ->factory(true);
-        $object2 = $container[ChainMethodTestDependInterface::class];
+        $object2 = $container[FactoryTestIF::class];
 
         // all not same
-        $object2_1 = $container[ChainMethodTestDependInterface::class];
+        $object2_1 = $container[FactoryTestIF::class];
 
         static::assertNotSame($object2, $object2_1);
         static::assertEquals($object2, $object2_1);
 
-        $object2_2 = $container[ChainMethodTestDependInterface::class];
+        $object2_2 = $container[FactoryTestIF::class];
 
         static::assertNotSame($object2, $object2_2);
         static::assertEquals($object2, $object2_2);
@@ -121,5 +109,5 @@ class ChainMethodsTest extends PHPUnit_Framework_TestCase
     }
 }
 
-interface ChainMethodTestDependInterface {}
-class ChainMethodTestDepend implements ChainMethodTestDependInterface {}
+interface FactoryTestIF {}
+class FactoryTestClass implements FactoryTestIF {}

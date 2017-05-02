@@ -2,15 +2,13 @@
 namespace Wandu\DI\Containee;
 
 use Wandu\DI\ContainerInterface;
+use ReflectionClass;
 
 class BindContainee extends ContaineeAbstract
 {
     /** @var string */
     protected $className;
     
-    /**
-     * @param string $className
-     */
     public function __construct($className)
     {
         $this->className = $className;
@@ -19,17 +17,20 @@ class BindContainee extends ContaineeAbstract
     /**
      * {@inheritdoc}
      */
-    public function get(ContainerInterface $container)
+    protected function create(ContainerInterface $container)
     {
-        if ($this->factoryEnabled) {
-            $object = $container->create($this->className);
-            return $object;
+        $reflectionClass = new ReflectionClass($this->className);
+        $reflectionMethod = $reflectionClass->getConstructor();
+        if (!$reflectionMethod) {
+            $instance = $reflectionClass->newInstance();
+        } else {
+            $instance = $reflectionClass->newInstanceArgs(
+                $this->getParameters($container, $reflectionMethod)
+            );
         }
-        $this->frozen = true;
-        if (!isset($this->caching)) {
-            $object = $container->create($this->className);
-            $this->caching = $object;
+        if ($this->annotatedEnabled) {
+            $this->annotateAfterCreate($container, $instance);
         }
-        return $this->caching;
+        return $instance;
     }
 }

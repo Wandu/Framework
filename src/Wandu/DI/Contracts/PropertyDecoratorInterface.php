@@ -10,7 +10,7 @@ interface PropertyDecoratorInterface
      * @param \ReflectionProperty $reflector
      * @param \Wandu\DI\ContainerInterface $container
      */
-    public function decoratePropertyBeforeCreate(ReflectionProperty $reflector, ContainerInterface $container);
+    public function beforeCreateProperty(ReflectionProperty $reflector, ContainerInterface $container);
 
     /**
      * @param object $target

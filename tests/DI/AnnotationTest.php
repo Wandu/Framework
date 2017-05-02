@@ -52,7 +52,7 @@ class AnnotationTestClassAnnotation implements ClassDecoratorInterface
     /**
      * {@inheritdoc}
      */
-    public function onCreateClass($object, ReflectionClass $reflector, ContainerInterface $container)
+    public function afterCreateClass($object, ReflectionClass $reflector, ContainerInterface $container)
     {
         /** @var \Wandu\DI\AnnotationTestClass1 $object */
         $object->class = "{$this->name}";
@@ -68,7 +68,7 @@ class AnnotationTestPropertyAnnotation implements PropertyDecoratorInterface
     /** @var string */
     public $name;
 
-    public function decoratePropertyBeforeCreate(ReflectionProperty $reflector, ContainerInterface $container)
+    public function beforeCreateProperty(ReflectionProperty $reflector, ContainerInterface $container)
     {
     }
 
@@ -91,7 +91,7 @@ class AnnotationTestMethodAnnotation implements MethodDecoratorInterface
     /** @var string */
     public $name;
 
-    public function decorateMethodBeforeCreate(ReflectionMethod $reflector, ContainerInterface $container)
+    public function beforeCreateMethod(ReflectionMethod $reflector, ContainerInterface $container)
     {
     }
 

@@ -23,7 +23,7 @@ class CannotResolveException extends RuntimeException implements NotFoundExcepti
      */
     public function __construct($classOrCallee, $parameter)
     {
-        if (is_string($classOrCallee) && class_exists($classOrCallee)) {
+        if (is_string($classOrCallee) && (class_exists($classOrCallee) || interface_exists($classOrCallee))) {
             $this->class = $classOrCallee;
             $refl = new ReflectionClass($classOrCallee);
             $this->file = $refl->getFileName();

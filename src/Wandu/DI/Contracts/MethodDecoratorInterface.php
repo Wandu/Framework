@@ -10,7 +10,7 @@ interface MethodDecoratorInterface
      * @param \ReflectionMethod $reflector
      * @param \Wandu\DI\ContainerInterface $container
      */
-    public function decorateMethodBeforeCreate(ReflectionMethod $reflector, ContainerInterface $container);
+    public function beforeCreateMethod(ReflectionMethod $reflector, ContainerInterface $container);
 
     /**
      * @param object $target
