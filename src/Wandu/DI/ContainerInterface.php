@@ -22,15 +22,11 @@ interface ContainerInterface extends ArrayAccess, PsrContainerInterface
 
     /**
      * @param string $name
-     * @param mixed $value
-     * @return \Wandu\DI\ContaineeInterface
+     * @param string $package
+     * @return mixed
+     * @throws \Wandu\DI\Exception\RequirePackageException
      */
-    public function set($name, $value);
-
-    /**
-     * @param string ...$name
-     */
-    public function destroy(...$names);
+    public function assert(string $name, string $package);
 
     /**
      * @param string $name
@@ -39,71 +35,61 @@ interface ContainerInterface extends ArrayAccess, PsrContainerInterface
     public function has($name);
 
     /**
+     * @param string[] ...$names
+     */
+    public function destroy(...$names);
+
+    /**
      * @param string $name
      * @param mixed $value
      * @return \Wandu\DI\ContaineeInterface
      */
-    public function instance($name, $value);
+    public function instance(string $name, $value): ContaineeInterface;
 
     /**
      * @param string $name
      * @param callable $handler
      * @return \Wandu\DI\ContaineeInterface
      */
-    public function closure($name, callable $handler);
-
-    /**
-     * @param string|array $name
-     * @param string $origin
-     * @return \Wandu\DI\ContaineeInterface
-     */
-    public function alias($name, $origin);
+    public function closure(string $name, callable $handler): ContaineeInterface;
 
     /**
      * @param string $name
-     * @param string $class
+     * @param string $className
      * @return \Wandu\DI\ContaineeInterface
      */
-    public function bind($name, $class = null);
+    public function bind(string $name, string $className = null): ContaineeInterface;
+
+    /**
+     * @param string $alias
+     * @param string $target
+     */
+    public function alias(string $alias, string $target);
 
     /**
      * @param string $name
      * @return \Wandu\DI\ContaineeInterface
      */
-    public function containee($name);
+    public function containee(string $name): ContaineeInterface;
 
     /**
      * @param array $arguments
      * @return \Wandu\DI\ContainerInterface
      */
-    public function with(array $arguments = []);
+    public function with(array $arguments = []): ContainerInterface;
 
     /**
      * @param string $name
      * @param \Closure $handler
      */
-    public function extend($name, Closure $handler);
+    public function extend(string $name, Closure $handler);
     
     /**
-     * @param \Wandu\DI\ServiceProviderInterface $provider
-     */
-    public function register(ServiceProviderInterface $provider);
-
-    /**
-     */
-    public function boot();
-
-    /**
-     * @param $name
-     */
-    public function freeze($name);
-
-    /**
-     * @param string $class
+     * @param string $className
      * @param array $arguments
      * @return object
      */
-    public function create($class, array $arguments = []);
+    public function create(string $className, array $arguments = []);
 
     /**
      * @param callable $callee
@@ -112,16 +98,16 @@ interface ContainerInterface extends ArrayAccess, PsrContainerInterface
      */
     public function call(callable $callee, array $arguments = []);
 
-    /**
-     * @param object $object
-     * @param array $properties
+    /*
+     * for service provider
      */
-    public function inject($object, array $properties = []);
 
     /**
-     * @param string $name
-     * @param string $package
-     * @throws \Wandu\DI\Exception\RequirePackageException
+     * @param \Wandu\DI\ServiceProviderInterface $provider
      */
-    public function assert($name, $package = null);
+    public function register(ServiceProviderInterface $provider);
+
+    /**
+     */
+    public function boot();
 }

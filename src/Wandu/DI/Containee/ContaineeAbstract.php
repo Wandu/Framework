@@ -9,6 +9,9 @@ abstract class ContaineeAbstract implements ContaineeInterface
     /** @var mixed */
     protected $caching;
     
+    /** @var array */
+    protected $attributes = [];
+    
     /** @var bool */
     protected $factoryEnabled = false;
     
@@ -20,6 +23,23 @@ abstract class ContaineeAbstract implements ContaineeInterface
     
     /** @var bool */
     protected $frozen = false;
+
+    /**
+     * {@inheritdoc}
+     */
+    public function assign(array $attributes = [])
+    {
+        $this->attributes = $attributes;
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getAssign()
+    {
+        return $this->attributes;
+    }
 
     /**
      * {@inheritdoc}

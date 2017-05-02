@@ -7,6 +7,12 @@ use Wandu\DI\ContainerInterface;
 interface PropertyDecoratorInterface
 {
     /**
+     * @param \ReflectionProperty $reflector
+     * @param \Wandu\DI\ContainerInterface $container
+     */
+    public function decoratePropertyBeforeCreate(ReflectionProperty $reflector, ContainerInterface $container);
+
+    /**
      * @param object $target
      * @param \ReflectionProperty $reflector
      * @param \Wandu\DI\ContainerInterface $container

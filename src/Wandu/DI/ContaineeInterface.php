@@ -9,6 +9,12 @@ interface ContaineeInterface
     public function freeze();
 
     /**
+     * @param array $attributes
+     * @return \Wandu\DI\ContaineeInterface
+     */
+    public function assign(array $attributes = []);
+    
+    /**
      * @param bool $enabled
      * @return \Wandu\DI\ContaineeInterface
      */

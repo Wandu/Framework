@@ -3,7 +3,6 @@ namespace Wandu\DI;
 
 use Closure;
 use Doctrine\Common\Annotations\Reader;
-use Exception;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface as PsrContainerInterface;
 use ReflectionClass;
@@ -11,8 +10,6 @@ use ReflectionException;
 use ReflectionFunctionAbstract;
 use ReflectionMethod;
 use ReflectionObject;
-use ReflectionProperty;
-use Throwable;
 use Wandu\DI\Annotations\AutoWired;
 use Wandu\DI\Containee\BindContainee;
 use Wandu\DI\Containee\ClosureContainee;
@@ -34,6 +31,9 @@ class Container implements ContainerInterface
     
     /** @var \Wandu\DI\Containee\ContaineeAbstract[] */
     protected $containees = [];
+
+    /** @var array */
+    protected $instances = [];
     
     /** @var \Wandu\DI\ServiceProviderInterface[] */
     protected $providers = [];
@@ -42,7 +42,7 @@ class Container implements ContainerInterface
     protected $extenders = [];
     
     /** @var array */
-    protected $indexOfAliases = [];
+    protected $aliases = [];
     
     /** @var bool */
     protected $isBooted = false;
@@ -109,7 +109,7 @@ class Container implements ContainerInterface
      */
     public function offsetSet($name, $value)
     {
-        $this->set($name, $value);
+        $this->instance($name, $value);
     }
 
     /**
@@ -120,6 +120,44 @@ class Container implements ContainerInterface
         $this->destroy($name);
     }
 
+    /**
+     * {@inheritdoc}
+     */
+    public function get($name)
+    {
+        try {
+//            if ($this->containees[$name]->isAnnotatedEnabled()) {
+//                $this->annotateBeforeCreate($name);
+//            }
+            $instance = $this->containee($name)->get($this);
+        } catch (NullReferenceException $e) {
+            if (!class_exists($name)) {
+                throw $e;
+            }
+            $instance = $this->create($name);
+            $this->instance($name, $instance);
+        }
+        if ($this->containees[$name]->isAnnotatedEnabled()) {
+            $this->annotateAfterCreate($name, $instance);
+        }
+        foreach ($this->getExtenders($name) as $extender) {
+            $instance = $extender->__invoke($instance);
+        }
+        return $instance;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function assert(string $name, string $package)
+    {
+        try {
+            return $this->get($name);
+        } catch (ContainerExceptionInterface $e) {
+            throw new RequirePackageException($name, $package);
+        }
+    }
+    
     /**
      * {@inheritdoc}
      */
@@ -146,75 +184,7 @@ class Container implements ContainerInterface
     /**
      * {@inheritdoc}
      */
-    public function containee($name)
-    {
-        if (!array_key_exists($name, $this->containees)) {
-            throw new NullReferenceException($name);
-        }
-        return $this->containees[$name];
-    }
-    
-    /**
-     * {@inheritdoc}
-     */
-    public function get($name)
-    {
-        try {
-            $instance = $this->containee($name)->get($this);
-        } catch (NullReferenceException $e) {
-            if (!class_exists($name)) {
-                throw $e;
-            }
-            $instance = $this->create($name);
-            $this->instance($name, $instance);
-        }
-        if ($this->containees[$name]->isAnnotatedEnabled()) {
-            $this->parseAnnotation($name, $instance);
-        }
-        if ($this->containees[$name]->isWireEnabled()) {
-            $this->applyWire($instance);
-        }
-        foreach ($this->getExtenders($name) as $extender) {
-            $instance = $extender->__invoke($instance);
-        }
-        return $instance;
-    }
-
-    /**
-     * @param string $name
-     * @return \Closure[]
-     */
-    protected function getExtenders($name)
-    {
-        $extenders = [];
-        if (isset($this->extenders[$name])) {
-            $extenders = array_merge($extenders, $this->extenders[$name]);
-        }
-
-        // extend propagation
-        if (isset($this->indexOfAliases[$name])) {
-            foreach ($this->indexOfAliases[$name] as $aliasName) {
-                $extenders = array_merge($extenders, $this->getExtenders($aliasName));
-            }
-        }
-        return $extenders;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function set($name, $value)
-    {
-        if (!($value instanceof ContaineeInterface)) {
-            $value = new InstanceContainee($value);
-        }
-        return $this->addContainee($name, $value);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function instance($name, $value)
+    public function instance(string $name, $value): ContaineeInterface
     {
         return $this->addContainee($name, new InstanceContainee($value));
     }
@@ -222,7 +192,7 @@ class Container implements ContainerInterface
     /**
      * {@inheritdoc}
      */
-    public function closure($name, callable $handler)
+    public function closure(string $name, callable $handler): ContaineeInterface
     {
         return $this->addContainee($name, new ClosureContainee($handler));
     }
@@ -230,49 +200,98 @@ class Container implements ContainerInterface
     /**
      * {@inheritdoc}
      */
-    public function alias($name, $origin)
+    public function bind(string $name, string $className = null): ContaineeInterface
     {
-        if (!array_key_exists($origin, $this->indexOfAliases)) {
-            $this->indexOfAliases[$origin] = [];
+        if (isset($className)) {
+            $this->alias($className, $name);
+            return $this->addContainee($name, new BindContainee($className));
         }
-        $this->indexOfAliases[$origin][] = $name;
-        return $this->closure($name, function (ContainerInterface $container) use ($origin) {
-            return $container->get($origin); // proxy
+        return $this->addContainee($name, new BindContainee($name));
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function alias(string $alias, string $target)
+    {
+        if (!array_key_exists($target, $this->aliases)) {
+            $this->aliases[$target] = [];
+        }
+        $this->aliases[$target][] = $alias;
+        $this->closure($alias, function (ContainerInterface $container) use ($target) {
+            return $container->get($target); // proxy
         })->factory(true);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function bind($name, $class = null)
+    public function containee(string $name): ContaineeInterface
     {
-        if (isset($class)) {
-            $this->alias($class, $name);
-            return $this->addContainee($name, new BindContainee($class));
+        if (!array_key_exists($name, $this->containees)) {
+            throw new NullReferenceException($name);
         }
-        return $this->addContainee($name, new BindContainee($name));
-    }
-    
-    /**
-     * @param string $name
-     * @param \Wandu\DI\ContaineeInterface $containee
-     * @return \Wandu\DI\ContaineeInterface
-     */
-    public function addContainee($name, ContaineeInterface $containee)
-    {
-        $this->destroy($name);
-        return $this->containees[$name] = $containee;
+        return $this->containees[$name];
     }
 
     /**
      * {@inheritdoc}
      */
-    public function extend($name, Closure $handler)
+    public function with(array $arguments = []): ContainerInterface
+    {
+        $new = clone $this;
+        foreach ($arguments as $name => $argument) {
+            if ($argument instanceof ContaineeInterface) {
+                $new->addContainee($name, $argument);
+            } else {
+                $new->instance($name, $argument);
+            }
+        }
+        return $new;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function extend(string $name, Closure $handler)
     {
         if (!array_key_exists($name, $this->extenders)) {
             $this->extenders[$name] = [];
         }
         $this->extenders[$name][] = $handler;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function create(string $className, array $arguments = [])
+    {
+        $reflectionClass = new ReflectionClass($className);
+        $reflectionMethod = $reflectionClass->getConstructor();
+        if (!$reflectionMethod) {
+            return $reflectionClass->newInstance();
+        }
+        try {
+            $parameters = $this->getParameters($reflectionMethod, $arguments);
+        } catch (CannotFindParameterException $e) {
+            throw new CannotResolveException($className, $e->getParameter());
+        }
+        return $reflectionClass->newInstanceArgs($parameters);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function call(callable $callee, array $arguments = [])
+    {
+        try {
+            return call_user_func_array(
+                $callee,
+                $this->getParameters(new ReflectionCallable($callee), $arguments)
+            );
+        } catch (CannotFindParameterException $e) {
+            throw new CannotResolveException($callee, $e->getParameter());
+        }
     }
 
     /**
@@ -297,98 +316,38 @@ class Container implements ContainerInterface
         }
         return $this;
     }
-    
-    /**
-     * {@inheritdoc}
-     */
-    public function freeze($name)
-    {
-        $this->containees[$name]->freeze();
-    }
 
     /**
-     * {@inheritdoc}
+     * @param string $name
+     * @return \Closure[]
      */
-    public function with(array $arguments = [])
+    protected function getExtenders($name)
     {
-        $new = clone $this;
-        foreach ($arguments as $name => $argument) {
-            if ($argument instanceof ContaineeInterface) {
-                $new->addContainee($name, $argument);
-            } else {
-                $new->instance($name, $argument);
+        $extenders = [];
+        if (isset($this->extenders[$name])) {
+            $extenders = array_merge($extenders, $this->extenders[$name]);
+        }
+
+        // extend propagation
+        if (isset($this->aliases[$name])) {
+            foreach ($this->aliases[$name] as $aliasName) {
+                $extenders = array_merge($extenders, $this->getExtenders($aliasName));
             }
         }
-        return $new;
+        return $extenders;
+    }
+
+    /**
+     * @param string $name
+     * @param \Wandu\DI\ContaineeInterface $containee
+     * @return \Wandu\DI\ContaineeInterface
+     */
+    protected function addContainee($name, ContaineeInterface $containee): ContaineeInterface
+    {
+        $this->destroy($name);
+        return $this->containees[$name] = $containee;
     }
     
-    /**
-     * {@inheritdoc}
-     */
-    public function create($class, array $arguments = [])
-    {
-        $reflectionClass = new ReflectionClass($class);
-        $reflectionMethod = $reflectionClass->getConstructor();
-        if (!$reflectionMethod) {
-            return $reflectionClass->newInstance();
-        }
-        try {
-            $parameters = $this->getParameters($reflectionMethod, $arguments);
-        } catch (CannotFindParameterException $e) {
-            throw new CannotResolveException($class, $e->getParameter());
-        }
-        return $reflectionClass->newInstanceArgs($parameters);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function call(callable $callee, array $arguments = [])
-    {
-        try {
-            return call_user_func_array(
-                $callee,
-                $this->getParameters(new ReflectionCallable($callee), $arguments)
-            );
-        } catch (CannotFindParameterException $e) {
-            throw new CannotResolveException($callee, $e->getParameter());
-        }
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function inject($object, array $properties = [])
-    {
-        $reflectionObject = new ReflectionObject($object);
-        foreach ($properties as $property => $value) {
-            $this->injectProperty($reflectionObject->getProperty($property), $object, $value);
-        }
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function assert($name, $package = null)
-    {
-        try {
-            $this->get($name);
-        } catch (ContainerExceptionInterface $e) {
-            throw new RequirePackageException($name, $package);
-        }
-    }
-
-    /**
-     * @param \ReflectionProperty $property
-     * @param object $object
-     * @param mixed $target
-     */
-    private function injectProperty(ReflectionProperty $property, $object, $target)
-    {
-        $property->setAccessible(true);
-        $property->setValue($object, $target);
-    }
-
     /**
      * @param \ReflectionFunctionAbstract $reflectionFunction
      * @param array $arguments
@@ -475,8 +434,35 @@ class Container implements ContainerInterface
         }
         return $arrayToReturn;
     }
+
+    protected function annotateBeforeCreate($className)
+    {
+        if (!class_exists($className)) return;
+        $reader = $this->get(Reader::class);
+        $reflClass = new ReflectionClass($className);
+
+        foreach ($reader->getClassAnnotations($reflClass) as $classAnnotation) {
+            if ($classAnnotation instanceof ClassDecoratorInterface) {
+                $classAnnotation->beforeCreateClass($reflClass, $this);
+            }
+        }
+        foreach ($reflClass->getProperties() as $reflProperty) {
+            foreach ($reader->getPropertyAnnotations($reflProperty) as $propertyAnnotation) {
+                if ($propertyAnnotation instanceof PropertyDecoratorInterface) {
+                    $propertyAnnotation->decoratePropertyBeforeCreate($reflProperty, $this);
+                }
+            }
+        }
+        foreach ($reflClass->getMethods() as $reflMethod) {
+            foreach ($reader->getMethodAnnotations($reflMethod) as $methodAnnotation) {
+                if ($methodAnnotation instanceof MethodDecoratorInterface) {
+                    $methodAnnotation->decorateMethodBeforeCreate($reflMethod, $this);
+                }
+            }
+        }
+    }
     
-    protected function parseAnnotation($name, $instance)
+    protected function annotateAfterCreate($className, $instance)
     {
         if (!is_object($instance)) return;
         $reader = $this->get(Reader::class);
@@ -484,7 +470,7 @@ class Container implements ContainerInterface
         
         foreach ($reader->getClassAnnotations($reflObject) as $classAnnotation) {
             if ($classAnnotation instanceof ClassDecoratorInterface) {
-                $classAnnotation->decorateClass($instance, $reflObject, $this);
+                $classAnnotation->onCreateClass($instance, $reflObject, $this);
             }
         }
         foreach ($reflObject->getProperties() as $reflProperty) {
@@ -497,39 +483,10 @@ class Container implements ContainerInterface
         foreach ($reflObject->getMethods() as $reflMethod) {
             foreach ($reader->getMethodAnnotations($reflMethod) as $methodAnnotation) {
                 if ($methodAnnotation instanceof MethodDecoratorInterface) {
-                    $methodAnnotation->decorateMethod($instance, $reflMethod, $this);
+                    $methodAnnotation->afterCreateMethod($instance, $reflMethod, $this);
                 }
             }
         }
-    }
-    
-    protected function applyWire($instance)
-    {
-        static $callStack = [];
-        if (in_array($instance, $callStack)) {
-            return; // return when a circular call is detected.
-        }
-        array_push($callStack, $instance);
-        try {
-            $reader = $this->get(Reader::class);
-            class_exists(AutoWired::class); // pre-load for Annotation Reader
-            $reflObject = new ReflectionObject($instance);
-            foreach ($reflObject->getProperties() as $reflProperty) {
-                /* @var \Wandu\DI\Annotations\AutoWired $autoWired */
-                if ($autoWired = $reader->getPropertyAnnotation($reflProperty, AutoWired::class)) {
-                    $this->inject($instance, [
-                        $reflProperty->getName() => $this->get($autoWired->name),
-                    ]);
-                }
-            }
-        } catch (Exception $e) {
-            array_pop($callStack);
-            throw $e;
-        } catch (Throwable $e) {
-            array_pop($callStack);
-            throw $e;
-        }
-        array_pop($callStack);
     }
 
     /**

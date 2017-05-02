@@ -49,45 +49,6 @@ class ContainerTest extends PHPUnit_Framework_TestCase
         static::assertFalse(isset($container['undefined']));
     }
 
-    public function testSet()
-    {
-        $container = new Container();
-        $xml = new ContainerTestXmlRenderer();
-        $json = new ContainerTestJsonRenderer();
-        
-        $container->set('xml', $xml);
-
-        // "set" map to offsetSet
-        $container['json'] = $json;
-
-        static::assertSame($xml, $container->get('xml'));
-        static::assertSame($json, $container->get('json'));
-
-        // "get" map to offsetGet
-        static::assertSame($xml, $container['xml']);
-        static::assertSame($json, $container['json']);
-    }
-
-    public function testSetWithContainee()
-    {
-        $container = new Container();
-
-        $container->set('xml', new ClosureContainee(function () {
-            return new ContainerTestXmlRenderer();
-        }));
-
-        // "set" map to offsetSet
-        $container['json'] = new ClosureContainee(function () {
-            return new ContainerTestJsonRenderer();
-        });
-
-        static::assertInstanceOf(ContainerTestXmlRenderer::class, $container->get('xml'));
-        static::assertInstanceOf(ContainerTestJsonRenderer::class, $container->get('json'));
-
-        static::assertSame($container->get('xml'), $container->get('xml'));
-        static::assertSame($container->get('json'), $container->get('json'));
-    }
-
     public function testInstance()
     {
         $container = new Container();

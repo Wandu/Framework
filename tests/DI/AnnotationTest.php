@@ -6,6 +6,8 @@ use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\Common\Annotations\Reader;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
+use ReflectionMethod;
+use ReflectionProperty;
 use Wandu\DI\Contracts\ClassDecoratorInterface;
 use Wandu\DI\Contracts\MethodDecoratorInterface;
 use Wandu\DI\Contracts\PropertyDecoratorInterface;
@@ -43,10 +45,14 @@ class AnnotationTestClassAnnotation implements ClassDecoratorInterface
     /** @var string */
     public $name;
 
+    public function beforeCreateClass(ReflectionClass $reflector, ContainerInterface $container)
+    {
+    }
+
     /**
      * {@inheritdoc}
      */
-    public function decorateClass($object, ReflectionClass $reflector, ContainerInterface $container)
+    public function onCreateClass($object, ReflectionClass $reflector, ContainerInterface $container)
     {
         /** @var \Wandu\DI\AnnotationTestClass1 $object */
         $object->class = "{$this->name}";
@@ -61,6 +67,10 @@ class AnnotationTestPropertyAnnotation implements PropertyDecoratorInterface
 {
     /** @var string */
     public $name;
+
+    public function decoratePropertyBeforeCreate(ReflectionProperty $reflector, ContainerInterface $container)
+    {
+    }
 
     /**
      * {@inheritdoc}
@@ -81,10 +91,14 @@ class AnnotationTestMethodAnnotation implements MethodDecoratorInterface
     /** @var string */
     public $name;
 
+    public function decorateMethodBeforeCreate(ReflectionMethod $reflector, ContainerInterface $container)
+    {
+    }
+
     /**
      * {@inheritdoc}
      */
-    public function decorateMethod($object, \ReflectionMethod $reflector, ContainerInterface $container)
+    public function afterCreateMethod($object, \ReflectionMethod $reflector, ContainerInterface $container)
     {
         $object->countOfParams = $reflector->getNumberOfParameters();
     }
