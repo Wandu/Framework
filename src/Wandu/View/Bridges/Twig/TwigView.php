@@ -1,5 +1,5 @@
 <?php
-namespace Wandu\Bridges\Twig;
+namespace Wandu\View\Bridges\Twig;
 
 use Twig_Environment;
 use Twig_Loader_Filesystem;

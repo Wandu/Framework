@@ -1,5 +1,5 @@
 <?php
-namespace Wandu\Bridges\Latte;
+namespace Wandu\View\Bridges\Latte;
 
 use Latte\Engine;
 use Wandu\View\Contracts\RenderInterface;
