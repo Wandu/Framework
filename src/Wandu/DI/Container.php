@@ -18,6 +18,8 @@ use Wandu\DI\Containee\BindContainee;
 use Wandu\DI\Containee\ClosureContainee;
 use Wandu\DI\Containee\InstanceContainee;
 use Wandu\DI\Contracts\ClassDecoratorInterface;
+use Wandu\DI\Contracts\MethodDecoratorInterface;
+use Wandu\DI\Contracts\PropertyDecoratorInterface;
 use Wandu\DI\Exception\CannotChangeException;
 use Wandu\DI\Exception\CannotFindParameterException;
 use Wandu\DI\Exception\CannotResolveException;
@@ -478,12 +480,25 @@ class Container implements ContainerInterface
     {
         if (!is_object($instance)) return;
         $reader = $this->get(Reader::class);
+        $reflObject = new ReflectionObject($instance);
         
-        $classRefl = new ReflectionObject($instance);
-        $annotations = $reader->getClassAnnotations($classRefl);
-        foreach ($annotations as $annotation) {
-            if ($annotation instanceof ClassDecoratorInterface) {
-                $annotation->decorateClass($instance, $classRefl);
+        foreach ($reader->getClassAnnotations($reflObject) as $classAnnotation) {
+            if ($classAnnotation instanceof ClassDecoratorInterface) {
+                $classAnnotation->decorateClass($instance, $reflObject, $this);
+            }
+        }
+        foreach ($reflObject->getProperties() as $reflProperty) {
+            foreach ($reader->getPropertyAnnotations($reflProperty) as $propertyAnnotation) {
+                if ($propertyAnnotation instanceof PropertyDecoratorInterface) {
+                    $propertyAnnotation->decorateProperty($instance, $reflProperty, $this);
+                }
+            }
+        }
+        foreach ($reflObject->getMethods() as $reflMethod) {
+            foreach ($reader->getMethodAnnotations($reflMethod) as $methodAnnotation) {
+                if ($methodAnnotation instanceof MethodDecoratorInterface) {
+                    $methodAnnotation->decorateMethod($instance, $reflMethod, $this);
+                }
             }
         }
     }

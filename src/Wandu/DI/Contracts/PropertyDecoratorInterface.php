@@ -2,12 +2,14 @@
 namespace Wandu\DI\Contracts;
 
 use ReflectionProperty;
+use Wandu\DI\ContainerInterface;
 
 interface PropertyDecoratorInterface
 {
     /**
-     * @param object $object
-     * @param \ReflectionProperty $descriptor
+     * @param object $target
+     * @param \ReflectionProperty $reflector
+     * @param \Wandu\DI\ContainerInterface $container
      */
-    public function decorateProperty($object, ReflectionProperty $descriptor);
+    public function decorateProperty($target, ReflectionProperty $reflector, ContainerInterface $container);
 }

@@ -2,12 +2,14 @@
 namespace Wandu\DI\Contracts;
 
 use ReflectionMethod;
+use Wandu\DI\ContainerInterface;
 
 interface MethodDecoratorInterface
 {
     /**
-     * @param object $object
-     * @param \ReflectionMethod $descriptor
+     * @param object $target
+     * @param \ReflectionMethod $reflector
+     * @param \Wandu\DI\ContainerInterface $container
      */
-    public function decorateMethod($object, ReflectionMethod $descriptor);
+    public function decorateMethod($target, ReflectionMethod $reflector, ContainerInterface $container);
 }

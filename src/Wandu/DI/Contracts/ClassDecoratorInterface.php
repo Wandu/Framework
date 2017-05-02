@@ -2,12 +2,14 @@
 namespace Wandu\DI\Contracts;
 
 use ReflectionClass;
+use Wandu\DI\ContainerInterface;
 
 interface ClassDecoratorInterface
 {
     /**
-     * @param object $object
-     * @param \ReflectionClass $descriptor
+     * @param object $target
+     * @param \ReflectionClass $reflector
+     * @param \Wandu\DI\ContainerInterface $container
      */
-    public function decorateClass($object, ReflectionClass $descriptor);
+    public function decorateClass($target, ReflectionClass $reflector, ContainerInterface $container);
 }
