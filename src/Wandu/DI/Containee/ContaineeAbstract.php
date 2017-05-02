@@ -13,6 +13,9 @@ abstract class ContaineeAbstract implements ContaineeInterface
     protected $factoryEnabled = false;
     
     /** @var bool */
+    protected $annotatedEnabled = false;
+    
+    /** @var bool */
     protected $wireEnabled = false;
     
     /** @var bool */
@@ -55,8 +58,26 @@ abstract class ContaineeAbstract implements ContaineeInterface
     /**
      * {@inheritdoc}
      */
+    public function annotated($enabled = true)
+    {
+        $this->annotatedEnabled = $enabled;
+        return $this;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function isAnnotatedEnabled(): bool
+    {
+        return $this->annotatedEnabled;
+    }
+    
+    /**
+     * {@inheritdoc}
+     */
     public function wire($enabled = true)
     {
+        $this->annotatedEnabled = true; // if you use autowired, use annotation!
         $this->wireEnabled = $enabled;
         return $this;
     }

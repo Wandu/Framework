@@ -17,6 +17,7 @@ use Wandu\DI\Annotations\AutoWired;
 use Wandu\DI\Containee\BindContainee;
 use Wandu\DI\Containee\ClosureContainee;
 use Wandu\DI\Containee\InstanceContainee;
+use Wandu\DI\Contracts\ClassDecoratorInterface;
 use Wandu\DI\Exception\CannotChangeException;
 use Wandu\DI\Exception\CannotFindParameterException;
 use Wandu\DI\Exception\CannotResolveException;
@@ -164,6 +165,9 @@ class Container implements ContainerInterface
             }
             $instance = $this->create($name);
             $this->instance($name, $instance);
+        }
+        if ($this->containees[$name]->isAnnotatedEnabled()) {
+            $this->parseAnnotation($name, $instance);
         }
         if ($this->containees[$name]->isWireEnabled()) {
             $this->applyWire($instance);
@@ -468,6 +472,20 @@ class Container implements ContainerInterface
             }
         }
         return $arrayToReturn;
+    }
+    
+    protected function parseAnnotation($name, $instance)
+    {
+        if (!is_object($instance)) return;
+        $reader = $this->get(Reader::class);
+        
+        $classRefl = new ReflectionObject($instance);
+        $annotations = $reader->getClassAnnotations($classRefl);
+        foreach ($annotations as $annotation) {
+            if ($annotation instanceof ClassDecoratorInterface) {
+                $annotation->decorateClass($instance, $classRefl);
+            }
+        }
     }
     
     protected function applyWire($instance)

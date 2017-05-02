@@ -12,6 +12,12 @@ interface ContaineeInterface
      * @param bool $enabled
      * @return \Wandu\DI\ContaineeInterface
      */
+    public function annotated($enabled = true);
+
+    /**
+     * @param bool $enabled
+     * @return \Wandu\DI\ContaineeInterface
+     */
     public function wire($enabled = true);
     
     /**
