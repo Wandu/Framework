@@ -3,6 +3,7 @@ namespace Wandu\DI\Containee;
 
 use Doctrine\Common\Annotations\Reader;
 use Wandu\DI\ContaineeInterface;
+use ReflectionClass;
 use Wandu\DI\ContainerInterface;
 use ReflectionMethod;
 use ReflectionObject;
@@ -36,9 +37,9 @@ abstract class ContaineeAbstract implements ContaineeInterface
     /**
      * {@inheritdoc}
      */
-    public function assign(array $attributes = [])
+    public function assign(array $arguments = [])
     {
-        $this->attributes = $attributes;
+        $this->attributes = $arguments + $this->attributes;
         return $this;
     }
 
@@ -123,7 +124,7 @@ abstract class ContaineeAbstract implements ContaineeInterface
             return $object;
         }
         if (!isset($this->caching)) {
-            $this->caching = $this->create($container);
+            $this->caching = $this->create($container); // 
             $this->frozen = true;
         }
         return $this->caching;
@@ -147,43 +148,7 @@ abstract class ContaineeAbstract implements ContaineeInterface
             return $parametersToReturn;
         }
         $autoWires = [];
-//        if ($reflectionFunction instanceof ReflectionMethod) {
-//            $declaredClassName = $reflectionFunction->getDeclaringClass()->getName();
-//            if ($container->containee($declaredClassName)->isWireEnabled()) {
-//                $autoWires = $this->getAutoWiresFromMethod($reflectionFunction);
-//            }
-//        } elseif (
-//            $reflectionFunction instanceof ReflectionCallable &&
-//            $reflectionFunction->getRawReflection() instanceof ReflectionMethod
-//        ) {
-//            $declaredClassName = $reflectionFunction->getRawReflection()->getDeclaringClass()->getName();
-//            if (isset($this->containees[$declaredClassName]) && $this->containees[$declaredClassName]->isWireEnabled()) {
-//                $autoWires = $this->getAutoWiresFromMethod($reflectionFunction->getRawReflection());
-//            }
-//        }
-//        if ($this->annotatedEnabled) {
-//            $reader = $container->get(Reader::class);
-//            $reflClass = new ReflectionClass($this->className);
-//            foreach ($reader->getClassAnnotations($reflClass) as $classAnnotation) {
-//                if ($classAnnotation instanceof ClassDecoratorInterface) {
-//                    $classAnnotation->beforeCreateClass($reflClass, $container);
-//                }
-//            }
-//            foreach ($reflClass->getProperties() as $reflProperty) {
-//                foreach ($reader->getPropertyAnnotations($reflProperty) as $propertyAnnotation) {
-//                    if ($propertyAnnotation instanceof PropertyDecoratorInterface) {
-//                        $propertyAnnotation->beforeCreateProperty($reflProperty, $container);
-//                    }
-//                }
-//            }
-//            foreach ($reflClass->getMethods() as $reflMethod) {
-//                foreach ($reader->getMethodAnnotations($reflMethod) as $methodAnnotation) {
-//                    if ($methodAnnotation instanceof MethodDecoratorInterface) {
-//                        $methodAnnotation->beforeCreateMethod($reflMethod, $container);
-//                    }
-//                }
-//            }
-//        }        
+
         /* @var \ReflectionParameter $param */
         foreach ($reflectionParameters as $param) {
             /*
@@ -240,48 +205,35 @@ abstract class ContaineeAbstract implements ContaineeInterface
         }
         return $arrayToReturn;
     }
-
-    protected function annotateAfterCreate(ContainerInterface $container, $instance)
+  
+    protected function getDecorators(Reader $reader, ReflectionClass $reflClass)
     {
-        if (!is_object($instance)) return;
-        $reader = $container->get(Reader::class);
-        $reflObject = new ReflectionObject($instance);
-
-        foreach ($reader->getClassAnnotations($reflObject) as $classAnnotation) {
+        $classDecorators = [];
+        $propertyDecorators = [];
+        $methodDecorators = [];
+        foreach ($reader->getClassAnnotations($reflClass) as $classAnnotation) {
             if ($classAnnotation instanceof ClassDecoratorInterface) {
-                $classAnnotation->afterCreateClass($instance, $reflObject, $container);
+                $classDecorators[] = [$classAnnotation, $reflClass];
             }
         }
-        foreach ($reflObject->getProperties() as $reflProperty) {
+        foreach ($reflClass->getProperties() as $reflProperty) {
             foreach ($reader->getPropertyAnnotations($reflProperty) as $propertyAnnotation) {
                 if ($propertyAnnotation instanceof PropertyDecoratorInterface) {
-                    $propertyAnnotation->decorateProperty($instance, $reflProperty, $container);
+                    $propertyDecorators[] = [$propertyAnnotation, $reflProperty];
                 }
             }
         }
-        foreach ($reflObject->getMethods() as $reflMethod) {
+        foreach ($reflClass->getMethods() as $reflMethod) {
             foreach ($reader->getMethodAnnotations($reflMethod) as $methodAnnotation) {
                 if ($methodAnnotation instanceof MethodDecoratorInterface) {
-                    $methodAnnotation->afterCreateMethod($instance, $reflMethod, $container);
+                    $methodDecorators[] = [$methodAnnotation, $reflMethod];
                 }
             }
         }
+        return [
+            $classDecorators,
+            $propertyDecorators,
+            $methodDecorators,
+        ];
     }
-//
-//    /**
-//     * @param \ReflectionMethod $reflMethod
-//     * @return array
-//     */
-//    protected function getAutoWiresFromMethod(ReflectionMethod $reflMethod)
-//    {
-//        $reader = $this->get(Reader::class);
-//        class_exists(AutoWired::class); // pre-load for Annotation Reader
-//        $autoWires = [];
-//        foreach ($reader->getMethodAnnotations($reflMethod) as $annotation) {
-//            if ($annotation instanceof AutoWired) {
-//                $autoWires[$annotation->to] = $annotation->name;
-//            }
-//        }
-//        return $autoWires;
-//    }
 }

@@ -121,9 +121,6 @@ class Container implements ContainerInterface
                 $this->bind($name);
                 $instance = $this->containee($name)->get($this);
             }
-            if ($this->containees[$name]->isAnnotatedEnabled()) {
-//            $this->annotateAfterCreate($name, $instance);
-            }
             foreach ($this->getExtenders($name) as $extender) {
                 $instance = $extender->__invoke($instance);
             }

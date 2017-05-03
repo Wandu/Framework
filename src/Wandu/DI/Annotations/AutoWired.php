@@ -6,27 +6,31 @@ use Doctrine\Common\Annotations\Annotation\Target;
 use Exception;
 use ReflectionProperty;
 use Throwable;
+use Wandu\DI\ContaineeInterface;
 use Wandu\DI\ContainerInterface;
 use Wandu\DI\Contracts\PropertyDecoratorInterface;
 
 /**
  * @Annotation
- * @Target({"PROPERTY", "METHOD"})
+ * @Target({"PROPERTY"})
  */
 class AutoWired implements PropertyDecoratorInterface
 {
     /** @Required @var string */
     public $name;
 
-    /** @var string */
-    public $to = null;
-
-    public function beforeCreateProperty(ReflectionProperty $reflector, ContainerInterface $container)
+    /**
+     * {@inheritdoc}
+     */
+    public function beforeCreateProperty(ReflectionProperty $reflector, ContaineeInterface $containee, ContainerInterface $container)
     {
         // do nothing
     }
 
-    public function decorateProperty($target, ReflectionProperty $reflector, ContainerInterface $container)
+    /**
+     * {@inheritdoc}
+     */
+    public function afterCreateProperty($target, ReflectionProperty $reflector, ContaineeInterface $containee, ContainerInterface $container)
     {
         static $callStack = [];
         if (in_array($target, $callStack)) {

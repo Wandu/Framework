@@ -4,6 +4,7 @@ namespace Wandu\DI\Annotations;
 use Doctrine\Common\Annotations\Annotation\Required;
 use Doctrine\Common\Annotations\Annotation\Target;
 use ReflectionMethod;
+use Wandu\DI\ContaineeInterface;
 use Wandu\DI\ContainerInterface;
 use Wandu\DI\Contracts\MethodDecoratorInterface;
 
@@ -14,20 +15,26 @@ use Wandu\DI\Contracts\MethodDecoratorInterface;
 class Assign implements MethodDecoratorInterface
 {
     /** @Required @var string */
-    public $name;
-
-    /** @Required @var string */
     public $target;
 
-    public function beforeCreateMethod(ReflectionMethod $reflector, ContainerInterface $container)
+    /** @Required @var string */
+    public $name;
+
+    /**
+     * {@inheritdoc}
+     */
+    public function beforeCreateMethod(ReflectionMethod $reflector, ContaineeInterface $containee, ContainerInterface $container)
     {
-        $containee = $container->containee($reflector->getDeclaringClass()->getName());
-        $attributes = $containee->getAssign();
-        $attributes[$this->target] = $this->name;
-        $containee->assign($attributes);
+        $containee->assign([
+            $this->target => $container->get($this->name),
+        ]);
     }
 
-    public function afterCreateMethod($target, ReflectionMethod $reflector, ContainerInterface $container)
+    /**
+     * {@inheritdoc}
+     */
+    public function afterCreateMethod($target, ReflectionMethod $reflector, ContaineeInterface $containee, ContainerInterface $container)
     {
+        // do nothing
     }
 }
