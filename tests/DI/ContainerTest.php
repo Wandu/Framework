@@ -3,11 +3,14 @@ namespace Wandu\DI;
 
 use ArrayObject;
 use PHPUnit\Framework\TestCase;
+use Wandu\Assertions;
 use Wandu\DI\Exception\CannotChangeException;
 use Wandu\DI\Exception\NullReferenceException;
 
 class ContainerTest extends TestCase 
 {
+    use Assertions;
+    
     public function testConstruct()
     {
         $container = new Container();
@@ -190,49 +193,25 @@ class ContainerTest extends TestCase
         // call, then it freeze all values.
         $container->get('instance');
         $container->get('closure');
-        $container->get('alias');
 
         // now cannot change
-        try {
+        static::assertException(new CannotChangeException("instance"), function () use ($container) {
             $container->instance('instance', 'instance string changed 2');
-            static::fail();
-        } catch (CannotChangeException $exception) {
-            static::assertEquals('it cannot be changed; "instance".', $exception->getMessage());
-        }
-        try {
+        });
+
+        static::assertException(new CannotChangeException("closure"), function () use ($container) {
             $container->closure('closure', function () {
                 return 'closure string change 2';
             });
-            static::fail();
-        } catch (CannotChangeException $exception) {
-            static::assertEquals('it cannot be changed; "closure".', $exception->getMessage());
-        }
-        try {
-            $container->alias('alias', 'closure');
-            static::fail();
-        } catch (CannotChangeException $exception) {
-            static::assertEquals('it cannot be changed; "alias".', $exception->getMessage());
-        }
-
+        });
+        
         // also cannot remove
-        try {
+        static::assertException(new CannotChangeException("instance"), function () use ($container) {
             $container->offsetUnset('instance');
-            static::fail();
-        } catch (CannotChangeException $exception) {
-            static::assertEquals('it cannot be changed; "instance".', $exception->getMessage());
-        }
-        try {
+        });
+        static::assertException(new CannotChangeException("closure"), function () use ($container) {
             $container->offsetUnset('closure');
-            static::fail();
-        } catch (CannotChangeException $exception) {
-            static::assertEquals('it cannot be changed; "closure".', $exception->getMessage());
-        }
-        try {
-            $container->offsetUnset('alias');
-            static::fail();
-        } catch (CannotChangeException $exception) {
-            static::assertEquals('it cannot be changed; "alias".', $exception->getMessage());
-        }
+        });
     }
     
     public function testWith()

@@ -26,9 +26,12 @@ class Container implements ContainerInterface
 
     /** @var array */
     protected $extenders = [];
-    
+
     /** @var array */
     protected $aliases = [];
+
+    /** @var array */
+    protected $aliasIndex = [];
     
     /** @var bool */
     protected $isBooted = false;
@@ -111,6 +114,9 @@ class Container implements ContainerInterface
      */
     public function get($name)
     {
+        while (isset($this->aliases[$name])) {
+            $name = $this->aliases[$name];
+        }
         try {
             try {
                 $instance = $this->containee($name)->get($this);
@@ -147,7 +153,7 @@ class Container implements ContainerInterface
      */
     public function has($name)
     {
-        return array_key_exists($name, $this->containees) || class_exists($name);
+        return array_key_exists($name, $this->containees) || class_exists($name) || isset($this->aliases[$name]);
     }
 
     /**
@@ -198,13 +204,11 @@ class Container implements ContainerInterface
      */
     public function alias(string $alias, string $target)
     {
-        if (!array_key_exists($target, $this->aliases)) {
-            $this->aliases[$target] = [];
+        if (!array_key_exists($target, $this->aliasIndex)) {
+            $this->aliasIndex[$target] = [];
         }
-        $this->aliases[$target][] = $alias;
-        $this->closure($alias, function (ContainerInterface $container) use ($target) {
-            return $container->get($target); // proxy
-        })->factory(true);
+        $this->aliasIndex[$target][] = $alias;
+        $this->aliases[$alias] = $target;
     }
 
     /**
@@ -304,8 +308,8 @@ class Container implements ContainerInterface
         }
 
         // extend propagation
-        if (isset($this->aliases[$name])) {
-            foreach ($this->aliases[$name] as $aliasName) {
+        if (isset($this->aliasIndex[$name])) {
+            foreach ($this->aliasIndex[$name] as $aliasName) {
                 $extenders = array_merge($extenders, $this->getExtenders($aliasName));
             }
         }

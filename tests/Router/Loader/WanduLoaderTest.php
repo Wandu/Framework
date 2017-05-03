@@ -43,7 +43,7 @@ class WanduLoaderTest extends PHPUnit_Framework_TestCase
     {
         $loader = new WanduLoader(new Container());
 
-        static::assertExceptionEquals(new HandlerNotFoundException('ThereIsNoClass'), function () use ($loader) {
+        static::assertException(new HandlerNotFoundException('ThereIsNoClass'), function () use ($loader) {
             $loader->middleware('ThereIsNoClass');
         });
     }

@@ -282,7 +282,7 @@ class DispatcherTest extends TestCase
             $router->get('/users/:id', "DummyController", 'show')->name('users.show');
         });
         
-        static::assertExceptionEquals(new RouteNotFoundException('Route "admin.unknown" not found.'), function () use ($dispatcher) {
+        static::assertException(new RouteNotFoundException('Route "admin.unknown" not found.'), function () use ($dispatcher) {
             $dispatcher->getPath('admin.unknown');
         });
 
@@ -291,7 +291,7 @@ class DispatcherTest extends TestCase
 
         static::assertSame('/users/10', $dispatcher->getPath('users.show', ['id' => 10]));
         
-        static::assertExceptionEquals(new CannotGetPathException(['id']), function () use ($dispatcher) {
+        static::assertException(new CannotGetPathException(['id']), function () use ($dispatcher) {
             static::assertSame('/users', $dispatcher->getPath('users.show'));
         });
 

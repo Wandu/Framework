@@ -16,13 +16,13 @@ class AssignTest extends TestCase
         $container = new Container();
         $container->bind(ChainMethodTestAssignIF::class, ChainMethodTestAssign::class);
 
-        static::assertExceptionEquals(
+        static::assertException(
             new CannotResolveException(ChainMethodTestAssignIF::class, 'dep'),
             function () use ($container) {
                 $container->get(ChainMethodTestAssign::class);
             }
         );
-        static::assertExceptionEquals(
+        static::assertException(
             new CannotResolveException(ChainMethodTestAssignIF::class, 'dep'),
             function () use ($container) {
                 $container->get(ChainMethodTestAssignIF::class);
@@ -33,7 +33,7 @@ class AssignTest extends TestCase
         $container = new Container();
         $container->bind(ChainMethodTestAssign::class);
 
-        static::assertExceptionEquals(
+        static::assertException(
             new CannotResolveException(ChainMethodTestAssign::class, 'dep'),
             function () use ($container) {
                 $container->get(ChainMethodTestAssign::class);
@@ -71,7 +71,7 @@ class AssignTest extends TestCase
             return new ChainMethodTestAssign($dep . ' from closure');
         });
 
-        static::assertExceptionEquals(
+        static::assertException(
             new CannotResolveException(ChainMethodTestAssign::class, 'dep'),
             function () use ($container) {
                 $container->get(ChainMethodTestAssign::class);

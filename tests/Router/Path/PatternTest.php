@@ -49,13 +49,13 @@ class PatternTest extends TestCase
             ],
         ], $pattern->parse());
         static::assertSame('/1111/2222', $pattern->path(['foo' => 1111, 'bar' => 2222]));
-        static::assertExceptionEquals(new CannotGetPathException(['foo', 'bar']), function () use ($pattern) {
+        static::assertException(new CannotGetPathException(['foo', 'bar']), function () use ($pattern) {
             $pattern->path(['foo' => 1111]);
         });
-        static::assertExceptionEquals(new CannotGetPathException(['foo', 'bar']), function () use ($pattern) {
+        static::assertException(new CannotGetPathException(['foo', 'bar']), function () use ($pattern) {
             $pattern->path(['bar' => 1111]);
         });
-        static::assertExceptionEquals(new CannotGetPathException(['foo', 'bar']), function () use ($pattern) {
+        static::assertException(new CannotGetPathException(['foo', 'bar']), function () use ($pattern) {
             $pattern->path();
         });
 
@@ -69,7 +69,7 @@ class PatternTest extends TestCase
             ],
         ], $pattern->parse());
         static::assertSame('/icon-30.png', $pattern->path(['res' => 30]));
-        static::assertExceptionEquals(new CannotGetPathException(['res']), function () use ($pattern) {
+        static::assertException(new CannotGetPathException(['res']), function () use ($pattern) {
             $pattern->path(['foo' => 1111]);
         });
     }

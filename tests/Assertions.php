@@ -23,7 +23,7 @@ trait Assertions
         PHPUnit_Framework_Assert::assertEquals($expected, $contents, $message);
     }
     
-    public static function assertExceptionEquals($expected, Closure $closure, $message = '')
+    public static function assertException($expected, Closure $closure, $message = '')
     {
         try {
             $closure();

@@ -7,22 +7,22 @@ use RuntimeException;
 class CannotChangeException extends RuntimeException implements ContainerExceptionInterface
 {
     /** @var string */
-    protected $class;
+    protected $name;
 
     /**
-     * @param string $class
+     * @param string $name
      */
-    public function __construct($class)
+    public function __construct($name)
     {
-        $this->class = $class;
-        $this->message = "it cannot be changed; \"{$class}\".";
+        $this->name = $name;
+        $this->message = "it cannot be changed; \"{$name}\".";
     }
 
     /**
      * @return string
      */
-    public function getClass()
+    public function getName()
     {
-        return $this->class;
+        return $this->name;
     }
 }

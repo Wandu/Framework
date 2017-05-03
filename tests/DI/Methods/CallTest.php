@@ -1,13 +1,16 @@
 <?php
 namespace Wandu\DI\Methods;
 
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use stdClass;
+use Wandu\Assertions;
 use Wandu\DI\Container;
 use Wandu\DI\Exception\CannotResolveException;
 
-class CallTest extends PHPUnit_Framework_TestCase
+class CallTest extends TestCase 
 {
+    use Assertions;
+    
     public function testCall()
     {
         $container = new Container();
@@ -154,13 +157,14 @@ class CallTest extends PHPUnit_Framework_TestCase
         $container = new Container();
         $container->alias(CallTestCallWithOnlyAliasInterface::class, CallTestCallWithOnlyAlias::class);
 
-        try {
-            $container->call(function (CallTestCallWithOnlyAliasInterface $depend) {
-                return $depend;
-            });
-            static::fail();
-        } catch (CannotResolveException $e) {
-        }
+        static::assertException(
+            new CannotResolveException(CallTestCallWithOnlyAlias::class, 'param'),
+            function () use ($container) {
+                $container->call(function (CallTestCallWithOnlyAliasInterface $depend) {
+                    return $depend;
+                });
+            }
+        );
 
         $expected = new CallTestCallWithOnlyAlias(1111);
         
