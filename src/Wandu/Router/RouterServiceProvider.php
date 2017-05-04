@@ -12,10 +12,9 @@ use function Wandu\Foundation\config;
 
 class RouterServiceProvider implements  ServiceProviderInterface
 {
-    public function boot(ContainerInterface $app)
-    {
-    }
-
+    /**
+     * {@inheritdoc}
+     */
     public function register(ContainerInterface $app)
     {
         $app->bind(LoaderInterface::class, WanduLoader::class);
@@ -30,5 +29,12 @@ class RouterServiceProvider implements  ServiceProviderInterface
         });
         $app->bind(Dispatcher::class);
         $app->alias('router', Dispatcher::class);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function boot(ContainerInterface $app)
+    {
     }
 }
