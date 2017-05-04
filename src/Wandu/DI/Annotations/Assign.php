@@ -4,7 +4,7 @@ namespace Wandu\DI\Annotations;
 use Doctrine\Common\Annotations\Annotation\Required;
 use Doctrine\Common\Annotations\Annotation\Target;
 use ReflectionMethod;
-use Wandu\DI\ContaineeInterface;
+use Wandu\DI\Descriptor;
 use Wandu\DI\ContainerInterface;
 use Wandu\DI\Contracts\MethodDecoratorInterface;
 
@@ -23,9 +23,9 @@ class Assign implements MethodDecoratorInterface
     /**
      * {@inheritdoc}
      */
-    public function beforeCreateMethod(ReflectionMethod $reflector, ContaineeInterface $containee, ContainerInterface $container)
+    public function beforeCreateMethod(ReflectionMethod $refl, Descriptor $desc, ContainerInterface $container)
     {
-        $containee->assign([
+        $desc->assign([
             $this->target => $container->get($this->name),
         ]);
     }
@@ -33,7 +33,7 @@ class Assign implements MethodDecoratorInterface
     /**
      * {@inheritdoc}
      */
-    public function afterCreateMethod($target, ReflectionMethod $reflector, ContaineeInterface $containee, ContainerInterface $container)
+    public function afterCreateMethod($target, ReflectionMethod $refl, Descriptor $desc, ContainerInterface $container)
     {
         // do nothing
     }

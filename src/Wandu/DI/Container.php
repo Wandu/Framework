@@ -4,9 +4,9 @@ namespace Wandu\DI;
 use Closure;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface as PsrContainerInterface;
-use Wandu\DI\Containee\BindContainee;
-use Wandu\DI\Containee\ClosureContainee;
-use Wandu\DI\Containee\InstanceContainee;
+use Wandu\DI\Descriptors\BindDescriptor;
+use Wandu\DI\Descriptors\CallableDescriptor;
+use Wandu\DI\Descriptors\InstanceDescriptor;
 use Wandu\DI\Exception\CannotChangeException;
 use Wandu\DI\Exception\CannotFindParameterException;
 use Wandu\DI\Exception\CannotResolveException;
@@ -18,8 +18,11 @@ class Container implements ContainerInterface
     /** @var \Wandu\DI\ContainerInterface */
     public static $instance;
     
-    /** @var \Wandu\DI\Containee\ContaineeAbstract[] */
-    protected $containees = [];
+    /** @var \Wandu\DI\Descriptor[] */
+    protected $descriptors = [];
+    
+    /** @var array */
+    protected $instances = [];
 
     /** @var \Wandu\DI\ServiceProviderInterface[] */
     protected $providers = [];
@@ -58,10 +61,10 @@ class Container implements ContainerInterface
     {
         // direct remove instance because of frozen
         unset(
-            $this->containees[Container::class],
-            $this->containees[ContainerInterface::class],
-            $this->containees[PsrContainerInterface::class],
-            $this->containees['container']
+            $this->descriptors[Container::class],
+            $this->descriptors[ContainerInterface::class],
+            $this->descriptors[PsrContainerInterface::class],
+            $this->descriptors['container']
         );
         $this->instance(Container::class, $this)->freeze();
         $this->instance(ContainerInterface::class, $this)->freeze();
@@ -119,13 +122,13 @@ class Container implements ContainerInterface
         }
         try {
             try {
-                $instance = $this->containee($name)->get($this);
+                $instance = $this->descriptor($name)->createInstance($this);
             } catch (NullReferenceException $e) {
                 if (!class_exists($name)) {
                     throw $e;
                 }
                 $this->bind($name);
-                $instance = $this->containee($name)->get($this);
+                $instance = $this->descriptor($name)->createInstance($this);
             }
             foreach ($this->getExtenders($name) as $extender) {
                 $instance = $extender->__invoke($instance);
@@ -153,7 +156,7 @@ class Container implements ContainerInterface
      */
     public function has($name)
     {
-        return array_key_exists($name, $this->containees) || class_exists($name) || isset($this->aliases[$name]);
+        return array_key_exists($name, $this->descriptors) || class_exists($name) || isset($this->aliases[$name]);
     }
 
     /**
@@ -162,41 +165,41 @@ class Container implements ContainerInterface
     public function destroy(...$names)
     {
         foreach ($names as $name) {
-            if (array_key_exists($name, $this->containees)) {
-                if ($this->containees[$name]->isFrozen()) {
+            if (array_key_exists($name, $this->descriptors)) {
+                if ($this->descriptors[$name]->frozen) {
                     throw new CannotChangeException($name);
                 }
             }
-            unset($this->containees[$name]);
+            unset($this->descriptors[$name]);
         }
     }
 
     /**
      * {@inheritdoc}
      */
-    public function instance(string $name, $value): ContaineeInterface
+    public function instance(string $name, $value): Descriptor
     {
-        return $this->addContainee($name, new InstanceContainee($value));
+        return $this->createDescriptor($name, new InstanceDescriptor($value));
     }
 
     /**
      * {@inheritdoc}
      */
-    public function closure(string $name, callable $handler): ContaineeInterface
+    public function closure(string $name, callable $handler): Descriptor
     {
-        return $this->addContainee($name, new ClosureContainee($handler));
+        return $this->createDescriptor($name, new CallableDescriptor($handler));
     }
 
     /**
      * {@inheritdoc}
      */
-    public function bind(string $name, string $className = null): ContaineeInterface
+    public function bind(string $name, string $className = null): Descriptor
     {
         if (isset($className)) {
             $this->alias($className, $name);
-            return $this->addContainee($name, new BindContainee($className));
+            return $this->createDescriptor($name, new BindDescriptor($className));
         }
-        return $this->addContainee($name, new BindContainee($name));
+        return $this->createDescriptor($name, new BindDescriptor($name));
     }
 
     /**
@@ -214,12 +217,12 @@ class Container implements ContainerInterface
     /**
      * {@inheritdoc}
      */
-    public function containee(string $name): ContaineeInterface
+    public function descriptor(string $name): Descriptor
     {
-        if (!array_key_exists($name, $this->containees)) {
+        if (!array_key_exists($name, $this->descriptors)) {
             throw new NullReferenceException($name);
         }
-        return $this->containees[$name];
+        return $this->descriptors[$name];
     }
 
     /**
@@ -229,8 +232,8 @@ class Container implements ContainerInterface
     {
         $new = clone $this;
         foreach ($arguments as $name => $argument) {
-            if ($argument instanceof ContaineeInterface) {
-                $new->addContainee($name, $argument);
+            if ($argument instanceof Descriptor) {
+                $new->createDescriptor($name, $argument);
             } else {
                 $new->instance($name, $argument);
             }
@@ -255,7 +258,7 @@ class Container implements ContainerInterface
     public function create(string $className, array $arguments = [])
     {
         try {
-            return (new BindContainee($className))->assign($arguments)->get($this);
+            return (new BindDescriptor($className))->assign($arguments)->createInstance($this);
         } catch (CannotFindParameterException $e) {
             throw new CannotResolveException($className, $e->getParameter());
         }
@@ -267,7 +270,7 @@ class Container implements ContainerInterface
     public function call(callable $callee, array $arguments = [])
     {
         try {
-            return (new ClosureContainee($callee))->assign($arguments)->get($this);
+            return (new CallableDescriptor($callee))->assign($arguments)->createInstance($this);
         } catch (CannotFindParameterException $e) {
             throw new CannotResolveException($callee, $e->getParameter());
         }
@@ -318,12 +321,12 @@ class Container implements ContainerInterface
 
     /**
      * @param string $name
-     * @param \Wandu\DI\ContaineeInterface $containee
-     * @return \Wandu\DI\ContaineeInterface
+     * @param \Wandu\DI\Descriptor $containee
+     * @return \Wandu\DI\Descriptor
      */
-    protected function addContainee($name, ContaineeInterface $containee): ContaineeInterface
+    protected function createDescriptor($name, Descriptor $containee): Descriptor
     {
         $this->destroy($name);
-        return $this->containees[$name] = $containee;
+        return $this->descriptors[$name] = $containee;
     }
 }

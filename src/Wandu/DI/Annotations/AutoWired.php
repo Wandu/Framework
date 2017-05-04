@@ -6,7 +6,7 @@ use Doctrine\Common\Annotations\Annotation\Target;
 use Exception;
 use ReflectionProperty;
 use Throwable;
-use Wandu\DI\ContaineeInterface;
+use Wandu\DI\Descriptor;
 use Wandu\DI\ContainerInterface;
 use Wandu\DI\Contracts\PropertyDecoratorInterface;
 
@@ -22,7 +22,7 @@ class AutoWired implements PropertyDecoratorInterface
     /**
      * {@inheritdoc}
      */
-    public function beforeCreateProperty(ReflectionProperty $reflector, ContaineeInterface $containee, ContainerInterface $container)
+    public function beforeCreateProperty(ReflectionProperty $refl, Descriptor $desc, ContainerInterface $container)
     {
         // do nothing
     }
@@ -30,7 +30,7 @@ class AutoWired implements PropertyDecoratorInterface
     /**
      * {@inheritdoc}
      */
-    public function afterCreateProperty($target, ReflectionProperty $reflector, ContaineeInterface $containee, ContainerInterface $container)
+    public function afterCreateProperty($target, ReflectionProperty $refl, Descriptor $desc, ContainerInterface $container)
     {
         static $callStack = [];
         if (in_array($target, $callStack)) {
@@ -38,8 +38,8 @@ class AutoWired implements PropertyDecoratorInterface
         }
         array_push($callStack, $target);
         try {
-            $reflector->setAccessible(true);
-            $reflector->setValue($target, $container->get($this->name));
+            $refl->setAccessible(true);
+            $refl->setValue($target, $container->get($this->name));
         } catch (Exception $e) {
             array_pop($callStack);
             throw $e;

@@ -1,133 +1,95 @@
 <?php
-namespace Wandu\DI\Containee;
+namespace Wandu\DI;
 
 use Doctrine\Common\Annotations\Reader;
-use Wandu\DI\ContaineeInterface;
 use ReflectionClass;
-use Wandu\DI\ContainerInterface;
-use ReflectionMethod;
-use ReflectionObject;
+use ReflectionException;
 use ReflectionFunctionAbstract;
 use Wandu\DI\Contracts\ClassDecoratorInterface;
 use Wandu\DI\Contracts\MethodDecoratorInterface;
 use Wandu\DI\Contracts\PropertyDecoratorInterface;
 use Wandu\DI\Exception\CannotFindParameterException;
-use ReflectionException;
 
-abstract class ContaineeAbstract implements ContaineeInterface
+abstract class Descriptor
 {
     /** @var mixed */
-    protected $caching;
+    public $cache;
     
     /** @var array */
-    protected $attributes = [];
+    public $arguments = [];
     
     /** @var bool */
-    protected $factoryEnabled = false;
+    public $factory = false;
     
     /** @var bool */
-    protected $annotatedEnabled = false;
+    public $annotated = false;
     
     /** @var bool */
-    protected $wireEnabled = false;
-    
-    /** @var bool */
-    protected $frozen = false;
-    
+    public $frozen = false;
+
     /**
-     * {@inheritdoc}
+     * @param array $arguments
+     * @return \Wandu\DI\Descriptor
      */
-    public function assign(array $arguments = [])
+    public function assign(array $arguments = []): Descriptor
     {
-        $this->attributes = $arguments + $this->attributes;
+        $this->arguments = $arguments + $this->arguments;
         return $this;
     }
 
     /**
-     * {@inheritdoc}
+     * @return \Wandu\DI\Descriptor
      */
-    public function freeze()
+    public function freeze(): Descriptor
     {
         $this->frozen = true;
         return $this;
     }
 
     /**
-     * @return bool
+     * @return \Wandu\DI\Descriptor
      */
-    public function isFrozen()
+    public function factory(): Descriptor
     {
-        return $this->frozen;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function factory($enabled = true)
-    {
-        $this->factoryEnabled = $enabled;
+        $this->factory = true;
         return $this;
     }
 
     /**
-     * @return boolean
+     * @return \Wandu\DI\Descriptor
      */
-    public function isFactoryEnabled()
+    public function annotated(): Descriptor
     {
-        return $this->factoryEnabled;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function annotated($enabled = true)
-    {
-        $this->annotatedEnabled = $enabled;
+        $this->annotated = true;
         return $this;
-    }
-
-    /**
-     * @return boolean
-     */
-    public function isAnnotatedEnabled(): bool
-    {
-        return $this->annotatedEnabled;
     }
     
     /**
-     * {@inheritdoc}
+     * @deprecated
+     * 
+     * @return \Wandu\DI\Descriptor
      */
-    public function wire($enabled = true)
+    public function wire(): Descriptor
     {
-        $this->annotatedEnabled = true; // if you use autowired, use annotation!
-        $this->wireEnabled = $enabled;
-        return $this;
-    }
-
-    /**
-     * @return boolean
-     */
-    public function isWireEnabled()
-    {
-        return $this->wireEnabled;
+        return $this->annotated();
     }
 
     /**
      * @param \Wandu\DI\ContainerInterface $container
      * @return mixed
      */
-    public function get(ContainerInterface $container)
+    public function createInstance(ContainerInterface $container)
     {
-        if ($this->factoryEnabled) {
+        if ($this->factory) {
             $object = $this->create($container);
             $this->frozen = true;
             return $object;
         }
-        if (!isset($this->caching)) {
-            $this->caching = $this->create($container); // 
-            $this->frozen = true;
+        if (!isset($this->cache)) {
+            $this->cache = $this->create($container); // 
         }
-        return $this->caching;
+        $this->frozen = true;
+        return $this->cache;
     }
 
     /**
@@ -140,15 +102,13 @@ abstract class ContaineeAbstract implements ContaineeInterface
         ContainerInterface $container,
         ReflectionFunctionAbstract $reflectionFunction
     ) {
-        $arguments = $this->attributes;
+        $arguments = $this->arguments;
         $parametersToReturn = static::getSeqArray($arguments);
 
         $reflectionParameters = array_slice($reflectionFunction->getParameters(), count($parametersToReturn));
         if (!count($reflectionParameters)) {
             return $parametersToReturn;
         }
-        $autoWires = [];
-
         /* @var \ReflectionParameter $param */
         foreach ($reflectionParameters as $param) {
             /*
@@ -156,10 +116,8 @@ abstract class ContaineeAbstract implements ContaineeInterface
              * #1.1. search in arguments by class name
              * #2. if parameter has type hint
              * #2.1. search in container by class name
-             * #3. if autowired enabled
-             * #3.1. search in container by autowired name
-             * #4. if has default value, insert default value.
-             * #5. exception
+             * #3. if has default value, insert default value.
+             * #4. exception
              */
             $paramName = $param->getName();
             try {
@@ -175,15 +133,11 @@ abstract class ContaineeAbstract implements ContaineeInterface
                         continue;
                     }
                 }
-                if (array_key_exists($paramName, $autoWires) && $container->has($autoWires[$paramName])) {
-                    $parametersToReturn[] = $this->get($autoWires[$paramName]);
-                    continue;
-                }
-                if ($param->isDefaultValueAvailable()) { // #4.
+                if ($param->isDefaultValueAvailable()) { // #3.
                     $parametersToReturn[] = $param->getDefaultValue();
                     continue;
                 }
-                throw new CannotFindParameterException($paramName); // #5.
+                throw new CannotFindParameterException($paramName); // #4.
             } catch (ReflectionException $e) {
                 throw new CannotFindParameterException($paramName);
             }

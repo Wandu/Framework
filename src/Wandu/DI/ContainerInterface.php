@@ -35,23 +35,23 @@ interface ContainerInterface extends ArrayAccess, PsrContainerInterface
     /**
      * @param string $name
      * @param mixed $value
-     * @return \Wandu\DI\ContaineeInterface
+     * @return \Wandu\DI\Descriptor
      */
-    public function instance(string $name, $value): ContaineeInterface;
+    public function instance(string $name, $value): Descriptor;
 
     /**
      * @param string $name
      * @param callable $handler
-     * @return \Wandu\DI\ContaineeInterface
+     * @return \Wandu\DI\Descriptor
      */
-    public function closure(string $name, callable $handler): ContaineeInterface;
+    public function closure(string $name, callable $handler): Descriptor;
 
     /**
      * @param string $name
      * @param string $className
-     * @return \Wandu\DI\ContaineeInterface
+     * @return \Wandu\DI\Descriptor
      */
-    public function bind(string $name, string $className = null): ContaineeInterface;
+    public function bind(string $name, string $className = null): Descriptor;
 
     /**
      * @param string $alias
@@ -61,9 +61,9 @@ interface ContainerInterface extends ArrayAccess, PsrContainerInterface
 
     /**
      * @param string $name
-     * @return \Wandu\DI\ContaineeInterface
+     * @return \Wandu\DI\Descriptor
      */
-    public function containee(string $name): ContaineeInterface;
+    public function descriptor(string $name): Descriptor;
 
     /**
      * @param array $arguments

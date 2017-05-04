@@ -1,14 +1,12 @@
 <?php
-namespace Wandu\DI\Containee;
+namespace Wandu\DI\Descriptors;
 
 use Doctrine\Common\Annotations\Reader;
-use Wandu\DI\ContainerInterface;
 use ReflectionClass;
-use Wandu\DI\Contracts\ClassDecoratorInterface;
-use Wandu\DI\Contracts\MethodDecoratorInterface;
-use Wandu\DI\Contracts\PropertyDecoratorInterface;
+use Wandu\DI\ContainerInterface;
+use Wandu\DI\Descriptor;
 
-class BindContainee extends ContaineeAbstract
+class BindDescriptor extends Descriptor
 {
     /** @var string */
     protected $className;
@@ -24,7 +22,7 @@ class BindContainee extends ContaineeAbstract
     protected function create(ContainerInterface $container)
     {
         $reflClass = new ReflectionClass($this->className);
-        if ($this->annotatedEnabled) {
+        if ($this->annotated) {
             list($classDecorators, $propertyDecorators, $methodDecorators) = $this->getDecorators($container->get(Reader::class),
                 $reflClass);
             /** @var \Wandu\DI\Contracts\ClassDecoratorInterface $anno */
@@ -49,7 +47,7 @@ class BindContainee extends ContaineeAbstract
                 $this->getParameters($container, $reflectionMethod)
             );
         }
-        if ($this->annotatedEnabled) {
+        if ($this->annotated) {
             /** @var \Wandu\DI\Contracts\ClassDecoratorInterface $anno */
             foreach ($classDecorators as list($anno, $refl)) {
                 $anno->afterCreateClass($instance, $refl, $this, $container);

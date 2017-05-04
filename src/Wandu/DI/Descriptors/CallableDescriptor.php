@@ -1,10 +1,11 @@
 <?php
-namespace Wandu\DI\Containee;
+namespace Wandu\DI\Descriptors;
 
 use Wandu\DI\ContainerInterface;
+use Wandu\DI\Descriptor;
 use Wandu\Reflection\ReflectionCallable;
 
-class ClosureContainee extends ContaineeAbstract
+class CallableDescriptor extends Descriptor
 {
     /** @var callable */
     protected $handler;
