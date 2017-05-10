@@ -359,6 +359,15 @@ class CreateQuery implements QueryInterface
     }
 
     /**
+     * @param string $name
+     * @return \Wandu\Database\Query\Expression\ColumnExpression
+     */
+    public function json($name)
+    {
+        return $this->addColumn($name, 'json');
+    }
+
+    /**
      * @param string|\Wandu\Database\Contracts\ExpressionInterface $name
      * @param string $type
      * @param array $attributes
