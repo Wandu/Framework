@@ -1,14 +1,15 @@
 <?php
 namespace Wandu\Database\Contracts;
 
-use Wandu\Database\Configuration;
+use Wandu\Database\QueryBuilder;
 
 interface ConnectionInterface
 {
     /**
-     * @return \Wandu\Database\Configuration
+     * @param string $tableName
+     * @return \Wandu\Database\QueryBuilder
      */
-    public function getConfig(): Configuration;
+    public function createQueryBuilder(string $tableName): QueryBuilder;
     
     /**
      * @return $this

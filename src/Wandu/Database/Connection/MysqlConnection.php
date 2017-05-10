@@ -11,6 +11,7 @@ use Wandu\Database\Contracts\ConnectionInterface;
 use Wandu\Database\Contracts\QueryInterface;
 use Wandu\Database\Events\Connect;
 use Wandu\Database\Events\ExecuteQuery;
+use Wandu\Database\QueryBuilder;
 use Wandu\Event\DispatcherInterface;
 
 class MysqlConnection implements ConnectionInterface
@@ -35,9 +36,9 @@ class MysqlConnection implements ConnectionInterface
     /**
      * {@inheritdoc}
      */
-    public function getConfig(): Configuration
+    public function createQueryBuilder(string $tableName): QueryBuilder
     {
-        return $this->config;
+        return new QueryBuilder($this->config->getPrefix() . $tableName);
     }
 
     /**

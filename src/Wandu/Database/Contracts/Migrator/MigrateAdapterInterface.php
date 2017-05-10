@@ -1,17 +1,16 @@
 <?php
-namespace Wandu\Database\Migrator;
+namespace Wandu\Database\Contracts\Migrator;
 
 interface MigrateAdapterInterface
 {
     /**
-     * @return \Wandu\Database\Migrator\MigrateAdapterInterface
      */
     public function initialize();
 
     /**
      * @return array
      */
-    public function versions();
+    public function versions(): array;
 
     /**
      * @param string $id
@@ -21,14 +20,11 @@ interface MigrateAdapterInterface
 
     /**
      * @param string $id
-     * @param string $source
-     * @return \Wandu\Database\Migrator\MigrateAdapterInterface
      */
-    public function up($id, $source);
+    public function up($id);
 
     /**
      * @param string $id
-     * @return \Wandu\Database\Migrator\MigrateAdapterInterface
      */
     public function down($id);
 }

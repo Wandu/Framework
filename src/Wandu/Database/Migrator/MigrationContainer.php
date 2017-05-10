@@ -2,6 +2,7 @@
 namespace Wandu\Database\Migrator;
 
 use SplFileInfo;
+use Wandu\Database\Contracts\Migrator\MigrateAdapterInterface;
 use Wandu\DI\ContainerInterface;
 
 class MigrationContainer
@@ -9,7 +10,7 @@ class MigrationContainer
     /** @var \SplFileInfo */
     protected $fileInfo;
 
-    /** @var \Wandu\Database\Migrator\MigrateAdapterInterface */
+    /** @var \Wandu\Database\Contracts\Migrator\MigrateAdapterInterface */
     protected $adapter;
     
     /** @var \Wandu\DI\ContainerInterface */
@@ -17,7 +18,7 @@ class MigrationContainer
     
     /**
      * @param \SplFileInfo $fileInfo
-     * @param \Wandu\Database\Migrator\MigrateAdapterInterface $adapter
+     * @param \Wandu\Database\Contracts\Migrator\MigrateAdapterInterface $adapter
      * @param \Wandu\DI\ContainerInterface $container
      */
     public function __construct(SplFileInfo $fileInfo, MigrateAdapterInterface $adapter, ContainerInterface $container)
@@ -57,6 +58,15 @@ class MigrationContainer
         $migrationName = $this->getName();
         $this->container->create($migrationName)->up();
         $this->adapter->initialize();
-        $this->adapter->up($this->getId(), file_get_contents($this->fileInfo));
+        $this->adapter->up($this->getId());
+    }
+    
+    public function down()
+    {
+        require $this->fileInfo->__toString();
+        $migrationName = $this->getName();
+        $this->container->create($migrationName)->down();
+        $this->adapter->initialize();
+        $this->adapter->down($this->getId());
     }
 }

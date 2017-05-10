@@ -1,6 +1,7 @@
 <?php
 namespace Wandu\Database\Migrator;
 
+use Wandu\Database\Contracts\Migrator\MigrateAdapterInterface;
 use Wandu\Database\Manager;
 use Wandu\Database\Query\CreateQuery;
 
@@ -28,17 +29,16 @@ class MigrateAdapter implements MigrateAdapterInterface
             $this->connection->query(
                 $builder->create(function (CreateQuery $query) {
                     $query->string('version', 30);
-                    $query->longText('source');
+                    $query->index('version');
                 })
             );
         }
-        return $this;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function versions()
+    public function versions(): array
     {
         if (!$this->hasMigrateTable()) {
             return [];
@@ -63,15 +63,13 @@ class MigrateAdapter implements MigrateAdapterInterface
     /**
      * {@inheritdoc}
      */
-    public function up($id, $source)
+    public function up($id)
     {
         $this->connection->query(
             $this->connection->createQueryBuilder($this->tableName)->insert([
                 'version' => $id,
-                'source' => $source,
             ])
         );
-        return $this;
     }
 
     /**
@@ -84,7 +82,6 @@ class MigrateAdapter implements MigrateAdapterInterface
                 'version' => $id,
             ])
         );
-        return $this;
     }
 
     /**

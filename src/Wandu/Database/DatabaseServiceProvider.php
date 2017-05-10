@@ -8,9 +8,9 @@ use Wandu\Database\Contracts\ConnectionInterface;
 use Wandu\Database\Contracts\Entity\MetadataReaderInterface;
 use Wandu\Database\Entity\MetadataReader;
 use Wandu\Database\Migrator\MigrateAdapter;
-use Wandu\Database\Migrator\MigrateAdapterInterface;
-use Wandu\Database\Migrator\MigrateTemplate;
-use Wandu\Database\Migrator\MigrateTemplateInterface;
+use Wandu\Database\Contracts\Migrator\MigrateAdapterInterface;
+use Wandu\Database\Migrator\MigrationTemplate;
+use Wandu\Database\Contracts\Migrator\MigrationTemplateInterface;
 use Wandu\DI\ContainerInterface;
 use Wandu\DI\ServiceProviderInterface;
 use function Wandu\Foundation\config;
@@ -36,7 +36,7 @@ class DatabaseServiceProvider implements ServiceProviderInterface
         });
         $app->alias('connection', ConnectionInterface::class);
 
-        $app->bind(MigrateTemplateInterface::class, MigrateTemplate::class);
+        $app->bind(MigrationTemplateInterface::class, MigrationTemplate::class);
         $app->bind(MigrateAdapterInterface::class, MigrateAdapter::class);
     }
 

@@ -3,7 +3,6 @@ namespace Wandu\Database\Commands;
 
 use Wandu\Console\Command;
 use Wandu\Database\Migrator\MigrateCreator;
-use Wandu\DI\ContainerInterface;
 
 class MigrateCreateCommand extends Command
 {
@@ -15,21 +14,11 @@ class MigrateCreateCommand extends Command
         'name' => 'the name for the migration',
     ];
     
-    /** @var \Wandu\DI\ContainerInterface */
-    protected $container;
-    
     /** @var \Wandu\Database\Migrator\MigrateCreator */
     protected $creator;
 
-    /**
-     * @param \Wandu\DI\ContainerInterface $container
-     * @param \Wandu\Database\Migrator\MigrateCreator $creator
-     */
-    public function __construct(
-        ContainerInterface $container,
-        MigrateCreator $creator
-    ) {
-        $this->container = $container;
+    public function __construct(MigrateCreator $creator)
+    {
         $this->creator = $creator;
     }
 

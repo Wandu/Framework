@@ -12,7 +12,6 @@ use Wandu\Database\Exception\EntityNotFoundException;
 use Wandu\Database\Exception\IdentifierNotFoundException;
 use Wandu\Database\Manager;
 use Wandu\Database\Query\SelectQuery;
-use Wandu\Database\QueryBuilder;
 
 class Repository
 {
@@ -43,10 +42,10 @@ class Repository
     public function __construct(Manager $manager, Metadata $meta, CastManagerInterface $caster)
     {
         $this->manager = $manager;
-        $this->connection = $manager->connection($meta->getConnection());
+        $this->connection = $connection = $manager->connection($meta->getConnection());
         $this->meta = $meta;
         $this->caster = $caster;
-        $this->query = new QueryBuilder($this->connection->getConfig()->getPrefix() . $meta->getTable());
+        $this->queryBuilder = $connection->createQueryBuilder($meta->getTable());
     }
 
     /**
@@ -156,7 +155,7 @@ class Repository
             }
             $attributesToStore[$column->name] = $this->pickProperty($this->getPropertyReflection($propertyName), $entity);
         }
-        $rowAffected = $this->query($this->query->insert($attributesToStore));
+        $rowAffected = $this->query($this->queryBuilder->insert($attributesToStore));
         if ($this->meta->isIncrements()) {
             $lastInsertId = $this->connection->getLastInsertId();
             if ($primaryProperty) {
@@ -183,7 +182,7 @@ class Repository
         }
 
         return $this->query(
-            $this->query->update($attributesToStore)->where($primaryKey, $identifier)
+            $this->queryBuilder->update($attributesToStore)->where($primaryKey, $identifier)
         );
     }
 
@@ -198,7 +197,7 @@ class Repository
         $primaryKey = $this->meta->getPrimaryKey();
         $identifier = $this->getIdentifier($entity);
 
-        $affectedRows = $this->query($this->query->delete()->where($primaryKey, $identifier));
+        $affectedRows = $this->query($this->queryBuilder->delete()->where($primaryKey, $identifier));
         if ($identifierProperty = $this->meta->getPrimaryProperty()) {
             $this->injectProperty($this->getPropertyReflection($identifierProperty), $entity, null);
         }
@@ -273,7 +272,7 @@ class Repository
     {
         if (!isset($query) || is_callable($query)) {
             $connection = $this->connection;
-            $queryBuilder = $this->query->select();
+            $queryBuilder = $this->queryBuilder->select();
             if (!isset($query)) {
                 return $queryBuilder;
             }

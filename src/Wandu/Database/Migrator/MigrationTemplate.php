@@ -1,12 +1,14 @@
 <?php
 namespace Wandu\Database\Migrator;
 
-class MigrateTemplate implements MigrateTemplateInterface
+use Wandu\Database\Contracts\Migrator\MigrationTemplateInterface;
+
+class MigrationTemplate implements MigrationTemplateInterface
 {
     /**
      * {@inheritdoc}
      */
-    public function getContext($migrateName)
+    public function template($migrateName)
     {
         return <<<PHP
 <?php

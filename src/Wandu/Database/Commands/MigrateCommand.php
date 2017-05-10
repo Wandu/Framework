@@ -2,30 +2,30 @@
 namespace Wandu\Database\Commands;
 
 use Wandu\Console\Command;
-use Wandu\Database\Migrator\MigrateManager;
+use Wandu\Database\Migrator\Migrator;
 
 class MigrateCommand extends Command
 {
     /** @var string */
     protected $description = 'Run migrate.';
 
-    /** @var \Wandu\Database\Migrator\MigrateManager */
+    /** @var \Wandu\Database\Migrator\Migrator */
     protected $manager;
 
-    public function __construct(MigrateManager $manager)
+    public function __construct(Migrator $manager)
     {
         $this->manager = $manager;
     }
 
     public function execute()
     {
-        $migrations = $this->manager->getMigrations();
+        $migrations = $this->manager->migrations();
         $isNoMigration = true;
         foreach ($migrations as $migration) {
             if (!$migration->isApplied()) {
                 $isNoMigration = false;
                 $migration->up();
-                $this->output->writeln(sprintf("<info>migrate</info> %s", $migration->getId()));
+                $this->output->writeln(sprintf("<info>up</info> %s", $migration->getId()));
             }
         }
         if ($isNoMigration) {

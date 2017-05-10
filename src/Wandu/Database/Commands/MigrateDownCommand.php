@@ -4,7 +4,7 @@ namespace Wandu\Database\Commands;
 use Wandu\Console\Command;
 use Wandu\Console\Exception\ConsoleException;
 use RuntimeException;
-use Wandu\Database\Migrator\MigrateManager;
+use Wandu\Database\Migrator\Migrator;
 
 class MigrateDownCommand extends Command
 {
@@ -16,13 +16,13 @@ class MigrateDownCommand extends Command
         'id' => 'the migrate id for the rollback',
     ];
     
-    /** @var \Wandu\Database\Migrator\MigrateManager */
+    /** @var \Wandu\Database\Migrator\Migrator */
     protected $manager;
 
     /**
-     * @param \Wandu\Database\Migrator\MigrateManager $manager
+     * @param \Wandu\Database\Migrator\Migrator $manager
      */
-    public function __construct(MigrateManager $manager)
+    public function __construct(Migrator $manager)
     {
         $this->manager = $manager;
     }
@@ -35,6 +35,6 @@ class MigrateDownCommand extends Command
         } catch (RuntimeException $e) {
             throw new ConsoleException("<error>Error</error> {$e->getMessage()}");
         }
-        $this->output->writeln("<info>rollback</info> {$id}");
+        $this->output->writeln("<info>down</info> {$id}");
     }
 }

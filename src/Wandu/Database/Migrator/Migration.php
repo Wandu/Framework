@@ -2,6 +2,7 @@
 namespace Wandu\Database\Migrator;
 
 use Wandu\Database\Contracts\ConnectionInterface;
+use Wandu\Database\Contracts\Migrator\MigrationInterface;
 use Wandu\Database\Manager;
 
 abstract class Migration implements MigrationInterface
@@ -25,7 +26,7 @@ abstract class Migration implements MigrationInterface
      */
     public function up()
     {
-        $this->migrate($this->manager->getConnection($this->connection));
+        $this->migrate($this->manager->connection($this->connection));
     }
 
     /**
@@ -33,7 +34,7 @@ abstract class Migration implements MigrationInterface
      */
     public function down()
     {
-        $this->rollback($this->manager->getConnection($this->connection));
+        $this->rollback($this->manager->connection($this->connection));
     }
 
     /**

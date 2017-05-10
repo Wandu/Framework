@@ -4,7 +4,7 @@ namespace Wandu\Database\Commands;
 use RuntimeException;
 use Wandu\Console\Command;
 use Wandu\Console\Exception\ConsoleException;
-use Wandu\Database\Migrator\MigrateManager;
+use Wandu\Database\Migrator\Migrator;
 
 class MigrateUpCommand extends Command
 {
@@ -16,13 +16,13 @@ class MigrateUpCommand extends Command
         'id' => 'the migrate id for the migration',
     ];
 
-    /** @var \Wandu\Database\Migrator\MigrateManager */
+    /** @var \Wandu\Database\Migrator\Migrator */
     protected $manager;
 
     /**
-     * @param \Wandu\Database\Migrator\MigrateManager $manager
+     * @param \Wandu\Database\Migrator\Migrator $manager
      */
-    public function __construct(MigrateManager $manager)
+    public function __construct(Migrator $manager)
     {
         $this->manager = $manager;
     }
@@ -35,6 +35,6 @@ class MigrateUpCommand extends Command
         } catch (RuntimeException $e) {
             throw new ConsoleException("<error>Error</error> {$e->getMessage()}");
         }
-        $this->output->writeln("<info>migrate</info> {$id}");
+        $this->output->writeln("<info>up</info> {$id}");
     }
 }

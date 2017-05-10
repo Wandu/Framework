@@ -2,20 +2,20 @@
 namespace Wandu\Database\Commands;
 
 use Wandu\Console\Command;
-use Wandu\Database\Migrator\MigrateManager;
+use Wandu\Database\Migrator\Migrator;
 
 class MigrateStatusCommand extends Command
 {
     /** @var string */
     protected $description = 'Show the status of all migrations.';
     
-    /** @var \Wandu\Database\Migrator\MigrateManager */
+    /** @var \Wandu\Database\Migrator\Migrator */
     protected $manager;
 
     /**
-     * @param \Wandu\Database\Migrator\MigrateManager $manager
+     * @param \Wandu\Database\Migrator\Migrator $manager
      */
-    public function __construct(MigrateManager $manager) {
+    public function __construct(Migrator $manager) {
         $this->manager = $manager;
     }
 
@@ -23,7 +23,7 @@ class MigrateStatusCommand extends Command
     {
         $this->output->writeln(' STATUS   MIGRATION ID   MIGRATION NAME');
         $this->output->writeln('----------------------------------------');
-        foreach ($this->manager->getMigrations() as $migration) {
+        foreach ($this->manager->migrations() as $migration) {
             if ($migration->isApplied()) {
                 $textFormat = " <info>%6s</info>   %s  <comment>%s</comment>";
             } else {

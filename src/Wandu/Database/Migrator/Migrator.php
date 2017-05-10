@@ -4,11 +4,13 @@ namespace Wandu\Database\Migrator;
 use DirectoryIterator;
 use RuntimeException;
 use SplFileInfo;
+use Wandu\Database\Contracts\Migrator\MigrateAdapterInterface;
+use Wandu\Database\Contracts\Migrator\MigrationInterface;
 use Wandu\DI\ContainerInterface;
 
-class MigrateManager
+class Migrator
 {
-    /** @var \Wandu\Database\Migrator\MigrateAdapterInterface */
+    /** @var \Wandu\Database\Contracts\Migrator\MigrateAdapterInterface */
     protected $adapter;
     
     /** @var \Wandu\Database\Migrator\Configuration */
@@ -18,7 +20,7 @@ class MigrateManager
     protected $container;
     
     /**
-     * @param \Wandu\Database\Migrator\MigrateAdapterInterface $adapter
+     * @param \Wandu\Database\Contracts\Migrator\MigrateAdapterInterface $adapter
      * @param \Wandu\Database\Migrator\Configuration $config
      * @param \Wandu\DI\ContainerInterface $container
      */
@@ -32,7 +34,7 @@ class MigrateManager
     /**
      * @return array|\Wandu\Database\Migrator\MigrationContainer[]
      */
-    public function getMigrations()
+    public function migrations()
     {
         $migrations = [];
         foreach ($this->getAllMigrationFiles() as $file) {
@@ -45,10 +47,10 @@ class MigrateManager
      * @param string $migrationId
      * @return \Wandu\Database\Migrator\MigrationContainer
      */
-    public function getMigration($migrationId)
+    public function migration($migrationId)
     {
         foreach ($this->getAllMigrationFiles() as $file) {
-            if (strpos($file, $migrationId . '_') === 0) {
+            if (strpos($file, $migrationId . '_') !== false) {
                 return new MigrationContainer($file, $this->adapter, $this->container);
             }
         }
@@ -68,7 +70,7 @@ class MigrateManager
             throw new RuntimeException("this {$migrationId} is already applied.");
         }
         
-        $this->getMigration($migrationId)->up();
+        $this->migration($migrationId)->up();
     }
 
     /**
@@ -84,9 +86,7 @@ class MigrateManager
             throw new RuntimeException("this {$migrationId} is not already applied.");
         }
 
-        $migrationName = $this->getMigrationClassFromSource($version['source']);
-        $this->container->create($migrationName)->down();
-        $this->adapter->down($migrationId);
+        $this->migration($migrationId)->down();
     }
 
     /**
@@ -95,7 +95,7 @@ class MigrateManager
     public function migrate()
     {
         $migratedMigrations = [];
-        $migrations = $this->getMigrations();
+        $migrations = $this->migrations();
         foreach ($migrations as $migration) {
             if (!$this->adapter->version($migration->getId())) {
                 $migration->up();
@@ -122,22 +122,5 @@ class MigrateManager
             return $file->getFilename() < $nextFile->getFilename() ? -1 : 0;
         });
         return $files;
-    }
-
-    /**
-     * @param string $source
-     * @return string
-     */
-    protected function getMigrationClassFromSource($source)
-    {
-        $definedClasses = get_declared_classes();
-        eval('?>' . $source);
-        $lastMigrationClass = null;
-        foreach (array_diff(get_declared_classes(), $definedClasses) as $declaredClass) {
-            if ((new \ReflectionClass($declaredClass))->isSubclassOf(MigrationInterface::class)) {
-                $lastMigrationClass = $declaredClass; // last migration class is migration class. (maybe)
-            }
-        }
-        return $lastMigrationClass;
     }
 }
