@@ -1,28 +1,19 @@
 <?php
-namespace Wandu\Database\Migrator\Commands;
+namespace Wandu\Database\Commands;
 
 use Wandu\Console\Command;
 use Wandu\Database\Migrator\MigrateManager;
-use Wandu\DI\ContainerInterface;
 
 class MigrateCommand extends Command
 {
     /** @var string */
     protected $description = 'Run migrate.';
 
-    /** @var \Wandu\DI\ContainerInterface */
-    protected $container;
-
     /** @var \Wandu\Database\Migrator\MigrateManager */
     protected $manager;
 
-    /**
-     * @param \Wandu\DI\ContainerInterface $container
-     * @param \Wandu\Database\Migrator\MigrateManager $manager
-     */
-    public function __construct(ContainerInterface $container, MigrateManager $manager)
+    public function __construct(MigrateManager $manager)
     {
-        $this->container = $container;
         $this->manager = $manager;
     }
 

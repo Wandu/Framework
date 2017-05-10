@@ -1,5 +1,5 @@
 <?php
-namespace Wandu\Database\Migrator\Commands;
+namespace Wandu\Database\Commands;
 
 use Wandu\Console\Command;
 use Wandu\Database\Migrator\MigrateManager;

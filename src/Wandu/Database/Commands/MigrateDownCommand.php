@@ -1,21 +1,21 @@
 <?php
-namespace Wandu\Database\Migrator\Commands;
+namespace Wandu\Database\Commands;
 
-use RuntimeException;
 use Wandu\Console\Command;
 use Wandu\Console\Exception\ConsoleException;
+use RuntimeException;
 use Wandu\Database\Migrator\MigrateManager;
 
-class MigrateUpCommand extends Command
+class MigrateDownCommand extends Command
 {
     /** @var string */
-    protected $description = 'Execute targeted migration.';
-    
+    protected $description = 'Execute targeted rollback.';
+
     /** @var array */
     protected $arguments = [
-        'id' => 'the migrate id for the migration',
+        'id' => 'the migrate id for the rollback',
     ];
-
+    
     /** @var \Wandu\Database\Migrator\MigrateManager */
     protected $manager;
 
@@ -31,10 +31,10 @@ class MigrateUpCommand extends Command
     {
         $id = $this->input->getArgument('id');
         try {
-            $this->manager->up($id);
+            $this->manager->down($id);
         } catch (RuntimeException $e) {
             throw new ConsoleException("<error>Error</error> {$e->getMessage()}");
         }
-        $this->output->writeln("<info>migrate</info> {$id}");
+        $this->output->writeln("<info>rollback</info> {$id}");
     }
 }
