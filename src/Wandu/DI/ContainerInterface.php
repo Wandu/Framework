@@ -8,23 +8,11 @@ interface ContainerInterface extends ArrayAccess, PsrContainerInterface
 {
     /**
      * @param string $name
-     * @return mixed
-     */
-    public function get($name);
-
-    /**
-     * @param string $name
      * @param string $package
      * @return mixed
      * @throws \Wandu\DI\Exception\RequirePackageException
      */
     public function assert(string $name, string $package);
-
-    /**
-     * @param string $name
-     * @return bool
-     */
-    public function has($name);
 
     /**
      * @param string[] ...$names
@@ -33,18 +21,18 @@ interface ContainerInterface extends ArrayAccess, PsrContainerInterface
     public function destroy(...$names);
 
     /**
-     * @param string $name
+     * @param string $className
      * @param mixed $value
      * @return \Wandu\DI\Descriptor
      */
-    public function instance(string $name, $value): Descriptor;
+    public function instance(string $className, $value): Descriptor;
 
     /**
-     * @param string $name
+     * @param string $className
      * @param callable $handler
      * @return \Wandu\DI\Descriptor
      */
-    public function closure(string $name, callable $handler): Descriptor;
+    public function closure(string $className, callable $handler): Descriptor;
 
     /**
      * @param string $name
