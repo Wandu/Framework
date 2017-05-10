@@ -4,6 +4,7 @@ namespace Wandu;
 use PHPUnit_Framework_TestCase;
 use ReflectionObject;
 use Wandu\Config\Config;
+use Wandu\DI\ServiceProviderInterface;
 use Wandu\Foundation\Application;
 use Wandu\Foundation\Kernels\NullKernel;
 
@@ -18,48 +19,41 @@ abstract class ServiceProviderTestCase extends PHPUnit_Framework_TestCase
     /** @var array */
     protected $config = [];
 
-    /**
-     * @return \Wandu\DI\ServiceProviderInterface
-     */
-    abstract public function getServiceProvider();
-
-    /**
-     * @return array
-     */
-    abstract public function getRegisterClasses();
-
+    abstract public function getServiceProvider(): ServiceProviderInterface;
+    abstract public function getRegisterClasses(): array;
+    abstract public function getAliases(): array;
+    
     public function setUp()
     {
         $this->app = new Application(new NullKernel());
-        $this->app['base_path'] = $this->basePath;
         $this->app['config'] = new Config($this->config);
     }
 
     public function testCheckRegisteredClasses()
     {
         $refl = new ReflectionObject($this->app);
-        $propertyRefl = $refl->getProperty('containees');
+        $propertyRefl = $refl->getProperty('descriptors');
         $propertyRefl->setAccessible(true);
-        $containees = $propertyRefl->getValue($this->app);
+        $descriptors = $propertyRefl->getValue($this->app);
         foreach ($this->getRegisterClasses() as $name => $class) {
             if (is_int($name)) {
                 $name = $class;
             }
-            static::assertFalse(isset($containees[$name]), "error in check registered classes. already exist \"{$name}\".");
+            static::assertFalse(isset($descriptors[$name]), "error in check registered classes. already exist \"{$name}\".");
         }
 
         $this->runRegister();
         $this->runBoot();
 
         $refl = new ReflectionObject($this->app);
-        $propertyRefl = $refl->getProperty('containees');
+        $propertyRefl = $refl->getProperty('descriptors');
         $propertyRefl->setAccessible(true);
-        $containees = $propertyRefl->getValue($this->app);
+        $descriptors = $propertyRefl->getValue($this->app);
         foreach ($this->getRegisterClasses() as $name => $class) {
             if (is_int($name)) {
                 $name = $class;
             }
-            static::assertTrue(isset($containees[$name]), "error in check registered classes. not exist \"{$name}\".");
+            static::assertTrue(isset($descriptors[$name]), "error in check registered classes. not exist \"{$name}\".");
         }
     }
 
@@ -80,12 +74,12 @@ abstract class ServiceProviderTestCase extends PHPUnit_Framework_TestCase
         }
     }
 
-    public function runRegister()
+    private function runRegister()
     {
         $this->app->register($this->getServiceProvider());
     }
 
-    public function runBoot()
+    private function runBoot()
     {
         $this->app->boot();
     }

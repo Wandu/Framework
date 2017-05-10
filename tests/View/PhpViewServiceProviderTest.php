@@ -1,20 +1,35 @@
 <?php
 namespace Wandu\View;
 
+use Wandu\DI\ServiceProviderInterface;
 use Wandu\ServiceProviderTestCase;
 use Wandu\View\Contracts\RenderInterface;
 
-class PhpViewServiceProviderTest extends ServiceProviderTestCase 
+class PhpViewServiceProviderTest extends ServiceProviderTestCase
 {
-    public function getServiceProvider()
+    /**
+     * {@inheritdoc}
+     */
+    public function getServiceProvider(): ServiceProviderInterface
     {
         return new PhpViewServiceProvider();
     }
-    
-    public function getRegisterClasses()
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getRegisterClasses(): array
     {
         return [
             RenderInterface::class,
         ];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getAliases(): array
+    {
+        return [];
     }
 }

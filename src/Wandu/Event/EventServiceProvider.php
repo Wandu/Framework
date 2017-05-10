@@ -20,14 +20,12 @@ class EventServiceProvider implements ServiceProviderInterface
      */
     public function register(ContainerInterface $app)
     {
-        $app->bind(DispatcherInterface::class, Dispatcher::class);
-        $app->extend(Dispatcher::class, function (DispatcherInterface $dispatcher) {
+        $app->bind(DispatcherInterface::class, Dispatcher::class)->after(function (DispatcherInterface $dispatcher) {
             foreach ($this->listeners as $event => $listeners) {
                 foreach ($listeners as $listener) {
                     $dispatcher->on($event, $listener);
                 }
             }
-            return $dispatcher;
         });
         $app->alias('event', Dispatcher::class);
     }
