@@ -38,7 +38,7 @@ class MigrateCreateCommand extends Command
         $name = $this->input->getArgument('name');
         $filePath = $this->creator->create($name);
         $this->output->writeln(
-            '<info>create</info> .' . str_replace($this->container['app_path'], '', $filePath)
+            '<info>create</info> .' . str_replace(getcwd(), '', $filePath)
         );
     }
 }
