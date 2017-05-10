@@ -1,5 +1,5 @@
 <?php
-namespace Wandu\DI\Containnee;
+namespace Wandu\DI\Descriptor;
 
 use PHPUnit\Framework\TestCase;
 use stdClass;

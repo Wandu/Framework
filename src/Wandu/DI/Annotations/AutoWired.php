@@ -4,11 +4,12 @@ namespace Wandu\DI\Annotations;
 use Doctrine\Common\Annotations\Annotation\Required;
 use Doctrine\Common\Annotations\Annotation\Target;
 use Exception;
+use ReflectionClass;
 use ReflectionProperty;
 use Throwable;
-use Wandu\DI\Descriptor;
 use Wandu\DI\ContainerInterface;
 use Wandu\DI\Contracts\PropertyDecoratorInterface;
+use Wandu\DI\Descriptor;
 
 /**
  * @Annotation
@@ -16,37 +17,37 @@ use Wandu\DI\Contracts\PropertyDecoratorInterface;
  */
 class AutoWired implements PropertyDecoratorInterface
 {
+    /** @var array  */
+    static protected $callStack = []; 
+    
     /** @Required @var string */
     public $name;
 
     /**
      * {@inheritdoc}
      */
-    public function beforeCreateProperty(ReflectionProperty $refl, Descriptor $desc, ContainerInterface $container)
-    {
-        // do nothing
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function afterCreateProperty($target, ReflectionProperty $refl, Descriptor $desc, ContainerInterface $container)
-    {
-        static $callStack = [];
-        if (in_array($target, $callStack)) {
-            return; // return when a circular call is detected.
-        }
-        array_push($callStack, $target);
-        try {
-            $refl->setAccessible(true);
-            $refl->setValue($target, $container->get($this->name));
-        } catch (Exception $e) {
-            array_pop($callStack);
-            throw $e;
-        } catch (Throwable $e) {
-            array_pop($callStack);
-            throw $e;
-        }
-        array_pop($callStack);
+    public function onBindProperty(
+        ReflectionProperty $reflProperty,
+        ReflectionClass $reflClass,
+        Descriptor $desc,
+        ContainerInterface $container
+    ) {
+        $desc->after(function ($instance) use ($reflProperty, $container) {
+            if (in_array($instance, static::$callStack)) {
+                return; // return when a circular call is detected.
+            }
+            array_push(static::$callStack, $instance);
+            try {
+                $reflProperty->setAccessible(true);
+                $reflProperty->setValue($instance, $container->get($this->name));
+            } catch (Exception $e) {
+                array_pop(static::$callStack);
+                throw $e;
+            } catch (Throwable $e) {
+                array_pop(static::$callStack);
+                throw $e;
+            }
+            array_pop(static::$callStack);
+        });
     }
 }

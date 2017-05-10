@@ -16,7 +16,7 @@ class AssignTest extends TestCase
         $container = new Container();
         $container->bind(Reader::class, AnnotationReader::class); // add annotation.
 
-        $container->bind(AssignTestConstructor::class)->wire();
+        $container->bind(AssignTestConstructor::class)->annotated();
 
         $container->instance('depend.first', $depend1 = new AssignTestPropertyDepend());
         $container->instance('depend.second', $depend2 = new AssignTestPropertyDepend());

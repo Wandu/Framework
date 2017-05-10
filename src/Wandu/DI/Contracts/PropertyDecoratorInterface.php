@@ -1,24 +1,18 @@
 <?php
 namespace Wandu\DI\Contracts;
 
+use ReflectionClass;
 use ReflectionProperty;
-use Wandu\DI\Descriptor;
 use Wandu\DI\ContainerInterface;
+use Wandu\DI\Descriptor;
 
 interface PropertyDecoratorInterface
 {
     /**
-     * @param \ReflectionProperty $refl
+     * @param \ReflectionProperty $reflProperty
+     * @param \ReflectionClass $reflClass
      * @param \Wandu\DI\Descriptor $desc
      * @param \Wandu\DI\ContainerInterface $container
      */
-    public function beforeCreateProperty(ReflectionProperty $refl, Descriptor $desc, ContainerInterface $container);
-
-    /**
-     * @param object $target
-     * @param \ReflectionProperty $refl
-     * @param \Wandu\DI\Descriptor $desc
-     * @param \Wandu\DI\ContainerInterface $container
-     */
-    public function afterCreateProperty($target, ReflectionProperty $refl, Descriptor $desc, ContainerInterface $container);
+    public function onBindProperty(ReflectionProperty $reflProperty, ReflectionClass $reflClass, Descriptor $desc, ContainerInterface $container);
 }

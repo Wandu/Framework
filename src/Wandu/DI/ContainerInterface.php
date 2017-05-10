@@ -2,7 +2,6 @@
 namespace Wandu\DI;
 
 use ArrayAccess;
-use Closure;
 use Psr\Container\ContainerInterface as PsrContainerInterface;
 
 interface ContainerInterface extends ArrayAccess, PsrContainerInterface
@@ -29,6 +28,7 @@ interface ContainerInterface extends ArrayAccess, PsrContainerInterface
 
     /**
      * @param string[] ...$names
+     * @return void
      */
     public function destroy(...$names);
 
@@ -56,6 +56,7 @@ interface ContainerInterface extends ArrayAccess, PsrContainerInterface
     /**
      * @param string $alias
      * @param string $target
+     * @return void
      */
     public function alias(string $alias, string $target);
 
@@ -70,12 +71,6 @@ interface ContainerInterface extends ArrayAccess, PsrContainerInterface
      * @return \Wandu\DI\ContainerInterface
      */
     public function with(array $arguments = []): ContainerInterface;
-
-    /**
-     * @param string $name
-     * @param \Closure $handler
-     */
-    public function extend(string $name, Closure $handler);
     
     /**
      * @param string $className
@@ -97,10 +92,12 @@ interface ContainerInterface extends ArrayAccess, PsrContainerInterface
 
     /**
      * @param \Wandu\DI\ServiceProviderInterface $provider
+     * @return void
      */
     public function register(ServiceProviderInterface $provider);
 
     /**
+     * @return void
      */
     public function boot();
 }

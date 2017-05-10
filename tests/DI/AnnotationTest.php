@@ -45,17 +45,11 @@ class AnnotationTestClassAnnotation implements ClassDecoratorInterface
     /** @var string */
     public $name;
 
-    public function beforeCreateClass(ReflectionClass $refl, Descriptor $desc, ContainerInterface $container)
+    public function onBindClass(ReflectionClass $refl, Descriptor $desc, ContainerInterface $container)
     {
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function afterCreateClass($object, ReflectionClass $refl, Descriptor $desc, ContainerInterface $container)
-    {
-        /** @var \Wandu\DI\AnnotationTestClass1 $object */
-        $object->class = "{$this->name}";
+        $desc->after(function ($instance) {
+            $instance->class = "{$this->name}";
+        });
     }
 }
 
@@ -68,17 +62,16 @@ class AnnotationTestPropertyAnnotation implements PropertyDecoratorInterface
     /** @var string */
     public $name;
 
-    public function beforeCreateProperty(ReflectionProperty $refl, Descriptor $desc, ContainerInterface $container)
-    {
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function afterCreateProperty($object, \ReflectionProperty $refl, Descriptor $desc, ContainerInterface $container)
-    {
-        $refl->setAccessible(true);
-        $refl->setValue($object, $this->name);
+    public function onBindProperty(
+        ReflectionProperty $reflProperty,
+        ReflectionClass $reflClass,
+        Descriptor $desc,
+        ContainerInterface $container
+    ) {
+        $desc->after(function ($instance) use ($reflProperty) {
+            $reflProperty->setAccessible(true);
+            $reflProperty->setValue($instance, $this->name);
+        });
     }
 }
 
@@ -91,16 +84,15 @@ class AnnotationTestMethodAnnotation implements MethodDecoratorInterface
     /** @var string */
     public $name;
 
-    public function beforeCreateMethod(ReflectionMethod $refl, Descriptor $desc, ContainerInterface $container)
-    {
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function afterCreateMethod($object, \ReflectionMethod $refl, Descriptor $desc, ContainerInterface $container)
-    {
-        $object->countOfParams = $refl->getNumberOfParameters();
+    public function onBindMethod(
+        ReflectionMethod $reflMethod,
+        ReflectionClass $reflClass,
+        Descriptor $desc,
+        ContainerInterface $container
+    ) {
+        $desc->after(function ($instance) use ($reflMethod) {
+            $instance->countOfParams = $reflMethod->getNumberOfParameters();
+        });
     }
 }
 

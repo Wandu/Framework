@@ -8,17 +8,9 @@ use Wandu\DI\ContainerInterface;
 interface ClassDecoratorInterface
 {
     /**
-     * @param \ReflectionClass $refl
+     * @param \ReflectionClass $reflClass
      * @param \Wandu\DI\Descriptor $desc
      * @param \Wandu\DI\ContainerInterface $container
      */
-    public function beforeCreateClass(ReflectionClass $refl, Descriptor $desc, ContainerInterface $container);
-
-    /**
-     * @param object $target
-     * @param \ReflectionClass $refl
-     * @param \Wandu\DI\Descriptor $desc
-     * @param \Wandu\DI\ContainerInterface $container
-     */
-    public function afterCreateClass($target, ReflectionClass $refl, Descriptor $desc, ContainerInterface $container);
+    public function onBindClass(ReflectionClass $reflClass, Descriptor $desc, ContainerInterface $container);
 }

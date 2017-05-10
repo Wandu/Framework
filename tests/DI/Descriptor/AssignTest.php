@@ -1,5 +1,5 @@
 <?php
-namespace Wandu\DI\Containee;
+namespace Wandu\DI\Descriptor;
 
 use PHPUnit\Framework\TestCase;
 use Wandu\Assertions;
@@ -16,36 +16,31 @@ class AssignTest extends TestCase
         $container = new Container();
         $container->bind(ChainMethodTestAssignIF::class, ChainMethodTestAssign::class);
 
-        static::assertException(
-            new CannotResolveException(ChainMethodTestAssignIF::class, 'dep'),
+        static::assertException(new CannotResolveException(ChainMethodTestAssignIF::class, 'dep'),
             function () use ($container) {
                 $container->get(ChainMethodTestAssign::class);
-            }
-        );
-        static::assertException(
-            new CannotResolveException(ChainMethodTestAssignIF::class, 'dep'),
+            });
+        static::assertException(new CannotResolveException(ChainMethodTestAssignIF::class, 'dep'),
             function () use ($container) {
                 $container->get(ChainMethodTestAssignIF::class);
-            }
-        );
+            });
 
         // bind class directly
         $container = new Container();
         $container->bind(ChainMethodTestAssign::class);
 
-        static::assertException(
-            new CannotResolveException(ChainMethodTestAssign::class, 'dep'),
+        static::assertException(new CannotResolveException(ChainMethodTestAssign::class, 'dep'),
             function () use ($container) {
                 $container->get(ChainMethodTestAssign::class);
-            }
-        );
+            });
     }
 
     public function testBindSuccess()
     {
         // bind interface
         $container = new Container();
-        $container->bind(ChainMethodTestAssignIF::class, ChainMethodTestAssign::class)->assign(['dep' => "hello dependency!",]);
+        $container->bind(ChainMethodTestAssignIF::class,
+            ChainMethodTestAssign::class)->assign(['dep' => "hello dependency!",]);
 
         $object = $container->get(ChainMethodTestAssign::class);
         static::assertInstanceOf(ChainMethodTestAssign::class, $object);
@@ -71,12 +66,10 @@ class AssignTest extends TestCase
             return new ChainMethodTestAssign($dep . ' from closure');
         });
 
-        static::assertException(
-            new CannotResolveException(ChainMethodTestAssign::class, 'dep'),
+        static::assertException(new CannotResolveException(ChainMethodTestAssign::class, 'dep'),
             function () use ($container) {
                 $container->get(ChainMethodTestAssign::class);
-            }
-        );
+            });
     }
 
     public function testClosureSuccess()
