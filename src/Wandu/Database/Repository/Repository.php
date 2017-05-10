@@ -8,6 +8,7 @@ use Wandu\Caster\CastManagerInterface;
 use Wandu\Collection\ArrayList;
 use Wandu\Collection\Contracts\ListInterface;
 use Wandu\Database\Entity\Metadata;
+use Wandu\Database\Exception\EntityNotFoundException;
 use Wandu\Database\Exception\IdentifierNotFoundException;
 use Wandu\Database\Manager;
 use Wandu\Database\Query\SelectQuery;
@@ -45,7 +46,7 @@ class Repository
         $this->connection = $manager->connection($meta->getConnection());
         $this->meta = $meta;
         $this->caster = $caster;
-        $this->query = new QueryBuilder($meta->getTable());
+        $this->query = new QueryBuilder($this->connection->getConfig()->getPrefix() . $meta->getTable());
     }
 
     /**
@@ -89,12 +90,39 @@ class Repository
     }
 
     /**
+     * @param string|callable|\Wandu\Database\Contracts\QueryInterface $query
+     * @param array $bindings
+     * @return object
+     * @throws \Wandu\Database\Exception\EntityNotFoundException
+     */
+    public function firstOrFail($query = null, array $bindings = [])
+    {
+        $attributes = $this->connection->first($this->normalizeSelectQuery($query), $bindings);
+        if (isset($attributes)) {
+            return $this->hydrate($attributes);
+        }
+        throw new EntityNotFoundException();
+    }
+
+    /**
      * @param string|int $identifier
      * @return object
      */
     public function find($identifier)
     {
         return $this->first(function (SelectQuery $select) use ($identifier) {
+            return $select->where($this->meta->getPrimaryKey(), $identifier);
+        });
+    }
+
+    /**
+     * @param string|int $identifier
+     * @return object
+     * @throws \Wandu\Database\Exception\EntityNotFoundException
+     */
+    public function findOrFail($identifier)
+    {
+        return $this->firstOrFail(function (SelectQuery $select) use ($identifier) {
             return $select->where($this->meta->getPrimaryKey(), $identifier);
         });
     }

@@ -35,6 +35,14 @@ class MysqlConnection implements ConnectionInterface
     /**
      * {@inheritdoc}
      */
+    public function getConfig(): Configuration
+    {
+        return $this->config;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function connect()
     {
         if (!$this->pdo) {

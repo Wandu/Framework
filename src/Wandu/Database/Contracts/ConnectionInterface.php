@@ -1,8 +1,15 @@
 <?php
 namespace Wandu\Database\Contracts;
 
+use Wandu\Database\Configuration;
+
 interface ConnectionInterface
 {
+    /**
+     * @return \Wandu\Database\Configuration
+     */
+    public function getConfig(): Configuration;
+    
     /**
      * @return $this
      */

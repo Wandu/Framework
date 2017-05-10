@@ -50,10 +50,10 @@ class Manager
      */
     public function connect($connection, $name = 'default')
     {
-        if (!$connection instanceof Configuration) {
+        if (is_array($connection)) {
             $connection = new Configuration($connection);
         }
-        if (!$connection instanceof ConnectionInterface) {
+        if ($connection instanceof Configuration) {
             switch ($connection->getDriver()) {
                 case Configuration::DRIVER_MYSQL:
                     $connection = new MysqlConnection($connection, $this->dispatcher);
@@ -77,12 +77,11 @@ class Manager
 
     /**
      * @param string $class
-     * @param string $connection
      * @return \Wandu\Database\Repository\Repository
      */
-    public function repository(string $class, string $connection = 'default'): Repository
+    public function repository(string $class): Repository
     {
-        $repoName = "{$class}@{$connection}";
+        $repoName = "{$class}";
         if (!isset($this->repositories[$repoName])) {
             $this->repositories[$repoName] = new Repository($this, $this->reader->getMetadataFrom($class), $this->caster);
         }

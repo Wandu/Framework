@@ -24,13 +24,12 @@ class DatabaseServiceProvider implements ServiceProviderInterface
     {
         $app->bind(Reader::class, AnnotationReader::class);
         $app->bind(MetadataReaderInterface::class, MetadataReader::class);
-        $app->closure(Manager::class, function (MetadataReaderInterface $reader, CastManagerInterface $caster) {
-            $manager = new Manager($reader, $caster);
+        $app->bind(Manager::class)->after(function (Manager $manager) {
             foreach (config('database.connections', []) as $name => $connection) {
                 $manager->connect($connection, $name);
             }
-            return $manager;
         });
+
         $app->alias('database', Manager::class);
         $app->closure(ConnectionInterface::class, function (Manager $manager) {
             return $manager->connection();

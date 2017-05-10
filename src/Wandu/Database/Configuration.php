@@ -67,17 +67,9 @@ class Configuration
     /**
      * @return string
      */
-    public function getHost()
+    public function getPrefix(): string
     {
-        return $this->host;
-    }
-
-    /**
-     * @return int
-     */
-    public function getPort()
-    {
-        return $this->port;
+        return $this->prefix;
     }
     
     /**
