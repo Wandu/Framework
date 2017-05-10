@@ -12,7 +12,7 @@ class MonologServiceProvider implements ServiceProviderInterface
 {
     public function register(ContainerInterface $app)
     {
-        $app->closure(Logger::class, function (ContainerInterface $app) {
+        $app->closure(Logger::class, function () {
             $logger = new Logger('wandu');
             if ($path = config('log.path')) {
                 $logger->pushHandler(new StreamHandler($path));
