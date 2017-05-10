@@ -15,6 +15,7 @@ use Wandu\Database\Support\Helper;
  * column_definition:
  *     data_type [NOT NULL | NULL] [DEFAULT default_value]
  *         [AUTO_INCREMENT] [UNIQUE [KEY] | [PRIMARY] KEY]
+ *         [COMMENT 'string']
  *         [ReferenceExpression]
  * 
  * data_type:
@@ -69,6 +70,8 @@ use Wandu\Database\Support\Helper;
  *
  * @method \Wandu\Database\Query\Expression\ColumnExpression first()
  * @method \Wandu\Database\Query\Expression\ColumnExpression after(string $column)
+ * 
+ * @method \Wandu\Database\Query\Expression\ColumnExpression comment(string $comment)
  */
 class ColumnExpression implements ExpressionInterface
 {
@@ -195,6 +198,10 @@ class ColumnExpression implements ExpressionInterface
         }
         if (isset($this->attributes['primary'])) {
             $stringToReturn .= ' PRIMARY KEY';
+        }
+        if (isset($this->attributes['comment'])) {
+            $comment = str_replace("'", "''", $this->attributes['comment']);
+            $stringToReturn .= " COMMENT '{$comment}'";
         }
         if (isset($this->reference)) {
             $referenceString = $this->reference->toSql();
