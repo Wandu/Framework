@@ -29,9 +29,9 @@ class CorsPsr7ServiceProvider implements ServiceProviderInterface
 
         $app->closure(Analyzer::class, function (AnalysisStrategyInterface $strategy) {
             return Analyzer::instance($strategy);
-        })->after(function (Analyzer $analyzer, ContainerInterface $container) {
-            if ($container->has(LoggerInterface::class)) {
-                $analyzer->setLogger($container->get(LoggerInterface::class));
+        })->after(function (Analyzer $analyzer) use ($app) {
+            if ($app->has(LoggerInterface::class)) {
+                $analyzer->setLogger($app->get(LoggerInterface::class));
             }
         });
         $app->alias(AnalyzerInterface::class, Analyzer::class);
