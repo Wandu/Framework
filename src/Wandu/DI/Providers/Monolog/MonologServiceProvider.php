@@ -1,5 +1,5 @@
 <?php
-namespace Wandu\Bridges\Monolog;
+namespace Wandu\DI\Providers\Monolog;
 
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
@@ -10,6 +10,9 @@ use function Wandu\Foundation\config;
 
 class MonologServiceProvider implements ServiceProviderInterface
 {
+    /**
+     * {@inheritdoc}
+     */
     public function register(ContainerInterface $app)
     {
         $app->closure(Logger::class, function () {
@@ -23,6 +26,9 @@ class MonologServiceProvider implements ServiceProviderInterface
         $app->alias('log', Logger::class);
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function boot(ContainerInterface $app)
     {
     }

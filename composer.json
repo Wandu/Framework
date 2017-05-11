@@ -37,9 +37,9 @@
         "twig/twig": "^1.24",
 
         "doctrine/cache": "^1.6",
-        "illuminate/database": "^5.2",
         "monolog/monolog": "^1.19",
-        "composer/semver": "^1.4"
+        "composer/semver": "^1.4",
+        "neomerx/cors-psr7": "^1.0"
     },
     "autoload": {
         "psr-4": {
