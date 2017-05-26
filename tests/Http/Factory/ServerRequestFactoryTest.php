@@ -60,6 +60,7 @@ class ServerRequestFactoryTest extends PHPUnit_Framework_TestCase
     {
         $request = $this->factory->create([
             'HTTP_HOST' => 'blog.wani.kr',
+            'HTTP_AUTHORIZATION_' => "something",
             'HTTP_CONNECTION' => 'keep-alive',
             'HTTP_CACHE_CONTROL' => 'max-age=0',
             'HTTP_USER_AGENT' => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.116 Safari/537.36',
@@ -74,6 +75,8 @@ class ServerRequestFactoryTest extends PHPUnit_Framework_TestCase
         static::assertEquals(['blog.wani.kr'], $request->getHeader('host'));
         static::assertEquals(['blog.wani.kr'], $request->getHeader('HOST'));
         static::assertEquals(['blog.wani.kr'], $request->getHeader('Host'));
+
+        static::assertEquals('something', $request->getHeaderLine('authorization'));
 
         static::assertEquals(['keep-alive'], $request->getHeader('connection'));
         static::assertEquals(['max-age=0'], $request->getHeader('cache-control'));
