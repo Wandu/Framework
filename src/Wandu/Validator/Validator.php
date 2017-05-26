@@ -1,7 +1,6 @@
 <?php
 namespace Wandu\Validator;
 
-use Wandu\Validator\Contracts\RuleInterface;
 use Wandu\Validator\Contracts\TesterInterface;
 use Wandu\Validator\Exception\InvalidValueException;
 
