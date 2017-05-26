@@ -2,31 +2,18 @@
 namespace Wandu\Validator;
 
 use Wandu\Validator\Contracts\RuleInterface;
+use Wandu\Validator\Contracts\TesterInterface;
 use Wandu\Validator\Exception\InvalidValueException;
 
 class Validator
 {
-    /**
-     * @param string|\Wandu\Validator\Contracts\RuleInterface|\Wandu\Validator\Contracts\TesterInterface $rule
-     * @return \Wandu\Validator\Validator
-     */
-    public static function create($rule): Validator
-    {
-        if ($rule instanceof RuleInterface) return new Validator($rule);
-        if (is_string($rule)) {
-            $rule = tester($rule);
-        }
-        // all rule is TesterInterface
-        
-    }
-    
-    /** @var \Wandu\Validator\Contracts\RuleInterface */
+    /** @var string|\Wandu\Validator\Contracts\RuleInterface|\Wandu\Validator\Contracts\TesterInterface */
     protected $rule;
     
     /**
-     * @param \Wandu\Validator\Contracts\RuleInterface $rule
+     * @param string|\Wandu\Validator\Contracts\RuleInterface|\Wandu\Validator\Contracts\TesterInterface $rule
      */
-    public function __construct(RuleInterface $rule)
+    public function __construct($rule)
     {
         $this->rule = $rule;
     }
@@ -37,6 +24,17 @@ class Validator
      */
     public function assert($data)
     {
+        if (is_string($this->rule)) {
+            if (!tester($this->rule)->test($data)) {
+                throw new InvalidValueException([$this->rule]);
+            }
+        }
+        if ($this->rule instanceof TesterInterface) {
+            if (!$this->rule->test($data)) {
+                throw new InvalidValueException([get_class($this->rule)]);
+            }
+        }
+        
         $errorBag = new ErrorBag();
         $this->rule->define(new AssertRuleDefinition($errorBag, $data));
         if (count($errorBag)) {

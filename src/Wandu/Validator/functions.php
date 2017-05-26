@@ -5,24 +5,25 @@ use Wandu\Validator\Contracts\RuleInterface;
 use Wandu\Validator\Contracts\TesterInterface;
 
 /**
- * @param string|\Wandu\Validator\Contracts\TesterInterface $tester
+ * @param string $tester
+ * @param array ...$arguments
  * @return \Wandu\Validator\Contracts\TesterInterface
  */
-function tester($tester): TesterInterface
+function tester($tester, ...$arguments): TesterInterface
 {
     if (!isset(TesterFactory::$instance)) {
         (new TesterFactory)->setAsGlobal();
     }
-    return TesterFactory::$instance->from($tester);
+    return TesterFactory::$instance->from($tester, ...$arguments);
 }
 
 /**
- * @param string|\Wandu\Validator\Contracts\TesterInterface $validator
- * @return \Wandu\Validator\Contracts\TesterInterface
+ * @param string|\Wandu\Validator\Contracts\RuleInterface|\Wandu\Validator\Contracts\TesterInterface $rule
+ * @return \Wandu\Validator\Validator
  */
-function validator($validator)
+function validator($rule): Validator
 {
-    
+    return new Validator($rule);
 }
 
 /**

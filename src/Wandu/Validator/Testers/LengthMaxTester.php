@@ -21,6 +21,7 @@ class LengthMaxTester implements TesterInterface
      */
     public function test($data): bool
     {
+        if ($data === null) return false;
         if (is_array($data)) {
             return count($data) <= $this->max;
         }

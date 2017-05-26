@@ -21,6 +21,7 @@ class MaxTester implements TesterInterface
      */
     public function test($data): bool
     {
+        if ($data === null) return false;
         return $data <= $this->max;
     }
 }

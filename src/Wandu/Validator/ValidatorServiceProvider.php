@@ -11,10 +11,11 @@ class ValidatorServiceProvider implements ServiceProviderInterface
      */
     public function register(ContainerInterface $app)
     {
-        $app->closure(ValidatorFactory::class, function () {
-            return validator();
+        $app->closure(TesterFactory::class, function () {
+            return new TesterFactory();
+        })->after(function (TesterFactory $instance) {
+            $instance->setAsGlobal();
         });
-        $app->alias('validator', ValidatorFactory::class);
     }
 
     /**

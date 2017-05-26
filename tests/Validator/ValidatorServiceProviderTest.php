@@ -20,7 +20,7 @@ class ValidatorServiceProviderTest extends ServiceProviderTestCase
     public function getRegisterClasses(): array
     {
         return [
-            ValidatorFactory::class,
+            TesterFactory::class,
         ];
     }
 
@@ -30,7 +30,6 @@ class ValidatorServiceProviderTest extends ServiceProviderTestCase
     public function getAliases(): array
     {
         return [
-            'validator' => ValidatorFactory::class,
         ];
     }
 }

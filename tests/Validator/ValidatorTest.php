@@ -11,6 +11,13 @@ class ValidatorTest extends TestCase
 {
     use Assertions;
 
+    public function testStringAssert()
+    {
+        static::assertException(new InvalidValueException(["string"]), function () {
+            validator("string")->assert(1010);
+        });
+    }
+
     public function testRuleAssert()
     {
         $validator = new Validator(new ValidatorTestPointRule());

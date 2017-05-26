@@ -67,15 +67,16 @@ class TesterFactory
     }
     
     /**
-     * @param string|\Wandu\Validator\Contracts\TesterInterface $tester
+     * @param string $tester
+     * @param array ...$arguments
      * @return \Wandu\Validator\Contracts\TesterInterface
      */
-    public function from(string $tester): TesterInterface
+    public function from(string $tester, ...$arguments): TesterInterface
     {
-        if ($tester instanceof TesterInterface) {
-            return $tester;
+        if (count($arguments)) {
+            $className = $this->getClassName($tester);
+            return new $className(...$arguments);
         }
-
         list($name, $arguments) = $this->getMethodAndParams($tester);
         if (!array_key_exists($tester, $this->caches)) {
             $className = $this->getClassName($name);
