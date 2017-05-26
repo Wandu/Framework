@@ -249,6 +249,9 @@ class Container implements ContainerInterface
     public function create(string $className, array $arguments = [])
     {
         try {
+            if (!class_exists($className)) {
+                throw new NullReferenceException($className);
+            }
             return (new Descriptor($className, new BindResolver($className)))->assign($arguments)->createInstance($this);
         } catch (CannotFindParameterException $e) {
             throw new CannotResolveException($className, $e->getParameter());
