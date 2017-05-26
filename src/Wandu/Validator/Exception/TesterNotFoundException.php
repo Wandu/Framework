@@ -3,7 +3,7 @@ namespace Wandu\Validator\Exception;
 
 use RuntimeException;
 
-class ValidatorNotFoundException extends RuntimeException
+class TesterNotFoundException extends RuntimeException
 {
     /** @var string */
     protected $name;
@@ -11,7 +11,7 @@ class ValidatorNotFoundException extends RuntimeException
     public function __construct($name)
     {
         $this->name = $name;
-        parent::__construct("validator \"{$name}\" not found.");
+        parent::__construct("tester \"{$name}\" not found.");
     }
 
     /**

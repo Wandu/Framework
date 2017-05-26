@@ -1,13 +1,16 @@
 <?php
 namespace Wandu\Validator;
 
+use Wandu\Validator\Contracts\TesterInterface;
+
 /**
- * @return \Wandu\Validator\ValidatorFactory
+ * @param string|\Wandu\Validator\Contracts\TesterInterface $tester
+ * @return \Wandu\Validator\Contracts\TesterInterface
  */
-function validator()
+function tester($tester): TesterInterface
 {
-    if (!isset(ValidatorFactory::$factory)) {
-        (new ValidatorFactory)->setAsGlobal();
+    if (!isset(TesterFactory::$instance)) {
+        (new TesterFactory)->setAsGlobal();
     }
-    return ValidatorFactory::$factory;
+    return TesterFactory::$instance->from($tester);
 }

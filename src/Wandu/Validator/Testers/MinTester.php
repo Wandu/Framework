@@ -1,10 +1,10 @@
 <?php
-namespace Wandu\Validator\Rules;
+namespace Wandu\Validator\Testers;
 
-class MinValidator extends ValidatorAbstract
+use Wandu\Validator\Contracts\TesterInterface;
+
+class MinTester implements TesterInterface
 {
-    const ERROR_TYPE = 'min:{{min}}';
-
     /** @var int */
     protected $min;
 
@@ -19,8 +19,8 @@ class MinValidator extends ValidatorAbstract
     /**
      * {@inheritdoc}
      */
-    public function test($item)
+    public function test($data): bool
     {
-        return $item >= $this->min;
+        return $data >= $this->min;
     }
 }

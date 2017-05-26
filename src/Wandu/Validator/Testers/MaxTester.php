@@ -1,10 +1,10 @@
 <?php
-namespace Wandu\Validator\Rules;
+namespace Wandu\Validator\Testers;
 
-class MaxValidator extends ValidatorAbstract
+use Wandu\Validator\Contracts\TesterInterface;
+
+class MaxTester implements TesterInterface
 {
-    const ERROR_TYPE = 'max:{{max}}';
-
     /** @var int */
     protected $max;
 
@@ -19,8 +19,8 @@ class MaxValidator extends ValidatorAbstract
     /**
      * {@inheritdoc}
      */
-    public function test($item)
+    public function test($data): bool
     {
-        return $item <= $this->max;
+        return $data <= $this->max;
     }
 }

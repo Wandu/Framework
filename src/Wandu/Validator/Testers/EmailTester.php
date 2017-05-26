@@ -1,14 +1,13 @@
 <?php
-namespace Wandu\Validator\Rules;
+namespace Wandu\Validator\Testers;
 
 use Egulias\EmailValidator\EmailLexer;
 use Egulias\EmailValidator\Validation\EmailValidation;
 use Egulias\EmailValidator\Validation\RFCValidation;
+use Wandu\Validator\Contracts\TesterInterface;
 
-class EmailValidator extends ValidatorAbstract
+class EmailTester implements TesterInterface
 {
-    const ERROR_TYPE = 'email';
-
     /** @var \Egulias\EmailValidator\Validation\EmailValidation */
     protected $validation;
     
@@ -23,8 +22,8 @@ class EmailValidator extends ValidatorAbstract
     /**
      * {@inheritdoc}
      */
-    public function test($item)
+    public function test($data): bool
     {
-        return is_string($item) && $this->validation->isValid($item, new EmailLexer());
+        return is_string($data) && $this->validation->isValid($data, new EmailLexer());
     }
 }

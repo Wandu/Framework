@@ -1,10 +1,10 @@
 <?php
-namespace Wandu\Validator\Rules;
+namespace Wandu\Validator\Testers;
 
-class RegExpValidator extends ValidatorAbstract
+use Wandu\Validator\Contracts\TesterInterface;
+
+class RegExpTester implements TesterInterface
 {
-    const ERROR_TYPE = 'reg_exp:{{pattern}}';
-
     /** @var string */
     protected $pattern;
 
@@ -19,8 +19,8 @@ class RegExpValidator extends ValidatorAbstract
     /**
      * {@inheritdoc}
      */
-    public function test($item)
+    public function test($data): bool
     {
-        return @preg_match($this->pattern, $item) > 0;
+        return @preg_match($this->pattern, $data) > 0;
     }
 }
