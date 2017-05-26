@@ -28,10 +28,10 @@ function validator($rule): Validator
 
 /**
  * @param \Wandu\Validator\Contracts\RuleInterface $rule
- * @param string $model
+ * @param string $T
  * @return \Wandu\Validator\Sanitizer
  */
-function sanitizer(RuleInterface $rule, string $model): Sanitizer
+function sanitizer(RuleInterface $rule, string $T = null): Sanitizer
 {
-    return new Sanitizer($rule, $model);
+    return new Sanitizer($rule, $T);
 }
