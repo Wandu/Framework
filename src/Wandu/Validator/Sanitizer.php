@@ -18,7 +18,7 @@ class Sanitizer
      * @param string|\Wandu\Validator\Contracts\RuleInterface|\Wandu\Validator\Contracts\TesterInterface|\Wandu\Validator\Validator $rule
      * @param string $T
      */
-    public function __construct($rule, string $T)
+    public function __construct($rule, string $T = null)
     {
         if ($rule instanceof Validator) {
             $this->validator = $rule;
@@ -30,12 +30,12 @@ class Sanitizer
 
     /**
      * @param mixed $data
-     * @return {$this->T}
+     * @return mixed|{$this->T}
      */
     public function sanitize($data)
     {
         $this->validator->assert($data);
-        if (!class_exists($this->T)) return $data;
+        if (!$this->T || !class_exists($this->T)) return $data;
         $refl = $this->getReflectionClass();
         $instance = $refl->newInstanceWithoutConstructor();
         foreach ($refl->getProperties() as $reflectionProperty) {
