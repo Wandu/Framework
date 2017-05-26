@@ -36,11 +36,13 @@ class TesterFactory
         $this->testers = $testers + [
                 'always_false' => AlwaysFalseTester::class,
                 'always_true' => AlwaysTrueTester::class,
+                'bool' => BooleanTester::class,
                 'boolean' => BooleanTester::class,
                 'email' => EmailTester::class,
                 'float' => FloatTester::class,
                 'floatable' => NumericTester::class,
                 'integerable' => IntegerableTester::class,
+                'int' => IntegerTester::class,
                 'integer' => IntegerTester::class,
                 'length_max' => LengthMaxTester::class,
                 'length_min' => LengthMinTester::class,
