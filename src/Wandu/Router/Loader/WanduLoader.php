@@ -5,6 +5,7 @@ use Exception;
 use Psr\Http\Message\ServerRequestInterface;
 use Throwable;
 use Wandu\DI\ContainerInterface;
+use Wandu\DI\Exception\NullReferenceException;
 use Wandu\Http\Psr\ServerRequest;
 use Wandu\Router\Contracts\LoaderInterface;
 use Wandu\Router\Contracts\MiddlewareInterface;
@@ -30,9 +31,7 @@ class WanduLoader implements LoaderInterface
     {
         try {
             return $this->container->create($className);
-        } catch (Exception $e) {
-            throw new HandlerNotFoundException($className);
-        } catch (Throwable $e) {
+        } catch (NullReferenceException $e) {
             throw new HandlerNotFoundException($className);
         }
     }
@@ -44,9 +43,7 @@ class WanduLoader implements LoaderInterface
     {
         try {
             $object = $this->container->get($className);
-        } catch (Exception $e) {
-            throw new HandlerNotFoundException($className, $methodName);
-        } catch (Throwable $e) {
+        } catch (NullReferenceException $e) {
             throw new HandlerNotFoundException($className, $methodName);
         }
         if (!method_exists($object, $methodName) && !method_exists($object, '__call')) {
