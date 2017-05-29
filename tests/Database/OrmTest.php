@@ -2,12 +2,10 @@
 namespace Wandu\Database;
 
 use Carbon\Carbon;
+use Mockery;
 use Wandu\Database\Events\ExecuteQuery;
-use Wandu\Database\Query\SelectQuery;
-use Wandu\Database\Sakila\SakilaFilm;
 use Wandu\Database\Sakila\SakilaLanguage;
 use Wandu\Event\Listener;
-use Mockery;
 
 class OrmTest extends SakilaTestCase
 {

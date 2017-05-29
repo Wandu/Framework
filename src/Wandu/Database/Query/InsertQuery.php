@@ -1,6 +1,8 @@
 <?php
 namespace Wandu\Database\Query;
 
+use Traversable;
+use Wandu\Database\Contracts\ExpressionInterface;
 use Wandu\Database\Contracts\QueryInterface;
 use Wandu\Database\Support\Helper;
 
@@ -16,10 +18,16 @@ class InsertQuery implements QueryInterface
      * @param string $table
      * @param array|\Traversable $values
      */
-    public function __construct($table, $values)
+    public function __construct($table, $values = [])
     {
         $this->table = $table;
-        $this->values = $values;
+        if (is_array($values)) {
+            $this->values = $values;
+        } elseif ($values instanceof Traversable) {
+            $this->values = iterator_to_array($values);
+        } else {
+            $this->values = [];
+        }
     }
 
     /**
@@ -27,14 +35,28 @@ class InsertQuery implements QueryInterface
      */
     public function toSql()
     {
-        $insertParts = $this->values;
-        if (array_values($insertParts) !== $insertParts) {
-            $insertParts = [$insertParts];
+        $valuesList = $this->values;
+        if (array_values($valuesList) !== $valuesList) {
+            $valuesList = [$valuesList];
         }
-        $columns = array_keys($insertParts[0]);
-        $valueSqlPart = Helper::stringRepeat(', ', '?', count($columns), '(', ')');
-        return "INSERT INTO `{$this->table}`(`". implode("`, `", array_values($columns)) . "`)" .
-            " VALUES ". Helper::stringRepeat(', ', $valueSqlPart, count($insertParts));
+        $fields = array_keys($valuesList[0]); // fields
+
+        $sqlPartValuesList = [];
+        foreach ($valuesList as $values) {
+            $sqlPartValues = [];
+            foreach ($fields as $field) {
+                $value = $values[$field] ?? null;
+                if ($value instanceof ExpressionInterface) {
+                    $sqlPartValues[] = $value->toSql();
+                } else {
+                    $sqlPartValues[] = '?';
+                }
+            }
+            $sqlPartValuesList[] = implode(", ", $sqlPartValues);
+        }
+        $sql = "INSERT INTO `{$this->table}`(`". implode("`, `", array_values($fields)) . "`)"
+            ." VALUES " . Helper::arrayImplode(", ", $sqlPartValuesList, '(', ')');
+        return $sql;
     }
 
     /**
@@ -42,15 +64,20 @@ class InsertQuery implements QueryInterface
      */
     public function getBindings()
     {
-        $insertParts = $this->values;
-        if (array_values($insertParts) !== $insertParts) {
-            $insertParts = [$insertParts];
+        $valuesList = $this->values;
+        if (array_values($valuesList) !== $valuesList) {
+            $valuesList = [$valuesList];
         }
-        $columns = array_keys($insertParts[0]);
+        $fields = array_keys($valuesList[0]);
         $bindings = [];
-        foreach ($insertParts as $insertPart) {
-            foreach ($columns as $column) {
-                $bindings[] = isset($insertPart[$column]) ? $insertPart[$column] : null;
+        foreach ($valuesList as $values) {
+            foreach ($fields as $field) {
+                $value = $values[$field] ?? null;
+                if ($value instanceof ExpressionInterface) {
+                    $bindings = array_merge($bindings, $value->getBindings());
+                } else {
+                    $bindings[] = $value;
+                }
             }
         }
         return $bindings;
