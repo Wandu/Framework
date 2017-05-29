@@ -31,7 +31,7 @@ class ComparisonExpression implements ExpressionInterface
      * WhereStatement constructor.
      * @param string $name
      * @param string $operator
-     * @param string|array $value
+     * @param string|array|\Wandu\Database\Contracts\ExpressionInterface $value
      */
     public function __construct($name, $operator, $value)
     {
@@ -48,7 +48,12 @@ class ComparisonExpression implements ExpressionInterface
         if ($this->operator === 'IN') {
             return Helper::stringRepeat(', ', '?', count($this->value), Helper::normalizeName($this->name) . " {$this->operator} (", ")");
         }
-        return Helper::normalizeName($this->name) . " {$this->operator} ?";
+        $name = Helper::normalizeName($this->name);
+        $operator = $this->operator;
+        if ($this->value instanceof ExpressionInterface) {
+            return "{$name} {$operator} " . $this->value->toSql();
+        }
+        return "{$name} {$operator} ?";
     }
 
     /**
@@ -56,6 +61,14 @@ class ComparisonExpression implements ExpressionInterface
      */
     public function getBindings()
     {
-        return is_array($this->value) ? $this->value : [$this->value];
+        $bindings = [];
+        foreach (is_array($this->value) ? $this->value : [$this->value] as $value) {
+            if ($value instanceof ExpressionInterface) {
+                $bindings = array_merge($bindings, $value->getBindings());
+            } else {
+                $bindings[] = $value;
+            }
+        }
+        return $bindings;
     }
 }
