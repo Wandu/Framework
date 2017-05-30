@@ -1,10 +1,11 @@
 <?php
 namespace Wandu\Validator;
 
-use Wandu\Validator\Contracts\RuleDefnition;
+use Closure;
 use Wandu\Validator\Contracts\Rule;
+use Wandu\Validator\Contracts\RuleDefinition;
 
-class AssertRuleDefinition implements RuleDefnition
+class AssertRuleDefinition implements RuleDefinition
 {
     /** @var \Wandu\Validator\TesterFactory */
     protected $tester;
@@ -15,21 +16,22 @@ class AssertRuleDefinition implements RuleDefnition
     /** @var mixed $data */
     protected $data;
     
-    public function __construct(TesterFactory $tester, ErrorBag $errors, $data)
+    /** @var mixed $origin */
+    protected $origin;
+    
+    public function __construct(TesterFactory $tester, ErrorBag $errors, $data, $origin)
     {
         $this->tester = $tester;
         $this->errors = $errors;
         $this->data = $data;
+        $this->origin = $origin;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function prop(string $target, $rules = null)
+    public function prop(string $target, ...$rules)
     {
-        $rules = ($rules ? $rules : []);
-        $rules = is_array($rules) ? $rules : [$rules];
-
         $targetName = $target;
         $iterable = 0;
         $optional = false;
@@ -45,12 +47,12 @@ class AssertRuleDefinition implements RuleDefnition
 
         if ($optional && !isset($this->data[$targetName])) return;
         if (!isset($this->data[$targetName])) {
-            $this->errors->throw("required", [$targetName]);
+            $this->errors->store("required", [$targetName]);
             return;
         }
 
         if ($iterable && !is_array($this->data[$targetName])) {
-            $this->errors->throw("array", [$targetName]);
+            $this->errors->store("array", [$targetName]);
             return;
         }
 
@@ -58,28 +60,32 @@ class AssertRuleDefinition implements RuleDefnition
         if ($iterable) {
             foreach ($this->data[$targetName] as $index => $subData) {
                 $this->errors->pushPrefix($index);
-                foreach ($rules as $rule) {
-                    if ($rule instanceof Rule) {
-                        $rule->define(new AssertRuleDefinition($this->tester, $this->errors, $subData));
-                    } else {
-                        if (!$this->tester->parse($rule)->test($subData)) {
-                            $this->errors->throw($rule);
-                        }
-                    }
-                }
+                $this->checkRules($rules, $subData, $this->origin);
                 $this->errors->popPrefix();
             }
         } else {
-            foreach ($rules as $rule) {
-                if ($rule instanceof Rule) {
-                    $rule->define(new AssertRuleDefinition($this->tester, $this->errors, $this->data[$targetName]));
-                } else {
-                    if (!$this->tester->parse($rule)->test($this->data[$targetName])) {
-                        $this->errors->throw($rule);
-                    }
+            $this->checkRules($rules, $this->data[$targetName], $this->origin);
+        }
+        $this->errors->popPrefix();
+    }
+
+    /**
+     * @param string[]|\Wandu\Validator\Contracts\Rule[]|\Closure[] $rules
+     * @param mixed $data
+     * @param mixed $origin
+     */
+    protected function checkRules(array $rules, $data, $origin)
+    {
+        foreach ($rules as $rule) {
+            if ($rule instanceof Rule) {
+                $rule->define(new AssertRuleDefinition($this->tester, $this->errors, $data, $origin));
+            } elseif ($rule instanceof Closure) {
+                $rule->__invoke(new AssertRuleDefinition($this->tester, $this->errors, $data, $origin));
+            } else {
+                if (!$this->tester->parse($rule)->test($data, $origin)) {
+                    $this->errors->store($rule);
                 }
             }
         }
-        $this->errors->popPrefix();
     }
 }

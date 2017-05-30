@@ -31,7 +31,7 @@ class Validator
         }
 
         $errorBag = new ErrorBag();
-        $this->rule->define(new AssertRuleDefinition($this->tester, $errorBag, $data));
+        $this->rule->define(new AssertRuleDefinition($this->tester, $errorBag, $data, $data));
         if (count($errorBag)) {
             throw new InvalidValueException($errorBag->errors());
         }

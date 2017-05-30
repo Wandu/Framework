@@ -4,8 +4,8 @@ namespace Wandu\Validator\Contracts;
 interface Rule
 {
     /**
-     * @param \Wandu\Validator\Contracts\RuleDefnition $rule
+     * @param \Wandu\Validator\Contracts\RuleDefinition $rule
      * @return void
      */
-    public function define(RuleDefnition $rule);
+    public function define(RuleDefinition $rule);
 }

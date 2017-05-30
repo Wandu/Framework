@@ -80,3 +80,32 @@ namespace Wandu\Router
         return dispatcher()->getPath($name, $attributes);
     }
 }
+
+namespace Wandu\Validator
+{
+    use Wandu\Validator\Contracts\Tester;
+    use function Wandu\DI\container;
+
+    /**
+     * @param string $tester
+     * @param array $arguments
+     * @return \Wandu\Validator\Contracts\Tester
+     */
+    function tester(string $tester, array $arguments = []): Tester
+    {
+        $factory = container()->get(TesterFactory::class);
+        if (count($arguments)) {
+            return $factory->create($tester, $arguments);
+        }
+        return $factory->parse($tester);
+    }
+
+    /**
+     * @param string|\Wandu\Validator\Contracts\Rule $rule
+     * @return \Wandu\Validator\Validator
+     */
+    function validator($rule): Validator
+    {
+        return container()->get(ValidatorFactory::class)->create($rule);
+    }
+}

@@ -4,7 +4,6 @@ namespace Wandu\Validator\Testers;
 use Egulias\EmailValidator\Validation\DNSCheckValidation;
 use PHPUnit\Framework\TestCase;
 use Wandu\Validator\TesterFactory;
-use function Wandu\Validator\tester;
 
 class EmailTest extends TestCase 
 {
@@ -29,7 +28,7 @@ class EmailTest extends TestCase
     
     public function testEmailWithOtherValidation()
     {
-        static::assertTrue(tester('email', new DNSCheckValidation())->test('im@wani.kr'));
-        static::assertFalse(tester('email', new DNSCheckValidation())->test('im@wani.nothing'));
+        static::assertTrue($this->tester->create('email', [new DNSCheckValidation()])->test('im@wani.kr'));
+        static::assertFalse($this->tester->create('email', [new DNSCheckValidation()])->test('im@wani.nothing'));
     }
 }

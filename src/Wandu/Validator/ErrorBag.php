@@ -8,6 +8,7 @@ class ErrorBag implements Countable
     /** @var string[] */
     private $prefixes = [];
 
+    /** @var array */
     public $errors = [];
 
     /**
@@ -27,7 +28,7 @@ class ErrorBag implements Countable
      * @param string $type
      * @param array $target
      */
-    public function throw(string $type, array $target = [])
+    public function store(string $type, array $target = [])
     {
         array_push($this->errors, [
             $type,

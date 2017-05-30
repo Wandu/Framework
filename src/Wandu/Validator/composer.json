@@ -8,10 +8,7 @@
     "autoload": {
         "psr-4": {
             "Wandu\\Validator\\": ""
-        },
-        "files": [
-            "functions.php"
-        ]
+        }
     },
     "suggest": {
         "egulias/email-validator": "for Email validator."

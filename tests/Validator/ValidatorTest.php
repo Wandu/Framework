@@ -3,7 +3,7 @@ namespace Wandu\Validator;
 
 use PHPUnit\Framework\TestCase;
 use Wandu\Assertions;
-use Wandu\Validator\Contracts\RuleDefnition;
+use Wandu\Validator\Contracts\RuleDefinition;
 use Wandu\Validator\Contracts\Rule;
 use Wandu\Validator\Exception\InvalidValueException;
 
@@ -60,7 +60,8 @@ class ValidatorTest extends TestCase
             "departure" => ["name" => "busan"],
             "arrival" => ["name" => "seoul"],
             "waypoints" => [],
-            "timeToGo" => "2017-10-10 00:00:00",
+            "timeToGo" => 1496139000,
+            "timeToBack" => 1496139010,
             "people" => 50,
         ]);
         static::assertException(new InvalidValueException([
@@ -71,6 +72,7 @@ class ValidatorTest extends TestCase
 
         static::assertException(new InvalidValueException([
             "required@waypoints.1.name",
+            "greater_than:timeToGo@timeToBack",
         ]), function () use ($validator) {
             $validator->assert([
                 "departure" => ["name" => "busan"],
@@ -78,7 +80,8 @@ class ValidatorTest extends TestCase
                 "waypoints" => [
                     ["name" => "seoul"], [], ["name" => "seoul"],
                 ],
-                "timeToGo" => "2017-10-10 00:00:00",
+                "timeToGo" => 1496139000,
+                "timeToBack" => 1496138000,
                 "people" => 50,
             ]);
         });
@@ -87,7 +90,7 @@ class ValidatorTest extends TestCase
 
 class ValidatorTestPointRule implements Rule
 {
-    public function define(RuleDefnition $rule)
+    public function define(RuleDefinition $rule)
     {
         $rule->prop("name", "string");
         $rule->prop("address?", "string");
@@ -98,13 +101,18 @@ class ValidatorTestPointRule implements Rule
 
 class ValidatorTestCharterRule implements Rule
 {
-    public function define(RuleDefnition $rule)
+    public function define(RuleDefinition $rule)
     {
         $rule->prop("departure", new ValidatorTestPointRule());
-        $rule->prop("arrival", new ValidatorTestPointRule());
+        $rule->prop("arrival", function (RuleDefinition $rule) {
+            $rule->prop("name", "string");
+            $rule->prop("address?", "string");
+            $rule->prop("lat?", "float");
+            $rule->prop("lng?", "float");
+        });
         $rule->prop("waypoints[]", new ValidatorTestPointRule());
-        $rule->prop("timeToGo", "string");
-        $rule->prop("timeToBack?", "string");
+        $rule->prop("timeToGo", "int");
+        $rule->prop("timeToBack?", "int", "greater_than:timeToGo");
         $rule->prop("people", "int");
     }
 }
