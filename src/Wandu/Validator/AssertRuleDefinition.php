@@ -1,19 +1,23 @@
 <?php
 namespace Wandu\Validator;
 
-use Wandu\Validator\Contracts\RuleDefinitionInterface;
-use Wandu\Validator\Contracts\RuleInterface;
+use Wandu\Validator\Contracts\RuleDefnition;
+use Wandu\Validator\Contracts\Rule;
 
-class AssertRuleDefinition implements RuleDefinitionInterface
+class AssertRuleDefinition implements RuleDefnition
 {
+    /** @var \Wandu\Validator\TesterFactory */
+    protected $tester;
+    
     /** @var \Wandu\Validator\ErrorBag */
     protected $errors;
     
     /** @var mixed $data */
     protected $data;
     
-    public function __construct(ErrorBag $errors, $data)
+    public function __construct(TesterFactory $tester, ErrorBag $errors, $data)
     {
+        $this->tester = $tester;
         $this->errors = $errors;
         $this->data = $data;
     }
@@ -55,10 +59,10 @@ class AssertRuleDefinition implements RuleDefinitionInterface
             foreach ($this->data[$targetName] as $index => $subData) {
                 $this->errors->pushPrefix($index);
                 foreach ($rules as $rule) {
-                    if ($rule instanceof RuleInterface) {
-                        $rule->define(new AssertRuleDefinition($this->errors, $subData));
+                    if ($rule instanceof Rule) {
+                        $rule->define(new AssertRuleDefinition($this->tester, $this->errors, $subData));
                     } else {
-                        if (!tester($rule)->test($subData)) {
+                        if (!$this->tester->parse($rule)->test($subData)) {
                             $this->errors->throw($rule);
                         }
                     }
@@ -67,10 +71,10 @@ class AssertRuleDefinition implements RuleDefinitionInterface
             }
         } else {
             foreach ($rules as $rule) {
-                if ($rule instanceof RuleInterface) {
-                    $rule->define(new AssertRuleDefinition($this->errors, $this->data[$targetName]));
+                if ($rule instanceof Rule) {
+                    $rule->define(new AssertRuleDefinition($this->tester, $this->errors, $this->data[$targetName]));
                 } else {
-                    if (!tester($rule)->test($this->data[$targetName])) {
+                    if (!$this->tester->parse($rule)->test($this->data[$targetName])) {
                         $this->errors->throw($rule);
                     }
                 }

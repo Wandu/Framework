@@ -1,9 +1,9 @@
 <?php
 namespace Wandu\Validator\Testers;
 
-use Wandu\Validator\Contracts\TesterInterface;
+use Wandu\Validator\Contracts\Tester;
 
-class RegExpTester implements TesterInterface
+class RegExpTester implements Tester
 {
     /** @var string */
     protected $pattern;
@@ -19,7 +19,7 @@ class RegExpTester implements TesterInterface
     /**
      * {@inheritdoc}
      */
-    public function test($data): bool
+    public function test($data, $origin = null, array $keys = []): bool
     {
         return @preg_match($this->pattern, $data) > 0;
     }

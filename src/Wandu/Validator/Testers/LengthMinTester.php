@@ -1,9 +1,9 @@
 <?php
 namespace Wandu\Validator\Testers;
 
-use Wandu\Validator\Contracts\TesterInterface;
+use Wandu\Validator\Contracts\Tester;
 
-class LengthMinTester implements TesterInterface
+class LengthMinTester implements Tester
 {
     /** @var int */
     protected $min;
@@ -19,7 +19,7 @@ class LengthMinTester implements TesterInterface
     /**
      * {@inheritdoc}
      */
-    public function test($data): bool
+    public function test($data, $origin = null, array $keys = []): bool
     {
         if (is_array($data)) {
             return count($data) >= $this->min;

@@ -1,14 +1,14 @@
 <?php
 namespace Wandu\Validator\Testers;
 
-use Wandu\Validator\Contracts\TesterInterface;
+use Wandu\Validator\Contracts\Tester;
 
-class PrintableTester implements TesterInterface
+class PrintableTester implements Tester
 {
     /**
      * {@inheritdoc}
      */
-    public function test($data): bool
+    public function test($data, $origin = null, array $keys = []): bool
     {
         if (is_object($data)) {
             return method_exists($data, '__toString');

@@ -1,14 +1,14 @@
 <?php
 namespace Wandu\Validator\Testers;
 
-use Wandu\Validator\Contracts\TesterInterface;
+use Wandu\Validator\Contracts\Tester;
 
-class IntegerableTester implements TesterInterface
+class IntegerableTester implements Tester
 {
     /**
      * {@inheritdoc}
      */
-    public function test($data): bool
+    public function test($data, $origin = null, array $keys = []): bool
     {
         return is_numeric($data) && is_int($data + 0);
     }

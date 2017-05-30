@@ -1,10 +1,15 @@
 <?php
 namespace Wandu\Validator;
 
-use Wandu\Validator\Contracts\TesterInterface;
+use Wandu\Validator\Contracts\Tester;
 use Wandu\Validator\Exception\TesterNotFoundException;
+use Wandu\Validator\Testers\AfterTester;
+use Wandu\Validator\Testers\EqualToTester;
+use Wandu\Validator\Testers\GreaterThanOrEqualTester;
+use Wandu\Validator\Testers\GreaterThanTester;
 use Wandu\Validator\Testers\AlwaysFalseTester;
 use Wandu\Validator\Testers\AlwaysTrueTester;
+use Wandu\Validator\Testers\BeforeTester;
 use Wandu\Validator\Testers\BooleanTester;
 use Wandu\Validator\Testers\EmailTester;
 use Wandu\Validator\Testers\FloatTester;
@@ -12,6 +17,8 @@ use Wandu\Validator\Testers\IntegerableTester;
 use Wandu\Validator\Testers\IntegerTester;
 use Wandu\Validator\Testers\LengthMaxTester;
 use Wandu\Validator\Testers\LengthMinTester;
+use Wandu\Validator\Testers\LessThanOrEqualTester;
+use Wandu\Validator\Testers\LessThanTester;
 use Wandu\Validator\Testers\MaxTester;
 use Wandu\Validator\Testers\MinTester;
 use Wandu\Validator\Testers\NumericTester;
@@ -22,30 +29,39 @@ use Wandu\Validator\Testers\StringTester;
 
 class TesterFactory
 {
-    /** @var \Wandu\Validator\TesterFactory */
-    public static $instance;
-    
     /** @var string[] */
     protected $testers;
 
-    /** @var \Wandu\Validator\Contracts\TesterInterface[] */
+    /** @var \Wandu\Validator\Contracts\Tester[] */
     protected $caches = [];
 
     public function __construct(array $testers = [])
     {
         $this->testers = $testers + [
+                'after' => AfterTester::class,
                 'always_false' => AlwaysFalseTester::class,
                 'always_true' => AlwaysTrueTester::class,
+                'before' => BeforeTester::class,
                 'bool' => BooleanTester::class,
                 'boolean' => BooleanTester::class,
                 'email' => EmailTester::class,
+                'equal_to' => EqualToTester::class,
+                'eq' => EqualToTester::class,
                 'float' => FloatTester::class,
                 'floatable' => NumericTester::class,
+                'greater_than' => GreaterThanTester::class,
+                'greater_than_or_equal' => GreaterThanOrEqualTester::class,
+                'gt' => GreaterThanTester::class,
+                'gte' => GreaterThanOrEqualTester::class,
                 'integerable' => IntegerableTester::class,
                 'int' => IntegerTester::class,
                 'integer' => IntegerTester::class,
                 'length_max' => LengthMaxTester::class,
                 'length_min' => LengthMinTester::class,
+                'less_than' => LessThanTester::class,
+                'less_than_or_equal' => LessThanOrEqualTester::class,
+                'lt' => LessThanTester::class,
+                'lte' => LessThanOrEqualTester::class,
                 'max' => MaxTester::class,
                 'min' => MinTester::class,
                 'numeric' => NumericTester::class,
@@ -55,32 +71,27 @@ class TesterFactory
                 'string' => StringTester::class,
             ];
     }
-
+    
     /**
-     * @return \Wandu\Validator\TesterFactory
+     * @param string $tester
+     * @param array $arguments
+     * @return \Wandu\Validator\Contracts\Tester
      */
-    public function setAsGlobal()
+    public function create(string $tester, array $arguments = []): Tester
     {
-        $instance = static::$instance;
-        static::$instance = $this;
-        return $instance;
+        $className = $this->getClassName($tester);
+        return new $className(...$arguments);
     }
     
     /**
      * @param string $tester
-     * @param array ...$arguments
-     * @return \Wandu\Validator\Contracts\TesterInterface
+     * @return \Wandu\Validator\Contracts\Tester
      */
-    public function from(string $tester, ...$arguments): TesterInterface
+    public function parse(string $tester): Tester
     {
-        if (count($arguments)) {
-            $className = $this->getClassName($tester);
-            return new $className(...$arguments);
-        }
         list($name, $arguments) = $this->getMethodAndParams($tester);
         if (!array_key_exists($tester, $this->caches)) {
-            $className = $this->getClassName($name);
-            $this->caches[$tester] = new $className(...$arguments);
+            $this->caches[$tester] = $this->create($name, $arguments);
         }
         return $this->caches[$tester];
     }

@@ -3,17 +3,14 @@ namespace Wandu\Validator\Testers;
 
 use Wandu\Validator\Contracts\Tester;
 
-class MinTester implements Tester
+class BeforeTester implements Tester
 {
-    /** @var int */
-    protected $min;
+    /** @var string */
+    protected $criteria;
 
-    /**
-     * @param int $min
-     */
-    public function __construct($min)
+    public function __construct($criteria)
     {
-        $this->min = $min;
+        $this->criteria = $criteria;
     }
 
     /**
@@ -21,6 +18,6 @@ class MinTester implements Tester
      */
     public function test($data, $origin = null, array $keys = []): bool
     {
-        return $data >= $this->min;
+        return strtotime($this->criteria) >= $data;
     }
 }

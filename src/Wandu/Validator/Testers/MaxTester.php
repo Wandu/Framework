@@ -1,9 +1,9 @@
 <?php
 namespace Wandu\Validator\Testers;
 
-use Wandu\Validator\Contracts\TesterInterface;
+use Wandu\Validator\Contracts\Tester;
 
-class MaxTester implements TesterInterface
+class MaxTester implements Tester
 {
     /** @var int */
     protected $max;
@@ -19,7 +19,7 @@ class MaxTester implements TesterInterface
     /**
      * {@inheritdoc}
      */
-    public function test($data): bool
+    public function test($data, $origin = null, array $keys = []): bool
     {
         if ($data === null) return false;
         return $data <= $this->max;

@@ -1,15 +1,14 @@
 <?php
 namespace Wandu\Validator\Testers;
 
-use Wandu\Validator\Contracts\Tester;
-
-class StringableTester implements Tester
+class LessThanTester extends PropertyTesterAbstract
 {
     /**
      * {@inheritdoc}
      */
     public function test($data, $origin = null, array $keys = []): bool
     {
-        return is_scalar($data);
+        if (null === $prop = $this->getProp($origin)) return false;
+        return $prop > $data;
     }
 }

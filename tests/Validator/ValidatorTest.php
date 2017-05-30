@@ -3,24 +3,32 @@ namespace Wandu\Validator;
 
 use PHPUnit\Framework\TestCase;
 use Wandu\Assertions;
-use Wandu\Validator\Contracts\RuleDefinitionInterface;
-use Wandu\Validator\Contracts\RuleInterface;
+use Wandu\Validator\Contracts\RuleDefnition;
+use Wandu\Validator\Contracts\Rule;
 use Wandu\Validator\Exception\InvalidValueException;
 
 class ValidatorTest extends TestCase
 {
     use Assertions;
 
+    /** @var \Wandu\Validator\ValidatorFactory */
+    protected $validator;
+    
+    public function setUp()
+    {
+        $this->validator = new ValidatorFactory();
+    }
+    
     public function testStringAssert()
     {
         static::assertException(new InvalidValueException(["string"]), function () {
-            validator("string")->assert(1010);
+            $this->validator->create("string")->assert(1010);
         });
     }
 
     public function testRuleAssert()
     {
-        $validator = new Validator(new ValidatorTestPointRule());
+        $validator = $this->validator->create(new ValidatorTestPointRule());
 
         $validator->assert(["name" => "wandu"]);
         $validator->assert([
@@ -46,7 +54,7 @@ class ValidatorTest extends TestCase
 
     public function testRuleByRuleAssert()
     {
-        $validator = new Validator(new ValidatorTestCharterRule());
+        $validator = $this->validator->create(new ValidatorTestCharterRule());
 
         $validator->assert([
             "departure" => ["name" => "busan"],
@@ -77,9 +85,9 @@ class ValidatorTest extends TestCase
     }
 }
 
-class ValidatorTestPointRule implements RuleInterface
+class ValidatorTestPointRule implements Rule
 {
-    public function define(RuleDefinitionInterface $rule)
+    public function define(RuleDefnition $rule)
     {
         $rule->prop("name", "string");
         $rule->prop("address?", "string");
@@ -88,9 +96,9 @@ class ValidatorTestPointRule implements RuleInterface
     }
 }
 
-class ValidatorTestCharterRule implements RuleInterface
+class ValidatorTestCharterRule implements Rule
 {
-    public function define(RuleDefinitionInterface $rule)
+    public function define(RuleDefnition $rule)
     {
         $rule->prop("departure", new ValidatorTestPointRule());
         $rule->prop("arrival", new ValidatorTestPointRule());

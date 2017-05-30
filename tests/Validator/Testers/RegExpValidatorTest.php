@@ -3,13 +3,21 @@ namespace Wandu\Validator\Rules;
 
 use PHPUnit\Framework\TestCase;
 use stdClass;
-use function Wandu\Validator\tester;
+use Wandu\Validator\TesterFactory;
 
 class RegExpValidatorTest extends TestCase 
 {
+    /** @var \Wandu\Validator\TesterFactory */
+    protected $tester;
+
+    public function setUp()
+    {
+        $this->tester = new TesterFactory();
+    }
+
     public function testRegExp()
     {
-        $tester = tester("regexp", "/^hello_world$/");
+        $tester = $this->tester->create("regexp", ["/^hello_world$/"]);
 
         static::assertTrue($tester->test("hello_world"));
 
@@ -19,7 +27,7 @@ class RegExpValidatorTest extends TestCase
 
     public function testRegExpFrom()
     {
-        $tester = tester("regexp:/^hello_world$/");
+        $tester = $this->tester->parse("regexp:/^hello_world$/");
 
         static::assertTrue($tester->test("hello_world"));
 
@@ -29,7 +37,7 @@ class RegExpValidatorTest extends TestCase
 
     public function testRegExpHasComma()
     {
-        $tester = tester("regexp:/^\\d{3,5}$/");
+        $tester = $this->tester->parse("regexp:/^\\d{3,5}$/");
 
         static::assertTrue($tester->test("100"));
         static::assertTrue($tester->test("1000"));

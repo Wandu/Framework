@@ -4,9 +4,9 @@ namespace Wandu\Validator\Testers;
 use Egulias\EmailValidator\EmailLexer;
 use Egulias\EmailValidator\Validation\EmailValidation;
 use Egulias\EmailValidator\Validation\RFCValidation;
-use Wandu\Validator\Contracts\TesterInterface;
+use Wandu\Validator\Contracts\Tester;
 
-class EmailTester implements TesterInterface
+class EmailTester implements Tester
 {
     /** @var \Egulias\EmailValidator\Validation\EmailValidation */
     protected $validation;
@@ -22,7 +22,7 @@ class EmailTester implements TesterInterface
     /**
      * {@inheritdoc}
      */
-    public function test($data): bool
+    public function test($data, $origin = null, array $keys = []): bool
     {
         return is_string($data) && $this->validation->isValid($data, new EmailLexer());
     }
