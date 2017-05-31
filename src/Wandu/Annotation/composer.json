@@ -1,0 +1,19 @@
+{
+    "name": "wandu/annotation",
+    "license": "MIT",
+    "require": {
+        "php": ">=7.0",
+        "psr/simple-cache": "^1",
+        "doctrine/annotations": "~1.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "Wandu\\Annotation\\": ""
+        }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "4.0-dev"
+        }
+    }
+}

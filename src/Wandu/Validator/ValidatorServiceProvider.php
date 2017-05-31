@@ -6,15 +6,16 @@ use Wandu\DI\ServiceProviderInterface;
 
 class ValidatorServiceProvider implements ServiceProviderInterface
 {
+    /** @var array */
+    protected $testers = [];
+    
     /**
      * {@inheritdoc}
      */
     public function register(ContainerInterface $app)
     {
         $app->closure(TesterFactory::class, function () {
-            return new TesterFactory();
-        })->after(function (TesterFactory $instance) {
-            $instance->setAsGlobal();
+            return new TesterFactory($this->testers);
         });
     }
 
