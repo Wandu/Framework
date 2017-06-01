@@ -16,10 +16,10 @@ class BeanstalkServiceProvider implements ServiceProviderInterface
     {
         $app->closure(PheanstalkInterface::class, function () {
             return new Pheanstalk(
-                config('beanstalkd.host', '127.0.0.1'),
-                config('beanstalkd.port', Pheanstalk::DEFAULT_PORT),
-                config('beanstalkd.timeout'),
-                config('beanstalkd.connect_persistent', false)
+                config('pda.pheanstalk.host', '127.0.0.1'),
+                config('pda.pheanstalk.port', Pheanstalk::DEFAULT_PORT),
+                config('pda.pheanstalk.timeout'),
+                config('pda.pheanstalk.connect_persistent', false)
             );
         });
     }

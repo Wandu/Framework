@@ -27,7 +27,6 @@ class EventServiceProvider implements ServiceProviderInterface
                 }
             }
         });
-        $app->alias('event', Dispatcher::class);
     }
 
     /**
