@@ -1,11 +1,10 @@
 <?php
 namespace Wandu\Event;
 
-use PHPUnit_Framework_TestCase;
-use Mockery;
+use PHPUnit\Framework\TestCase;
 use Wandu\DI\Container;
 
-class DispatcherTest extends PHPUnit_Framework_TestCase
+class DispatcherTest extends TestCase 
 {
     public function testTriggerByClass()
     {
@@ -18,27 +17,27 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
 
         // check init event & listener
         $event = new DispatcherTestEvent();
-        $this->assertEquals(0, $event->getCallCount());
-        $this->assertEquals(0, $listener->getLastCallCount());
+        static::assertEquals(0, $event->getCallCount());
+        static::assertEquals(0, $listener->getLastCallCount());
         
         $dispatcher->trigger($event);
 
-        $this->assertEquals(1, $event->getCallCount());
-        $this->assertEquals(1, $listener->getLastCallCount());
+        static::assertEquals(1, $event->getCallCount());
+        static::assertEquals(1, $listener->getLastCallCount());
 
         $dispatcher->trigger($event);
         $dispatcher->trigger($event);
         $dispatcher->trigger($event);
 
-        $this->assertEquals(4, $event->getCallCount());
-        $this->assertEquals(4, $listener->getLastCallCount());
+        static::assertEquals(4, $event->getCallCount());
+        static::assertEquals(4, $listener->getLastCallCount());
     }
 }
 
 class DispatcherTestEvent implements EventInterface
 {
     private $callCount = 0;
-    
+
     public function call()
     {
         $this->callCount++;

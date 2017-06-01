@@ -1,13 +1,18 @@
 <?php
 namespace Wandu\Event;
 
-use PHPUnit_Framework_TestCase;
 use Mockery;
+use PHPUnit\Framework\TestCase;
 use Wandu\DI\Container;
 use Wandu\Q\Queue;
 
-class QueueEventTest extends PHPUnit_Framework_TestCase
+class QueueEventTest extends TestCase 
 {
+    public function tearDown()
+    {
+        Mockery::close();
+    }
+    
     public function testQueueEvent()
     {
         $event = new ViaQueueEventTestEvent();

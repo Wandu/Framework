@@ -1,4 +1,17 @@
 <?php
+namespace Wandu\Event
+{
+    use function Wandu\DI\container;
+
+    /**
+     * @param \Wandu\Event\EventInterface $event
+     */
+    function trigger(EventInterface $event)
+    {
+        container()->get(Dispatcher::class)->trigger($event);
+    }
+}
+
 namespace Wandu\Foundation
 {
     use function Wandu\DI\container;
@@ -20,24 +33,6 @@ namespace Wandu\Foundation
     function config($name, $default = null)
     {
         return container()->get('config')->get($name, $default);
-    }
-
-    /**
-     * @deprecated
-     * @param string|array $path
-     * @return string|array
-     */
-    function path($path)
-    {
-        if (is_array($path)) {
-            return array_map(function ($path) {
-                return path($path);
-            }, $path);
-        }
-        if ($path[0] !== '/' && container()->has('base_path')) {
-            return container()->get('base_path') . '/' . $path;
-        }
-        return $path;
     }
 }
 
