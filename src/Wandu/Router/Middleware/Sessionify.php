@@ -4,6 +4,8 @@ namespace Wandu\Router\Middleware;
 use Closure;
 use Psr\Http\Message\ServerRequestInterface;
 use SessionHandlerInterface;
+use Wandu\Http\Contracts\CookieJarInterface;
+use Wandu\Http\Contracts\SessionInterface;
 use Wandu\Http\Exception\HttpException;
 use Wandu\Http\Parameters\CookieJar;
 use Wandu\Http\Parameters\Session;
@@ -38,7 +40,11 @@ class Sessionify implements MiddlewareInterface
 
         $request = $request
             ->withAttribute('cookie', $cookieJar)
-            ->withAttribute('session', $session);
+            ->withAttribute(CookieJar::class, $cookieJar)
+            ->withAttribute(CookieJarInterface::class, $cookieJar)
+            ->withAttribute('session', $session)
+            ->withAttribute(Session::class, $session)
+            ->withAttribute(SessionInterface::class, $session);
 
         // run next
         try {

@@ -5,7 +5,7 @@ use Mockery;
 use PHPUnit_Framework_TestCase;
 use Psr\Http\Message\ServerRequestInterface;
 use Wandu\Router\Loader\DefaultLoader;
-use Wandu\Router\Responsifier\WanduResponsifier;
+use Wandu\Router\Responsifier\PsrResponsifier;
 
 class TestCase extends PHPUnit_Framework_TestCase
 {
@@ -35,7 +35,7 @@ class TestCase extends PHPUnit_Framework_TestCase
     {
         return new Dispatcher(
             new DefaultLoader(),
-            new WanduResponsifier(),
+            new PsrResponsifier(),
             new Configuration($config)
         );
     }

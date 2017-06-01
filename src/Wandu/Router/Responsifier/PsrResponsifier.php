@@ -7,7 +7,7 @@ use RuntimeException;
 use Wandu\Router\Contracts\ResponsifierInterface;
 use function Wandu\Http\response;
 
-class WanduResponsifier implements ResponsifierInterface
+class PsrResponsifier implements ResponsifierInterface
 {
     /**
      * {@inheritdoc}

@@ -5,7 +5,7 @@ use Closure;
 use Psr\Http\Message\ServerRequestInterface;
 use Wandu\Router\Contracts\MiddlewareInterface;
 use Wandu\Router\Loader\DefaultLoader;
-use Wandu\Router\Responsifier\WanduResponsifier;
+use Wandu\Router\Responsifier\PsrResponsifier;
 use Wandu\Router\Route;
 use Wandu\Router\TestCase;
 
@@ -25,7 +25,7 @@ class Issue1Test extends TestCase
             TestIssue1Middleware::class
         ]);
 
-        $response = $route->execute($request, new DefaultLoader(), new WanduResponsifier());
+        $response = $route->execute($request, new DefaultLoader(), new PsrResponsifier());
         static::assertEquals(
             'login@Issue1, cookie={"name":"wan2land"}',
             $response->getBody()->__toString()

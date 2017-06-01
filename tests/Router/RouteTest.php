@@ -6,7 +6,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Wandu\Http\Psr\Stream\StringStream;
 use Wandu\Router\Contracts\MiddlewareInterface;
-use Wandu\Router\Responsifier\WanduResponsifier;
+use Wandu\Router\Responsifier\PsrResponsifier;
 use function Wandu\Http\response;
 
 class RouteTest extends TestCase
@@ -18,7 +18,7 @@ class RouteTest extends TestCase
         $request = $this->createRequest('GET', '/');
 
         ob_start();
-        $response = $route->execute($request, null, new WanduResponsifier());
+        $response = $route->execute($request, null, new PsrResponsifier());
         $contents = ob_get_contents();
         ob_end_clean();
 
@@ -36,7 +36,7 @@ class RouteTest extends TestCase
         $request = $this->createRequest('GET', '/');
 
         ob_start();
-        $response = $route->execute($request, null, new WanduResponsifier());
+        $response = $route->execute($request, null, new PsrResponsifier());
         $contents = ob_get_contents();
         ob_end_clean();
 
@@ -54,7 +54,7 @@ class RouteTest extends TestCase
         $request = $this->createRequest('GET', '/');
 
         ob_start();
-        $response = $route->execute($request, null, new WanduResponsifier());
+        $response = $route->execute($request, null, new PsrResponsifier());
         $contents = ob_get_contents();
         ob_end_clean();
 
@@ -72,7 +72,7 @@ class RouteTest extends TestCase
         $request = $this->createRequest('GET', '/');
 
         ob_start();
-        $response = $route->execute($request, null, new WanduResponsifier());
+        $response = $route->execute($request, null, new PsrResponsifier());
         $contents = ob_get_contents();
         ob_end_clean();
 

@@ -11,7 +11,7 @@ class DefaultLoader implements LoaderInterface
     /**
      * {@inheritdoc}
      */
-    public function middleware($className): MiddlewareInterface
+    public function middleware(string $className): MiddlewareInterface
     {
         if (!class_exists($className)) {
             throw new HandlerNotFoundException($className);
@@ -22,7 +22,7 @@ class DefaultLoader implements LoaderInterface
     /**
      * {@inheritdoc}
      */
-    public function execute($className, $methodName, ServerRequestInterface $request)
+    public function execute(string $className, string $methodName, ServerRequestInterface $request)
     {
         if (!method_exists($className, $methodName)) {
             throw new HandlerNotFoundException($className, $methodName);

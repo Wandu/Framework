@@ -9,7 +9,7 @@ interface LoaderInterface
      * @param string $className
      * @return \Wandu\Router\Contracts\MiddlewareInterface
      */
-    public function middleware($className): MiddlewareInterface;
+    public function middleware(string $className): MiddlewareInterface;
 
     /**
      * @param string $className
@@ -17,5 +17,5 @@ interface LoaderInterface
      * @param \Psr\Http\Message\ServerRequestInterface $request
      * @return mixed
      */
-    public function execute($className, $methodName, ServerRequestInterface $request);
+    public function execute(string $className, string $methodName, ServerRequestInterface $request);
 }
