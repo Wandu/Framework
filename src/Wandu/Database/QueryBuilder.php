@@ -10,9 +10,6 @@ use Wandu\Database\Query\SelectQuery;
 use Wandu\Database\Query\TruncateQuery;
 use Wandu\Database\Query\UpdateQuery;
 
-/**
- * @todo ALTER add column / drop column / modify column(rename column) / drop constraint / add constraint
- */
 class QueryBuilder
 {
     /** @var string */
@@ -94,4 +91,11 @@ class QueryBuilder
     {
         return new TruncateQuery($this->table);
     }
+
+    // public function addColumn(string $columnName, AddColumnExpression $definition);
+    // public function dropColumn(string $columnName);
+    // public function modifyColumn(string $columnName, ModifyColumnExpression $definition);
+    // public function renameColumn(string $columnName, string $newColumnName);
+    // public function addConstraint(string $constraintName);
+    // public function dropConstraint(string $constraintName);
 }

@@ -44,19 +44,49 @@ class SakilaFilm
     private $language;
 
     public function __construct(
-        $id,
         $title,
         $description,
         $releaseYear,
         SakilaLanguage $language
     ) {
-        $this->id = $id;
         $this->title = $title;
         $this->description = $description;
         $this->releaseYear = $releaseYear;
         $this->language = $language;
     }
 
+    /**
+     * @return int
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTitle(): string
+    {
+        return $this->title;
+    }
+
+    /**
+     * @return string
+     */
+    public function getDescription(): string
+    {
+        return $this->description;
+    }
+
+    /**
+     * @return string
+     */
+    public function getReleaseYear()
+    {
+        return $this->releaseYear;
+    }
+    
     /**
      * @return \Wandu\Database\Sakila\SakilaLanguage
      */

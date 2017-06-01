@@ -1,5 +1,5 @@
 <?php
-namespace Wandu\Database\Repository;
+namespace Wandu\Database;
 
 use InvalidArgumentException;
 use ReflectionClass;
@@ -9,8 +9,6 @@ use Wandu\Collection\ArrayList;
 use Wandu\Collection\Contracts\ListInterface;
 use Wandu\Database\Entity\Metadata;
 use Wandu\Database\Exception\EntityNotFoundException;
-use Wandu\Database\Exception\IdentifierNotFoundException;
-use Wandu\Database\Manager;
 use Wandu\Database\Query\SelectQuery;
 
 class Repository
@@ -136,14 +134,35 @@ class Repository
             return $select->where($this->meta->getPrimaryKey(), 'IN', $identifiers);
         });
     }
+
+    /**
+     * @param object $entity
+     * @return int
+     */
+    public function persist($entity)
+    {
+        $this->assertIsInstance($entity, __METHOD__);
+        $identifier = $this->getIdentifier($entity);
+        if ($identifier) {
+            return $this->executeUpdate($entity);
+        }
+        return $this->executeInsert($entity);
+    }
+
+    /**
+     * @param array $attributes
+     * @return object
+     */
+    public function create(array $attributes = [])
+    {
+    }
     
     /**
      * @param object $entity
      * @return int
      */
-    public function insert($entity)
+    protected function executeInsert($entity)
     {
-        $this->assertIsInstance($entity, __METHOD__);
         $primaryKey = $this->meta->getPrimaryKey();
         $primaryProperty = null;
         $columns = $this->meta->getColumns();
@@ -169,9 +188,8 @@ class Repository
      * @param object $entity
      * @return int
      */
-    public function update($entity)
+    protected function executeUpdate($entity)
     {
-        $this->assertIsInstance($entity, __METHOD__);
         $primaryKey = $this->meta->getPrimaryKey(); 
 
         $identifier = $this->getIdentifier($entity);
@@ -196,6 +214,9 @@ class Repository
         
         $primaryKey = $this->meta->getPrimaryKey();
         $identifier = $this->getIdentifier($entity);
+        if (!$identifier) {
+            return 0;
+        }
 
         $affectedRows = $this->query($this->queryBuilder->delete()->where($primaryKey, $identifier));
         if ($identifierProperty = $this->meta->getPrimaryProperty()) {
@@ -257,9 +278,6 @@ class Repository
         $identifier = null;
         if ($identifierProperty = $this->meta->getPrimaryProperty()) {
             $identifier = $this->pickProperty($this->getPropertyReflection($identifierProperty), $entity);
-        }
-        if (!$identifier) {
-            throw new IdentifierNotFoundException();
         }
         return $identifier;
     }

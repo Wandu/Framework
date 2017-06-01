@@ -1,6 +1,7 @@
 <?php
 namespace Wandu\Database\Sakila;
 
+use Carbon\Carbon;
 use Wandu\Database\Annotations\Cast;
 use Wandu\Database\Annotations\Column;
 use Wandu\Database\Annotations\Table;
@@ -26,14 +27,37 @@ class SakilaLanguage
     /**
      * @Column("last_update")
      * @Cast("datetime")
-     * @var string
+     * @var \Carbon\Carbon
      */
     private $lastUpdate;
 
-    public function __construct($id, $name, $lastUpdate)
+    public function __construct($name, Carbon $lastUpdate)
     {
-        $this->id = $id;
         $this->name = $name;
         $this->lastUpdate = $lastUpdate;
+    }
+
+    /**
+     * @return int
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * @return string
+     */
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
+    /**
+     * @return \Carbon\Carbon
+     */
+    public function getLastUpdate(): Carbon
+    {
+        return $this->lastUpdate;
     }
 }

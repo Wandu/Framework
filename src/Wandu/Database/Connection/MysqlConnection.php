@@ -44,7 +44,7 @@ class MysqlConnection implements ConnectionInterface
     /**
      * {@inheritdoc}
      */
-    public function connect()
+    public function connect(): ConnectionInterface
     {
         if (!$this->pdo) {
             $this->pdo = $this->config->createPdo();
@@ -106,7 +106,7 @@ class MysqlConnection implements ConnectionInterface
     {
         $this->pdo->beginTransaction();
         try {
-            call_user_func($handler, $this);
+            $result = call_user_func($handler, $this);
         } catch (Exception $e) {
             $this->pdo->rollBack();
             throw $e;
@@ -115,6 +115,7 @@ class MysqlConnection implements ConnectionInterface
             throw $e;
         }
         $this->pdo->commit();
+        return $result;
     }
 
     /**

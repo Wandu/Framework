@@ -3,11 +3,11 @@ namespace Wandu\Database;
 
 use Carbon\Carbon;
 use Mockery;
+use Wandu\Collection\ArrayList;
 use Wandu\Database\Events\ExecuteQuery;
 use Wandu\Database\Sakila\SakilaCity;
 use Wandu\Database\Sakila\SakilaCountry;
 use Wandu\Database\Sakila\SakilaFilm;
-use Wandu\Database\Sakila\SakilaLanguage;
 use Wandu\Event\Listener;
 
 class OrmRelationTest extends SakilaTestCase
@@ -26,16 +26,17 @@ class OrmRelationTest extends SakilaTestCase
 
         $filmRepo = $this->manager->repository(SakilaFilm::class);
 
-        static::assertEqualsAndSameProperty(
-            new SakilaFilm(
-                1,
-                'ACADEMY DINOSAUR',
-                'A Epic Drama of a Feminist And a Mad Scientist who must Battle a Teacher in The Canadian Rockies',
-                2006,
-                new SakilaLanguage(1, 'English', new Carbon('2006-02-15 05:02:19'))
-            ),
-            $filmRepo->find(1)
-        );
+        /** @var \Wandu\Database\Sakila\SakilaFilm $film */
+        $film = $filmRepo->find(1);
+
+        static::assertSame(1, $film->getId());
+        static::assertSame('ACADEMY DINOSAUR', $film->getTitle());
+        static::assertSame('A Epic Drama of a Feminist And a Mad Scientist who must Battle a Teacher in The Canadian Rockies', $film->getDescription());
+        static::assertSame(2006, $film->getReleaseYear());
+
+        static::assertSame(1, $film->getLanguage()->getId());
+        static::assertSame('English', $film->getLanguage()->getName());
+        static::assertEquals(new Carbon('2006-02-15 05:02:19'), $film->getLanguage()->getLastUpdate());
     }
 
     public function testHasOneByAll()
@@ -47,15 +48,21 @@ class OrmRelationTest extends SakilaTestCase
 
         $filmRepo = $this->manager->repository(SakilaFilm::class);
 
-        static::assertEqualsAndSameProperty(
-            [
-                new SakilaLanguage(1, 'English', new Carbon('2006-02-15 05:02:19')),
-                new SakilaLanguage(1, 'English', new Carbon('2006-02-15 05:02:19')),
-            ],
-            $filmRepo->findMany([1, 2])->map(function (SakilaFilm $film) {
-                return $film->getLanguage();
-            })->toArray()
-        );
+
+        /** @var \Wandu\Database\Sakila\SakilaLanguage[] $languages */
+        $languages = $filmRepo->findMany([1, 2])->map(function (SakilaFilm $film) {
+            return $film->getLanguage();
+        });
+
+        static::assertInstanceOf(ArrayList::class, $languages);
+        
+        static::assertSame(1, $languages[0]->getId());
+        static::assertSame('English', $languages[0]->getName());
+        static::assertEquals(new Carbon('2006-02-15 05:02:19'), $languages[0]->getLastUpdate());
+
+        static::assertSame(1, $languages[1]->getId());
+        static::assertSame('English', $languages[1]->getName());
+        static::assertEquals(new Carbon('2006-02-15 05:02:19'), $languages[1]->getLastUpdate());
     }
 
     public function testHasManyAndCircular()

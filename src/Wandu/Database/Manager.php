@@ -7,7 +7,7 @@ use Wandu\Database\Connection\MysqlConnection;
 use Wandu\Database\Contracts\ConnectionInterface;
 use Wandu\Database\Contracts\Entity\MetadataReaderInterface;
 use Wandu\Database\Exception\DriverNotFoundException;
-use Wandu\Database\Repository\Repository;
+use Wandu\Database\Repository;
 use Wandu\Event\DispatcherInterface;
 
 class Manager
@@ -24,7 +24,7 @@ class Manager
     /** @var \Wandu\Database\Contracts\ConnectionInterface[] */
     protected $connections = [];
     
-    /** @var \Wandu\Database\Repository\Repository[] */
+    /** @var \Wandu\Database\Repository[] */
     protected $repositories = [];
 
     public function __construct(
@@ -77,7 +77,7 @@ class Manager
 
     /**
      * @param string $class
-     * @return \Wandu\Database\Repository\Repository
+     * @return \Wandu\Database\Repository
      */
     public function repository(string $class): Repository
     {

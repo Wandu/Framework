@@ -2,12 +2,12 @@
 namespace Wandu\Database;
 
 use Mockery;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use Wandu\Database\Contracts\ConnectionInterface;
 use Wandu\Database\Contracts\Entity\MetadataReaderInterface;
 use Wandu\Database\Exception\DriverNotFoundException;
 
-class ManagerTest extends PHPUnit_Framework_TestCase
+class ManagerTest extends TestCase 
 {
     public function testConnectFail()
     {

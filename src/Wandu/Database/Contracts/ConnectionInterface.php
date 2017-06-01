@@ -12,23 +12,16 @@ interface ConnectionInterface
     public function createQueryBuilder(string $tableName): QueryBuilder;
     
     /**
-     * @return $this
+     * @return \Wandu\Database\Contracts\ConnectionInterface
      */
-    public function connect();
+    public function connect(): ConnectionInterface;
 
     /**
      * @param string|callable|\Wandu\Database\Contracts\QueryInterface $query
      * @param array $bindings
-     * @return \Generator
+     * @return \Traversable
      */
     public function fetch($query, array $bindings = []);
-
-    /**
-     * @param string|callable|\Wandu\Database\Contracts\QueryInterface $query
-     * @param array $bindings
-     * @return \Wandu\Collection\Contracts\ListInterface
-     */
-    public function all($query, array $bindings = []);
 
     /**
      * @param string|callable|\Wandu\Database\Contracts\QueryInterface $query
@@ -51,6 +44,7 @@ interface ConnectionInterface
     
     /**
      * @param callable $handler
+     * @return mixed
      * @throws \Exception
      * @throws \Throwable
      */

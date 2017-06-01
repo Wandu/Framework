@@ -1,17 +1,14 @@
 <?php
-namespace Wandu\Database\Repository;
+namespace Wandu\Database;
 
 use InvalidArgumentException;
 use stdClass;
-use Wandu\Database\Exception\IdentifierNotFoundException;
 use Wandu\Database\Query\SelectQuery;
-use Wandu\Database\QueryBuilder;
 use Wandu\Database\Sakila\SakilaActor;
-use Wandu\Database\SakilaTestCase;
 
 class RepositoryTest extends SakilaTestCase 
 {
-    /** @var \Wandu\Database\Repository\Repository */
+    /** @var \Wandu\Database\Repository */
     protected $repository;
     
     public function setUp()
@@ -101,29 +98,21 @@ class RepositoryTest extends SakilaTestCase
     public function testInsert()
     {
         try {
-            $this->repository->insert(new stdClass());
+            $this->repository->persist(new stdClass());
             static::fail();
         } catch (InvalidArgumentException $e) {
             static::assertEquals(
-                "Argument 1 passed to Wandu\\Database\\Repository\\Repository::insert() must be of the type " . SakilaActor::class,
+                "Argument 1 passed to Wandu\\Database\\Repository::persist() must be of the type " . SakilaActor::class,
                 $e->getMessage()
             );
         }
-        static::assertEquals(1, $this->repository->insert($actor = new SakilaActor(null, 'WANDU', 'J', '2016-11-06')));
+        static::assertEquals(1, $this->repository->persist($actor = new SakilaActor(null, 'WANDU', 'J', '2016-11-06')));
         static::assertNotNull($actor->getIdentifier());
 
         static::assertEquals(1, $this->repository->delete($actor));
         static::assertNull($actor->getIdentifier());
 
-        try {
-            $this->repository->delete($actor);
-            static::fail();
-        } catch (IdentifierNotFoundException $e) {
-            static::assertEquals(
-                "Identifier not found from entity",
-                $e->getMessage()
-            );
-        }
+        static::assertEquals(0, $this->repository->delete($actor));
     }
 
     public function testUpdate()
@@ -131,11 +120,11 @@ class RepositoryTest extends SakilaTestCase
         $repository = $this->repository;
 
         try {
-            $repository->update(new stdClass());
+            $repository->persist(new stdClass());
             static::fail();
         } catch (InvalidArgumentException $e) {
             static::assertEquals(
-                "Argument 1 passed to Wandu\\Database\\Repository\\Repository::update() must be of the type " . SakilaActor::class,
+                "Argument 1 passed to Wandu\\Database\\Repository::persist() must be of the type " . SakilaActor::class,
                 $e->getMessage()
             );
         }
@@ -149,7 +138,7 @@ class RepositoryTest extends SakilaTestCase
         $actor->setFirstName('CHANGWAN');
         $actor->setLastName('JUN');
         
-        static::assertEquals(1, $repository->update($actor));
+        static::assertEquals(1, $repository->persist($actor));
 
         /* @var \Wandu\Database\Sakila\SakilaActor $actor */
         $actor = $repository->first("SELECT * FROM `actor` WHERE `actor_id` = ?", ['80']);
@@ -160,6 +149,6 @@ class RepositoryTest extends SakilaTestCase
         $actor->setFirstName('RALPH');
         $actor->setLastName('CRUZ');
 
-        static::assertEquals(1, $repository->update($actor));
+        static::assertEquals(1, $repository->persist($actor));
     }
 }
