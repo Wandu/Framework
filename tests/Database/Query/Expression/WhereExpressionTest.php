@@ -2,6 +2,7 @@
 namespace Wandu\Database\Query\Expression;
 
 use PHPUnit_Framework_TestCase;
+use Wandu\Collection\ArrayList;
 use Wandu\Database\Query\SelectQuery;
 
 class WhereExpressionTest extends PHPUnit_Framework_TestCase
@@ -123,7 +124,7 @@ class WhereExpressionTest extends PHPUnit_Framework_TestCase
         static::assertEquals('WHERE (`foo` = ? OR (`bar1` = ? OR `bar2` = ?)) AND `other` < ?', $query->toSql());
         static::assertEquals(['inner foo string', 'inner bar1 string', 'inner bar2 string', 30], $query->getBindings());
     }
-    
+
     public function testSubQuery()
     {
         $query = new WhereExpression();
@@ -131,6 +132,15 @@ class WhereExpressionTest extends PHPUnit_Framework_TestCase
 
         static::assertEquals('WHERE `id` IN (SELECT `user_id` FROM `users` WHERE `created_at` > ?)', $query->toSql());
         static::assertEquals(["2017-05-05"], $query->getBindings());
+    }
+
+    public function testWhereInTraversable()
+    {
+        $query = new WhereExpression();
+        $query->where("id", "in", new ArrayList([30, 40, 50]));
+
+        static::assertEquals('WHERE `id` IN (?, ?, ?)', $query->toSql());
+        static::assertEquals([30, 40, 50], $query->getBindings());
     }
 
     public function testWhereWithRawQuery()

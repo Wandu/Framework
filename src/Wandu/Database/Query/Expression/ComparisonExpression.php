@@ -1,6 +1,7 @@
 <?php
 namespace Wandu\Database\Query\Expression;
 
+use Traversable;
 use Wandu\Database\Contracts\ExpressionInterface;
 use Wandu\Database\Support\Helper;
 
@@ -47,14 +48,18 @@ class ComparisonExpression implements ExpressionInterface
     {
         $name = Helper::normalizeName($this->name);
         $operator = $this->operator;
+        $value = $this->value;
         if ($this->operator === 'IN') {
-            if ($this->value instanceof ExpressionInterface) {
-                return "{$name} {$operator} (" . $this->value->toSql() . ")";
+            if ($value instanceof ExpressionInterface) {
+                return "{$name} {$operator} (" . $value->toSql() . ")";
             }
-            return Helper::stringRepeat(', ', '?', count($this->value), "{$name} {$operator} (", ")");
+            if ($value instanceof Traversable) {
+                $value = iterator_to_array($value);
+            }
+            return Helper::stringRepeat(', ', '?', count($value), "{$name} {$operator} (", ")");
         }
-        if ($this->value instanceof ExpressionInterface) {
-            return "{$name} {$operator} " . $this->value->toSql();
+        if ($value instanceof ExpressionInterface) {
+            return "{$name} {$operator} " . $value->toSql();
         }
         return "{$name} {$operator} ?";
     }
@@ -65,7 +70,8 @@ class ComparisonExpression implements ExpressionInterface
     public function getBindings()
     {
         $bindings = [];
-        foreach (is_array($this->value) ? $this->value : [$this->value] as $value) {
+        $values = (is_array($this->value) || $this->value instanceof Traversable) ? $this->value : [$this->value];
+        foreach ($values as $value) {
             if ($value instanceof ExpressionInterface) {
                 $bindings = array_merge($bindings, $value->getBindings());
             } else {
