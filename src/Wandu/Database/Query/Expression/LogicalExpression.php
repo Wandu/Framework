@@ -54,7 +54,10 @@ class LogicalExpression implements ExpressionInterface
 
     protected function addWhereQuery($logicalOp, $name, $operator = null, $value = null)
     {
-        if (!is_string($name) && is_callable($name)) {
+        if ($name instanceof ExpressionInterface) {
+            $this->operators[] = $logicalOp;
+            $this->expressions[] = $name;
+        } elseif (!is_string($name) && is_callable($name)) {
             $newWhere = new LogicalExpression();
             $newWhereResult = call_user_func($name, $newWhere);
             $this->operators[] = $logicalOp;

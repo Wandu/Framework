@@ -137,5 +137,18 @@ class WhereExpressionTest extends PHPUnit_Framework_TestCase
 
         static::assertEquals('WHERE (`foo` = ? OR (`created_at` > FROM_UNIXTIME(?, ?) OR `bar2` = ?)) AND `other` < ?', $query->toSql());
         static::assertEquals(['inner foo string', 1496043752, 'Y-m-d H:i:s', 'inner bar2 string', 30], $query->getBindings());
+
+        $query = new WhereExpression();
+        $query->where(function (LogicalExpression $query) {
+            $query->where('foo', 'inner foo string');
+            $query->orWhere(function (LogicalExpression $query) {
+                $query->orWhere(new RawExpression("FROM_UNIXTIME(?, ?) = 1", [1496043752, "Y-m-d H:i:s"]));
+                $query->orWhere('bar2', 'inner bar2 string');
+            });
+            return $query;
+        })->where('other', '<', 30);
+
+        static::assertEquals('WHERE (`foo` = ? OR (FROM_UNIXTIME(?, ?) = 1 OR `bar2` = ?)) AND `other` < ?', $query->toSql());
+        static::assertEquals(['inner foo string', 1496043752, 'Y-m-d H:i:s', 'inner bar2 string', 30], $query->getBindings());
     }
 }
