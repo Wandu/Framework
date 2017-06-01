@@ -45,11 +45,14 @@ class ComparisonExpression implements ExpressionInterface
      */
     public function toSql()
     {
-        if ($this->operator === 'IN') {
-            return Helper::stringRepeat(', ', '?', count($this->value), Helper::normalizeName($this->name) . " {$this->operator} (", ")");
-        }
         $name = Helper::normalizeName($this->name);
         $operator = $this->operator;
+        if ($this->operator === 'IN') {
+            if ($this->value instanceof ExpressionInterface) {
+                return "{$name} {$operator} (" . $this->value->toSql() . ")";
+            }
+            return Helper::stringRepeat(', ', '?', count($this->value), "{$name} {$operator} (", ")");
+        }
         if ($this->value instanceof ExpressionInterface) {
             return "{$name} {$operator} " . $this->value->toSql();
         }
