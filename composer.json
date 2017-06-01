@@ -35,7 +35,7 @@
         "egulias/email-validator": "~2.1",
         "latte/latte": "^2.3",
         "twig/twig": "^1.24",
-
+        "cleentfaar/slack": "^0.20.1",
         "doctrine/cache": "^1.6",
         "monolog/monolog": "^1.19",
         "composer/semver": "^1.4",
