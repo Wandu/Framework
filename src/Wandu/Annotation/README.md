@@ -1,17 +1,16 @@
-Wandu Decorator
-===
+Wandu Annotation
+================
 
-[![Latest Stable Version](https://poser.pugx.org/wandu/decorator/v/stable.svg)](https://packagist.org/packages/wandu/decorator)
-[![Latest Unstable Version](https://poser.pugx.org/wandu/decorator/v/unstable.svg)](https://packagist.org/packages/wandu/decorator)
-[![Total Downloads](https://poser.pugx.org/wandu/decorator/downloads.svg)](https://packagist.org/packages/wandu/decorator)
-[![License](https://poser.pugx.org/wandu/decorator/license.svg)](https://packagist.org/packages/wandu/decorator)
+[![Latest Stable Version](https://poser.pugx.org/wandu/annotation/v/stable.svg)](https://packagist.org/packages/wandu/annotation)
+[![Latest Unstable Version](https://poser.pugx.org/wandu/annotation/v/unstable.svg)](https://packagist.org/packages/wandu/annotation)
+[![Total Downloads](https://poser.pugx.org/wandu/annotation/downloads.svg)](https://packagist.org/packages/wandu/annotation)
+[![License](https://poser.pugx.org/wandu/annotation/license.svg)](https://packagist.org/packages/wandu/annotation)
 
-Decorator.
+Annotation.
 
 ## Installation
 
-`composer require wandu/decorator`
+`composer require wandu/annotation`
 
 ## Documents
-
 
