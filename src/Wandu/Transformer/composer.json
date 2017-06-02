@@ -1,0 +1,19 @@
+{
+    "name": "wandu/transformer",
+    "description": "Transform Data to the RESTFul API Output.",
+    "keywords": ["wandu", "transformer"],
+    "license": "MIT",
+    "require": {
+        "php": ">=7.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Wandu\\Transformer\\": ""
+        }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "4.0-dev"
+        }
+    }
+}
