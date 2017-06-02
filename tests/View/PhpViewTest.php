@@ -2,9 +2,9 @@
 namespace Wandu\View;
 
 use Exception;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 
-class PhpViewTest extends PHPUnit_Framework_TestCase
+class PhpViewTest extends TestCase
 {
     /** @var \Wandu\View\Contracts\RenderInterface */
     protected $view;

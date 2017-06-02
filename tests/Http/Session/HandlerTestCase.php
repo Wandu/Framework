@@ -1,9 +1,9 @@
 <?php
 namespace Wandu\Http\Session;
 
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 
-abstract class HandlerTestCase extends PHPUnit_Framework_TestCase
+abstract class HandlerTestCase extends TestCase
 {
     /** @var \SessionHandlerInterface */
     protected $adapter;
@@ -28,6 +28,7 @@ abstract class HandlerTestCase extends PHPUnit_Framework_TestCase
     {
         $sessionId = sha1(uniqid());
         $this->adapter->destroy($sessionId);
+        static::addToAssertionCount(1); // no exception!
     }
 
     public function testMultiIdSession()

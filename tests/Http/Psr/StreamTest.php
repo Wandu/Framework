@@ -2,11 +2,11 @@
 namespace Wandu\Http\Psr;
 
 use InvalidArgumentException;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use Mockery;
 use RuntimeException;
 
-class StreamTest extends PHPUnit_Framework_TestCase
+class StreamTest extends TestCase
 {
     use StreamTestTrait;
 
@@ -23,7 +23,7 @@ class StreamTest extends PHPUnit_Framework_TestCase
         try {
             new Stream('unknown');
         } catch (InvalidArgumentException $e) {
-            $this->assertequals(
+            static::assertequals(
                 'Invalid stream "unknown". It must be a valid path with valid permissions.',
                 $e->getMessage()
             );
@@ -32,7 +32,7 @@ class StreamTest extends PHPUnit_Framework_TestCase
 
     public function testGetMetaDataSeekable()
     {
-        $this->assertEquals(1, $this->stream->getMetadata('seekable'));
+        static::assertEquals(1, $this->stream->getMetadata('seekable'));
     }
 
     public function testIsWritableAndReadable()
@@ -41,35 +41,35 @@ class StreamTest extends PHPUnit_Framework_TestCase
 
         $stream = new Stream($fileName, "r");
 
-        $this->assertFalse($stream->isWritable());
-        $this->assertTrue($stream->isReadable());
+        static::assertFalse($stream->isWritable());
+        static::assertTrue($stream->isReadable());
         try {
             $stream->write('...');
             $this->fail();
         } catch (RuntimeException $e) {
-            $this->assertEquals('Stream is not writable.', $e->getMessage());
+            static::assertEquals('Stream is not writable.', $e->getMessage());
         }
 
         $stream = new Stream($fileName, "w");
 
-        $this->assertTrue($stream->isWritable());
-        $this->assertFalse($stream->isReadable());
+        static::assertTrue($stream->isWritable());
+        static::assertFalse($stream->isReadable());
         try {
             $stream->read(1);
             $this->fail();
         } catch (RuntimeException $e) {
-            $this->assertEquals('Stream is not readable.', $e->getMessage());
+            static::assertEquals('Stream is not readable.', $e->getMessage());
         }
 
         $stream = new Stream($fileName, "r+");
 
-        $this->assertTrue($stream->isWritable());
-        $this->assertTrue($stream->isReadable());
+        static::assertTrue($stream->isWritable());
+        static::assertTrue($stream->isReadable());
 
         $stream = new Stream($fileName, "w+");
 
-        $this->assertTrue($stream->isWritable());
-        $this->assertTrue($stream->isReadable());
+        static::assertTrue($stream->isWritable());
+        static::assertTrue($stream->isReadable());
 
         @unlink($fileName);
     }
@@ -81,17 +81,17 @@ class StreamTest extends PHPUnit_Framework_TestCase
         $stream->close();
         $stream->close();
 
-        $this->assertFalse($stream->isWritable());
-        $this->assertFalse($stream->isReadable());
-        $this->assertFalse($stream->isSeekable());
-        $this->assertSame('', $stream->__toString());
-        $this->assertNull($stream->getSize());
-        $this->assertTrue($stream->eof());
+        static::assertFalse($stream->isWritable());
+        static::assertFalse($stream->isReadable());
+        static::assertFalse($stream->isSeekable());
+        static::assertSame('', $stream->__toString());
+        static::assertNull($stream->getSize());
+        static::assertTrue($stream->eof());
         try {
             $stream->write('...?');
             $this->fail();
         } catch (RuntimeException $e) {
-            $this->assertEquals('No resource available.', $e->getMessage());
+            static::assertEquals('No resource available.', $e->getMessage());
         }
     }
 }

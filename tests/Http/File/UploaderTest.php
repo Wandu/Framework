@@ -2,12 +2,18 @@
 namespace Wandu\Http\File;
 
 use Mockery;
-use PHPUnit_Framework_TestCase;
-use InvalidArgumentexception;
+use PHPUnit\Framework\TestCase;
+use InvalidArgumentException;
 use Wandu\Http\Psr\UploadedFile;
 
-class UploaderTest extends PHPUnit_Framework_TestCase
+class UploaderTest extends TestCase
 {
+    public function tearDown()
+    {
+        Mockery::close();
+        static::addToAssertionCount(1);
+    }
+
     public function testSuccessToConstruct()
     {
         new Uploader(__DIR__);
@@ -22,24 +28,28 @@ class UploaderTest extends PHPUnit_Framework_TestCase
         // file
         try {
             new Uploader(__FILE__);
-            $this->fail();
-        } catch (InvalidArgumentexception $e) {
+            static::fail();
+        } catch (InvalidArgumentException $e) {
+            static::addToAssertionCount(1);
         }
 
         // not exists directory
         try {
             new Uploader(__DIR__ . '/notexists');
-            $this->fail();
-        } catch (InvalidArgumentexception $e) {
+            static::fail();
+        } catch (InvalidArgumentException $e) {
+            static::addToAssertionCount(1);
         }
 
         // do not permit directory
         mkdir(__DIR__ . '/cannot', 0);
         try {
             new Uploader(__DIR__ . '/cannot');
-            $this->fail();
-        } catch (InvalidArgumentexception $e) {
+            static::fail();
+        } catch (InvalidArgumentException $e) {
+            static::addToAssertionCount(1);
         }
+
         rmdir(__DIR__ . '/cannot');
     }
 
@@ -52,15 +62,15 @@ class UploaderTest extends PHPUnit_Framework_TestCase
         $file->shouldReceive('getError')->once()->andReturn(UploadedFile::ERR_NO_FILE);
         $file->shouldReceive('moveTo')->never();
 
-        $this->assertNull($uploader->uploadFile($file));
+        static::assertNull($uploader->uploadFile($file));
 
         $file = Mockery::mock(UploadedFile::class);
         $file->shouldReceive('getError')->once()->andReturn(UploadedFile::OK);
         $file->shouldReceive('getClientFilename')->once()->andReturn('helloworld.png');
         $file->shouldReceive('moveTo')->once();
 
-        $this->assertRegExp('/\d{6}\\/[0-9a-f]{40}\\.png/', $file = $uploader->uploadFile($file));
-        $this->asserttrue(is_dir(__DIR__ . '/' .pathinfo($file)['dirname'])); // auto dir created
+        static::assertRegExp('/\d{6}\\/[0-9a-f]{40}\\.png/', $file = $uploader->uploadFile($file));
+        static::asserttrue(is_dir(__DIR__ . '/' .pathinfo($file)['dirname'])); // auto dir created
 
         @rmdir(__DIR__ . '/' .date('ymd'));
     }
@@ -85,14 +95,14 @@ class UploaderTest extends PHPUnit_Framework_TestCase
             'qux' => $erroredFile,
         ]);
 
-        $this->assertTrue(is_string($result['foo']));
-        $this->assertTrue(is_string($result['bar']));
-        $this->assertTrue(is_string($result['baz'][0]));
-        $this->assertFalse(array_key_exists(1, $result['baz']));
-        $this->assertTrue(is_string($result['baz'][2]));
-        $this->assertTrue(is_string($result['baz'][3]));
+        static::assertTrue(is_string($result['foo']));
+        static::assertTrue(is_string($result['bar']));
+        static::assertTrue(is_string($result['baz'][0]));
+        static::assertFalse(array_key_exists(1, $result['baz']));
+        static::assertTrue(is_string($result['baz'][2]));
+        static::assertTrue(is_string($result['baz'][3]));
 
-        $this->assertFalse(array_key_exists('qux', $result));
+        static::assertFalse(array_key_exists('qux', $result));
 
         @rmdir(__DIR__ . '/' .date('ymd'));
     }

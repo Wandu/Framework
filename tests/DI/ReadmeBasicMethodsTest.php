@@ -1,9 +1,9 @@
 <?php
 namespace Wandu\DI;
 
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 
-class ReadmeBasicMethodsTest extends PHPUnit_Framework_TestCase
+class ReadmeBasicMethodsTest extends TestCase
 {
     public function testSimpleExample()
     {
@@ -28,7 +28,7 @@ $container['client']; // return Client Object
 $container[Client::class]; // return Client Object
 
 // $container['client'] === $container[Client::class]
-$this->assertSame(
+static::assertSame(
     $container['client'],
     $container[Client::class]
 );
@@ -45,7 +45,7 @@ $container->instance('config1', [
     'password' => 'db_password',
 ]);
 
-$this->assertEquals([
+static::assertEquals([
     'username' => 'db_username',
     'password' => 'db_password',
 ], $container['config1']);
@@ -56,7 +56,7 @@ $container['config2'] = [
     'password' => 'db_password',
 ];
 
-$this->assertEquals([
+static::assertEquals([
     'username' => 'db_username',
     'password' => 'db_password',
 ], $container['config2']);
@@ -73,7 +73,7 @@ $container->closure(DbAdapterInterface::class, function () {
     return new MySqlAdapter();
 });
 
-$this->assertInstanceOf(
+static::assertInstanceOf(
     DbAdapterInterface::class,
     $container[DbAdapterInterface::class]
 );
@@ -88,17 +88,17 @@ $container = new \Wandu\DI\Container();
 
 $container->bind(DbAdapterInterface::class, MySqlAdapter::class);
 
-$this->assertInstanceOf(
+static::assertInstanceOf(
     DbAdapterInterface::class,
     $container[DbAdapterInterface::class]
 );
-$this->assertInstanceOf(
+static::assertInstanceOf(
     MySqlAdapter::class,
     $container[MySqlAdapter::class]
 );
 
 // also same
-$this->assertSame($container[DbAdapterInterface::class], $container[MySqlAdapter::class]);
+static::assertSame($container[DbAdapterInterface::class], $container[MySqlAdapter::class]);
 
 /* } */
     }
@@ -112,7 +112,7 @@ $container->bind(DbAdapterInterface::class, MySqlAdapter::class);
 $container->alias('adapter', DbAdapterInterface::class);
 
 // get by alias name
-$this->assertInstanceOf(
+static::assertInstanceOf(
     DbAdapterInterface::class,
     $container['adapter']
 );

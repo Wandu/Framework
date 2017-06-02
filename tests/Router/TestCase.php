@@ -2,12 +2,12 @@
 namespace Wandu\Router;
 
 use Mockery;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase as PHPUnitTestCase;
 use Psr\Http\Message\ServerRequestInterface;
 use Wandu\Router\Loader\DefaultLoader;
 use Wandu\Router\Responsifier\PsrResponsifier;
 
-class TestCase extends PHPUnit_Framework_TestCase
+class TestCase extends PHPUnitTestCase
 {
     public function tearDown()
     {

@@ -1,7 +1,7 @@
 <?php
 namespace Wandu\Foundation\Error;
 
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use Mockery;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerInterface;
@@ -13,7 +13,7 @@ use Exception;
 use Wandu\Http\Psr\Stream\StringStream;
 use Wandu\Http\Psr\Uri;
 
-class DefaultHttpErrorHandlerTest extends PHPUnit_Framework_TestCase
+class DefaultHttpErrorHandlerTest extends TestCase
 {
     /** @var \Psr\Log\LoggerInterface $logger */
     protected $logger;
@@ -38,9 +38,9 @@ class DefaultHttpErrorHandlerTest extends PHPUnit_Framework_TestCase
             new Exception()
         );
         
-        $this->assertInstanceOf(ResponseInterface::class, $response);
-        $this->assertEquals(500, $response->getStatusCode());
-        $this->assertEquals('500 Internal Server Error', $response->getBody()->__toString());
+        static::assertInstanceOf(ResponseInterface::class, $response);
+        static::assertEquals(500, $response->getStatusCode());
+        static::assertEquals('500 Internal Server Error', $response->getBody()->__toString());
     }
 
     public function testHandleHttpException()
@@ -53,9 +53,9 @@ class DefaultHttpErrorHandlerTest extends PHPUnit_Framework_TestCase
             (new NotFoundException())->withBody(new StringStream('404 Not Found...'))
         );
 
-        $this->assertInstanceOf(ResponseInterface::class, $response);
-        $this->assertEquals(404, $response->getStatusCode());
-        $this->assertEquals('404 Not Found...', $response->getBody()->__toString());
+        static::assertInstanceOf(ResponseInterface::class, $response);
+        static::assertEquals(404, $response->getStatusCode());
+        static::assertEquals('404 Not Found...', $response->getBody()->__toString());
     }
 
     public function testHandleDebugMode()
@@ -66,13 +66,13 @@ class DefaultHttpErrorHandlerTest extends PHPUnit_Framework_TestCase
             new Exception()
         );
 
-        $this->assertInstanceOf(ResponseInterface::class, $response);
-        $this->assertEquals(500, $response->getStatusCode());
+        static::assertInstanceOf(ResponseInterface::class, $response);
+        static::assertEquals(500, $response->getStatusCode());
         
         // never print original text...
-        $this->assertNotEquals('500 Internal Server Error', $response->getBody()->__toString());
+        static::assertNotEquals('500 Internal Server Error', $response->getBody()->__toString());
         
-        $this->assertTrue(is_string($response->getBody()->__toString()));
+        static::assertTrue(is_string($response->getBody()->__toString()));
     }
 
     public function testHandleDebugModeButHttpException()
@@ -85,8 +85,8 @@ class DefaultHttpErrorHandlerTest extends PHPUnit_Framework_TestCase
             (new NotFoundException())->withBody(new StringStream('404 Not Found...'))
         );
 
-        $this->assertInstanceOf(ResponseInterface::class, $response);
-        $this->assertEquals(404, $response->getStatusCode());
-        $this->assertEquals('404 Not Found...', $response->getBody()->__toString());
+        static::assertInstanceOf(ResponseInterface::class, $response);
+        static::assertEquals(404, $response->getStatusCode());
+        static::assertEquals('404 Not Found...', $response->getBody()->__toString());
     }
 }

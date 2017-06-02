@@ -3,7 +3,7 @@ namespace Wandu\Router\Loader;
 
 use Closure;
 use Mockery;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ServerRequestInterface;
 use Wandu\Assertions;
 use Wandu\DI\Container;
@@ -21,7 +21,7 @@ use Wandu\Router\Contracts\MiddlewareInterface;
 use Wandu\Router\Exception\HandlerNotFoundException;
 use Wandu\Router\Middleware\Parameterify;
 
-class PsrLoaderTest extends PHPUnit_Framework_TestCase
+class PsrLoaderTest extends TestCase
 {
     use Assertions;
     

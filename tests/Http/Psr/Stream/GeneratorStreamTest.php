@@ -2,10 +2,10 @@
 namespace Wandu\Http\Psr\Stream;
 
 use Mockery;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use RuntimeException;
 
-class GeneratorStreamTest extends PHPUnit_Framework_TestCase
+class GeneratorStreamTest extends TestCase
 {
     /** @var \Wandu\Http\Psr\Stream\GeneratorStream */
     protected $stream;
@@ -22,46 +22,46 @@ class GeneratorStreamTest extends PHPUnit_Framework_TestCase
 
     public function testWrite()
     {
-        $this->assertFalse($this->stream->isWritable());
+        static::assertFalse($this->stream->isWritable());
         try {
             $this->stream->write("some...");
             $this->fail();
         } catch (RuntimeException $e) {
-            $this->assertEquals('GeneratorStream cannot write.', $e->getMessage());
+            static::assertEquals('GeneratorStream cannot write.', $e->getMessage());
         }
     }
 
     public function testSeek()
     {
-        $this->assertFalse($this->stream->isSeekable());
+        static::assertFalse($this->stream->isSeekable());
         try {
             $this->stream->seek(0);
             $this->fail();
         } catch (RuntimeException $e) {
-            $this->assertEquals('GeneratorStream cannot seek.', $e->getMessage());
+            static::assertEquals('GeneratorStream cannot seek.', $e->getMessage());
         }
     }
 
     public function testRead()
     {
-        $this->assertFalse($this->stream->isReadable());
+        static::assertFalse($this->stream->isReadable());
         try {
             $this->stream->read(10);
             $this->fail();
         } catch (RuntimeException $e) {
-            $this->assertEquals('GeneratorStream cannot read.', $e->getMessage());
+            static::assertEquals('GeneratorStream cannot read.', $e->getMessage());
         }
     }
 
     public function testRewindAndGetContents()
     {
-        $this->assertFalse($this->stream->eof());
-        $this->assertEquals(
+        static::assertFalse($this->stream->eof());
+        static::assertEquals(
             '00 01 02 03 04 05 06 07 08 09 ',
             $this->stream->getContents()
         );
-        $this->assertTrue($this->stream->eof());
-        $this->assertEquals(
+        static::assertTrue($this->stream->eof());
+        static::assertEquals(
             '',
             $this->stream->getContents()
         );
@@ -69,13 +69,13 @@ class GeneratorStreamTest extends PHPUnit_Framework_TestCase
         // rewind
         $this->stream->rewind();
 
-        $this->assertFalse($this->stream->eof());
-        $this->assertEquals(
+        static::assertFalse($this->stream->eof());
+        static::assertEquals(
             '00 01 02 03 04 05 06 07 08 09 ',
             $this->stream->getContents()
         );
-        $this->assertTrue($this->stream->eof());
-        $this->assertEquals(
+        static::assertTrue($this->stream->eof());
+        static::assertEquals(
             '',
             $this->stream->getContents()
         );
@@ -83,15 +83,15 @@ class GeneratorStreamTest extends PHPUnit_Framework_TestCase
 
     public function testToString()
     {
-        $this->assertEquals(
+        static::assertEquals(
             '00 01 02 03 04 05 06 07 08 09 ',
             $this->stream->__toString()
         );
-        $this->assertEquals(
+        static::assertEquals(
             '00 01 02 03 04 05 06 07 08 09 ',
             $this->stream->__toString()
         );
-        $this->assertEquals(
+        static::assertEquals(
             '00 01 02 03 04 05 06 07 08 09 ',
             $this->stream->__toString()
         );

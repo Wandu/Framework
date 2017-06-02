@@ -2,10 +2,10 @@
 namespace Wandu\Http\Parameters;
 
 use Mockery;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use Wandu\Support\Exception\CannotCallMethodException;
 
-class ParameterTest extends PHPUnit_Framework_TestCase
+class ParameterTest extends TestCase
 {
     /** @var array */
     protected $param1Attributes = [

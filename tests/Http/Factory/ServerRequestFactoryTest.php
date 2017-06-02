@@ -2,10 +2,10 @@
 namespace Wandu\Http\Factory;
 
 use Mockery;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\StreamInterface;
 
-class ServerRequestFactoryTest extends PHPUnit_Framework_TestCase
+class ServerRequestFactoryTest extends TestCase
 {
     /** @var \Wandu\Http\Factory\ServerRequestFactory */
     protected $factory;

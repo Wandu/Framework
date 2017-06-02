@@ -2,12 +2,18 @@
 namespace Wandu\Http\Session;
 
 use Mockery;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use Wandu\Http\Cookie\Cookie;
 use Wandu\Http\Cookie\CookieJar;
 
-class SessionFactoryTest extends PHPUnit_Framework_TestCase
+class SessionFactoryTest extends TestCase
 {
+    public function tearDown()
+    {
+        Mockery::close();
+        static::addToAssertionCount(1);
+    }
+
     public function testCreateEmptySessionFromCookieJar()
     {
         $mockery = Mockery::mock(\SessionHandlerInterface::class);
@@ -20,7 +26,7 @@ class SessionFactoryTest extends PHPUnit_Framework_TestCase
         $cookieJar = new CookieJar();
         
         $session = $factory->fromCookieJar($cookieJar);
-        $this->assertEquals([], $session->getRawParams());
+        static::assertEquals([], $session->getRawParams());
     }
 
     public function testCreateSessionFromCookieJar()
@@ -38,7 +44,7 @@ class SessionFactoryTest extends PHPUnit_Framework_TestCase
         ]);
 
         $session = $factory->fromCookieJar($cookieJar);
-        $this->assertEquals(['hello' => 'world'], $session->getRawParams());
+        static::assertEquals(['hello' => 'world'], $session->getRawParams());
     }
 
     public function testCreateSessionFromCookieJarAndOtherSessionName()
@@ -58,7 +64,7 @@ class SessionFactoryTest extends PHPUnit_Framework_TestCase
         ]);
 
         $session = $factory->fromCookieJar($cookieJar);
-        $this->assertEquals(['hello' => 'world'], $session->getRawParams());
+        static::assertEquals(['hello' => 'world'], $session->getRawParams());
     }
 
     public function testTo()
@@ -87,10 +93,10 @@ class SessionFactoryTest extends PHPUnit_Framework_TestCase
             ]
         ]), $cookieJar);
         
-        $this->assertEquals('session_id', $cookieJar->get('WdSessId'));
+        static::assertEquals('session_id', $cookieJar->get('WdSessId'));
 
         // exists in setCookies
         $setCookies = iterator_to_array($cookieJar->getIterator());
-        $this->assertInstanceOf(Cookie::class, $setCookies['WdSessId']);
+        static::assertInstanceOf(Cookie::class, $setCookies['WdSessId']);
     }
 }

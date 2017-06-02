@@ -1,10 +1,10 @@
 <?php
 namespace Wandu\Caster\Caster;
 
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use Wandu\DateTime\Time;
 
-class TimeCasterTest extends PHPUnit_Framework_TestCase
+class TimeCasterTest extends TestCase
 {
     public function testCast()
     {

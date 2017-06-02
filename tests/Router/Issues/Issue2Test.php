@@ -20,7 +20,7 @@ class Issue2Test extends TestCase
             $dispatcher->dispatch($this->createRequest('GET', '/'));
             $this->fail();
         } catch (HandlerNotFoundException $exception) {
-            $this->assertEquals(
+            static::assertEquals(
                 '"Wandu\Router\Issues\TestIssue2Controller::wrong" is not found.',
                 $exception->getMessage()
             );

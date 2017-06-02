@@ -11,6 +11,7 @@ class QueueEventTest extends TestCase
     public function tearDown()
     {
         Mockery::close();
+        static::addToAssertionCount(1);
     }
     
     public function testQueueEvent()

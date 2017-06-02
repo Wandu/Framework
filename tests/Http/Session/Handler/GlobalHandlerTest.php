@@ -12,12 +12,12 @@ class GlobalHandlerTest extends HandlerTestCase
 
     public function testMultiIdSession()
     {
-        // do nothing
+        static::addToAssertionCount(1); // do nothing
     }
 
     public function testGarbageCollection()
     {
-        // do nothing;
+        static::addToAssertionCount(1); // do nothing
     }
     
     protected function getCountOfSessionFiles()

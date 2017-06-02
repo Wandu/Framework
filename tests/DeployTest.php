@@ -2,10 +2,10 @@
 namespace Wandu;
 
 use Composer\Semver\Semver;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use Wandu\Foundation\Application;
 
-class DeployTest extends PHPUnit_Framework_TestCase
+class DeployTest extends TestCase
 {
     /** @var string */
     protected $basePath = __DIR__ . '/../';
@@ -15,6 +15,7 @@ class DeployTest extends PHPUnit_Framework_TestCase
     
     /** @var array */
     protected $jsonFiles = [
+        'src/Wandu/Annotation/composer.json',
         'src/Wandu/Caster/composer.json',
         'src/Wandu/Collection/composer.json',
         'src/Wandu/Config/composer.json',
@@ -28,6 +29,7 @@ class DeployTest extends PHPUnit_Framework_TestCase
         'src/Wandu/Q/composer.json',
         'src/Wandu/Router/composer.json',
         'src/Wandu/Support/composer.json',
+        'src/Wandu/Transformer/composer.json',
         'src/Wandu/Validator/composer.json',
         'src/Wandu/View/composer.json',
     ];
@@ -36,6 +38,7 @@ class DeployTest extends PHPUnit_Framework_TestCase
     {
         foreach (array_merge($this->jsonFiles, [$this->rootComposerJson]) as $jsonFile) {
             $this->getJsonFromFile($jsonFile);
+            static::addToAssertionCount(1);
         }
     }
 

@@ -2,14 +2,14 @@
 namespace Wandu\Q\Queue;
 
 use Mockery;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use Wandu\Q\Contracts\AdapterInterface;
 use Wandu\Q\Contracts\JobInterface;
 use Wandu\Q\Contracts\SerializerInterface;
 use Wandu\Q\Queue;
 use Wandu\Q\Serializer\PhpSerializer;
 
-class QueueTest extends PHPUnit_Framework_TestCase
+class QueueTest extends TestCase
 {
     public function tearDown()
     {
@@ -29,7 +29,7 @@ class QueueTest extends PHPUnit_Framework_TestCase
         $queue = new Queue($serializer, $adapter);
 
         $queue->enqueue("Hello World");
-        $this->assertEquals("Something To Return", $queue->dequeue());
+        static::assertEquals("Something To Return", $queue->dequeue());
     }
     
     public function testQueueWithPhpSerializer()
@@ -50,6 +50,6 @@ class QueueTest extends PHPUnit_Framework_TestCase
 
 
         $queue->enqueue($sendObject);
-        $this->assertSame($returnJob, $queue->dequeue());
+        static::assertSame($returnJob, $queue->dequeue());
     }
 }

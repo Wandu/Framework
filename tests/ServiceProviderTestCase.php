@@ -1,14 +1,14 @@
 <?php
 namespace Wandu;
 
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use ReflectionObject;
 use Wandu\Config\Config;
 use Wandu\DI\ServiceProviderInterface;
 use Wandu\Foundation\Application;
 use Wandu\Foundation\Kernels\NullKernel;
 
-abstract class ServiceProviderTestCase extends PHPUnit_Framework_TestCase
+abstract class ServiceProviderTestCase extends TestCase 
 {
     /** @var \Wandu\Foundation\Application */
     protected $app;

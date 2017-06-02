@@ -1,10 +1,10 @@
 <?php
 namespace Wandu\View\Phiew;
 
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use Wandu\View\FileNotFoundException;
 
-class FileResolverTest extends PHPUnit_Framework_TestCase
+class FileResolverTest extends TestCase
 {
     public function testResolveSuccess()
     {

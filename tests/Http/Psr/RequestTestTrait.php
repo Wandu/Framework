@@ -15,43 +15,43 @@ trait RequestTestTrait
         $request = $this->request;
         $requestWithBlank = $this->request->withRequestTarget('');
 
-        $this->assertSame('/', $request->getRequestTarget());
-        $this->assertSame('/', $requestWithBlank->getRequestTarget());
+        static::assertSame('/', $request->getRequestTarget());
+        static::assertSame('/', $requestWithBlank->getRequestTarget());
     }
 
     public function testWithRequestTarget()
     {
-        $this->assertNotSame($this->request, $this->request->withRequestTarget('/abc/def'));
-        $this->assertEquals('/abc/def', $this->request->withRequestTarget('/abc/def')->getRequestTarget());
+        static::assertNotSame($this->request, $this->request->withRequestTarget('/abc/def'));
+        static::assertEquals('/abc/def', $this->request->withRequestTarget('/abc/def')->getRequestTarget());
     }
 
     public function testGetMethod()
     {
-        $this->assertEquals(null, $this->request->getMethod());
+        static::assertEquals(null, $this->request->getMethod());
     }
 
     public function testWithMethod()
     {
-        $this->assertNotSame($this->request, $this->request->withMethod('post'));
-        $this->assertEquals('POST', $this->request->withMethod('post')->getMethod());
+        static::assertNotSame($this->request, $this->request->withMethod('post'));
+        static::assertEquals('POST', $this->request->withMethod('post')->getMethod());
 
         try {
             $this->request->withMethod([]);
             $this->fail();
         } catch (InvalidArgumentException $e) {
-            $this->assertEquals('Unsupported HTTP method. It must be a string.', $e->getMessage());
+            static::assertEquals('Unsupported HTTP method. It must be a string.', $e->getMessage());
         }
         try {
             $this->request->withMethod('UNKNOWN');
             $this->fail();
         } catch (InvalidArgumentException $e) {
-            $this->assertEquals('Unsupported HTTP method. "UNKNOWN" provided.', $e->getMessage());
+            static::assertEquals('Unsupported HTTP method. "UNKNOWN" provided.', $e->getMessage());
         }
     }
 
     public function testGetUri()
     {
-        $this->assertSame(null, $this->request->getUri());
+        static::assertSame(null, $this->request->getUri());
     }
 
     public function testWithUri()
@@ -62,9 +62,9 @@ trait RequestTestTrait
 
         $requestWithUri = $this->request->withUri($mockUri, true);
 
-        $this->assertNotSame($this->request, $requestWithUri);
-        $this->assertSame($mockUri, $requestWithUri->getUri());
-        $this->assertSame('/abc/def?hello=world', $requestWithUri->getRequestTarget());
+        static::assertNotSame($this->request, $requestWithUri);
+        static::assertSame($mockUri, $requestWithUri->getUri());
+        static::assertSame('/abc/def?hello=world', $requestWithUri->getRequestTarget());
     }
 
     public function testWithBlankUri()
@@ -75,7 +75,7 @@ trait RequestTestTrait
 
         $requestWithUri = $this->request->withUri($mockUri, true);
 
-        $this->assertSame('/', $requestWithUri->getRequestTarget());
+        static::assertSame('/', $requestWithUri->getRequestTarget());
     }
 
     public function testWithUriTrue()
@@ -103,8 +103,8 @@ trait RequestTestTrait
 
         $requestWithUri = $this->request->withUri($mockUri);
 
-        $this->assertEquals('/', $requestWithUri->getRequestTarget());
-        $this->assertEquals('localhost:8888', $requestWithUri->getHeaderLine('host'));
+        static::assertEquals('/', $requestWithUri->getRequestTarget());
+        static::assertEquals('localhost:8888', $requestWithUri->getHeaderLine('host'));
 
     }
 }

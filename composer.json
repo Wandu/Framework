@@ -24,7 +24,7 @@
         "wandu/fastelper": "^0.1.0"
     },
     "require-dev": {
-        "phpunit/phpunit": "^5.3",
+        "phpunit/phpunit": "^6.1",
         "mockery/mockery": "^0.9.4",
 
         "nesbot/carbon": "^1.21",

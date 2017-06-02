@@ -2,13 +2,14 @@
 namespace Wandu\DI;
 
 use Mockery;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 
-class ServiceProviderTest extends PHPUnit_Framework_TestCase
+class ServiceProviderTest extends TestCase
 {
     public function tearDown()
     {
         Mockery::close();
+        static::addToAssertionCount(1);
     }
     
     public function testRegister()

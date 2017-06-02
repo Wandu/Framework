@@ -2,10 +2,10 @@
 namespace Wandu\Caster;
 
 use Carbon\Carbon;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use Wandu\Caster\Caster\CarbonCaster;
 
-class CasterTest extends PHPUnit_Framework_TestCase
+class CasterTest extends TestCase 
 {
     use CastProviderTrait;
 

@@ -1,10 +1,10 @@
 <?php
 namespace Wandu\DI\Descriptor;
 
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use Wandu\DI\Container;
 
-class AfterTest extends PHPUnit_Framework_TestCase
+class AfterTest extends TestCase
 {
     public function testAfterBind()
     {

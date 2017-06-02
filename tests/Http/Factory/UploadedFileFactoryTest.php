@@ -2,10 +2,10 @@
 namespace Wandu\Http\Factory;
 
 use Mockery;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use Wandu\Http\Psr\UploadedFile;
 
-class UploadedFileFactoryTest extends PHPUnit_Framework_TestCase
+class UploadedFileFactoryTest extends TestCase
 {
     /** @var \Wandu\Http\Factory\UploadedFileFactory */
     protected $factory;
@@ -17,8 +17,8 @@ class UploadedFileFactoryTest extends PHPUnit_Framework_TestCase
 
     public function testSimple()
     {
-        $this->assertEquals([], $this->factory->createFromFiles([]));
-        $this->assertEquals([
+        static::assertEquals([], $this->factory->createFromFiles([]));
+        static::assertEquals([
             'main' => new UploadedFile('/private/var/abcdefg', 6171, 0, 'img.png', 'image/png'),
             'other' => new UploadedFile('/private/var/abcdefg', 6175, 0, 'img.png', 'image/png')
         ], $this->factory->createFromFiles([
@@ -42,7 +42,7 @@ class UploadedFileFactoryTest extends PHPUnit_Framework_TestCase
     public function testOneDepth()
     {
         // with seq array
-        $this->assertEquals([
+        static::assertEquals([
             'main' => [
                 new UploadedFile('/private/var/abcdefg', 6171, 0, 'img.png', 'image/png'),
                 new UploadedFile('/private/var/abcdefg', 6171, 0, 'img.png', 'image/png')
@@ -58,7 +58,7 @@ class UploadedFileFactoryTest extends PHPUnit_Framework_TestCase
         ]));
 
         // with assoc array
-        $this->assertEquals([
+        static::assertEquals([
             'main' => [
                 'sub1' => new UploadedFile('/private/var/abcdefg', 6171, 0, 'img.png', 'image/png'),
                 'sub2' => new UploadedFile('/private/var/abcdef2', 6172, 0, 'img2.png', 'image/png')
@@ -91,7 +91,7 @@ class UploadedFileFactoryTest extends PHPUnit_Framework_TestCase
 
     public function testMultiDepth()
     {
-        $this->assertEquals([
+        static::assertEquals([
             'main' => [
                 'sub1' => [
                     new UploadedFile('/private/var/abcdefg', 6171, 0, 'sub1_0.png', 'image/png'),

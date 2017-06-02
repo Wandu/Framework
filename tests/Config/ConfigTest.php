@@ -1,12 +1,12 @@
 <?php
 namespace Wandu\Config;
 
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use Wandu\Config\Contracts\ConfigInterface;
 use Wandu\Config\Exception\NotAllowedMethodException;
 use InvalidArgumentException;
 
-class ConfigTest extends PHPUnit_Framework_TestCase
+class ConfigTest extends TestCase
 {
     public function testGet()
     {
@@ -19,15 +19,15 @@ class ConfigTest extends PHPUnit_Framework_TestCase
             'null' => null,
         ]);
 
-        $this->assertSame('foo string!', $config->get('foo'));
-        $this->assertSame([
+        static::assertSame('foo string!', $config->get('foo'));
+        static::assertSame([
             'bar1' => 'bar1 string!',
             'bar2' => 'bar2 string!',
         ], $config->get('bar'));
-        $this->assertSame('bar1 string!', $config->get('bar.bar1'));
+        static::assertSame('bar1 string!', $config->get('bar.bar1'));
 
-        $this->assertSame(null, $config->get('null'));
-        $this->assertSame(null, $config->get('null.isnull'));
+        static::assertSame(null, $config->get('null'));
+        static::assertSame(null, $config->get('null.isnull'));
     }
 
     public function testGetDefault()
@@ -41,14 +41,14 @@ class ConfigTest extends PHPUnit_Framework_TestCase
             'null' => null,
         ]);
 
-        $this->assertNull($config->get('bar.bar3'));
-        $this->assertNull($config->get('unknown.something'));
+        static::assertNull($config->get('bar.bar3'));
+        static::assertNull($config->get('unknown.something'));
 
-        $this->assertSame('unknown', $config->get('bar.bar3', 'unknown'));
-        $this->assertSame('unknown', $config->get('unknown.something', 'unknown'));
+        static::assertSame('unknown', $config->get('bar.bar3', 'unknown'));
+        static::assertSame('unknown', $config->get('unknown.something', 'unknown'));
 
-        $this->assertSame(null, $config->get('null', 'unknown'));
-        $this->assertSame('unknown', $config->get('null.isnull', 'unknown'));
+        static::assertSame(null, $config->get('null', 'unknown'));
+        static::assertSame('unknown', $config->get('null.isnull', 'unknown'));
     }
 
     public function testHas()
@@ -62,14 +62,14 @@ class ConfigTest extends PHPUnit_Framework_TestCase
             'null' => null,
         ]);
 
-        $this->assertTrue($config->has('foo'));
-        $this->assertTrue($config->has('bar'));
+        static::assertTrue($config->has('foo'));
+        static::assertTrue($config->has('bar'));
 
-        $this->assertTrue($config->has('bar.bar1'));
-        $this->assertFalse($config->has('bar.bar3'));
+        static::assertTrue($config->has('bar.bar1'));
+        static::assertFalse($config->has('bar.bar3'));
 
-        $this->assertTrue($config->has('null'));
-        $this->assertFalse($config->has('null.isnull'));
+        static::assertTrue($config->has('null'));
+        static::assertFalse($config->has('null.isnull'));
     }
 
     public function testSetNowAllowed()
@@ -78,8 +78,9 @@ class ConfigTest extends PHPUnit_Framework_TestCase
 
         try {
             $config->set('foo', 'foo string!!');
-            $this->fail();
+            static::fail();
         } catch (NotAllowedMethodException $exception) {
+            static::addToAssertionCount(1);
         }
     }
 
@@ -94,23 +95,23 @@ class ConfigTest extends PHPUnit_Framework_TestCase
         ], false);
 
         $config->set('foo', 'foo string!!');
-        $this->assertSame('foo string!!', $config->get('foo'));
+        static::assertSame('foo string!!', $config->get('foo'));
 
         $config->set('foo.bar', 'foo.bar string!');
-        $this->assertSame([
+        static::assertSame([
             'bar' => 'foo.bar string!'
         ], $config->get('foo'));
 
         $config->set('bar.bar2', 'bar2 string!!');
         $config->set('bar.bar3', 'bar3 string!');
-        $this->assertSame([
+        static::assertSame([
             'bar1' => 'bar1 string!',
             'bar2' => 'bar2 string!!',
             'bar3' => 'bar3 string!',
         ], $config->get('bar'));
 
         $config->set('baz', 'baz string!');
-        $this->assertSame([
+        static::assertSame([
             'foo' => [
                 'bar' => 'foo.bar string!',
             ],
@@ -134,35 +135,35 @@ class ConfigTest extends PHPUnit_Framework_TestCase
             'null' => null,
         ], false);
 
-        $this->assertTrue($config->has('foo'));
-        $this->assertTrue($config->remove('foo'));
-        $this->assertFalse($config->has('foo'));
+        static::assertTrue($config->has('foo'));
+        static::assertTrue($config->remove('foo'));
+        static::assertFalse($config->has('foo'));
 
-        $this->assertFalse($config->has('bar.bar3'));
-        $this->assertFalse($config->remove('bar.bar3'));
+        static::assertFalse($config->has('bar.bar3'));
+        static::assertFalse($config->remove('bar.bar3'));
 
-        $this->assertFalse($config->has('bar.bar2.unknown'));
-        $this->assertFalse($config->remove('bar.bar2.unknown'));
-        $this->assertEquals([
+        static::assertFalse($config->has('bar.bar2.unknown'));
+        static::assertFalse($config->remove('bar.bar2.unknown'));
+        static::assertEquals([
             'bar1' => 'bar1 string!',
             'bar2' => 'bar2 string!',
         ], $config->get('bar'));
 
-        $this->assertTrue($config->has('bar.bar2'));
-        $this->assertTrue($config->remove('bar.bar2'));
-        $this->assertFalse($config->has('bar.bar2'));
-        $this->assertEquals([
+        static::assertTrue($config->has('bar.bar2'));
+        static::assertTrue($config->remove('bar.bar2'));
+        static::assertFalse($config->has('bar.bar2'));
+        static::assertEquals([
             'bar1' => 'bar1 string!',
         ], $config->get('bar'));
 
-        $this->assertFalse($config->has('null.isnull'));
-        $this->assertFalse($config->remove('null.isnull'));
+        static::assertFalse($config->has('null.isnull'));
+        static::assertFalse($config->remove('null.isnull'));
 
-        $this->assertTrue($config->has('null'));
-        $this->assertTrue($config->remove('null'));
-        $this->assertFalse($config->has('null'));
+        static::assertTrue($config->has('null'));
+        static::assertTrue($config->remove('null'));
+        static::assertFalse($config->has('null'));
         
-        $this->assertEquals([
+        static::assertEquals([
             'bar' => [
                 'bar1' => 'bar1 string!',
             ]
@@ -180,22 +181,22 @@ class ConfigTest extends PHPUnit_Framework_TestCase
             'null' => null,
         ]);
 
-        $this->assertSame('foo string!', $config['foo']);
-        $this->assertSame([
+        static::assertSame('foo string!', $config['foo']);
+        static::assertSame([
             'bar1' => 'bar1 string!',
             'bar2' => 'bar2 string!',
         ], $config['bar']);
-        $this->assertSame('bar1 string!', $config['bar.bar1']);
+        static::assertSame('bar1 string!', $config['bar.bar1']);
 
-        $this->assertSame(null, $config['null']);
-        $this->assertSame(null, $config['null.isnull']);
+        static::assertSame(null, $config['null']);
+        static::assertSame(null, $config['null.isnull']);
 
         // with default
-        $this->assertSame('unknown', $config['bar.bar3||unknown']);
-        $this->assertSame('unknown', $config['unknown.something||unknown']);
+        static::assertSame('unknown', $config['bar.bar3||unknown']);
+        static::assertSame('unknown', $config['unknown.something||unknown']);
 
-        $this->assertSame(null, $config['null||unknown']);
-        $this->assertSame('unknown', $config['null.isnull||unknown']);
+        static::assertSame(null, $config['null||unknown']);
+        static::assertSame('unknown', $config['null.isnull||unknown']);
     }
     
     public function testReadOnly()
@@ -207,13 +208,15 @@ class ConfigTest extends PHPUnit_Framework_TestCase
         $config->get('foo');
         try {
             $config->set('bar', 'something');
-            $this->fail();
+            static::fail();
         } catch (NotAllowedMethodException $e) {
+            static::addToAssertionCount(1);
         }
         try {
             $config->remove('foo');
-            $this->fail();
+            static::fail();
         } catch (NotAllowedMethodException $e) {
+            static::addToAssertionCount(1);
         }
     }
     
@@ -228,8 +231,8 @@ class ConfigTest extends PHPUnit_Framework_TestCase
             'null' => null,
         ]);
 
-        $this->assertInstanceOf(ConfigInterface::class, $config->subset('bar'));
-        $this->assertEquals([
+        static::assertInstanceOf(ConfigInterface::class, $config->subset('bar'));
+        static::assertEquals([
             'bar1' => 'bar1 string!',
             'bar2' => 'bar2 string!',
         ], $config->subset('bar')->get(''));

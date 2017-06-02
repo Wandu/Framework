@@ -1,10 +1,10 @@
 <?php
 namespace Wandu\Support;
 
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use InvalidArgumentException;
 
-class DotArrayTest extends PHPUnit_Framework_TestCase
+class DotArrayTest extends TestCase
 {
     public function testGet()
     {
@@ -17,15 +17,15 @@ class DotArrayTest extends PHPUnit_Framework_TestCase
             'null' => null,
         ]);
 
-        $this->assertSame('foo string!', $arr->get('foo'));
-        $this->assertSame([
+        static::assertSame('foo string!', $arr->get('foo'));
+        static::assertSame([
             'bar1' => 'bar1 string!',
             'bar2' => 'bar2 string!',
         ], $arr->get('bar'));
-        $this->assertSame('bar1 string!', $arr->get('bar.bar1'));
+        static::assertSame('bar1 string!', $arr->get('bar.bar1'));
 
-        $this->assertSame(null, $arr->get('null'));
-        $this->assertSame(null, $arr->get('null.isnull'));
+        static::assertSame(null, $arr->get('null'));
+        static::assertSame(null, $arr->get('null.isnull'));
     }
 
     public function testGetDefault()
@@ -39,14 +39,14 @@ class DotArrayTest extends PHPUnit_Framework_TestCase
             'null' => null,
         ]);
 
-        $this->assertNull($arr->get('bar.bar3'));
-        $this->assertNull($arr->get('unknown.something'));
+        static::assertNull($arr->get('bar.bar3'));
+        static::assertNull($arr->get('unknown.something'));
 
-        $this->assertSame('unknown', $arr->get('bar.bar3', 'unknown'));
-        $this->assertSame('unknown', $arr->get('unknown.something', 'unknown'));
+        static::assertSame('unknown', $arr->get('bar.bar3', 'unknown'));
+        static::assertSame('unknown', $arr->get('unknown.something', 'unknown'));
 
-        $this->assertSame(null, $arr->get('null', 'unknown'));
-        $this->assertSame('unknown', $arr->get('null.isnull', 'unknown'));
+        static::assertSame(null, $arr->get('null', 'unknown'));
+        static::assertSame('unknown', $arr->get('null.isnull', 'unknown'));
     }
 
     public function testHas()
@@ -60,14 +60,14 @@ class DotArrayTest extends PHPUnit_Framework_TestCase
             'null' => null,
         ]);
 
-        $this->assertTrue($arr->has('foo'));
-        $this->assertTrue($arr->has('bar'));
+        static::assertTrue($arr->has('foo'));
+        static::assertTrue($arr->has('bar'));
 
-        $this->assertTrue($arr->has('bar.bar1'));
-        $this->assertFalse($arr->has('bar.bar3'));
+        static::assertTrue($arr->has('bar.bar1'));
+        static::assertFalse($arr->has('bar.bar3'));
 
-        $this->assertTrue($arr->has('null'));
-        $this->assertFalse($arr->has('null.isnull'));
+        static::assertTrue($arr->has('null'));
+        static::assertFalse($arr->has('null.isnull'));
     }
 
     public function testSet()
@@ -81,23 +81,23 @@ class DotArrayTest extends PHPUnit_Framework_TestCase
         ]);
 
         $arr->set('foo', 'foo string!!');
-        $this->assertSame('foo string!!', $arr->get('foo'));
+        static::assertSame('foo string!!', $arr->get('foo'));
 
         $arr->set('foo.bar', 'foo.bar string!');
-        $this->assertSame([
+        static::assertSame([
             'bar' => 'foo.bar string!'
         ], $arr->get('foo'));
 
         $arr->set('bar.bar2', 'bar2 string!!');
         $arr->set('bar.bar3', 'bar3 string!');
-        $this->assertSame([
+        static::assertSame([
             'bar1' => 'bar1 string!',
             'bar2' => 'bar2 string!!',
             'bar3' => 'bar3 string!',
         ], $arr->get('bar'));
 
         $arr->set('baz', 'baz string!');
-        $this->assertSame([
+        static::assertSame([
             'foo' => [
                 'bar' => 'foo.bar string!',
             ],
@@ -121,35 +121,35 @@ class DotArrayTest extends PHPUnit_Framework_TestCase
             'null' => null,
         ]);
 
-        $this->assertTrue($arr->has('foo'));
-        $this->assertTrue($arr->remove('foo'));
-        $this->assertFalse($arr->has('foo'));
+        static::assertTrue($arr->has('foo'));
+        static::assertTrue($arr->remove('foo'));
+        static::assertFalse($arr->has('foo'));
 
-        $this->assertFalse($arr->has('bar.bar3'));
-        $this->assertFalse($arr->remove('bar.bar3'));
+        static::assertFalse($arr->has('bar.bar3'));
+        static::assertFalse($arr->remove('bar.bar3'));
 
-        $this->assertFalse($arr->has('bar.bar2.unknown'));
-        $this->assertFalse($arr->remove('bar.bar2.unknown'));
-        $this->assertEquals([
+        static::assertFalse($arr->has('bar.bar2.unknown'));
+        static::assertFalse($arr->remove('bar.bar2.unknown'));
+        static::assertEquals([
             'bar1' => 'bar1 string!',
             'bar2' => 'bar2 string!',
         ], $arr->get('bar'));
 
-        $this->assertTrue($arr->has('bar.bar2'));
-        $this->assertTrue($arr->remove('bar.bar2'));
-        $this->assertFalse($arr->has('bar.bar2'));
-        $this->assertEquals([
+        static::assertTrue($arr->has('bar.bar2'));
+        static::assertTrue($arr->remove('bar.bar2'));
+        static::assertFalse($arr->has('bar.bar2'));
+        static::assertEquals([
             'bar1' => 'bar1 string!',
         ], $arr->get('bar'));
 
-        $this->assertFalse($arr->has('null.isnull'));
-        $this->assertFalse($arr->remove('null.isnull'));
+        static::assertFalse($arr->has('null.isnull'));
+        static::assertFalse($arr->remove('null.isnull'));
 
-        $this->assertTrue($arr->has('null'));
-        $this->assertTrue($arr->remove('null'));
-        $this->assertFalse($arr->has('null'));
+        static::assertTrue($arr->has('null'));
+        static::assertTrue($arr->remove('null'));
+        static::assertFalse($arr->has('null'));
 
-        $this->assertEquals([
+        static::assertEquals([
             'bar' => [
                 'bar1' => 'bar1 string!',
             ]
@@ -167,22 +167,22 @@ class DotArrayTest extends PHPUnit_Framework_TestCase
             'null' => null,
         ]);
 
-        $this->assertSame('foo string!', $arr['foo']);
-        $this->assertSame([
+        static::assertSame('foo string!', $arr['foo']);
+        static::assertSame([
             'bar1' => 'bar1 string!',
             'bar2' => 'bar2 string!',
         ], $arr['bar']);
-        $this->assertSame('bar1 string!', $arr['bar.bar1']);
+        static::assertSame('bar1 string!', $arr['bar.bar1']);
 
-        $this->assertSame(null, $arr['null']);
-        $this->assertSame(null, $arr['null.isnull']);
+        static::assertSame(null, $arr['null']);
+        static::assertSame(null, $arr['null.isnull']);
 
         // with default
-        $this->assertSame('unknown', $arr['bar.bar3||unknown']);
-        $this->assertSame('unknown', $arr['unknown.something||unknown']);
+        static::assertSame('unknown', $arr['bar.bar3||unknown']);
+        static::assertSame('unknown', $arr['unknown.something||unknown']);
 
-        $this->assertSame(null, $arr['null||unknown']);
-        $this->assertSame('unknown', $arr['null.isnull||unknown']);
+        static::assertSame(null, $arr['null||unknown']);
+        static::assertSame('unknown', $arr['null.isnull||unknown']);
     }
     
     public function testSubset()
@@ -196,8 +196,8 @@ class DotArrayTest extends PHPUnit_Framework_TestCase
             'null' => null,
         ]);
 
-        $this->assertInstanceOf(DotArray::class, $arr->subset('bar'));
-        $this->assertEquals([
+        static::assertInstanceOf(DotArray::class, $arr->subset('bar'));
+        static::assertEquals([
             'bar1' => 'bar1 string!',
             'bar2' => 'bar2 string!',
         ], $arr->subset('bar')->get(''));

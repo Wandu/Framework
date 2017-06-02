@@ -3,12 +3,12 @@ namespace Wandu\Http\Psr;
 
 use InvalidArgumentException;
 use Mockery;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\UploadedFileInterface;
 use Psr\Http\Message\UriInterface;
 use Wandu\Http\Attribute\LazyAttribute;
 
-class ServerRequestTest extends PHPUnit_Framework_TestCase
+class ServerRequestTest extends TestCase
 {
     public function tearDown()
     {

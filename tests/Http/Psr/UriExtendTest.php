@@ -2,10 +2,10 @@
 namespace Wandu\Http\Psr;
 
 use InvalidArgumentException;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use Mockery;
 
-class UriExtendTest extends PHPUnit_Framework_TestCase
+class UriExtendTest extends TestCase
 {
     public function urlProvider()
     {

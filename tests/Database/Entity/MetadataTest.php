@@ -2,10 +2,10 @@
 namespace Wandu\Database\Entity;
 
 use Doctrine\Common\Annotations\AnnotationReader;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use Wandu\Database\Sakila\SakilaFilm;
 
-class MetadataTest extends PHPUnit_Framework_TestCase
+class MetadataTest extends TestCase
 {
     /** @var \Wandu\Database\Entity\MetadataReader */
     protected $reader;

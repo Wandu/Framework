@@ -3,9 +3,9 @@ namespace Wandu\Http\Cookie;
 
 use DateTime;
 use InvalidArgumentException;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 
-class CookieTest extends PHPUnit_Framework_TestCase
+class CookieTest extends TestCase
 {
     public function testConstruct()
     {

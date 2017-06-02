@@ -1,12 +1,11 @@
 <?php
 namespace Wandu\Http\Psr\Stream;
 
-use Mockery;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use Wandu\Http\Psr\StreamTestTrait;
 
-class StringStreamTest extends PHPUnit_Framework_TestCase
+class StringStreamTest extends TestCase
 {
     use StreamTestTrait;
 
@@ -17,22 +16,24 @@ class StringStreamTest extends PHPUnit_Framework_TestCase
 
     public function testAllwaysTrueMethods()
     {
-        $this->assertTrue($this->stream->isReadable());
-        $this->assertTrue($this->stream->isSeekable());
-        $this->assertTrue($this->stream->isWritable());
+        static::assertTrue($this->stream->isReadable());
+        static::assertTrue($this->stream->isSeekable());
+        static::assertTrue($this->stream->isWritable());
     }
 
     public function testCannotUseMethods()
     {
         try {
             $this->stream->close();
-            $this->fail();
+            static::fail();
         } catch (RuntimeException $e) {
+            static::addToAssertionCount(1);
         }
         try {
             $this->stream->detach();
-            $this->fail();
+            static::fail();
         } catch (RuntimeException $e) {
+            static::addToAssertionCount(1);
         }
     }
 }

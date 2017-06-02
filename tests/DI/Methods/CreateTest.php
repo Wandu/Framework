@@ -1,12 +1,12 @@
 <?php
 namespace Wandu\DI\Methods;
 
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use stdClass;
 use Wandu\DI\Container;
 use Wandu\DI\Exception\CannotResolveException;
 
-class CreateTest extends PHPUnit_Framework_TestCase
+class CreateTest extends TestCase
 {
     public function testCreate()
     {

@@ -223,6 +223,7 @@ class DispatcherTest extends TestCase
             $dispatcher->dispatch($request);
             static::fail();
         } catch (MethodNotAllowedException $e) {
+            static::addToAssertionCount(1); // do nothing
         }
     }
 

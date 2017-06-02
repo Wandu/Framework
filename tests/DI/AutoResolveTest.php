@@ -1,13 +1,13 @@
 <?php
 namespace Wandu\DI;
 
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ServerRequestInterface;
 use Wandu\DI\Exception\CannotResolveException;
 use Wandu\Http\Parameters\ParsedBody;
 use Wandu\Http\Psr\ServerRequest;
 
-class AutoResolveTest extends PHPUnit_Framework_TestCase
+class AutoResolveTest extends TestCase
 {
     public function testBind()
     {

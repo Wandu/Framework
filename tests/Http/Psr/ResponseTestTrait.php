@@ -1,7 +1,7 @@
 <?php
 namespace Wandu\Http\Psr;
 
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use Mockery;
 use InvalidArgumentException;
 use Psr\Http\Message\ResponseInterface;
@@ -17,13 +17,13 @@ trait ResponseTestTrait
             $this->response->withStatus(9999);
             $this->fail();
         } catch (InvalidArgumentException $e) {
-            $this->assertEquals('Invalid status code "9999".', $e->getMessage());
+            static::assertEquals('Invalid status code "9999".', $e->getMessage());
         }
         try {
             $this->response->withStatus([]);
             $this->fail();
         } catch (InvalidArgumentException $e) {
-            $this->assertEquals('Invalid status code. It must be a 3-digit integer.', $e->getMessage());
+            static::assertEquals('Invalid status code. It must be a 3-digit integer.', $e->getMessage());
         }
     }
 
@@ -34,19 +34,19 @@ trait ResponseTestTrait
         $responseWithPhrase = $response->withStatus(201, 'What');
 
         $response = new Response();
-        $this->assertNotSame($response, $response->withStatus(200));
+        static::assertNotSame($response, $response->withStatus(200));
 
         // If no reason phrase is specified, implementations MAY choose to default
         // to the RFC 7231 or IANA recommended reason phrase for the response's
         // status code.
-        $this->assertEquals(201, $responseWithCode->getStatusCode());
-        $this->assertEquals('Created', $responseWithCode->getReasonPhrase());
+        static::assertEquals(201, $responseWithCode->getStatusCode());
+        static::assertEquals('Created', $responseWithCode->getReasonPhrase());
 
         // This method MUST be implemented in such a way as to retain the
         // immutability of the message, and MUST return an instance that has the
         // updated status and reason phrase.
-        $this->assertEquals(201, $responseWithPhrase->getStatusCode());
-        $this->assertEquals('What', $responseWithPhrase->getReasonPhrase());
+        static::assertEquals(201, $responseWithPhrase->getStatusCode());
+        static::assertEquals('What', $responseWithPhrase->getReasonPhrase());
     }
 
     public function testGetReasonPhrase()
@@ -60,10 +60,10 @@ trait ResponseTestTrait
         // choose to return the default RFC 7231 recommended reason phrase (or those
         // listed in the IANA HTTP Status Code Registry) for the response's
         // status code.
-        $this->assertEquals('OK', $response->getReasonPhrase());
+        static::assertEquals('OK', $response->getReasonPhrase());
 
-        $this->assertEquals('Created', $responseWithCode->getReasonPhrase());
+        static::assertEquals('Created', $responseWithCode->getReasonPhrase());
 
-        $this->assertEquals('Created !!', $responseWithPhrase->getReasonPhrase());
+        static::assertEquals('Created !!', $responseWithPhrase->getReasonPhrase());
     }
 }

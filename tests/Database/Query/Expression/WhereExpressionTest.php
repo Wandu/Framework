@@ -1,11 +1,11 @@
 <?php
 namespace Wandu\Database\Query\Expression;
 
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use Wandu\Collection\ArrayList;
 use Wandu\Database\Query\SelectQuery;
 
-class WhereExpressionTest extends PHPUnit_Framework_TestCase
+class WhereExpressionTest extends TestCase
 {
     public function testEmpty()
     {

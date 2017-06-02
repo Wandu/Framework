@@ -1,12 +1,12 @@
 <?php
 namespace Wandu\Http\Exception;
 
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Wandu\Http\Psr\Stream\StringStream;
 use function Wandu\Http\response;
 
-class HttpExceptionTest extends PHPUnit_Framework_TestCase
+class HttpExceptionTest extends TestCase
 {
     public function testCreate()
     {

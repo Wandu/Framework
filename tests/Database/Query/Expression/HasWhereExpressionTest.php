@@ -1,9 +1,9 @@
 <?php
 namespace Wandu\Database\Query\Expression;
 
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 
-class HasWhereExpressionTest extends PHPUnit_Framework_TestCase
+class HasWhereExpressionTest extends TestCase
 {
     public function testNothing()
     {

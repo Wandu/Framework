@@ -1,7 +1,7 @@
 <?php
 namespace Wandu\Http\Psr;
 
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use Mockery;
 use RuntimeException;
 use InvalidArgumentException;
@@ -9,7 +9,7 @@ use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UploadedFileInterface;
 use Wandu\Http\Psr\UploadedFile;
 
-class UploadedFileTest extends PHPUnit_Framework_TestCase
+class UploadedFileTest extends TestCase
 {
     public function tearDown()
     {
@@ -18,13 +18,13 @@ class UploadedFileTest extends PHPUnit_Framework_TestCase
 
     public function testConstruct()
     {
-        $this->assertInstanceOf(UploadedFileInterface::class, new UploadedFile);
+        static::assertInstanceOf(UploadedFileInterface::class, new UploadedFile);
 
         $file = new UploadedFile('/tmp/hello', 3030, 0, 'hello.txt', 'text/plain');
-        $this->assertSame(3030, $file->getSize());
-        $this->assertSame(0, $file->getError());
-        $this->assertSame('hello.txt', $file->getClientFilename());
-        $this->assertSame('text/plain', $file->getClientMediaType());
+        static::assertSame(3030, $file->getSize());
+        static::assertSame(0, $file->getError());
+        static::assertSame('hello.txt', $file->getClientFilename());
+        static::assertSame('text/plain', $file->getClientMediaType());
     }
 
     public function testGetStream()
@@ -38,7 +38,7 @@ class UploadedFileTest extends PHPUnit_Framework_TestCase
         // native PHP stream wrapper to work with such functions).
         $file = new UploadedFile($fileName);
 
-        $this->assertInstanceOf(StreamInterface::class, $file->getStream());
+        static::assertInstanceOf(StreamInterface::class, $file->getStream());
 
         // If the moveTo() method has been called previously, this method MUST raise
         // an exception.
@@ -48,7 +48,7 @@ class UploadedFileTest extends PHPUnit_Framework_TestCase
             $file->getStream();
             $this->fail();
         } catch (RuntimeException $e) {
-            $this->assertEquals('Cannot retrieve stream after it has already been moved.', $e->getMessage());
+            static::assertEquals('Cannot retrieve stream after it has already been moved.', $e->getMessage());
         }
 
         @unlink($fileName.'_moved');
@@ -75,9 +75,9 @@ class UploadedFileTest extends PHPUnit_Framework_TestCase
         $file->moveTo($fileName .'_moved');
 
         // The original file or stream MUST be removed on completion.
-        $this->assertFileNotExists($fileName); // old file check
-        $this->assertFileExists($fileName .'_moved');
-        $this->assertEquals('hello world...', file_get_contents($fileName .'_moved'));
+        static::assertFileNotExists($fileName); // old file check
+        static::assertFileExists($fileName .'_moved');
+        static::assertEquals('hello world...', file_get_contents($fileName .'_moved'));
 
         // If this method is called more than once, any subsequent calls MUST raise
         // an exception.
@@ -85,7 +85,7 @@ class UploadedFileTest extends PHPUnit_Framework_TestCase
             $file->moveTo($fileName . '_moved');
             $this->fail();
         } catch (RuntimeException $e) {
-            $this->assertEquals('Cannot move the file. Already moved!', $e->getMessage());
+            static::assertEquals('Cannot move the file. Already moved!', $e->getMessage());
         }
 
         // When used in an SAPI environment where $_FILES is populated, when writing
@@ -100,7 +100,7 @@ class UploadedFileTest extends PHPUnit_Framework_TestCase
             $file->moveTo([]);
             $this->fail();
         } catch (InvalidArgumentException $e) {
-            $this->assertEquals('Invalid path provided for move operation. It must be a string.', $e->getMessage());
+            static::assertEquals('Invalid path provided for move operation. It must be a string.', $e->getMessage());
         }
 
         @unlink($fileName .'_moved');

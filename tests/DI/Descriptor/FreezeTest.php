@@ -23,6 +23,7 @@ class FreezeTest extends TestCase
             $container->destroy('obj2');
             static::fail();
         } catch (CannotChangeException $e) {
+            static::addToAssertionCount(1);
         }
     }
 }

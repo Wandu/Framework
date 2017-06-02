@@ -2,9 +2,9 @@
 namespace Wandu\DateTime;
 
 use Carbon\Carbon;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 
-class DateTest extends PHPUnit_Framework_TestCase
+class DateTest extends TestCase
 {
     public function provideTimes()
     {

@@ -3,10 +3,10 @@ namespace Wandu\DI\Annotations;
 
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\Common\Annotations\Reader;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use Wandu\DI\Container;
 
-class AutoWiredTest extends PHPUnit_Framework_TestCase
+class AutoWiredTest extends TestCase
 {
     public function testAutoWiringViaProperty()
     {

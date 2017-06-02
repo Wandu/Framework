@@ -2,12 +2,12 @@
 namespace Wandu\Collection;
 
 use InvalidArgumentException;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use stdClass;
 use Wandu\Assertions;
 use Wandu\Collection\Contracts\ListInterface;
 
-class ArrayMapTest extends PHPUnit_Framework_TestCase
+class ArrayMapTest extends TestCase
 {
     use Assertions;
 

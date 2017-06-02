@@ -1,10 +1,10 @@
 <?php
 namespace Wandu\Http\Psr;
 
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use Mockery;
 
-class ResponseTest extends PHPUnit_Framework_TestCase
+class ResponseTest extends TestCase
 {
     use ResponseTestTrait, MessageTestTrait;
 

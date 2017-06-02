@@ -1,13 +1,13 @@
 <?php
 namespace Wandu\Database;
 
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use Wandu\Database\Query\CreateQuery;
 use Wandu\Database\Query\Expression\ConstraintExpression;
 use Wandu\Database\Query\Expression\ReferenceExpression;
 use Wandu\Database\Query\Expression\RawExpression;
 
-class QueryBuilderTest extends PHPUnit_Framework_TestCase
+class QueryBuilderTest extends TestCase
 {
     /** @var \Wandu\Database\QueryBuilder */
     protected $queryBuilder;

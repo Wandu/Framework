@@ -2,16 +2,16 @@
 namespace Wandu\Http\Issues;
 
 use Mockery;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use Wandu\Http\Psr\ServerRequest;
 
-class Issue12Test extends PHPUnit_Framework_TestCase
+class Issue12Test extends TestCase
 {
     public function testGetAttribute()
     {
         $request = (new ServerRequest())->withAttribute('null', null);
 
-        $this->assertNull($request->getAttribute('null'));
-        $this->assertNull($request->getAttribute('null', 20));
+        static::assertNull($request->getAttribute('null'));
+        static::assertNull($request->getAttribute('null', 20));
     }
 }
