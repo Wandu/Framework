@@ -1,6 +1,7 @@
 
 git subsplit init git@github.com:Wandu/Framework.git
 
+git subsplit publish --heads="master" --no-tags src/Wandu/Annotation:git@github.com:Wandu/Annotation.git
 git subsplit publish --heads="master 3.0" --no-tags src/Wandu/Caster:git@github.com:Wandu/Caster.git
 git subsplit publish --heads="master" --no-tags src/Wandu/Collection:git@github.com:Wandu/Collection.git
 git subsplit publish --heads="master 3.0" --no-tags src/Wandu/Config:git@github.com:Wandu/Config.git
