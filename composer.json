@@ -58,9 +58,9 @@
         }
     },
     "replace": {
+        "wandu/annotation": "self.version",
         "wandu/caster": "self.version",
         "wandu/collection": "self.version",
-        "wandu/compiler": "self.version",
         "wandu/config": "self.version",
         "wandu/console": "self.version",
         "wandu/database": "self.version",
@@ -69,7 +69,6 @@
         "wandu/event": "self.version",
         "wandu/foundation": "self.version",
         "wandu/http": "self.version",
-        "wandu/installation": "self.version",
         "wandu/q": "self.version",
         "wandu/router": "self.version",
         "wandu/support": "self.version",
