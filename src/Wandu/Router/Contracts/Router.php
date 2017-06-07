@@ -1,8 +1,6 @@
 <?php
 namespace Wandu\Router\Contracts;
 
-use Wandu\Router\Route;
-
 interface Router
 {
     /**
@@ -32,7 +30,7 @@ interface Router
      * @param string $path
      * @param string $className
      * @param string $methodName
-     * @return \Wandu\Router\Route
+     * @return \Wandu\Router\Contracts\Route
      */
     public function get(string $path, string $className, string $methodName = 'index'): Route;
 
@@ -40,7 +38,7 @@ interface Router
      * @param string $path
      * @param string $className
      * @param string $methodName
-     * @return \Wandu\Router\Route
+     * @return \Wandu\Router\Contracts\Route
      */
     public function post(string $path, string $className, string $methodName = 'index'): Route;
 
@@ -48,7 +46,7 @@ interface Router
      * @param string $path
      * @param string $className
      * @param string $methodName
-     * @return \Wandu\Router\Route
+     * @return \Wandu\Router\Contracts\Route
      */
     public function put(string $path, string $className, string $methodName = 'index'): Route;
 
@@ -56,7 +54,7 @@ interface Router
      * @param string $path
      * @param string $className
      * @param string $methodName
-     * @return \Wandu\Router\Route
+     * @return \Wandu\Router\Contracts\Route
      */
     public function delete(string $path, string $className, string $methodName = 'index'): Route;
 
@@ -64,7 +62,7 @@ interface Router
      * @param string $path
      * @param string $className
      * @param string $methodName
-     * @return \Wandu\Router\Route
+     * @return \Wandu\Router\Contracts\Route
      */
     public function options(string $path, string $className, string $methodName = 'index'): Route;
 
@@ -72,7 +70,7 @@ interface Router
      * @param string $path
      * @param string $className
      * @param string $methodName
-     * @return \Wandu\Router\Route
+     * @return \Wandu\Router\Contracts\Route
      */
     public function patch(string $path, string $className, string $methodName = 'index'): Route;
 
@@ -80,7 +78,7 @@ interface Router
      * @param string $path
      * @param string $className
      * @param string $methodName
-     * @return \Wandu\Router\Route
+     * @return \Wandu\Router\Contracts\Route
      */
     public function any(string $path, string $className, string $methodName = 'index'): Route;
 
@@ -89,7 +87,7 @@ interface Router
      * @param string $path
      * @param string $className
      * @param string $methodName
-     * @return \Wandu\Router\Route
+     * @return \Wandu\Router\Contracts\Route
      */
     public function createRoute(array $methods, string $path, string $className, string $methodName = 'index'): Route;
 }

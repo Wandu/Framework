@@ -2,8 +2,10 @@
 namespace Wandu\Router;
 
 use IteratorAggregate;
+use Wandu\Router\Contracts\Route as RouteInterface;
+use Wandu\Router\Contracts\Router as RouterInterface;
 
-class Router implements IteratorAggregate
+class Router implements IteratorAggregate, RouterInterface 
 {
     /** @var \Wandu\Router\Route[] */
     protected $routes = [];
@@ -21,7 +23,7 @@ class Router implements IteratorAggregate
      * @param string $prefix
      * @param callable $handler
      */
-    public function prefix($prefix, callable $handler)
+    public function prefix(string $prefix, callable $handler)
     {
         $beforePrefix = $this->prefix;
         $this->prefix = "{$beforePrefix}/" . ($prefix ?? '');
@@ -76,85 +78,57 @@ class Router implements IteratorAggregate
     }
 
     /**
-     * @param string $path
-     * @param string $className
-     * @param string $methodName
-     * @param array $middlewares
-     * @return Route
+     * {@inheritdoc}
      */
-    public function get($path, $className, $methodName = 'index', array $middlewares = [])
+    public function get(string $path, string $className, string $methodName = 'index'): RouteInterface
     {
-        return $this->createRoute(['GET', 'HEAD'], $path, $className, $methodName, $middlewares);
+        return $this->createRoute(['GET', 'HEAD'], $path, $className, $methodName);
     }
 
     /**
-     * @param string $path
-     * @param string $className
-     * @param string $methodName
-     * @param array $middlewares
-     * @return Route
+     * {@inheritdoc}
      */
-    public function post($path, $className, $methodName = 'index', array $middlewares = [])
+    public function post(string $path, string $className, string $methodName = 'index'): RouteInterface
     {
-        return $this->createRoute(['POST'], $path, $className, $methodName, $middlewares);
+        return $this->createRoute(['POST'], $path, $className, $methodName);
     }
 
     /**
-     * @param string $path
-     * @param string $className
-     * @param string $methodName
-     * @param array $middlewares
-     * @return Route
+     * {@inheritdoc}
      */
-    public function put($path, $className, $methodName = 'index', array $middlewares = [])
+    public function put(string $path, string $className, string $methodName = 'index'): RouteInterface
     {
-        return $this->createRoute(['PUT'], $path, $className, $methodName, $middlewares);
+        return $this->createRoute(['PUT'], $path, $className, $methodName);
     }
 
     /**
-     * @param string $path
-     * @param string $className
-     * @param string $methodName
-     * @param array $middlewares
-     * @return Route
+     * {@inheritdoc}
      */
-    public function delete($path, $className, $methodName = 'index', array $middlewares = [])
+    public function delete(string $path, string $className, string $methodName = 'index'): RouteInterface
     {
-        return $this->createRoute(['DELETE'], $path, $className, $methodName, $middlewares);
+        return $this->createRoute(['DELETE'], $path, $className, $methodName);
     }
 
     /**
-     * @param string $path
-     * @param string $className
-     * @param string $methodName
-     * @param array $middlewares
-     * @return Route
+     * {@inheritdoc}
      */
-    public function options($path, $className, $methodName = 'index', array $middlewares = [])
+    public function options(string $path, string $className, string $methodName = 'index'): RouteInterface
     {
-        return $this->createRoute(['OPTIONS'], $path, $className, $methodName, $middlewares);
+        return $this->createRoute(['OPTIONS'], $path, $className, $methodName);
     }
 
     /**
-     * @param string $path
-     * @param string $className
-     * @param string $methodName
-     * @param array $middlewares
-     * @return Route
+     * {@inheritdoc}
      */
-    public function patch($path, $className, $methodName = 'index', array $middlewares = [])
+    public function patch(string $path, string $className, string $methodName = 'index'): RouteInterface
     {
-        return $this->createRoute(['PATCH'], $path, $className, $methodName, $middlewares);
+        return $this->createRoute(['PATCH'], $path, $className, $methodName);
     }
 
     /**
-     * @param string $path
-     * @param string $className
-     * @param string $methodName
-     * @param array $middlewares
-     * @return Route
+     * {@inheritdoc}
      */
-    public function any($path, $className, $methodName = 'index', array $middlewares = [])
+    public function any(string $path, string $className, string $methodName = 'index'): RouteInterface
     {
         return $this->createRoute([
             'GET',
@@ -164,26 +138,20 @@ class Router implements IteratorAggregate
             'DELETE',
             'OPTIONS',
             'PATCH'
-        ], $path, $className, $methodName, $middlewares);
+        ], $path, $className, $methodName);
     }
-    
+
     /**
-     * @param array $methods
-     * @param string $path
-     * @param string $className
-     * @param string $methodName
-     * @param array|string $middlewares
-     * @return \Wandu\Router\Route
+     * {@inheritdoc}
      */
-    public function createRoute(array $methods, $path, $className, $methodName = 'index', array $middlewares = [])
+    public function createRoute(array $methods, string $path, string $className, string $methodName = 'index'): RouteInterface
     {
         $path = trim("{$this->prefix}/{$path}", '/');
         while(strpos($path, '//') !== false) {
             $path = str_replace('//', '/', $path);
         }
         $path = '/' . $path;
-        $middlewares = array_merge($this->middlewares, $middlewares);
-        $route = new Route($className, $methodName, $middlewares);
+        $route = new Route($className, $methodName, $this->middlewares);
         $this->routes[] = [$methods, $path, $route];
         return $route;
     }

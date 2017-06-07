@@ -4,8 +4,9 @@ namespace Wandu\Router;
 use Psr\Http\Message\ServerRequestInterface;
 use Wandu\Router\Contracts\LoaderInterface;
 use Wandu\Router\Contracts\ResponsifierInterface;
+use Wandu\Router\Contracts\Route as RouteContract;
 
-class Route
+class Route implements RouteContract
 {
     /**
      * @param array $dataSet
@@ -56,9 +57,9 @@ class Route
     /**
      * @param string|array $middlewares
      * @param bool $overwrite
-     * @return \Wandu\Router\Route|self
+     * @return \Wandu\Router\Contracts\Route|self
      */
-    public function middleware($middlewares, $overwrite = false)
+    public function middleware($middlewares, $overwrite = false): RouteContract
     {
         if (is_string($middlewares)) {
             $middlewares = [$middlewares];
@@ -71,9 +72,9 @@ class Route
 
     /**
      * @param string $name
-     * @return \Wandu\Router\Route|self
+     * @return \Wandu\Router\Contracts\Route|self
      */
-    public function name(string $name)
+    public function name(string $name): RouteContract
     {
         $this->name = $name;
         return $this;
