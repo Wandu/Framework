@@ -1,15 +1,20 @@
 <?php
 namespace Wandu\Annotation;
 
+use Wandu\Collection\ArrayList;
+use Wandu\Collection\ArrayMap;
+use Wandu\Collection\Contracts\ListInterface;
+use Wandu\Collection\Contracts\MapInterface;
+
 class AnnotationBag
 {
-    /** @var array */
+    /** @var \Wandu\Collection\Contracts\ListInterface */
     protected $classAnnos;
     
-    /** @var array[] */
+    /** @var \Wandu\Collection\Contracts\MapInterface */
     protected $propAnnos;
-    
-    /** @var array[] */
+
+    /** @var \Wandu\Collection\Contracts\MapInterface */
     protected $methodAnnos;
 
     /**
@@ -19,50 +24,54 @@ class AnnotationBag
      */
     public function __construct(array $classAnnos, array $propAnnos, array $methodAnnos)
     {
-        $this->classAnnos = $classAnnos;
-        $this->propAnnos = $propAnnos;
-        $this->methodAnnos = $methodAnnos;
+        $this->classAnnos = new ArrayList($classAnnos);
+        $this->propAnnos = (new ArrayMap($propAnnos))->map(function ($items) {
+            return new ArrayList($items);
+        });
+        $this->methodAnnos = (new ArrayMap($methodAnnos))->map(function ($items) {
+            return new ArrayList($items);
+        });
     }
 
     /**
-     * @return array
+     * @return \Wandu\Collection\Contracts\ListInterface
      */
-    public function getClassAnnotations(): array
+    public function getClassAnnotations(): ListInterface
     {
         return $this->classAnnos;
     }
 
     /**
-     * @return array
+     * @return \Wandu\Collection\Contracts\MapInterface
      */
-    public function getPropertiesAnnotations(): array
+    public function getPropertiesAnnotations(): MapInterface
     {
         return $this->propAnnos;
     }
 
     /**
      * @param string $name
-     * @return array
+     * @return \Wandu\Collection\Contracts\ListInterface
      */
-    public function getPropertyAnnotations(string $name): array
+    public function getPropertyAnnotations(string $name): ListInterface
     {
-        return $this->propAnnos[$name] ?? [];
+        return $this->propAnnos[$name] ?? new ArrayList();
     }
 
     /**
-     * @return array
+     * @return \Wandu\Collection\Contracts\MapInterface
      */
-    public function getMethodsAnnotations(): array
+    public function getMethodsAnnotations(): MapInterface
     {
         return $this->methodAnnos;
     }
 
     /**
      * @param string $name
-     * @return array
+     * @return \Wandu\Collection\Contracts\ListInterface
      */
-    public function getMethodAnnotations(string $name): array
+    public function getMethodAnnotations(string $name): ListInterface
     {
-        return $this->methodAnnos[$name] ?? [];
+        return $this->methodAnnos[$name] ?? new ArrayList();
     }
 }

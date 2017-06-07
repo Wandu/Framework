@@ -3,6 +3,8 @@ namespace Wandu\Annotation;
 
 use Doctrine\Common\Annotations\Annotation\Target;
 use PHPUnit\Framework\TestCase;
+use Wandu\Collection\ArrayList;
+use Wandu\Collection\ArrayMap;
 
 class AnnotationManagerTest extends TestCase 
 {
@@ -11,81 +13,81 @@ class AnnotationManagerTest extends TestCase
         $reader = new AnnotationManager();
         $group = $reader->read(AnnotationManagerTestClass::class);
         
-        static::assertEquals([
+        static::assertEquals(new ArrayList([
             $this->createClassAnnotation("class annotation 1"),
             $this->createClassAnnotation("class annotation 2"),
-        ], $group->getClassAnnotations());
+        ]), $group->getClassAnnotations());
 
-        static::assertEquals([
-            'property1' => [
+        static::assertEquals(new ArrayMap([
+            'property1' => new ArrayList([
                 $this->createPropertyAnnotation("prop1 annotation 1"),
                 $this->createPropertyAnnotation("prop1 annotation 2"),
                 $this->createPropertyAnnotation("prop1 annotation 3"),
-            ],
-            'property2' => [
+            ]),
+            'property2' => new ArrayList([
                 $this->createPropertyAnnotation("prop2 annotation 1"),
                 $this->createPropertyAnnotation("prop2 annotation 2"),
                 $this->createPropertyAnnotation("prop2 annotation 3"),
-            ],
-        ], $group->getPropertiesAnnotations());
+            ]),
+        ]), $group->getPropertiesAnnotations());
 
-        static::assertEquals([
+        static::assertEquals(new ArrayList([
             $this->createPropertyAnnotation("prop1 annotation 1"),
             $this->createPropertyAnnotation("prop1 annotation 2"),
             $this->createPropertyAnnotation("prop1 annotation 3"),
-        ], $group->getPropertyAnnotations("property1"));
+        ]), $group->getPropertyAnnotations("property1"));
 
-        static::assertEquals([
+        static::assertEquals(new ArrayList([
             $this->createPropertyAnnotation("prop2 annotation 1"),
             $this->createPropertyAnnotation("prop2 annotation 2"),
             $this->createPropertyAnnotation("prop2 annotation 3"),
-        ], $group->getPropertyAnnotations("property2"));
+        ]), $group->getPropertyAnnotations("property2"));
 
-        static::assertEquals([], $group->getPropertyAnnotations("property3"));
+        static::assertEquals(new ArrayList(), $group->getPropertyAnnotations("property3"));
 
-        static::assertEquals([
-            'method1' => [
+        static::assertEquals(new ArrayMap([
+            'method1' => new ArrayList([
                 $this->createMethodAnnotation("method1 annotation 1"),
                 $this->createMethodAnnotation("method1 annotation 2"),
                 $this->createMethodAnnotation("method1 annotation 3"),
                 $this->createMethodAnnotation("method1 annotation 4"),
-            ],
-            'method2' => [
+            ]),
+            'method2' => new ArrayList([
                 $this->createMethodAnnotation("method2 annotation 1"),
                 $this->createMethodAnnotation("method2 annotation 2"),
                 $this->createMethodAnnotation("method2 annotation 3"),
                 $this->createMethodAnnotation("method2 annotation 4"),
-            ],
-            'method3' => [
+            ]),
+            'method3' => new ArrayList([
                 $this->createMethodAnnotation("method3 annotation 1"),
                 $this->createMethodAnnotation("method3 annotation 2"),
                 $this->createMethodAnnotation("method3 annotation 3"),
                 $this->createMethodAnnotation("method3 annotation 4"),
-            ],
-        ], $group->getMethodsAnnotations());
+            ]),
+        ]), $group->getMethodsAnnotations());
 
-        static::assertEquals([
+        static::assertEquals(new ArrayList([
             $this->createMethodAnnotation("method1 annotation 1"),
             $this->createMethodAnnotation("method1 annotation 2"),
             $this->createMethodAnnotation("method1 annotation 3"),
             $this->createMethodAnnotation("method1 annotation 4"),
-        ], $group->getMethodAnnotations("method1"));
+        ]), $group->getMethodAnnotations("method1"));
 
-        static::assertEquals([
+        static::assertEquals(new ArrayList([
             $this->createMethodAnnotation("method2 annotation 1"),
             $this->createMethodAnnotation("method2 annotation 2"),
             $this->createMethodAnnotation("method2 annotation 3"),
             $this->createMethodAnnotation("method2 annotation 4"),
-        ], $group->getMethodAnnotations("method2"));
+        ]), $group->getMethodAnnotations("method2"));
 
-        static::assertEquals([
+        static::assertEquals(new ArrayList([
             $this->createMethodAnnotation("method3 annotation 1"),
             $this->createMethodAnnotation("method3 annotation 2"),
             $this->createMethodAnnotation("method3 annotation 3"),
             $this->createMethodAnnotation("method3 annotation 4"),
-        ], $group->getMethodAnnotations("method3"));
+        ]), $group->getMethodAnnotations("method3"));
 
-        static::assertEquals([], $group->getMethodAnnotations("method4"));
+        static::assertEquals(new ArrayList(), $group->getMethodAnnotations("method4"));
     }
 
     protected function createClassAnnotation($message)
