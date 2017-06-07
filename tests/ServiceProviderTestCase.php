@@ -4,9 +4,11 @@ namespace Wandu;
 use PHPUnit\Framework\TestCase;
 use ReflectionObject;
 use Wandu\Config\Config;
+use Wandu\Config\Contracts\ConfigInterface;
+use Wandu\DI\ContainerInterface;
 use Wandu\DI\ServiceProviderInterface;
 use Wandu\Foundation\Application;
-use Wandu\Foundation\Kernels\NullKernel;
+use Wandu\Foundation\Contracts\Bootstrapper;
 
 abstract class ServiceProviderTestCase extends TestCase 
 {
@@ -25,8 +27,12 @@ abstract class ServiceProviderTestCase extends TestCase
     
     public function setUp()
     {
-        $this->app = new Application(new NullKernel());
-        $this->app['config'] = new Config($this->config);
+        $this->app = new Application(new class implements Bootstrapper {
+            public function providers(): array { return []; }
+            public function boot(ContainerInterface $app) {}
+            public function execute(ContainerInterface $app): int { return 0; }
+        });
+        $this->app->instance(ConfigInterface::class, new Config($this->config));
     }
 
     public function testCheckRegisteredClasses()

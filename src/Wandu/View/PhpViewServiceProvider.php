@@ -1,10 +1,10 @@
 <?php
 namespace Wandu\View;
 
+use Wandu\Config\Contracts\ConfigInterface;
 use Wandu\DI\ContainerInterface;
 use Wandu\DI\ServiceProviderInterface;
 use Wandu\View\Contracts\RenderInterface;
-use function Wandu\Foundation\config;
 
 /**
  * @deprecated use PhiewServiceProvider
@@ -16,8 +16,8 @@ class PhpViewServiceProvider implements ServiceProviderInterface
      */
     public function register(ContainerInterface $app)
     {
-        $app->closure(RenderInterface::class, function () {
-            return new PhpView(config('view.path'));
+        $app->closure(RenderInterface::class, function (ConfigInterface $config) {
+            return new PhpView($config->get('view.path'));
         });
     }
 
