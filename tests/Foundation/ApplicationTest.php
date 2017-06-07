@@ -4,7 +4,6 @@ namespace Wandu\Foundation;
 use Mockery;
 use PHPUnit\Framework\TestCase;
 use Wandu\Foundation\Contracts\Bootstrapper;
-use Wandu\Foundation\Contracts\Definition;
 
 class ApplicationTest extends TestCase
 {
@@ -17,12 +16,12 @@ class ApplicationTest extends TestCase
     public function testBoot()
     {
         $bootstrapper = Mockery::mock(Bootstrapper::class);
-        $definition = Mockery::mock(Definition::class);
         
-        $app = new Application($bootstrapper, $definition);
+        $app = new Application($bootstrapper);
 
-        $bootstrapper->shouldReceive('boot')->with($app, $definition)->once();
-
+        $bootstrapper->shouldReceive('boot')->with($app)->once();
+        $bootstrapper->shouldReceive('providers')->andReturn([])->once();
+        
         $app->boot();
         
         // call boot many times, but called once
@@ -37,12 +36,12 @@ class ApplicationTest extends TestCase
     public function testExecute()
     {
         $bootstrapper = Mockery::mock(Bootstrapper::class);
-        $definition = Mockery::mock(Definition::class);
 
-        $app = new Application($bootstrapper, $definition);
+        $app = new Application($bootstrapper);
 
-        $bootstrapper->shouldReceive('boot')->with($app, $definition)->once();
-        $bootstrapper->shouldReceive('execute')->with($app, $definition)->once();
+        $bootstrapper->shouldReceive('providers')->andReturn([])->once();
+        $bootstrapper->shouldReceive('boot')->with($app)->once();
+        $bootstrapper->shouldReceive('execute')->with($app)->once();
 
         // no-call boot, but called once
         $app->execute();

@@ -1,10 +1,9 @@
 <?php
 namespace Wandu\Foundation\Contracts;
 
-use Throwable;
 use Psr\Http\Message\ServerRequestInterface;
 
-interface HttpErrorHandlerInterface
+interface HttpErrorHandler
 {
     /**
      * @param \Psr\Http\Message\ServerRequestInterface $request

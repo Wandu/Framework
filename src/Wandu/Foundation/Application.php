@@ -2,7 +2,6 @@
 namespace Wandu\Foundation;
 
 use Wandu\DI\Container;
-use Wandu\Foundation\Contracts\Definition;
 use Wandu\Foundation\Contracts\Bootstrapper;
 
 class Application extends Container
@@ -13,15 +12,10 @@ class Application extends Container
     /** @var \Wandu\Foundation\Contracts\Bootstrapper */
     protected $bootstrapper;
     
-    /** @var \Wandu\Foundation\Contracts\Definition */
-    protected $definition;
-
-    public function __construct(Bootstrapper $bootstrapper, Definition $definition)
+    public function __construct(Bootstrapper $bootstrapper)
     {
         parent::__construct();
         $this->instance(Bootstrapper::class, $this->bootstrapper = $bootstrapper);
-        $this->instance(Definition::class, $this->definition = $definition);
-        $this->setAsGlobal();
     }
 
     /**
@@ -30,7 +24,10 @@ class Application extends Container
     public function boot()
     {
         if (!$this->isBooted) {
-            $this->bootstrapper->boot($this, $this->definition);
+            foreach ($this->bootstrapper->providers() as $provider) {
+                $this->register($provider);
+            }
+            $this->bootstrapper->boot($this);
             parent::boot();
         }
         return $this;
@@ -42,6 +39,6 @@ class Application extends Container
     public function execute()
     {
         $this->boot();
-        return $this->bootstrapper->execute($this, $this->definition);
+        return $this->bootstrapper->execute($this);
     }
 }

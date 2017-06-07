@@ -6,16 +6,19 @@ use Wandu\DI\ContainerInterface;
 interface Bootstrapper
 {
     /**
-     * @param \Wandu\DI\ContainerInterface $app
-     * @param \Wandu\Foundation\Contracts\Definition $definition
-     * @return void
+     * @return \Wandu\DI\ServiceProviderInterface[]
      */
-    public function boot(ContainerInterface $app, Definition $definition);
+    public function providers(): array;
 
     /**
      * @param \Wandu\DI\ContainerInterface $app
-     * @param \Wandu\Foundation\Contracts\Definition $definition
+     * @return void
+     */
+    public function boot(ContainerInterface $app);
+
+    /**
+     * @param \Wandu\DI\ContainerInterface $app
      * @return int
      */
-    public function execute(ContainerInterface $app, Definition $definition): int;
+    public function execute(ContainerInterface $app): int;
 }

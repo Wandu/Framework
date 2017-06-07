@@ -4,10 +4,11 @@ namespace Wandu\Foundation\Error;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
 use Wandu\Config\Contracts\ConfigInterface;
-use Wandu\Foundation\Contracts\HttpErrorHandlerInterface;
+use Wandu\Foundation\Contracts\HttpErrorHandler;
 use Wandu\Http\Exception\HttpException;
 use Wandu\Router\Exception\MethodNotAllowedException as RouteMethodException;
 use Wandu\Router\Exception\RouteNotFoundException;
+use Wandu\Validator\Exception\InvalidValueException;
 use Whoops\Handler\JsonResponseHandler;
 use Whoops\Handler\PlainTextHandler;
 use Whoops\Handler\PrettyPageHandler;
@@ -15,14 +16,24 @@ use Whoops\Run;
 use function Wandu\Http\Response\create;
 use function Wandu\Http\Response\json;
 
-class DefaultHttpErrorHandler implements HttpErrorHandlerInterface
+class DefaultHttpErrorHandler implements HttpErrorHandler
 {
     /** @var \Psr\Log\LoggerInterface */
     protected $logger;
     
     /** @var \Wandu\Config\Contracts\ConfigInterface */
     protected $config;
+
+    /** @var array */
+    protected $types = [
+        /* ... */
+    ];
     
+    /** @var array */
+    protected $statusCodes = [
+        InvalidValueException::class => 400,
+    ];
+
     /**
      * @param \Wandu\Config\Contracts\ConfigInterface $config
      * @param \Psr\Log\LoggerInterface $logger
