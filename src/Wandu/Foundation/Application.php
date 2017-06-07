@@ -2,24 +2,25 @@
 namespace Wandu\Foundation;
 
 use Wandu\DI\Container;
-use Wandu\Foundation\Contracts\KernelInterface;
+use Wandu\Foundation\Contracts\Definition;
+use Wandu\Foundation\Contracts\Bootstrapper;
 
 class Application extends Container
 {
     const NAME = "Wandu";
     const VERSION = "4.0-dev";
 
-    /** @var \Wandu\Foundation\Contracts\KernelInterface */
-    protected $kernel;
+    /** @var \Wandu\Foundation\Contracts\Bootstrapper */
+    protected $bootstrapper;
+    
+    /** @var \Wandu\Foundation\Contracts\Definition */
+    protected $definition;
 
-    /**
-     * @param \Wandu\Foundation\Contracts\KernelInterface $kernel
-     */
-    public function __construct(KernelInterface $kernel)
+    public function __construct(Bootstrapper $bootstrapper, Definition $definition)
     {
         parent::__construct();
-        $this->instance(KernelInterface::class, $this->kernel = $kernel);
-        $this->alias('kernel', KernelInterface::class);
+        $this->instance(Bootstrapper::class, $this->bootstrapper = $bootstrapper);
+        $this->instance(Definition::class, $this->definition = $definition);
         $this->setAsGlobal();
     }
 
@@ -29,7 +30,7 @@ class Application extends Container
     public function boot()
     {
         if (!$this->isBooted) {
-            $this->kernel->boot($this);
+            $this->bootstrapper->boot($this, $this->definition);
             parent::boot();
         }
         return $this;
@@ -41,6 +42,6 @@ class Application extends Container
     public function execute()
     {
         $this->boot();
-        return $this->kernel->execute($this);
+        return $this->bootstrapper->execute($this, $this->definition);
     }
 }
