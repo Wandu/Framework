@@ -36,8 +36,11 @@ class ListenCommand extends Command
             if (isset($job)) {
                 $payload = $job->read();
                 if (is_array($payload) && array_key_exists('method', $payload) && $payload['method'] === 'event:execute') {
-                    $this->output->writeln(date('[ymd_His]').' Received!');
-                    $this->dispatcher->executeListeners($payload['event']);
+                    $this->output->writeln(date('[ymd_His]').' receive ' . get_class($payload['event']));
+                    $listeners = $this->dispatcher->executeListeners($payload['event']);
+                    foreach ($listeners as $listener) {
+                        $this->output->writeln("  -> {$listener}");
+                    }
                     $job->delete();
                 }
             } else {
