@@ -14,14 +14,19 @@ class AnnotationManager
     /** @var \Psr\SimpleCache\CacheInterface */
     protected $cache;
 
+    /** @var string */
+    protected $cachePrefix;
+    
     /**
      * @param \Doctrine\Common\Annotations\Reader $reader
      * @param \Psr\SimpleCache\CacheInterface $cache
+     * @param string $cachePrefix
      */
-    public function __construct(Reader $reader = null, CacheInterface $cache = null)
+    public function __construct(Reader $reader = null, CacheInterface $cache = null, string $cachePrefix = 'annotation.')
     {
         $this->reader = $reader ?? new AnnotationReader();
         $this->cache = $cache;
+        $this->cachePrefix = $cachePrefix;
     }
 
     /**
@@ -31,7 +36,7 @@ class AnnotationManager
     public function read(string $className): AnnotationBag
     {
         if ($this->cache && $this->cache->has($className)) {
-            return $this->cache->get($className);
+            return $this->cache->get($this->cachePrefix . $className);
         }
         $reflClass = new ReflectionClass($className);
         $classAnnotations = [];
@@ -54,7 +59,7 @@ class AnnotationManager
         }
         $result = new AnnotationBag($classAnnotations, $propsAnnotations, $methodsAnnotations);
         if ($this->cache) {
-            $this->cache->set($className, $result);
+            $this->cache->set($this->cachePrefix . $className, $result);
         }
         return $result;
     }
