@@ -3,9 +3,9 @@ namespace Wandu\Q\Providers;
 
 use Pheanstalk\Pheanstalk;
 use Pheanstalk\PheanstalkInterface;
+use Wandu\Config\Contracts\ConfigInterface;
 use Wandu\DI\ContainerInterface;
 use Wandu\DI\ServiceProviderInterface;
-use function Wandu\Foundation\config;
 
 class BeanstalkServiceProvider implements ServiceProviderInterface 
 {
@@ -14,12 +14,12 @@ class BeanstalkServiceProvider implements ServiceProviderInterface
      */
     public function register(ContainerInterface $app)
     {
-        $app->closure(PheanstalkInterface::class, function () {
+        $app->closure(PheanstalkInterface::class, function (ConfigInterface $config) {
             return new Pheanstalk(
-                config('pda.pheanstalk.host', '127.0.0.1'),
-                config('pda.pheanstalk.port', Pheanstalk::DEFAULT_PORT),
-                config('pda.pheanstalk.timeout'),
-                config('pda.pheanstalk.connect_persistent', false)
+                $config->get('pda.pheanstalk.host', '127.0.0.1'),
+                $config->get('pda.pheanstalk.port', Pheanstalk::DEFAULT_PORT),
+                $config->get('pda.pheanstalk.timeout'),
+                $config->get('pda.pheanstalk.connect_persistent', false)
             );
         });
     }

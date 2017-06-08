@@ -1,13 +1,13 @@
 <?php
 namespace Wandu\View;
 
+use Wandu\Config\Contracts\ConfigInterface;
 use Wandu\DI\ContainerInterface;
 use Wandu\DI\ServiceProviderInterface;
 use Wandu\View\Contracts\RenderInterface;
 use Wandu\View\Phiew\Configuration;
 use Wandu\View\Phiew\Contracts\ResolverInterface;
 use Wandu\View\Phiew\FileResolver;
-use function Wandu\Foundation\config;
 
 class PhiewServiceProvider implements ServiceProviderInterface
 {
@@ -16,9 +16,9 @@ class PhiewServiceProvider implements ServiceProviderInterface
      */
     public function register(ContainerInterface $app)
     {
-        $app->closure(Configuration::class, function () {
+        $app->closure(Configuration::class, function (ConfigInterface $config) {
             $conf = new Configuration();
-            $conf->path = (array) config('view.path', 'views');
+            $conf->path = (array) $config->get('view.path', 'views');
             return $conf;
         });
         $app->bind(ResolverInterface::class, FileResolver::class);

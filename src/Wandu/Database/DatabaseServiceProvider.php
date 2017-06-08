@@ -3,17 +3,16 @@ namespace Wandu\Database;
 
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\Common\Annotations\Reader;
-use Wandu\Caster\CastManagerInterface;
+use Wandu\Config\Contracts\ConfigInterface;
 use Wandu\Database\Contracts\ConnectionInterface;
 use Wandu\Database\Contracts\Entity\MetadataReaderInterface;
+use Wandu\Database\Contracts\Migrator\MigrateAdapterInterface;
+use Wandu\Database\Contracts\Migrator\MigrationTemplateInterface;
 use Wandu\Database\Entity\MetadataReader;
 use Wandu\Database\Migrator\MigrateAdapter;
-use Wandu\Database\Contracts\Migrator\MigrateAdapterInterface;
 use Wandu\Database\Migrator\MigrationTemplate;
-use Wandu\Database\Contracts\Migrator\MigrationTemplateInterface;
 use Wandu\DI\ContainerInterface;
 use Wandu\DI\ServiceProviderInterface;
-use function Wandu\Foundation\config;
 
 class DatabaseServiceProvider implements ServiceProviderInterface
 {
@@ -24,8 +23,8 @@ class DatabaseServiceProvider implements ServiceProviderInterface
     {
         $app->bind(Reader::class, AnnotationReader::class);
         $app->bind(MetadataReaderInterface::class, MetadataReader::class);
-        $app->bind(Manager::class)->after(function (Manager $manager) {
-            foreach (config('database.connections', []) as $name => $connection) {
+        $app->bind(Manager::class)->after(function (Manager $manager) use ($app) {
+            foreach ($app->get(ConfigInterface::class)->get('database.connections', []) as $name => $connection) {
                 $manager->connect($connection, $name);
             }
         });

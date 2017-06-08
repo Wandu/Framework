@@ -1,9 +1,9 @@
 <?php
 namespace Wandu\Caster;
 
+use Wandu\Config\Contracts\ConfigInterface;
 use Wandu\DI\ContainerInterface;
 use Wandu\DI\ServiceProviderInterface;
-use function Wandu\Foundation\config;
 
 class CasterServiceProvider implements ServiceProviderInterface
 {
@@ -12,10 +12,10 @@ class CasterServiceProvider implements ServiceProviderInterface
      */
     public function register(ContainerInterface $app)
     {
-        $app->closure(Caster::class, function (ContainerInterface $app) {
+        $app->closure(Caster::class, function (ContainerInterface $app, ConfigInterface $config) {
             return new Caster(array_map(function ($caster) use ($app) {
                 return $app->get($caster);
-            }, config('caster.casters', [])));
+            }, $config->get('caster.casters', [])));
         });
         $app->alias(CastManagerInterface::class, Caster::class);
     }

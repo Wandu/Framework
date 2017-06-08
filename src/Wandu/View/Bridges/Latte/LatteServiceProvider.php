@@ -3,10 +3,10 @@ namespace Wandu\View\Bridges\Latte;
 
 use Latte\Engine;
 use Latte\Loaders\FileLoader;
+use Wandu\Config\Contracts\ConfigInterface;
 use Wandu\DI\ContainerInterface;
 use Wandu\DI\ServiceProviderInterface;
 use Wandu\View\Contracts\RenderInterface;
-use function Wandu\Foundation\config;
 
 class LatteServiceProvider implements ServiceProviderInterface
 {
@@ -15,19 +15,19 @@ class LatteServiceProvider implements ServiceProviderInterface
      */
     public function register(ContainerInterface $app)
     {
-        $app->closure(Engine::class, function () {
+        $app->closure(Engine::class, function (ConfigInterface $config) {
             $engine = new Engine();
             $engine->setLoader(new FileLoader());
-            $cachePath = config('view.cache');
+            $cachePath = $config->get('view.cache');
             if ($cachePath) {
                 $engine->setTempDirectory($cachePath);
             }
             return $engine;
         });
-        $app->closure(RenderInterface::class, function ($app) {
+        $app->closure(RenderInterface::class, function (Engine $engine, ConfigInterface $config) {
             return new LatteView(
-                $app[Engine::class],
-                config('view.path')
+                $engine,
+                $config->get('view.path')
             );
         });
     }

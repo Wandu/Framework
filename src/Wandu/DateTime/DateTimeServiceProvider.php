@@ -1,9 +1,9 @@
 <?php
 namespace Wandu\DateTime;
 
+use Wandu\Config\Contracts\ConfigInterface;
 use Wandu\DI\ContainerInterface;
 use Wandu\DI\ServiceProviderInterface;
-use function Wandu\Foundation\config;
 
 class DateTimeServiceProvider implements ServiceProviderInterface
 {
@@ -19,6 +19,8 @@ class DateTimeServiceProvider implements ServiceProviderInterface
      */
     public function boot(ContainerInterface $app)
     {
-        date_default_timezone_set(config('timezone', 'UTC'));
+        if ($config = $app->get(ConfigInterface::class)) {
+            date_default_timezone_set($config->get('timezone', 'UTC'));
+        }
     }
 }

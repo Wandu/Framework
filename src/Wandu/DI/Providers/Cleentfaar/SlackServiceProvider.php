@@ -2,9 +2,9 @@
 namespace Wandu\DI\Providers\Cleentfaar;
 
 use CL\Slack\Transport\ApiClient;
+use Wandu\Config\Contracts\ConfigInterface;
 use Wandu\DI\ContainerInterface;
 use Wandu\DI\ServiceProviderInterface;
-use function Wandu\Foundation\config;
 
 class SlackServiceProvider implements ServiceProviderInterface
 {
@@ -13,10 +13,8 @@ class SlackServiceProvider implements ServiceProviderInterface
      */
     public function register(ContainerInterface $app)
     {
-        $app->closure(ApiClient::class, function () {
-            return new ApiClient(
-                config('cleentfaar.slack.token')
-            );
+        $app->closure(ApiClient::class, function (ConfigInterface $config) {
+            return new ApiClient($config->get('cleentfaar.slack.token'));
         });
     }
 
