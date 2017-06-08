@@ -3,7 +3,7 @@ namespace Wandu\Q\Providers;
 
 use Aws\Sqs\SqsClient;
 use Pheanstalk\PheanstalkInterface;
-use Wandu\Config\Contracts\ConfigInterface;
+use Wandu\Config\Contracts\Config;
 use Wandu\DI\ContainerInterface;
 use Wandu\DI\ServiceProviderInterface;
 
@@ -14,7 +14,7 @@ class SqsServiceProvider implements ServiceProviderInterface
      */
     public function register(ContainerInterface $app)
     {
-        $app->closure(PheanstalkInterface::class, function (ConfigInterface $config) {
+        $app->closure(PheanstalkInterface::class, function (Config $config) {
             return new SqsClient([
                 'version' => 'latest',
                 'credentials' => [

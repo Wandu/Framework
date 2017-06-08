@@ -3,7 +3,7 @@ namespace Wandu\Foundation\Error;
 
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
-use Wandu\Config\Contracts\ConfigInterface;
+use Wandu\Config\Contracts\Config;
 use Wandu\Foundation\Contracts\HttpErrorHandler;
 use Wandu\Http\Exception\HttpException;
 use Wandu\Router\Exception\MethodNotAllowedException as RouteMethodException;
@@ -21,7 +21,7 @@ class DefaultHttpErrorHandler implements HttpErrorHandler
     /** @var \Psr\Log\LoggerInterface */
     protected $logger;
     
-    /** @var \Wandu\Config\Contracts\ConfigInterface */
+    /** @var \Wandu\Config\Contracts\Config */
     protected $config;
 
     /** @var array */
@@ -35,10 +35,10 @@ class DefaultHttpErrorHandler implements HttpErrorHandler
     ];
 
     /**
-     * @param \Wandu\Config\Contracts\ConfigInterface $config
+     * @param \Wandu\Config\Contracts\Config $config
      * @param \Psr\Log\LoggerInterface $logger
      */
-    public function __construct(ConfigInterface $config, LoggerInterface $logger = null)
+    public function __construct(Config $config, LoggerInterface $logger = null)
     {
         $this->config = $config;
         $this->logger = $logger;

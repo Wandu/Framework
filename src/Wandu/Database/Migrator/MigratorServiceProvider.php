@@ -1,7 +1,7 @@
 <?php
 namespace Wandu\Database\Migrator;
 
-use Wandu\Config\Contracts\ConfigInterface;
+use Wandu\Config\Contracts\Config;
 use Wandu\DI\ContainerInterface;
 use Wandu\DI\ServiceProviderInterface;
 
@@ -12,7 +12,7 @@ class MigratorServiceProvider implements ServiceProviderInterface
      */
     public function register(ContainerInterface $app)
     {
-        $app->closure(Configuration::class, function (ConfigInterface $config) {
+        $app->closure(Configuration::class, function (Config $config) {
             return new Configuration([
                 'connection' => $config->get('database.migrator.connection'),
                 'table' => $config->get('database.migrator.table'),

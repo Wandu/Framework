@@ -1,0 +1,7 @@
+yml1:
+    yml11: true
+yml2:
+    paths: [vendor/*, tests/*]
+yml3:
+    - 'yml3_1'
+    - 'yml3_2'

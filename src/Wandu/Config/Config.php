@@ -1,44 +1,156 @@
 <?php
 namespace Wandu\Config;
 
-use Wandu\Config\Contracts\ConfigInterface;
+use InvalidArgumentException;
+use Wandu\Config\Contracts\Config as ConfigContract;
+use Wandu\Config\Contracts\Loader;
 use Wandu\Config\Exception\NotAllowedMethodException;
-use Wandu\Support\DotArray;
 
-class Config extends DotArray implements ConfigInterface
+class Config implements ConfigContract
 {
-    /** @var bool */
-    protected $readOnly;
+    /** @var array */
+    protected $items;
 
     /**
      * @param array $items
-     * @param bool $readOnly
      */
-    public function __construct(array $items = [], $readOnly = true)
+    public function __construct(array $items = [])
     {
-        parent::__construct($items);
-        $this->readOnly = $readOnly;
+        $this->items = $items;
     }
-    
+
     /**
-     * {@inheritdoc}
+     * @param \Wandu\Config\Contracts\Loader $loader
      */
-    public function set($name, $value)
+    public function pushLoader(Loader $loader)
     {
-        if ($this->readOnly) {
-            throw new NotAllowedMethodException(__FUNCTION__, __CLASS__);
+        $this->merge($loader->load());
+    }
+
+    /**
+     * @param array $appender
+     */
+    public function merge(array $appender)
+    {
+        $this->items = $this->recursiveMerge($this->items, $appender);
+    }
+
+    /**
+     * @param mixed $origin
+     * @param mixed $appender
+     * @return mixed
+     */
+    private function recursiveMerge($origin, $appender)
+    {
+        if (is_array($origin)
+            && array_values($origin) !== $origin
+            && is_array($appender)
+            && array_values($appender) !== $appender) {
+            foreach ($appender as $key => $value) {
+                if (isset($origin[$key])) {
+                    $origin[$key] = $this->recursiveMerge($origin[$key], $value);
+                } else {
+                    $origin[$key] = $value;
+                }
+            }
+            return $origin;
         }
-        return parent::set($name, $value);
+        return $appender;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function remove($name)
+    public function toArray(): array
     {
-        if ($this->readOnly) {
-            throw new NotAllowedMethodException(__FUNCTION__, __CLASS__);
+        return $this->items ?? [];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function has($name): bool
+    {
+        if ($name === '') {
+            return true;
         }
-        return parent::remove($name);
+        $names = explode('.', $name);
+        $dataToReturn = $this->items;
+        while (count($names)) {
+            $name = array_shift($names);
+            if (!is_array($dataToReturn) || !array_key_exists($name, $dataToReturn)) {
+                return false;
+            }
+            $dataToReturn = $dataToReturn[$name];
+        }
+        return true;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function get($name, $default = null)
+    {
+        if ($name === '') {
+            return $this->items;
+        }
+        $names = explode('.', $name);
+        $dataToReturn = $this->items;
+        while (count($names)) {
+            $name = array_shift($names);
+            if (!is_array($dataToReturn) || !array_key_exists($name, $dataToReturn)) {
+                return $default;
+            }
+            $dataToReturn = $dataToReturn[$name];
+        }
+        return $dataToReturn;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function subset($name): ConfigContract
+    {
+        $subset = $this->get($name);
+        if (!is_array($subset)) {
+            throw new InvalidArgumentException('subset must be an array.');
+        }
+        return new static($subset);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function offsetExists($offset)
+    {
+        return $this->has($offset);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function offsetGet($offset)
+    {
+        if (strpos($offset, '||') !== false) {
+            list($offset, $default) = explode('||', $offset);
+            return $this->get($offset, $default);
+        }
+        return $this->get($offset);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function offsetSet($offset, $value)
+    {
+        throw new NotAllowedMethodException(__FUNCTION__, __CLASS__);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function offsetUnset($offset)
+    {
+        throw new NotAllowedMethodException(__FUNCTION__, __CLASS__);
     }
 }

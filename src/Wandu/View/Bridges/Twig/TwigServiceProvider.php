@@ -3,7 +3,7 @@ namespace Wandu\View\Bridges\Twig;
 
 use Twig_Environment;
 use Twig_Loader_Filesystem;
-use Wandu\Config\Contracts\ConfigInterface;
+use Wandu\Config\Contracts\Config;
 use Wandu\DI\ContainerInterface;
 use Wandu\DI\ServiceProviderInterface;
 use Wandu\View\Contracts\RenderInterface;
@@ -15,7 +15,7 @@ class TwigServiceProvider implements ServiceProviderInterface
      */
     public function register(ContainerInterface $app)
     {
-        $app->closure(Twig_Environment::class, function (ConfigInterface $config) {
+        $app->closure(Twig_Environment::class, function (Config $config) {
             $loader = new Twig_Loader_Filesystem($config->get('twig.path', $config->get('view.path')));
             $options = [
                 'auto_reload' => true,

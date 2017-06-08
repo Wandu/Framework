@@ -7,7 +7,7 @@ use Neomerx\Cors\Contracts\AnalyzerInterface;
 use Neomerx\Cors\Contracts\Strategies\SettingsStrategyInterface;
 use Neomerx\Cors\Strategies\Settings;
 use Psr\Log\LoggerInterface;
-use Wandu\Config\Contracts\ConfigInterface;
+use Wandu\Config\Contracts\Config;
 use Wandu\DI\ContainerInterface;
 use Wandu\DI\ServiceProviderInterface;
 
@@ -19,7 +19,7 @@ class CorsPsr7ServiceProvider implements ServiceProviderInterface
     public function register(ContainerInterface $app)
     {
         $app->bind(Settings::class)->after(function (Settings $settings) use ($app) {
-            $config = $app->get(ConfigInterface::class);
+            $config = $app->get(Config::class);
             $settings->setServerOrigin($config->get('neomerx.cors-psr7.server-origin'));
             $settings->setRequestAllowedOrigins($config->get('neomerx.cors-psr7.allowed-origins', []));
             $settings->setRequestAllowedMethods($config->get('neomerx.cors-psr7.allowed-methods', []));

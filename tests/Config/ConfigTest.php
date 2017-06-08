@@ -1,10 +1,12 @@
 <?php
 namespace Wandu\Config;
 
-use PHPUnit\Framework\TestCase;
-use Wandu\Config\Contracts\ConfigInterface;
-use Wandu\Config\Exception\NotAllowedMethodException;
 use InvalidArgumentException;
+use PHPUnit\Framework\TestCase;
+use Wandu\Config\Exception\NotAllowedMethodException;
+use Wandu\Config\Loader\EnvLoader;
+use Wandu\Config\Loader\PhpLoader;
+use Wandu\Config\Loader\YmlLoader;
 
 class ConfigTest extends TestCase
 {
@@ -71,104 +73,6 @@ class ConfigTest extends TestCase
         static::assertTrue($config->has('null'));
         static::assertFalse($config->has('null.isnull'));
     }
-
-    public function testSetNowAllowed()
-    {
-        $config = new Config([]);
-
-        try {
-            $config->set('foo', 'foo string!!');
-            static::fail();
-        } catch (NotAllowedMethodException $exception) {
-            static::addToAssertionCount(1);
-        }
-    }
-
-    public function testSet()
-    {
-        $config = new Config([
-            'foo' => 'foo string!',
-            'bar' => [
-                'bar1' => 'bar1 string!',
-                'bar2' => 'bar2 string!',
-            ],
-        ], false);
-
-        $config->set('foo', 'foo string!!');
-        static::assertSame('foo string!!', $config->get('foo'));
-
-        $config->set('foo.bar', 'foo.bar string!');
-        static::assertSame([
-            'bar' => 'foo.bar string!'
-        ], $config->get('foo'));
-
-        $config->set('bar.bar2', 'bar2 string!!');
-        $config->set('bar.bar3', 'bar3 string!');
-        static::assertSame([
-            'bar1' => 'bar1 string!',
-            'bar2' => 'bar2 string!!',
-            'bar3' => 'bar3 string!',
-        ], $config->get('bar'));
-
-        $config->set('baz', 'baz string!');
-        static::assertSame([
-            'foo' => [
-                'bar' => 'foo.bar string!',
-            ],
-            'bar' => [
-                'bar1' => 'bar1 string!',
-                'bar2' => 'bar2 string!!',
-                'bar3' => 'bar3 string!',
-            ],
-            'baz' => 'baz string!'
-        ], $config->getRawData());
-    }
-
-    public function testRemove()
-    {
-        $config = new Config([
-            'foo' => 'foo string!',
-            'bar' => [
-                'bar1' => 'bar1 string!',
-                'bar2' => 'bar2 string!',
-            ],
-            'null' => null,
-        ], false);
-
-        static::assertTrue($config->has('foo'));
-        static::assertTrue($config->remove('foo'));
-        static::assertFalse($config->has('foo'));
-
-        static::assertFalse($config->has('bar.bar3'));
-        static::assertFalse($config->remove('bar.bar3'));
-
-        static::assertFalse($config->has('bar.bar2.unknown'));
-        static::assertFalse($config->remove('bar.bar2.unknown'));
-        static::assertEquals([
-            'bar1' => 'bar1 string!',
-            'bar2' => 'bar2 string!',
-        ], $config->get('bar'));
-
-        static::assertTrue($config->has('bar.bar2'));
-        static::assertTrue($config->remove('bar.bar2'));
-        static::assertFalse($config->has('bar.bar2'));
-        static::assertEquals([
-            'bar1' => 'bar1 string!',
-        ], $config->get('bar'));
-
-        static::assertFalse($config->has('null.isnull'));
-        static::assertFalse($config->remove('null.isnull'));
-
-        static::assertTrue($config->has('null'));
-        static::assertTrue($config->remove('null'));
-        static::assertFalse($config->has('null'));
-        
-        static::assertEquals([
-            'bar' => [
-                'bar1' => 'bar1 string!',
-            ]
-        ], $config->getRawData());
-    }
     
     public function testArrayAccess()
     {
@@ -207,13 +111,13 @@ class ConfigTest extends TestCase
         
         $config->get('foo');
         try {
-            $config->set('bar', 'something');
+            $config->offsetSet('bar', 'something');
             static::fail();
         } catch (NotAllowedMethodException $e) {
             static::addToAssertionCount(1);
         }
         try {
-            $config->remove('foo');
+            $config->offsetUnset('foo');
             static::fail();
         } catch (NotAllowedMethodException $e) {
             static::addToAssertionCount(1);
@@ -231,7 +135,7 @@ class ConfigTest extends TestCase
             'null' => null,
         ]);
 
-        static::assertInstanceOf(ConfigInterface::class, $config->subset('bar'));
+        static::assertInstanceOf(Config::class, $config->subset('bar'));
         static::assertEquals([
             'bar1' => 'bar1 string!',
             'bar2' => 'bar2 string!',
@@ -239,15 +143,167 @@ class ConfigTest extends TestCase
 
         try {
             $config->subset('foo');
-            $this->fail();
+            static::fail();
         } catch (InvalidArgumentException $e) {}
         try {
             $config->subset('null');
-            $this->fail();
+            static::fail();
         } catch (InvalidArgumentException $e) {}
         try {
             $config->subset('bar.unknown');
-            $this->fail();
+            static::fail();
         } catch (InvalidArgumentException $e) {}
+    }
+    
+    public function testMerge()
+    {
+        $config = new Config([
+            'string1' => 'string1..',
+            'string2' => 'string2..',
+            'object1' => [
+                'object11' => 'object11..',
+                'array1' => [1, 2, 3,],
+                'array2' => [2, 3, 4,],
+            ],
+            'object2' => [
+                'object21' => 'object21..',
+                'array2' => [2, 3, 4,],
+            ],
+            'object3' => [
+                'object21' => 'object21..',
+                'array2' => [2, 3, 4,],
+            ],
+        ]);
+        $config->merge([
+            'string2' => 'string2 overwrite',
+            'string3' => 'string3 append',
+            'object1' => [
+                'object11' => 'object11 overwrite',
+                'object12' => 'object12 append',
+                'array1' => [3, 4, 5, ], // list -> list overwrite
+                'array2' => [
+                    'array21' => 'array21 overwrite',
+                    'array22' => 'array22 overwrite',
+                ], // list -> map overwrite 
+            ], // map -> map merge
+            'object2' => [1, 2, 3, 4, ], // map -> list overwrite
+            'object3' => 'scalar', // object -> scalar overwrite
+        ]);
+        static::assertSame([
+            'string1' => 'string1..',
+            'string2' => 'string2 overwrite',
+            'object1' => [
+                'object11' => 'object11 overwrite',
+                'array1' => [3, 4, 5, ], // list -> list overwrite
+                'array2' => [
+                    'array21' => 'array21 overwrite',
+                    'array22' => 'array22 overwrite',
+                ], // list -> map overwrite 
+                'object12' => 'object12 append',
+            ],
+            'object2' => [1, 2, 3, 4, ], // map -> list overwrite
+            'object3' => 'scalar', // object -> scalar overwrite
+            'string3' => 'string3 append',
+        ], $config->toArray());
+    }
+
+    public function testMergeDeep()
+    {
+        $config = new Config([
+            'object1' => [
+                'object2' => [
+                    'object3' => [
+                        'object4' => [
+                            'object5' => [
+                                'remain' => 'remain',
+                                'object6' => [1, 2, 3, 4],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ]);
+        $config->merge([
+            'object1' => [
+                'object2' => [
+                    'object3' => [
+                        'object4' => [
+                            'object5' => [
+                                'object6' => [
+                                    'object7' => 'scalar',
+                                ],
+                                'object6-1' => 'object6-1..',
+                            ],
+                            'object5-1' => 'object5-1..',
+                        ],
+                    ],
+                ],
+                'object2-1' => 'object2-1..',
+            ],
+        ]);
+        static::assertSame([
+            'object1' => [
+                'object2' => [
+                    'object3' => [
+                        'object4' => [
+                            'object5' => [
+                                'remain' => 'remain',
+                                'object6' => [
+                                    'object7' => 'scalar',
+                                ],
+                                'object6-1' => 'object6-1..',
+                            ],
+                            'object5-1' => 'object5-1..',
+                        ],
+                    ],
+                ],
+                'object2-1' => 'object2-1..',
+            ],
+        ], $config->toArray());
+    }
+    
+    public function testWithLoader()
+    {
+        $config = new Config();
+
+        $config->pushLoader(new PhpLoader(__DIR__ . '/test.config.php'));
+        $config->pushLoader(new EnvLoader(__DIR__ . '/test.config.env'));
+        $config->pushLoader(new YmlLoader(__DIR__ . '/test.config.yml'));
+        
+        static::assertSame([
+            'foo' => 'foo string',
+            'vendor1' => [
+                'service1' => [
+                    'name' => 'vendor1 service1 name..',
+                    'path' => 'vendor1 service1 path..',
+                ],
+                'service2' => [
+                    'name' => 'vendor1 service2 name..',
+                    'path' => 'vendor1 service2 path..',
+                ],
+            ],
+            'vendor2' => [
+                'service1' => [
+                    'name' => 'vendor2 service1 name..',
+                    'path' => 'vendor2 service1 path..',
+                ],
+                'service2' => [
+                    'name' => 'vendor2 service2 name..',
+                    'path' => 'vendor2 service2 path..',
+                ],
+            ],
+            'env1' => 'what the',
+            'env2' => false,
+            'yml1' => [
+                'yml11' => true,
+            ],
+            'yml2' => [
+                'paths' => ['vendor/*', 'tests/*']
+            ],
+            'yml3' => [
+                'yml3_1',
+                'yml3_2',
+            ],
+        ], $config->toArray());
     }
 }

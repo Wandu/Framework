@@ -40,7 +40,9 @@
         "monolog/monolog": "^1.19",
         "composer/semver": "^1.4",
         "neomerx/cors-psr7": "^1.0",
-        "lcobucci/jwt": "^3.2"
+        "lcobucci/jwt": "^3.2",
+        "symfony/yaml": "^3.3",
+        "m1/env": "^2.1"
     },
     "autoload": {
         "psr-4": {

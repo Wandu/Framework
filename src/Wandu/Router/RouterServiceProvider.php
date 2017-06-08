@@ -1,7 +1,7 @@
 <?php
 namespace Wandu\Router;
 
-use Wandu\Config\Contracts\ConfigInterface;
+use Wandu\Config\Contracts\Config;
 use Wandu\DI\ContainerInterface;
 use Wandu\DI\ServiceProviderInterface;
 use Wandu\Router\Contracts\LoaderInterface;
@@ -20,7 +20,7 @@ class RouterServiceProvider implements  ServiceProviderInterface
     {
         $app->bind(LoaderInterface::class, PsrLoader::class);
         $app->bind(ResponsifierInterface::class, PsrResponsifier::class);
-        $app->closure(Configuration::class, function (ConfigInterface $config) {
+        $app->closure(Configuration::class, function (Config $config) {
             return new Configuration([
                 'middleware' => $config->get('router.middleware', [Parameterify::class, Sessionify::class]),
                 'virtual_method_enabled' => true,

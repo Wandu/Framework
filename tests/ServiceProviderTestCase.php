@@ -4,7 +4,7 @@ namespace Wandu;
 use PHPUnit\Framework\TestCase;
 use ReflectionObject;
 use Wandu\Config\Config;
-use Wandu\Config\Contracts\ConfigInterface;
+use Wandu\Config\Contracts\Config;
 use Wandu\DI\ContainerInterface;
 use Wandu\DI\ServiceProviderInterface;
 use Wandu\Foundation\Application;
@@ -32,7 +32,7 @@ abstract class ServiceProviderTestCase extends TestCase
             public function boot(ContainerInterface $app) {}
             public function execute(ContainerInterface $app): int { return 0; }
         });
-        $this->app->instance(ConfigInterface::class, new Config($this->config));
+        $this->app->instance(Config::class, new Config($this->config));
     }
 
     public function testCheckRegisteredClasses()

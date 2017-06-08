@@ -3,7 +3,7 @@ namespace Wandu\Q;
 
 use Aws\Sqs\SqsClient;
 use Pheanstalk\PheanstalkInterface;
-use Wandu\Config\Contracts\ConfigInterface;
+use Wandu\Config\Contracts\Config;
 use Wandu\DI\ContainerInterface;
 use Wandu\DI\ServiceProviderInterface;
 use Wandu\Q\Adapter\BeanstalkdAdapter;
@@ -21,14 +21,14 @@ class QueueServiceProvider implements ServiceProviderInterface
      */
     public function register(ContainerInterface $app)
     {
-        $app->closure(SerializerInterface::class, function (ConfigInterface $config) {
+        $app->closure(SerializerInterface::class, function (Config $config) {
             switch ($config->get('q.serializer')) {
                 case 'json':
                     return new JsonSerializer();
             }
             return new PhpSerializer();
         });
-        $app->closure(AdapterInterface::class, function (ContainerInterface $app, ConfigInterface $config) {
+        $app->closure(AdapterInterface::class, function (ContainerInterface $app, Config $config) {
             switch ($config->get('q.type')) {
                 case 'beanstalkd':
                     $app->assert(PheanstalkInterface::class, 'pda/pheanstalk');

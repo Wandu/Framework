@@ -4,7 +4,7 @@ namespace Wandu\DI\Providers\Monolog;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Psr\Log\LoggerInterface;
-use Wandu\Config\Contracts\ConfigInterface;
+use Wandu\Config\Contracts\Config;
 use Wandu\DI\ContainerInterface;
 use Wandu\DI\ServiceProviderInterface;
 
@@ -15,7 +15,7 @@ class MonologServiceProvider implements ServiceProviderInterface
      */
     public function register(ContainerInterface $app)
     {
-        $app->closure(Logger::class, function (ConfigInterface $config) {
+        $app->closure(Logger::class, function (Config $config) {
             $logger = new Logger('wandu');
             if ($path = $config->get('log.path')) {
                 $logger->pushHandler(new StreamHandler($path));
