@@ -22,7 +22,7 @@ class Config implements ConfigContract
     /**
      * @param \Wandu\Config\Contracts\Loader $loader
      */
-    public function pushLoader(Loader $loader)
+    public function append(Loader $loader)
     {
         $this->merge($loader->load());
     }
