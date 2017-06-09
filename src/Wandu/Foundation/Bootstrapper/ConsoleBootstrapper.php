@@ -4,7 +4,6 @@ namespace Wandu\Foundation\Bootstrapper;
 use Symfony\Component\Console\Application as SymfonyApplication;
 use Wandu\Console\Dispatcher;
 use Wandu\DI\ContainerInterface;
-use Wandu\Foundation\Application;
 use Wandu\Foundation\Contracts\Bootstrapper;
 
 class ConsoleBootstrapper implements Bootstrapper
@@ -37,18 +36,7 @@ class ConsoleBootstrapper implements Bootstrapper
      */
     public function execute(ContainerInterface $app): int
     {
-        $dispatcher = new Dispatcher(
-            $app,
-            $symfonyApplication = new SymfonyApplication(
-                Application::NAME,
-                Application::VERSION
-            )
-        );
-
-        foreach ($this->commands as $name => $command) {
-            $dispatcher->add($name, $command);
-        }
-        $dispatcher->execute();
-        return $symfonyApplication->run();
+        $app->get(Dispatcher::class)->execute();
+        return $app->get(SymfonyApplication::class)->run();
     }
 }

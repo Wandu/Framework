@@ -7,6 +7,7 @@ use Psr\Http\Message\ResponseInterface;
 use Wandu\Foundation\Application;
 use Wandu\Http\Sender\ResponseSender;
 use Wandu\Router\Contracts\Router;
+use Wandu\Router\Dispatcher;
 
 class HttpRouterBootstrapperTest extends TestCase
 {
@@ -27,11 +28,17 @@ class HttpRouterBootstrapperTest extends TestCase
             return true;
         }))->once();
         
-        $bootstrap = new HttpRouterBootstrapper(function (Router $router) {
-            $router->get('/', HttpRouterBootstrapperTestController::class);
-        });
+        $bootstrap = new HttpRouterBootstrapper();
         $app = new Application($bootstrap);
+        $app->boot();
+        
+        // override
         $app->instance(ResponseSender::class, $sender); // mocking
+        $app->descriptor(Dispatcher::class)->after(function (Dispatcher $dispatcher) {
+            $dispatcher->setRoutes(function (Router $router) {
+                $router->get('/', HttpRouterBootstrapperTestController::class);
+            });
+        });
 
         $app->execute();
     }

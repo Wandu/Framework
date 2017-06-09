@@ -13,6 +13,9 @@ use Wandu\Router\Responsifier\PsrResponsifier;
 
 class RouterServiceProvider implements  ServiceProviderInterface
 {
+    /** @var \Closure */
+    protected $routes;
+    
     /**
      * {@inheritdoc}
      */
@@ -28,7 +31,11 @@ class RouterServiceProvider implements  ServiceProviderInterface
                 'cache_file' => $config->get('router.cache_file', null),
             ]);
         });
-        $app->bind(Dispatcher::class);
+        $app->bind(Dispatcher::class)->after(function (Dispatcher $dispatcher) {
+            if ($this->routes) {
+                $dispatcher->setRoutes($this->routes);
+            }
+        });
     }
 
     /**
