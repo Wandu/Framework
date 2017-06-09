@@ -28,7 +28,6 @@ class DeployTest extends TestCase
         'src/Wandu/Http/composer.json',
         'src/Wandu/Q/composer.json',
         'src/Wandu/Router/composer.json',
-        'src/Wandu/Support/composer.json',
         'src/Wandu/Transformer/composer.json',
         'src/Wandu/Validator/composer.json',
         'src/Wandu/View/composer.json',

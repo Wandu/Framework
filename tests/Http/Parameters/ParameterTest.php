@@ -3,7 +3,7 @@ namespace Wandu\Http\Parameters;
 
 use Mockery;
 use PHPUnit\Framework\TestCase;
-use Wandu\Support\Exception\CannotCallMethodException;
+use Wandu\Http\Exception\CannotCallMethodException;
 
 class ParameterTest extends TestCase
 {

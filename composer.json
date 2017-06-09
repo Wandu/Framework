@@ -73,7 +73,6 @@
         "wandu/http": "self.version",
         "wandu/q": "self.version",
         "wandu/router": "self.version",
-        "wandu/support": "self.version",
         "wandu/validator": "self.version",
         "wandu/view": "self.version"
     },

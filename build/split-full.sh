@@ -31,7 +31,6 @@ split_parallel Foundation   "master 3.0" $TAG & PIDS+=($!)
 split_parallel Http         "master 3.0" $TAG & PIDS+=($!)
 split_parallel Q            "master 3.0" $TAG & PIDS+=($!)
 split_parallel Router       "master 3.0" $TAG & PIDS+=($!)
-split_parallel Support      "master 3.0" $TAG & PIDS+=($!)
 split_parallel Validator    "master 3.0" $TAG & PIDS+=($!)
 split_parallel View         "master 3.0" $TAG & PIDS+=($!)
 

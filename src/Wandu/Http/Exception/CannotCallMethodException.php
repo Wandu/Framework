@@ -1,5 +1,5 @@
 <?php
-namespace Wandu\Support\Exception;
+namespace Wandu\Http\Exception;
 
 use RuntimeException;
 
