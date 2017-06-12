@@ -1,5 +1,5 @@
 <?php
-namespace Wandu\Foundation\Bootstrapper;
+namespace Wandu\Foundation\Bootstrap;
 
 use Mockery;
 use PHPUnit\Framework\TestCase;
@@ -9,7 +9,7 @@ use Wandu\Http\Sender\ResponseSender;
 use Wandu\Router\Contracts\Router;
 use Wandu\Router\Dispatcher;
 
-class HttpRouterBootstrapperTest extends TestCase
+class HttpRouterBootstrapTest extends TestCase
 {
     public function tearDown()
     {
@@ -28,7 +28,7 @@ class HttpRouterBootstrapperTest extends TestCase
             return true;
         }))->once();
         
-        $bootstrap = new HttpRouterBootstrapper();
+        $bootstrap = new HttpRouterBootstrap();
         $app = new Application($bootstrap);
         $app->boot();
         
