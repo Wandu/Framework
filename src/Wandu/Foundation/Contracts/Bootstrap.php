@@ -3,7 +3,7 @@ namespace Wandu\Foundation\Contracts;
 
 use Wandu\DI\ContainerInterface;
 
-interface Bootstrapper
+interface Bootstrap
 {
     /**
      * @return \Wandu\DI\ServiceProviderInterface[]

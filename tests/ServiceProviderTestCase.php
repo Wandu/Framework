@@ -8,7 +8,7 @@ use Wandu\Config\Contracts\Config as ConfigContract;
 use Wandu\DI\ContainerInterface;
 use Wandu\DI\ServiceProviderInterface;
 use Wandu\Foundation\Application;
-use Wandu\Foundation\Contracts\Bootstrapper;
+use Wandu\Foundation\Contracts\Bootstrap;
 
 abstract class ServiceProviderTestCase extends TestCase 
 {
@@ -27,7 +27,7 @@ abstract class ServiceProviderTestCase extends TestCase
     
     public function setUp()
     {
-        $this->app = new Application(new class implements Bootstrapper {
+        $this->app = new Application(new class implements Bootstrap {
             public function providers(): array { return []; }
             public function boot(ContainerInterface $app) {}
             public function execute(ContainerInterface $app): int { return 0; }

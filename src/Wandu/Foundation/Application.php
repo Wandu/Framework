@@ -2,20 +2,20 @@
 namespace Wandu\Foundation;
 
 use Wandu\DI\Container;
-use Wandu\Foundation\Contracts\Bootstrapper;
+use Wandu\Foundation\Contracts\Bootstrap;
 
 class Application extends Container
 {
     const NAME = "Wandu";
     const VERSION = "4.0-dev";
 
-    /** @var \Wandu\Foundation\Contracts\Bootstrapper */
+    /** @var \Wandu\Foundation\Contracts\Bootstrap */
     protected $bootstrapper;
     
-    public function __construct(Bootstrapper $bootstrapper)
+    public function __construct(Bootstrap $bootstrapper)
     {
         parent::__construct();
-        $this->instance(Bootstrapper::class, $this->bootstrapper = $bootstrapper);
+        $this->instance(Bootstrap::class, $this->bootstrapper = $bootstrapper);
     }
 
     /**

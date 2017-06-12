@@ -1,10 +1,10 @@
 <?php
-namespace Wandu\Foundation\Bootstrapper;
+namespace Wandu\Foundation\Bootstrap;
 
 use Throwable;
 use Wandu\Config\ConfigServiceProvider;
 use Wandu\DI\ContainerInterface;
-use Wandu\Foundation\Contracts\Bootstrapper;
+use Wandu\Foundation\Contracts\Bootstrap;
 use Wandu\Foundation\Contracts\HttpErrorHandler;
 use Wandu\Foundation\Error\DefaultHttpErrorHandler;
 use Wandu\Http\Factory\ServerRequestFactory;
@@ -13,7 +13,7 @@ use Wandu\Http\Sender\ResponseSender;
 use Wandu\Router\Dispatcher;
 use Wandu\Router\RouterServiceProvider;
 
-class HttpRouterBootstrapper implements Bootstrapper
+class HttpRouterBootstrap implements Bootstrap
 {
     /**
      * {@inheritdoc}

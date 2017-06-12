@@ -3,7 +3,7 @@ namespace Wandu\Foundation;
 
 use Mockery;
 use PHPUnit\Framework\TestCase;
-use Wandu\Foundation\Contracts\Bootstrapper;
+use Wandu\Foundation\Contracts\Bootstrap;
 
 class ApplicationTest extends TestCase
 {
@@ -15,7 +15,7 @@ class ApplicationTest extends TestCase
     
     public function testBoot()
     {
-        $bootstrapper = Mockery::mock(Bootstrapper::class);
+        $bootstrapper = Mockery::mock(Bootstrap::class);
         
         $app = new Application($bootstrapper);
 
@@ -35,7 +35,7 @@ class ApplicationTest extends TestCase
 
     public function testExecute()
     {
-        $bootstrapper = Mockery::mock(Bootstrapper::class);
+        $bootstrapper = Mockery::mock(Bootstrap::class);
 
         $app = new Application($bootstrapper);
 

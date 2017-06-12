@@ -1,12 +1,12 @@
 <?php
-namespace Wandu\Foundation\Bootstrapper;
+namespace Wandu\Foundation\Bootstrap;
 
 use Symfony\Component\Console\Application as SymfonyApplication;
 use Wandu\Console\Dispatcher;
 use Wandu\DI\ContainerInterface;
-use Wandu\Foundation\Contracts\Bootstrapper;
+use Wandu\Foundation\Contracts\Bootstrap;
 
-class ConsoleBootstrapper implements Bootstrapper
+class ConsoleBootstrap implements Bootstrap
 {
     /** @var array */
     protected $commands;
