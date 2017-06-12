@@ -2,26 +2,23 @@
 namespace Wandu\Foundation\Bootstrap;
 
 use Symfony\Component\Console\Application as SymfonyApplication;
+use Wandu\Config\ConfigServiceProvider;
+use Wandu\Console\ConsoleServiceProvider;
 use Wandu\Console\Dispatcher;
 use Wandu\DI\ContainerInterface;
 use Wandu\Foundation\Contracts\Bootstrap;
 
 class ConsoleBootstrap implements Bootstrap
 {
-    /** @var array */
-    protected $commands;
-
-    public function __construct(array $commands = [])
-    {
-        $this->commands = $commands;
-    }
-
     /**
      * {@inheritdoc}
      */
     public function providers(): array
     {
-        return [];
+        return [
+            new ConfigServiceProvider(),
+            new ConsoleServiceProvider(),
+        ];
     }
 
     /**
