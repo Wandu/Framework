@@ -1,10 +1,11 @@
 <?php
 namespace Wandu\Event\Listeners;
 
+use Wandu\Event\Contracts\ViaQueue;
 use Wandu\Event\Events\Ping;
-use Wandu\Event\Listener;
+use Wandu\Event\Listener\ListenHandler;
 
-class Pong extends Listener
+class Pong2 extends ListenHandler implements ViaQueue
 {
     /**
      * @param \Wandu\Event\Events\Ping $ping

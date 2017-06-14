@@ -32,7 +32,7 @@ class ListenCommand extends Command
     {
         $this->output->writeln("Start Queued Events Listener..");
         while (1) {
-            $job = $this->queue->dequeue();
+            $job = $this->queue->receive();
             if (isset($job)) {
                 $payload = $job->read();
                 if (is_array($payload) && array_key_exists('method', $payload) && $payload['method'] === 'event:execute') {
