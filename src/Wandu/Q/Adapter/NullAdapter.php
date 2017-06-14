@@ -8,6 +8,13 @@ class NullAdapter implements Adapter
     /**
      * {@inheritdoc}
      */
+    public function flush()
+    {
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function send(string $payload)
     {
     }
