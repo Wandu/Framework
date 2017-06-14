@@ -1,9 +1,9 @@
 <?php
 namespace Wandu\Q\Serializer;
 
-use Wandu\Q\Contracts\SerializerInterface;
+use Wandu\Q\Contracts\Serializer;
 
-class PhpSerializer implements SerializerInterface
+class PhpSerializer implements Serializer
 {
     /**
      * {@inheritdoc}

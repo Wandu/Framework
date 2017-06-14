@@ -23,7 +23,7 @@ class FlushCommand extends Command
     {
         try {
             while (1) {
-                $job = $this->queue->dequeue();
+                $job = $this->queue->receive();
                 if (!isset($job)) {
                     return;
                 }

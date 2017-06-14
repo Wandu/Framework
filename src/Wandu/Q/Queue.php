@@ -1,40 +1,52 @@
 <?php
 namespace Wandu\Q;
 
-use Wandu\Q\Contracts\AdapterInterface;
-use Wandu\Q\Contracts\SerializerInterface;
+use Wandu\Q\Contracts\Adapter;
+use Wandu\Q\Contracts\Serializer;
+use Wandu\Q\Serializer\JsonSerializer;
 
 class Queue
 {
-    /** @var \Wandu\Q\Contracts\SerializerInterface */
-    protected $serializer;
-
-    /** @var \Wandu\Q\Contracts\AdapterInterface */
+    /** @var \Wandu\Q\Contracts\Adapter */
     protected $adapter;
 
+    /** @var \Wandu\Q\Contracts\Serializer */
+    protected $serializer;
+
     /**
-     * @param \Wandu\Q\Contracts\SerializerInterface $serializer
-     * @param \Wandu\Q\Contracts\AdapterInterface $adapter
+     * @param \Wandu\Q\Contracts\Serializer $serializer
+     * @param \Wandu\Q\Contracts\Adapter $adapter
      */
-    public function __construct(SerializerInterface $serializer, AdapterInterface $adapter)
+    public function __construct(Adapter $adapter, Serializer $serializer = null)
     {
-        $this->serializer = $serializer;
         $this->adapter = $adapter;
+        $this->serializer = $serializer ?: new JsonSerializer();
+    }
+
+    /**
+     * @return void 
+     */
+    public function flush()
+    {
+        $this->adapter->flush();
     }
 
     /**
      * @param mixed $message
+     * @return void
      */
-    public function enqueue($message)
+    public function send($message)
     {
-        $this->adapter->enqueue($this->serializer, $message);
+        $this->adapter->send($this->serializer->serialize($message));
     }
 
     /**
-     * @return \Wandu\Q\Contracts\JobInterface
+     * @return \Wandu\Q\Job
      */
-    public function dequeue()
+    public function receive()
     {
-        return $this->adapter->dequeue($this->serializer);
+        if ($job = $this->adapter->receive()) {
+            return new Job($this->adapter, $this->serializer, $job);
+        }
     }
 }

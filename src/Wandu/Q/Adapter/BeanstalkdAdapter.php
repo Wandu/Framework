@@ -1,41 +1,66 @@
 <?php
 namespace Wandu\Q\Adapter;
 
+use Pheanstalk\Exception\ServerException;
 use Pheanstalk\PheanstalkInterface;
-use Wandu\Q\Contracts\AdapterInterface;
-use Wandu\Q\Contracts\SerializerInterface;
-use Wandu\Q\Job\BeanstalkdJob;
+use Wandu\Q\Contracts\Adapter;
 
-class BeanstalkdAdapter implements AdapterInterface
+class BeanstalkdAdapter implements Adapter
 {
     /** @var \Pheanstalk\PheanstalkInterface */
     protected $client;
-
-    /**
-     * @param \Pheanstalk\PheanstalkInterface $client
-     */
-    public function __construct(PheanstalkInterface $client)
+    
+    /** @var string */
+    protected $channel;
+    
+    public function __construct(PheanstalkInterface $client, string $channel = "default")
     {
         $this->client = $client;
+        $this->channel = $channel;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function enqueue(SerializerInterface $serializer, $payload)
+    public function flush()
     {
-        $this->client->put($serializer->serialize($payload));
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function dequeue(SerializerInterface $serializer)
-    {
-        $job = $this->client->reserve();
-        if ($job) {
-            return new BeanstalkdJob($this->client, $job, $serializer);
+        $client = $this->client->useTube($this->channel);
+        try {
+            while ($client->delete($client->peekDelayed())) {}
+        } catch (ServerException $e) {
         }
-        return null;
+        try {
+            while ($client->delete($client->peekReady())) {}
+        } catch (ServerException $e) {
+        }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function send(string $payload)
+    {
+        $this->client->useTube($this->channel)->put($payload);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function receive()
+    {
+        try {
+            return new BeanstalkdJob($this->client->watch($this->channel)->peekReady());
+        } catch (ServerException $e) {
+            return null;
+        }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function remove($job)
+    {
+        /** @var \Wandu\Q\Adapter\BeanstalkdJob $job */
+        return $this->client->delete($job->getJob());
     }
 }

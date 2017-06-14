@@ -1,55 +1,33 @@
 <?php
-namespace Wandu\Q\Queue;
+namespace Wandu\Q;
 
-use Mockery;
 use PHPUnit\Framework\TestCase;
-use Wandu\Q\Contracts\AdapterInterface;
-use Wandu\Q\Contracts\JobInterface;
-use Wandu\Q\Contracts\SerializerInterface;
-use Wandu\Q\Queue;
+use Wandu\Q\Adapter\ArrayAdapter;
 use Wandu\Q\Serializer\PhpSerializer;
 
 class QueueTest extends TestCase
 {
-    public function tearDown()
-    {
-        Mockery::close();
-    }
-
     public function testSimpleEnqueue()
     {
-        $serializer = Mockery::mock(SerializerInterface::class);
+        $queue = new Queue(new ArrayAdapter());
+        $queue->flush();
+        
+        $queue->send("Hello World");
+        $queue->send(["message" => "Hello World"]);
 
-        $adapter = Mockery::mock(AdapterInterface::class);
-        $adapter->shouldReceive('enqueue')->once()
-            ->with($serializer, "Hello World");
-        $adapter->shouldReceive('dequeue')->once()
-            ->with($serializer)->andReturn("Something To Return");
-
-        $queue = new Queue($serializer, $adapter);
-
-        $queue->enqueue("Hello World");
-        static::assertEquals("Something To Return", $queue->dequeue());
+        static::assertEquals("Hello World", $queue->receive()->read());
+        static::assertEquals(["message" => "Hello World"], $queue->receive()->read());
     }
-    
+
     public function testQueueWithPhpSerializer()
     {
         $sendObject = new \stdClass();
         $sendObject->message = "stdClass Message";
         
-        $returnJob = Mockery::mock(JobInterface::class);
-        
-        $serializer = new PhpSerializer();
-        $adapter = Mockery::mock(AdapterInterface::class);
-        $adapter->shouldReceive('enqueue')->once()
-            ->with($serializer, $sendObject);
-        $adapter->shouldReceive('dequeue')->once()
-            ->with($serializer)->andReturn($returnJob);
+        $queue = new Queue(new ArrayAdapter(), new PhpSerializer());
 
-        $queue = new Queue($serializer, $adapter);
+        $queue->send($sendObject);
 
-
-        $queue->enqueue($sendObject);
-        static::assertSame($returnJob, $queue->dequeue());
+        static::assertEquals($sendObject, $queue->receive()->read());
     }
 }

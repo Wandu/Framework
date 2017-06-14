@@ -1,22 +1,29 @@
 <?php
 namespace Wandu\Q\Adapter;
 
-use Wandu\Q\Contracts\AdapterInterface;
-use Wandu\Q\Contracts\SerializerInterface;
+use Wandu\Q\Contracts\Adapter;
 
-class NullAdapter implements AdapterInterface
+class NullAdapter implements Adapter
 {
     /**
      * {@inheritdoc}
      */
-    public function enqueue(SerializerInterface $serializer, $payload)
+    public function send(string $payload)
     {
     }
 
     /**
      * {@inheritdoc}
      */
-    public function dequeue(SerializerInterface $serializer)
+    public function receive()
+    {
+        return;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function remove($job)
     {
     }
 }

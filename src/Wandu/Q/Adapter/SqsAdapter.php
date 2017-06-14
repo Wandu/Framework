@@ -1,12 +1,11 @@
 <?php
 namespace Wandu\Q\Adapter;
 
+use Aws\Sqs\Exception\SqsException;
 use Aws\Sqs\SqsClient;
-use Wandu\Q\Contracts\AdapterInterface;
-use Wandu\Q\Contracts\SerializerInterface;
-use Wandu\Q\Job\SqsJob;
+use Wandu\Q\Contracts\Adapter;
 
-class SqsAdapter implements AdapterInterface
+class SqsAdapter implements Adapter
 {
     /** @var \Aws\Sqs\SqsClient */
     protected $client;
@@ -23,30 +22,55 @@ class SqsAdapter implements AdapterInterface
     /**
      * {@inheritdoc}
      */
-    public function enqueue(SerializerInterface $serializer, $payload)
+    public function flush()
+    {
+        try {
+            $this->client->purgeQueue([
+                'QueueUrl' => $this->url,
+            ]);
+        } catch (SqsException $e) {
+        }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function send(string $payload)
     {
         $this->client->sendMessage([
             'QueueUrl' => $this->url,
-            'MessageBody' => $serializer->serialize($payload),
+            'MessageBody' => $payload,
         ]);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function dequeue(SerializerInterface $serializer)
+    public function receive()
     {
-        $message = $this->client->receiveMessage([
+        $receiveResult = $this->client->receiveMessage([
             'QueueUrl' => $this->url,
-        ])->get('Messages');
-        if (count($message)) {
+            'MaxNumberOfMessages' => 1,
+        ]);
+        print_r($receiveResult);
+        if ($receiveResult->search("Messages") && ((int)$receiveResult->search("Messages | length(@)")) > 0) {
             return new SqsJob(
-                $this->client,
-                $this->url,
-                $message[0]['ReceiptHandle'],
-                $serializer->unserialize($message[0]['Body'])
+                $receiveResult->search("Messages[0].ReceiptHandle"),
+                $receiveResult->search("Messages[0].Body")
             );
         }
         return null;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function remove($job)
+    {
+        /** @var \Wandu\Q\Adapter\SqsJob $job */
+        $this->client->deleteMessage([
+            'QueueUrl'  => $this->url,
+            'ReceiptHandle' => $job->getReceiptHandler(),
+        ]);
     }
 }

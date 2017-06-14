@@ -1,7 +1,7 @@
 <?php
 namespace Wandu\Q\Contracts;
 
-interface SerializerInterface
+interface Serializer
 {
     /**
      * @param mixed $value
