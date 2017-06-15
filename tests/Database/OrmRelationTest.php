@@ -8,7 +8,7 @@ use Wandu\Database\Events\ExecuteQuery;
 use Wandu\Database\Sakila\SakilaCity;
 use Wandu\Database\Sakila\SakilaCountry;
 use Wandu\Database\Sakila\SakilaFilm;
-use Wandu\Event\Listener;
+use Wandu\Event\Contracts\Listener;
 
 class OrmRelationTest extends SakilaTestCase
 {

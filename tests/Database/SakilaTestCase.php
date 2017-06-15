@@ -10,13 +10,14 @@ use Wandu\Caster\Caster;
 use Wandu\Database\Entity\MetadataReader;
 use Wandu\DI\Container;
 use Wandu\Event\Dispatcher;
+use Wandu\Event\EventEmitter;
 
 class SakilaTestCase extends TestCase
 {
     /** @var \Wandu\Database\Manager */
     protected $manager;
     
-    /** @var \Wandu\Event\Dispatcher */
+    /** @var \Wandu\Event\Contracts\EventEmitter */
     protected $dispatcher;
     
     /** @var \Wandu\Database\Contracts\ConnectionInterface */
@@ -24,7 +25,7 @@ class SakilaTestCase extends TestCase
     
     public function setUp()
     {
-        $this->dispatcher = new Dispatcher(new Container());
+        $this->dispatcher = new EventEmitter();
         $this->manager = new Manager(
             new MetadataReader(new AnnotationReader()),
             new Caster([

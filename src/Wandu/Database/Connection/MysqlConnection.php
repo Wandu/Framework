@@ -12,7 +12,7 @@ use Wandu\Database\Contracts\QueryInterface;
 use Wandu\Database\Events\Connect;
 use Wandu\Database\Events\ExecuteQuery;
 use Wandu\Database\QueryBuilder;
-use Wandu\Event\DispatcherInterface;
+use Wandu\Event\Contracts\EventEmitter;
 
 class MysqlConnection implements ConnectionInterface
 {
@@ -22,15 +22,15 @@ class MysqlConnection implements ConnectionInterface
     /** @var \Wandu\Database\Configuration */
     protected $config;
 
-    /** @var \Wandu\Event\DispatcherInterface */
-    protected $dispatcher;
+    /** @var \Wandu\Event\Contracts\EventEmitter */
+    protected $emitter;
     
     public function __construct(
         Configuration $config,
-        DispatcherInterface $dispatcher = null
+        EventEmitter $emitter = null
     ) {
         $this->config = $config;
-        $this->dispatcher = $dispatcher;
+        $this->emitter = $emitter;
     }
 
     /**
@@ -48,8 +48,8 @@ class MysqlConnection implements ConnectionInterface
     {
         if (!$this->pdo) {
             $this->pdo = $this->config->createPdo();
-            if ($this->dispatcher) {
-                $this->dispatcher->trigger(new Connect());
+            if ($this->emitter) {
+                $this->emitter->trigger(new Connect());
             }
         }
         return $this;
@@ -135,8 +135,8 @@ class MysqlConnection implements ConnectionInterface
         $statement = $this->pdo->prepare($query);
         $this->bindValues($statement, $bindings);
         $statement->execute();
-        if ($this->dispatcher) {
-            $this->dispatcher->trigger(new ExecuteQuery($statement->queryString, $bindings));
+        if ($this->emitter) {
+            $this->emitter->trigger(new ExecuteQuery($statement->queryString, $bindings));
         }
         return $statement;
     }

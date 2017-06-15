@@ -1,9 +1,7 @@
 <?php
 namespace Wandu\Database\Events;
 
-use Wandu\Event\EventInterface;
-
-class ExecuteQuery implements EventInterface
+class ExecuteQuery
 {
     /** @var string */
     protected $sql;

@@ -4,11 +4,12 @@ namespace Wandu\Database;
 use Wandu\Caster\Caster;
 use Wandu\Caster\CastManagerInterface;
 use Wandu\Database\Connection\MysqlConnection;
+use Wandu\Database\Contracts\ConnectionInterface;
 use Wandu\Database\Contracts\Entity\MetadataReaderInterface;
 use Wandu\Database\Exception\DriverNotFoundException;
 use Wandu\Event\Contracts\EventEmitter;
 
-class Manager
+class DatabaseManager
 {
     /** @var \Wandu\Database\Contracts\Entity\MetadataReaderInterface */
     protected $reader;
@@ -54,14 +55,18 @@ class Manager
         if ($connection instanceof Configuration) {
             switch ($connection->getDriver()) {
                 case Configuration::DRIVER_MYSQL:
-                    $connection = new MysqlConnection($connection, $this->dispatcher);
+                    $connection = new MysqlConnection($connection->createPdo(), $this->dispatcher);
                     break;
                 default:
                     throw new DriverNotFoundException($connection->getDriver());
             }
         }
-        $connection->connect();
         return $this->connections[$name] = $connection;
+    }
+
+    public function add(ConnectionInterface $connection, $name = 'default')
+    {
+        
     }
 
     /**
