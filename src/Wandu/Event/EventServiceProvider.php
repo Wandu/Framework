@@ -3,16 +3,13 @@ namespace Wandu\Event;
 
 use Wandu\DI\ContainerInterface;
 use Wandu\DI\ServiceProviderInterface;
-use Wandu\Event\Events\Ping;
-use Wandu\Event\Listeners\Pong;
+use Wandu\Event\Contracts\EventEmitter as EventEmitterContract;
+use Wandu\Q\Worker;
 
 class EventServiceProvider implements ServiceProviderInterface
 {
     /** @var array */
     protected $listeners = [
-        Ping::class => [
-            Pong::class,
-        ]
     ];
 
     /**
@@ -20,13 +17,13 @@ class EventServiceProvider implements ServiceProviderInterface
      */
     public function register(ContainerInterface $app)
     {
-        $app->bind(DispatcherInterface::class, Dispatcher::class)->after(function (DispatcherInterface $dispatcher) {
-            foreach ($this->listeners as $event => $listeners) {
-                foreach ($listeners as $listener) {
-                    $dispatcher->on($event, $listener);
-                }
-            }
+        $app->closure(EventEmitter::class, function (ContainerInterface $container, Worker $worker) {
+            $emitter = new EventEmitter($this->listeners);
+            $emitter->setContainer($container);
+            $emitter->setWorker($worker);
+            return $emitter;
         });
+        $app->alias(EventEmitterContract::class, EventEmitter::class);
     }
 
     /**
