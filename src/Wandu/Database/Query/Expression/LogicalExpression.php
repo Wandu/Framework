@@ -63,10 +63,6 @@ class LogicalExpression implements ExpressionInterface
             $this->operators[] = $logicalOp;
             $this->expressions[] = $newWhereResult ?: $newWhere;
         } elseif (!is_array($name)) {
-            if (!isset($value)) {
-                $value = $operator;
-                $operator = '=';
-            }
             $this->operators[] = $logicalOp;
             $this->expressions[] = new ComparisonExpression($name, $operator, $value);
         } else {

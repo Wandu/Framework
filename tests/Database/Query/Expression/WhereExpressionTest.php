@@ -36,6 +36,53 @@ class WhereExpressionTest extends TestCase
         static::assertEquals(['foo string'], $query->getBindings());
     }
 
+    public function provideNullCases()
+    {
+        return [
+            ['foo', null],
+            ['foo', '=', null],
+            ['foo', 'IS', null],
+            ['foo', 'is', null],
+            ['foo', 'IS NULL'],
+            ['foo', 'is null'],
+        ];
+    }
+
+    /**
+     * @dataProvider provideNullCases
+     */
+    public function testWhereNull($name, $operator = null, $value = null)
+    {
+        $query = new WhereExpression();
+        $query->where($name, $operator, $value);
+
+        static::assertEquals('WHERE `foo` IS NULL', $query->toSql());
+        static::assertEquals([], $query->getBindings());
+    }
+
+    public function provideNotNullCases()
+    {
+        return [
+            ['foo', '!=', null],
+            ['foo', 'IS NOT', null],
+            ['foo', 'is not', null],
+            ['foo', 'IS NOT NULL'],
+            ['foo', 'is not null'],
+        ];
+    }
+
+    /**
+     * @dataProvider provideNotNullCases
+     */
+    public function testWhereNotNull($name, $operator = null, $value = null)
+    {
+        $query = new WhereExpression();
+        $query->where($name, $operator, $value);
+
+        static::assertEquals('WHERE `foo` IS NOT NULL', $query->toSql());
+        static::assertEquals([], $query->getBindings());
+    }
+
     public function testWhereOnlyOneWithNoOperator()
     {
         $query = new WhereExpression();

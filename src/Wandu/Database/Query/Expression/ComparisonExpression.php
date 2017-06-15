@@ -13,11 +13,23 @@ use Wandu\Database\Support\Helper;
  */
 class ComparisonExpression implements ExpressionInterface
 {
-    const OPERATOR_LT = '<';
-    const OPERATOR_LTE = '<=';
-    const OPERATOR_GT = '>';
-    const OPERATOR_GTE = '>=';
-    const OPERATOR_EQ = '=';
+    /** @var array */
+    protected static $ops = [
+        '<',
+        '>',
+        '>=',
+        '<=',
+        '=',
+        '!=',
+        '<>',
+        '<=>',
+        'IS',
+        'IS NOT',
+        'IS NOT NULL',
+        'IS NULL',
+        'LIKE',
+        'NOT LIKE',
+    ];
     
     /** @var string */
     protected $name;
@@ -34,8 +46,22 @@ class ComparisonExpression implements ExpressionInterface
      * @param string $operator
      * @param string|array|\Wandu\Database\Contracts\ExpressionInterface $value
      */
-    public function __construct($name, $operator, $value)
+    public function __construct($name, $operator = null, $value = null)
     {
+        if (!isset($value)) {
+            if (!isset($operator)) {
+                $operator = 'IS NULL';
+            } else {
+                $upperOp = strtoupper($operator);
+                if (in_array($upperOp, static::$ops)) {
+                    if ($upperOp === '=' || $upperOp === 'IS') $operator = 'IS NULL';
+                    if ($upperOp === '!=' || $upperOp === 'IS NOT') $operator = 'IS NOT NULL';
+                } else {
+                    $value = $operator;
+                    $operator = '=';
+                }
+            }
+        }
         $this->name = $name;
         $this->operator = strtoupper($operator);
         $this->value = $value;
@@ -61,7 +87,11 @@ class ComparisonExpression implements ExpressionInterface
         if ($value instanceof ExpressionInterface) {
             return "{$name} {$operator} " . $value->toSql();
         }
-        return "{$name} {$operator} ?";
+        if (isset($value)) {
+            return "{$name} {$operator} ?";
+        } else {
+            return "{$name} {$operator}";
+        }
     }
 
     /**
@@ -69,15 +99,24 @@ class ComparisonExpression implements ExpressionInterface
      */
     public function getBindings()
     {
-        $bindings = [];
-        $values = (is_array($this->value) || $this->value instanceof Traversable) ? $this->value : [$this->value];
-        foreach ($values as $value) {
-            if ($value instanceof ExpressionInterface) {
-                $bindings = array_merge($bindings, $value->getBindings());
-            } else {
-                $bindings[] = $value;
+
+        if (is_array($this->value) || $this->value instanceof Traversable) {
+            $bindings = [];
+            foreach ($this->value as $value) {
+                if ($value instanceof ExpressionInterface) {
+                    $bindings = array_merge($bindings, $value->getBindings());
+                } else {
+                    $bindings[] = $value;
+                }
             }
+            return $bindings;
         }
-        return $bindings;
+        if (isset($this->value)) {
+            if ($this->value instanceof ExpressionInterface) {
+                return $this->value->getBindings();
+            }
+            return [$this->value];
+        }
+        return [];
     }
 }
