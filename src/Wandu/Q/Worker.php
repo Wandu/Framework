@@ -74,10 +74,10 @@ class Worker
         } elseif ($this->logger) {
             $this->logger->info('if use pcntl_*, work more safety.');
         }
-        try {
-            while ($this->running) {
-                if ($job = $this->queue->receive()) {
-                    $result = $job->read();
+        while ($this->running) {
+            if ($job = $this->queue->receive()) {
+                $result = $job->read();
+                try {
                     call_user_func_array([
                         $this->container->get($result['class']),
                         $result['method']
@@ -85,17 +85,18 @@ class Worker
                     if ($this->logger) {
                         $this->logger->info(sprintf("execute %s@%s", $result['method'], $result['class']));
                     }
-                    $job->delete();
+                } catch (WorkerStopException $e) {
+                    $this->stop();
+                    if ($this->logger) {
+                        $this->logger->info("stop by WorkerStopException.");
+                    }
                 }
-                if ($signalEnabled) {
-                    pcntl_signal_dispatch();
-                }
-                usleep($tick);
+                $job->delete();
             }
-        } catch (WorkerStopException $e) {
-            if ($this->logger) {
-                $this->logger->info("stop by WorkerStopException.");
+            if ($signalEnabled) {
+                pcntl_signal_dispatch();
             }
+            usleep($tick);
         }
     }
 }

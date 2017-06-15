@@ -8,7 +8,7 @@ namespace Wandu\Event
      */
     function trigger($event)
     {
-        container()->get(Dispatcher::class)->trigger($event);
+        container()->get(EventEmitter::class)->trigger($event);
     }
 }
 
