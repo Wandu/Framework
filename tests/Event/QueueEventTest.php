@@ -1,74 +1,85 @@
 <?php
 namespace Wandu\Event;
 
-use Mockery;
+use Pheanstalk\Exception\ConnectionException;
+use Pheanstalk\Pheanstalk;
 use PHPUnit\Framework\TestCase;
+use Wandu\Assertions;
 use Wandu\DI\Container;
-use Wandu\Event\Contracts\ViaQueue;
-use Wandu\Event\Listener\ListenHandler;
+use Wandu\Event\Commands\Events\NormalPing;
+use Wandu\Event\Commands\Events\QueuePing;
+use Wandu\Event\Commands\Listeners\NormalPong;
+use Wandu\Event\Commands\Listeners\QueuePong;
+use Wandu\Q\Adapter\BeanstalkdAdapter;
 use Wandu\Q\Queue;
+use Wandu\Q\Serializer\PhpSerializer;
+use Wandu\Q\Worker;
+use Wandu\Q\WorkerStopper;
 
 class QueueEventTest extends TestCase 
 {
-//    public function tearDown()
-//    {
-//        Mockery::close();
-//        static::addToAssertionCount(1);
-//    }
-//    
-//    public function testQueueEvent()
-//    {
-//        $event = new ViaQueueEventTestEvent();
-//        
-//        $queue = Mockery::mock(Queue::class);
-//        $queue->shouldReceive('enqueue')->with([
-//            'method' => 'event:execute',
-//            'event' => $event,
-//        ])->once();
-//        
-//        $container = new Container();
-//        $container[Queue::class] = $queue;
-//        $dispatcher = new Dispatcher($container);
-//        
-//        $dispatcher->on(ViaQueueEventTestEvent::class, QueueEventTestListener::class);
-//        
-//        $dispatcher->trigger($event);
-//    }
-//}
-//
-//class ViaQueueEventTestEvent implements ViaQueue
-//{
-//    private $callCount = 0;
-//
-//    public function call()
-//    {
-//        $this->callCount++;
-//        return $this->callCount;
-//    }
-//
-//    /**
-//     * @return int
-//     */
-//    public function getCallCount()
-//    {
-//        return $this->callCount;
-//    }
-//}
-//
-//class QueueEventTestListener extends ListenHandler
-//{
-//    protected $lastCallCount = 0;
-//
-//    public function handle(DispatcherTestEvent $event)
-//    {
-//        $this->lastCallCount = $event->call();
-//    }
-//
-//    /**
-//     * @return null
-//     */
-//    public function getLastCallCount()
-//    {
-//        return $this->lastCallCount;
-//    }
+    use Assertions;
+    
+    /** @var \Wandu\Q\Queue */
+    protected $queue;
+    
+    /** @var \Wandu\DI\Container */
+    protected $container;
+
+    /** @var \Wandu\Q\Worker */
+    protected $worker;
+    
+    public function setUp()
+    {
+        try {
+            $this->queue = new Queue(new BeanstalkdAdapter(new Pheanstalk('127.0.0.1')), new PhpSerializer());
+            $this->queue->flush();
+        } catch (ConnectionException $e) {
+            static::markTestSkipped("cannot connect to beanstalkd");
+        }
+        $this->container = new Container();
+        $this->worker = new Worker($this->queue, $this->container);
+    }
+
+    public function testNormalPing()
+    {
+        $event = new EventEmitter([
+            NormalPing::class => [
+                NormalPong::class,
+                QueuePong::class,
+            ],
+        ]);
+        $event->setContainer($this->container);
+        $event->setWorker($this->worker);
+
+        static::assertOutputBufferEquals("[NORMAL PONG] normal ping message\n", function () use ($event) {
+            $event->trigger(new NormalPing("normal ping message"));
+        });
+        
+        $this->worker->work(WorkerStopper::class, 'stop'); // will stop automatically
+        static::assertOutputBufferEquals("[QUEUE PONG] normal ping message\n", function () {
+            $this->worker->listen();
+        });
+    }
+
+    public function testQueuePing()
+    {
+        $event = new EventEmitter([
+            QueuePing::class => [
+                NormalPong::class,
+                QueuePong::class,
+            ],
+        ]);
+        $event->setContainer($this->container);
+        $event->setWorker($this->worker);
+
+        static::assertOutputBufferEquals("", function () use ($event) {
+            $event->trigger(new QueuePing("queue ping message"));
+        });
+
+        $this->worker->work(WorkerStopper::class, 'stop'); // will stop automatically
+        static::assertOutputBufferEquals("[NORMAL PONG] queue ping message\n[QUEUE PONG] queue ping message\n", function () {
+            $this->worker->listen();
+        });
+    }
 }

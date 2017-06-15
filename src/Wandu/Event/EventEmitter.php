@@ -1,32 +1,44 @@
 <?php
 namespace Wandu\Event;
 
-use Wandu\DI\ContainerInterface;
+use Psr\Container\ContainerInterface;
 use Wandu\Event\Contracts\EventEmitter as EventEmitterContract;
 use Wandu\Event\Contracts\Listener;
 use Wandu\Event\Contracts\ViaQueue;
 use Wandu\Event\Listener\CallableListener;
-use Wandu\Q\Queue;
+use Wandu\Event\Listener\WorkerListener;
+use Wandu\Q\Worker;
 
 class EventEmitter implements EventEmitterContract 
 {
     /** @var array */
     protected $listeners = [];
 
-    /** @var \Wandu\DI\ContainerInterface */
+    /** @var \Psr\Container\ContainerInterface */
     protected $container;
     
-    /** @var \Wandu\Q\Queue */
-    protected $queue;
-    
+    /** @var \Wandu\Q\Worker */
+    protected $worker;
+
+    public function __construct(array $listeners = [])
+    {
+        $this->listeners = $listeners;
+    }
+
+    /**
+     * @param \Psr\Container\ContainerInterface $container
+     */
     public function setContainer(ContainerInterface $container)
     {
         $this->container = $container;
     }
-    
-    public function setQueue(Queue $queue)
+
+    /**
+     * @param \Wandu\Q\Worker $worker
+     */
+    public function setWorker(Worker $worker)
     {
-        $this->queue = $queue;
+        $this->worker = $worker;
     }
     
     /**
@@ -70,7 +82,11 @@ class EventEmitter implements EventEmitterContract
      */
     public function trigger($event, ...$arguments)
     {
+        $eventViaQueue = false;
         if (is_object($event)) {
+            if ($event instanceof ViaQueue) {
+                $eventViaQueue = true;
+            }
             $eventName = get_class($event);
             $arguments = [$event];
         } else {
@@ -79,20 +95,11 @@ class EventEmitter implements EventEmitterContract
 
         /** @var \Wandu\Event\Contracts\Listener $listener */
         foreach ($this->getListeners($eventName) as $listener) {
+            if ($eventViaQueue && !$listener instanceof WorkerListener) {
+                $listener = new WorkerListener($this->worker, get_class($listener));
+            }
             $listener->call($arguments);
         }
-//        if ($event instanceof ViaQueue) {
-////            if (!$this->container->has(Queue::class)) {
-////                // @todo fix error message
-////                throw new RuntimeException('cannot load queue.');
-////            }
-////            $this->container->get(Queue::class)->send([
-////                'method' => 'event:execute',
-////                'event' => $event,
-////            ]);
-//        } else {
-////            $this->executeListeners($event);
-//        }
     }
 
     /**
@@ -102,19 +109,18 @@ class EventEmitter implements EventEmitterContract
     public function getListeners($event)
     {
         if (!isset($this->listeners[$event])) return;
-        
         foreach ($this->listeners[$event] as $listener) {
             if ($listener instanceof Listener) {
                 yield $listener;
             } elseif (is_callable($listener)) {
                 yield new CallableListener($listener);
             } elseif ($this->container && $this->container->has($listener)) {
-                $listener = $this->container->get($listener);
-                if ($listener instanceof Listener) {
-                    if ($listener instanceof ViaQueue) {
-                        
+                $listenerInstance = $this->container->get($listener);
+                if ($listenerInstance instanceof Listener) {
+                    if ($listenerInstance instanceof ViaQueue) {
+                        yield new WorkerListener($this->worker, $listener);
                     } else {
-                        yield $listener;
+                        yield $listenerInstance;
                     }
                 }
             }
