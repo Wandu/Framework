@@ -1,14 +1,14 @@
 <?php
 namespace Wandu\Database\Annotations;
 
-use Wandu\Database\Manager;
+use Wandu\Database\DatabaseManager;
 
 interface RelationInterface
 {
     /**
-     * @param \Wandu\Database\Manager $manager
+     * @param \Wandu\Database\DatabaseManager $manager
      * @param mixed $columnValue
      * @return object
      */
-    public function getRelation(Manager $manager, $columnValue);
+    public function getRelation(DatabaseManager $manager, $columnValue);
 }

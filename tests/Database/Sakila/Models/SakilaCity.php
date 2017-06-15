@@ -1,5 +1,5 @@
 <?php
-namespace Wandu\Database\Sakila;
+namespace Wandu\Database\Sakila\Models;
 
 use Wandu\Database\Annotations\Cast;
 use Wandu\Database\Annotations\Column;

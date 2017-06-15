@@ -9,5 +9,5 @@ interface MetadataReaderInterface
      * @param string $class
      * @return \Wandu\Database\Entity\Metadata
      */
-    public function getMetadataFrom(string $class): Metadata;
+    public function getMetadata(string $class): Metadata;
 }

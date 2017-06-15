@@ -1,14 +1,17 @@
 <?php
-namespace Wandu\Database;
+namespace Wandu\Database\Sakila;
 
 use Doctrine\Common\Annotations\AnnotationReader;
+use Mockery;
 use PDO;
 use PHPUnit\Framework\TestCase as PHPUnitTestCase;
 use Wandu\Assertions;
 use Wandu\Caster\Caster;
+use Wandu\Database\Configuration;
+use Wandu\Database\DatabaseManager;
 use Wandu\Database\Entity\MetadataReader;
 use Wandu\DI\Container;
-use Wandu\Event\Dispatcher;
+use Wandu\Event\EventEmitter;
 
 class TestCase extends PHPUnitTestCase
 {
@@ -17,22 +20,25 @@ class TestCase extends PHPUnitTestCase
     /** @var \Wandu\Database\DatabaseManager */
     protected $manager;
     
-    /** @var \Wandu\Event\Dispatcher */
-    protected $dispatcher;
+    /** @var \Wandu\Event\Contracts\EventEmitter */
+    protected $emitter;
     
-    /** @var \Wandu\Database\Contracts\ConnectionInterface */
+    /** @var \Wandu\Database\Contracts\Connection */
     protected $connection;
     
     public function setUp()
     {
-        $this->dispatcher = new Dispatcher(new Container());
-        $this->manager = new DatabaseManager(
-            new MetadataReader(new AnnotationReader()),
+        $this->emitter = new EventEmitter();
+        $this->emitter->setContainer(new Container());
+     
+        $config = new Configuration(
+            null,
             new Caster([
                 'datetime' => new Caster\CarbonCaster(),
-            ])
+            ]),
+            $this->emitter
         );
-        $this->manager->setEventDispatcher($this->dispatcher);
+        $this->manager = new DatabaseManager($config);
         $this->connection = $this->manager->connect([
             'username' => 'root',
             'password' => '',
@@ -47,5 +53,10 @@ class TestCase extends PHPUnitTestCase
                 PDO::ATTR_EMULATE_PREPARES => false,
             ],
         ]);
+    }
+
+    public function tearDown()
+    {
+        Mockery::close();
     }
 }

@@ -4,10 +4,35 @@ namespace Wandu;
 use Closure;
 use Exception;
 use PHPUnit\Framework\Assert;
+use ReflectionClass;
 use Throwable;
 
 trait Assertions
 {
+    public static function assertEqualsAndSameProperty($expected, $actual)
+    {
+        if (!is_object($actual) && !is_array($actual)) {
+            static::assertSame($expected, $actual);
+            return;
+        }
+        static::assertEquals($expected, $actual);
+        if (is_array($expected)) {
+            foreach ($expected as $key => $_) {
+                static::assertEqualsAndSameProperty($expected[$key], $actual[$key]);
+            }
+        } else {
+            static::assertSame(get_class($expected), get_class($actual));
+
+            $reflClass = new ReflectionClass(get_class($expected));
+            $reflProps = $reflClass->getProperties();
+
+            foreach ($reflProps as $reflProp) {
+                $reflProp->setAccessible(true);
+                static::assertEqualsAndSameProperty($reflProp->getValue($expected), $reflProp->getValue($actual));
+            }
+        }
+    }
+    
     public static function assertOutputBufferEquals($expected, Closure $closure, $message = '')
     {
         $depth = ob_get_level();

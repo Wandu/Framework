@@ -3,7 +3,7 @@ namespace Wandu\Database\Entity;
 
 use Doctrine\Common\Annotations\AnnotationReader;
 use PHPUnit\Framework\TestCase;
-use Wandu\Database\Sakila\SakilaFilm;
+use Wandu\Database\Sakila\Models\SakilaFilm;
 
 class MetadataTest extends TestCase
 {
@@ -17,21 +17,21 @@ class MetadataTest extends TestCase
     
     public function testGetClass()
     {
-        $metadata = $this->reader->getMetadataFrom(SakilaFilm::class);
+        $metadata = $this->reader->getMetadata(SakilaFilm::class);
         
         static::assertSame(SakilaFilm::class, $metadata->getClass());
     }
 
     public function testIsIncrements()
     {
-        $metadata = $this->reader->getMetadataFrom(SakilaFilm::class);
+        $metadata = $this->reader->getMetadata(SakilaFilm::class);
 
         static::assertTrue($metadata->isIncrements());
     }
 
     public function testHasOne()
     {
-        $metadata = $this->reader->getMetadataFrom(SakilaFilm::class);
+        $metadata = $this->reader->getMetadata(SakilaFilm::class);
 
         static::assertTrue($metadata->isIncrements());
     }

@@ -1,17 +1,15 @@
 <?php
 namespace Wandu\Database;
 
-use Mockery;
 use PHPUnit\Framework\TestCase;
-use Wandu\Database\Contracts\ConnectionInterface;
-use Wandu\Database\Contracts\Entity\MetadataReaderInterface;
+use Wandu\Database\Contracts\Connection;
 use Wandu\Database\Exception\DriverNotFoundException;
 
 class DatabaseManagerTest extends TestCase 
 {
     public function testConnectFail()
     {
-        $manager = new DatabaseManager(Mockery::mock(MetadataReaderInterface::class));
+        $manager = new DatabaseManager(new Configuration());
         try {
             $manager->connect([
                 'driver' => 'wrong_driver',
@@ -28,7 +26,7 @@ class DatabaseManagerTest extends TestCase
 
     public function testConnectSuccess()
     {
-        $manager = new DatabaseManager(Mockery::mock(MetadataReaderInterface::class));
+        $manager = new DatabaseManager(new Configuration());
         
         $connection = $manager->connect([
             'driver' => 'mysql',
@@ -40,6 +38,6 @@ class DatabaseManagerTest extends TestCase
             'prefix' => 'local_',
             'timezone' => '+09:00',
         ]);
-        static::assertInstanceOf(ConnectionInterface::class, $connection);
+        static::assertInstanceOf(Connection::class, $connection);
     }
 }

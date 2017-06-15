@@ -7,16 +7,15 @@ use ReflectionProperty;
 use Wandu\Caster\CastManagerInterface;
 use Wandu\Collection\ArrayList;
 use Wandu\Collection\Contracts\ListInterface;
+use Wandu\Database\Contracts\Connection;
+use Wandu\Database\Contracts\QueryInterface;
 use Wandu\Database\Entity\Metadata;
 use Wandu\Database\Exception\EntityNotFoundException;
 use Wandu\Database\Query\SelectQuery;
 
 class Repository
 {
-    /** @var \Wandu\Database\Manager */
-    protected $manager;
-    
-    /** @var \Wandu\Database\Contracts\ConnectionInterface */
+    /** @var \Wandu\Database\Contracts\Connection */
     protected $connection;
     
     /** @var \Wandu\Database\Entity\Metadata */
@@ -37,23 +36,14 @@ class Repository
     /** @var array */
     protected static $entityCache = [];
     
-    public function __construct(Manager $manager, Metadata $meta, CastManagerInterface $caster)
+    public function __construct(Connection $connection, QueryBuilder $queryBuilder, Metadata $meta, Configuration $config)
     {
-        $this->manager = $manager;
-        $this->connection = $connection = $manager->connection($meta->getConnection());
+        $this->connection = $connection;
+        $this->caster = $config->getCaster();
+        $this->queryBuilder = $queryBuilder;
         $this->meta = $meta;
-        $this->caster = $caster;
-        $this->queryBuilder = $connection->createQueryBuilder($meta->getTable());
     }
 
-    /**
-     * @return \Wandu\Database\Entity\Metadata
-     */
-    public function getMeta(): Metadata
-    {
-        return $this->meta;
-    }
-    
     /**
      * @param string|callable|\Wandu\Database\Contracts\QueryInterface $query
      * @param array $bindings
@@ -61,7 +51,7 @@ class Repository
      */
     public function fetch($query = null, array $bindings = [])
     {
-        foreach ($this->connection->fetch($this->normalizeSelectQuery($query), $bindings) as $row) {
+        foreach ($this->connection->fetch(...$this->normalizeSelectQuery($query, $bindings)) as $row) {
             yield $this->hydrate($row);
         }
     }
@@ -79,11 +69,14 @@ class Repository
     /**
      * @param string|callable|\Wandu\Database\Contracts\QueryInterface $query
      * @param array $bindings
-     * @return object
+     * @return ?object
      */
     public function first($query = null, array $bindings = [])
     {
-        return $this->hydrate($this->connection->first($this->normalizeSelectQuery($query), $bindings));
+        $entity = $this->connection->first(...$this->normalizeSelectQuery($query, $bindings));
+        if ($entity) {
+            return $this->hydrate($entity);
+        }
     }
 
     /**
@@ -94,9 +87,8 @@ class Repository
      */
     public function firstOrFail($query = null, array $bindings = [])
     {
-        $attributes = $this->connection->first($this->normalizeSelectQuery($query), $bindings);
-        if (isset($attributes)) {
-            return $this->hydrate($attributes);
+        if ($entity = $this->first($query, $bindings)) {
+            return $entity;
         }
         throw new EntityNotFoundException();
     }
@@ -149,14 +141,6 @@ class Repository
         return $this->executeInsert($entity);
     }
 
-    /**
-     * @param array $attributes
-     * @return object
-     */
-    public function create(array $attributes = [])
-    {
-    }
-    
     /**
      * @param object $entity
      * @return int
@@ -230,8 +214,15 @@ class Repository
      * @param array $bindings
      * @return int
      */
-    public function query($query, array $bindings = [])
+    protected function query($query, array $bindings = [])
     {
+        while (is_callable($query)) {
+            $query = call_user_func($query);
+        }
+        if ($query instanceof QueryInterface) {
+            $bindings = $query->getBindings();
+            $query = $query->toSql();
+        }
         return $this->connection->query($query, $bindings);
     }
 
@@ -256,7 +247,7 @@ class Repository
         foreach ($this->meta->getColumns() as $propertyName => $column) {
             if (!isset($attributes[$column->name])) continue;
             if (isset($relations[$propertyName])) {
-                $value = $relations[$propertyName]->getRelation($this->manager, $attributes[$column->name]);
+//                $value = $relations[$propertyName]->getRelation($this->manager, $attributes[$column->name]);
             } elseif (isset($casts[$propertyName])) {
                 $value = $this->caster->cast($attributes[$column->name], $casts[$propertyName]->type);
             } else {
@@ -281,12 +272,8 @@ class Repository
         }
         return $identifier;
     }
-
-    /**
-     * @param string|callable|\Wandu\Database\Contracts\QueryInterface $query
-     * @return string|\Wandu\Database\Contracts\QueryInterface
-     */
-    private function normalizeSelectQuery($query = null)
+    
+    private function normalizeSelectQuery($query = null, array $bindings = [])
     {
         if (!isset($query) || is_callable($query)) {
             $connection = $this->connection;
@@ -298,7 +285,11 @@ class Repository
                 $query = call_user_func($query, $queryBuilder, $connection);
             }
         }
-        return $query;
+        if ($query instanceof QueryInterface) {
+            $bindings = $query->getBindings();
+            $query = $query->toSql();
+        }
+        return [$query, $bindings];
     }
     
     /**

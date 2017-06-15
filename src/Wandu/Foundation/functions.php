@@ -4,9 +4,9 @@ namespace Wandu\Event
     use function Wandu\DI\container;
 
     /**
-     * @param \Wandu\Event\EventInterface $event
+     * @param string|object $event
      */
-    function trigger(EventInterface $event)
+    function trigger($event)
     {
         container()->get(Dispatcher::class)->trigger($event);
     }

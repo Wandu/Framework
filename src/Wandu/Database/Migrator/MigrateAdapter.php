@@ -2,18 +2,18 @@
 namespace Wandu\Database\Migrator;
 
 use Wandu\Database\Contracts\Migrator\MigrateAdapterInterface;
-use Wandu\Database\Manager;
+use Wandu\Database\DatabaseManager;
 use Wandu\Database\Query\CreateQuery;
 
 class MigrateAdapter implements MigrateAdapterInterface
 {
-    /** @var \Wandu\Database\Contracts\ConnectionInterface */
+    /** @var \Wandu\Database\Contracts\Connection */
     protected $connection;
 
     /** @var string */
     protected $tableName;
 
-    public function __construct(Manager $manager, Configuration $config)
+    public function __construct(DatabaseManager $manager, Configuration $config)
     {
         $this->tableName = $config->getTable();
         $this->connection = $manager->connection($config->getConnection());

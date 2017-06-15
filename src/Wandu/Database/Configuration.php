@@ -1,120 +1,55 @@
 <?php
 namespace Wandu\Database;
 
-use PDO;
+use Doctrine\Common\Annotations\AnnotationReader;
+use Wandu\Caster\Caster;
+use Wandu\Caster\CastManagerInterface;
+use Wandu\Database\Contracts\Entity\MetadataReaderInterface;
+use Wandu\Database\Entity\MetadataReader;
+use Wandu\Event\Contracts\EventEmitter;
 
 class Configuration
 {
-    const DRIVER_MYSQL = 'mysql';
+    /** @var \Wandu\Database\Contracts\Entity\MetadataReaderInterface */
+    protected $metadataReader;
     
-    /** @var string */
-    protected $driver = 'mysql';
+    /** @var \Wandu\Caster\CastManagerInterface */
+    protected $caster;
     
-    /** @var string */
-    protected $host = 'localhost';
-
-    /** @var int */
-    protected $port = 4403;
-
-    /** @var string */
-    protected $username = 'root';
-
-    /** @var string */
-    protected $password = '';
-
-    /** @var string */
-    protected $database = null;
-
-    /** @var string */
-    protected $charset;
-
-    /** @var string */
-    protected $collation;
-
-    /** @var string */
-    protected $prefix = '';
-
-    /** @var string */
-    protected $timezone;
-
-    /** @var array */
-    protected $options = [
-        PDO::ATTR_CASE => PDO::CASE_NATURAL,
-        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-        PDO::ATTR_ORACLE_NULLS => PDO::NULL_NATURAL,
-        PDO::ATTR_STRINGIFY_FETCHES => false,
-        PDO::ATTR_EMULATE_PREPARES => false,
-    ];
-
-    /**
-     * @param array $settings
-     */
-    public function __construct(array $settings = [])
-    {
-        foreach ($settings as $name => $setting) {
-            $this->{$name} = $setting;
-        }
-    }
-
-    /**
-     * @return string
-     */
-    public function getDriver()
-    {
-        return $this->driver;
-    }
-
-    /**
-     * @return string
-     */
-    public function getPrefix(): string
-    {
-        return $this->prefix;
+    /** @var \Wandu\Event\Contracts\EventEmitter */
+    protected $emitter;
+    
+    public function __construct(
+        MetadataReaderInterface $metadataReader = null,
+        CastManagerInterface $caster = null,
+        EventEmitter $emitter = null
+    ) {
+        $this->metadataReader = $metadataReader ?? new MetadataReader(new AnnotationReader());
+        $this->caster = $caster ?? new Caster();
+        $this->emitter = $emitter;
     }
     
     /**
-     * @return \PDO
+     * @return \Wandu\Database\Contracts\Entity\MetadataReaderInterface
      */
-    public function createPdo()
+    public function getMetadataReader(): MetadataReaderInterface
     {
-        $pdo = new PDO(
-            "{$this->driver}:host={$this->host};port={$this->port};dbname={$this->database}",
-            $this->username,
-            $this->password,
-            $this->options + [
-                PDO::ATTR_CASE => PDO::CASE_NATURAL,
-                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                PDO::ATTR_ORACLE_NULLS => PDO::NULL_NATURAL,
-                PDO::ATTR_STRINGIFY_FETCHES => false,
-                PDO::ATTR_EMULATE_PREPARES => false,
-            ]
-        );
-        $this->applyCharset($pdo);
-        $this->applyTimezone($pdo);
-        return $pdo;
+        return $this->metadataReader;
     }
 
     /**
-     * @param \PDO $pdo
+     * @return \Wandu\Caster\CastManagerInterface
      */
-    protected function applyCharset(PDO $pdo)
+    public function getCaster(): CastManagerInterface
     {
-        if ($this->charset) {
-            $names = "SET NAMES '{$this->charset}'";
-            if ($this->collation) {
-                $names .= " COLLATE '{$this->collation}'";
-            }
-            $pdo->prepare($names)->execute();
-        }
+        return $this->caster;
     }
 
     /**
-     * @param \PDO $pdo
+     * @return \Wandu\Event\Contracts\EventEmitter|null
      */
-    protected function applyTimezone(PDO $pdo)
+    public function getEmitter()
     {
-        if ($this->timezone) {
-            $pdo->prepare("SET time_zone='{$this->timezone}'")->execute();
-        }
+        return $this->emitter;
     }
 }

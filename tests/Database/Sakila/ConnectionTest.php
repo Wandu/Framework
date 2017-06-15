@@ -1,9 +1,9 @@
 <?php
-namespace Wandu\Database;
+namespace Wandu\Database\Sakila;
 
 use Generator;
 
-class ConnectionTest extends SakilaTestCase
+class ConnectionTest extends TestCase
 {
     public function testOne()
     {
@@ -18,11 +18,6 @@ class ConnectionTest extends SakilaTestCase
             "SELECT * FROM `actor` WHERE `last_name` LIKE ? ORDER BY `actor_id` DESC LIMIT 3",
             ['C%']
         );
-        static::assertEquals($expectedRow, $row);
-
-        $row = $this->connection->first(function () {
-            return "SELECT * FROM `actor` WHERE `last_name` LIKE ? ORDER BY `actor_id` DESC LIMIT 3"; 
-        }, ['C%']);
         static::assertEquals($expectedRow, $row);
     }
 
@@ -57,18 +52,6 @@ class ConnectionTest extends SakilaTestCase
         static::assertInstanceOf(Generator::class, $cursor); // cursor is generator!
         foreach ($cursor as $index => $row) {
             // hhvm return 'actor_id' => '176' (string), but php return 'actor_id' => 176 (int)
-            static::assertEquals($expectedRows[$index], $row);
-            $interateCount++;
-        }
-        static::assertEquals(3, $interateCount);
-
-        // same
-        $cursor = $this->connection->fetch(function () {
-            return "SELECT * FROM `actor` WHERE `last_name` LIKE ? ORDER BY `actor_id` DESC LIMIT 3";
-        }, ['C%']);
-        $interateCount = 0;
-        static::assertInstanceOf(Generator::class, $cursor); // cursor is generator!
-        foreach ($cursor as $index => $row) {
             static::assertEquals($expectedRows[$index], $row);
             $interateCount++;
         }

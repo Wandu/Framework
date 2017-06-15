@@ -1,77 +1,43 @@
 <?php
 namespace Wandu\Database;
 
-use Wandu\Caster\Caster;
-use Wandu\Caster\CastManagerInterface;
-use Wandu\Database\Connection\MysqlConnection;
-use Wandu\Database\Contracts\ConnectionInterface;
-use Wandu\Database\Contracts\Entity\MetadataReaderInterface;
-use Wandu\Database\Exception\DriverNotFoundException;
-use Wandu\Event\Contracts\EventEmitter;
-
 class DatabaseManager
 {
-    /** @var \Wandu\Database\Contracts\Entity\MetadataReaderInterface */
-    protected $reader;
+    /** @var \Wandu\Database\Connector[] */
+    protected $connectors = [];
     
-    /** @var \Wandu\Caster\Caster */
-    protected $caster;
-    
-    /** @var \Wandu\Event\Contracts\EventEmitter */
-    protected $dispatcher;
-    
-    /** @var \Wandu\Database\Contracts\ConnectionInterface[] */
+    /** @var \Wandu\Database\Contracts\Connection[] */
     protected $connections = [];
     
     /** @var \Wandu\Database\Repository[] */
     protected $repositories = [];
 
-    public function __construct(
-        MetadataReaderInterface $reader,
-        CastManagerInterface $caster = null
-    ) {
-        $this->reader = $reader;
-        $this->caster = $caster ?: new Caster();
-    }
-
-    /**
-     * @param \Wandu\Event\Contracts\EventEmitter $dispatcher
-     */
-    public function setEventDispatcher(EventEmitter $dispatcher)
+    public function __construct(Configuration $config)
     {
-        $this->dispatcher = $dispatcher;
+        $this->config = $config;
     }
     
     /**
-     * @param array|\Wandu\Database\Configuration|\Wandu\Database\Contracts\ConnectionInterface $connection
+     * @param array|\Wandu\Database\Connector $connector
      * @param string $name
-     * @return \Wandu\Database\Contracts\ConnectionInterface
+     * @return \Wandu\Database\Contracts\Connection
      */
-    public function connect($connection, $name = 'default')
+    public function connect($connector, $name = 'default')
     {
-        if (is_array($connection)) {
-            $connection = new Configuration($connection);
+        if (is_array($connector)) {
+            $connector = new Connector($connector);
         }
-        if ($connection instanceof Configuration) {
-            switch ($connection->getDriver()) {
-                case Configuration::DRIVER_MYSQL:
-                    $connection = new MysqlConnection($connection->createPdo(), $this->dispatcher);
-                    break;
-                default:
-                    throw new DriverNotFoundException($connection->getDriver());
-            }
+        $this->connectors[$name] = $connector;
+        $connection = $connector->connect();
+        if ($emitter = $this->config->getEmitter()) {
+            $connection->setEventEmitter($emitter);
         }
         return $this->connections[$name] = $connection;
     }
 
-    public function add(ConnectionInterface $connection, $name = 'default')
-    {
-        
-    }
-
     /**
      * @param string $name
-     * @return \Wandu\Database\Contracts\ConnectionInterface
+     * @return \Wandu\Database\Contracts\Connection
      */
     public function connection($name = 'default')
     {
@@ -84,10 +50,19 @@ class DatabaseManager
      */
     public function repository(string $class): Repository
     {
-        $repoName = "{$class}";
-        if (!isset($this->repositories[$repoName])) {
-            $this->repositories[$repoName] = new Repository($this, $this->reader->getMetadataFrom($class), $this->caster);
+        if (!isset($this->repositories[$class])) {
+
+            $meta = $this->config->getMetadataReader()->getMetadata($class);
+            $connection = $meta->getConnection();
+            $prefix = $this->connectors[$connection]->getPrefix();
+
+            $this->repositories[$class] = new Repository(
+                $this->connections[$connection],
+                new QueryBuilder($prefix . $meta->getTable()),
+                $meta,
+                $this->config
+            );
         }
-        return $this->repositories[$repoName];
+        return $this->repositories[$class];
     }
 }

@@ -1,5 +1,5 @@
 <?php
-namespace Wandu\Database\Sakila;
+namespace Wandu\Database\Sakila\Models;
 
 use Carbon\Carbon;
 use Wandu\Database\Annotations\Cast;

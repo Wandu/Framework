@@ -1,22 +1,22 @@
 <?php
 namespace Wandu\Database\Migrator;
 
-use Wandu\Database\Contracts\ConnectionInterface;
+use Wandu\Database\Contracts\Connection;
 use Wandu\Database\Contracts\Migrator\MigrationInterface;
-use Wandu\Database\Manager;
+use Wandu\Database\DatabaseManager;
 
 abstract class Migration implements MigrationInterface
 {
     /** @var string */
     protected $connection = 'default';
 
-    /** @var \Wandu\Database\Manager */
+    /** @var \Wandu\Database\DatabaseManager */
     protected $manager;
 
     /**
-     * @param \Wandu\Database\Manager $manager
+     * @param \Wandu\Database\DatabaseManager $manager
      */
-    public function __construct(Manager $manager)
+    public function __construct(DatabaseManager $manager)
     {
         $this->manager = $manager;
     }
@@ -38,12 +38,12 @@ abstract class Migration implements MigrationInterface
     }
 
     /**
-     * @param \Wandu\Database\Contracts\ConnectionInterface $connection
+     * @param \Wandu\Database\Contracts\Connection $connection
      */
-    abstract public function migrate(ConnectionInterface $connection);
+    abstract public function migrate(Connection $connection);
 
     /**
-     * @param \Wandu\Database\Contracts\ConnectionInterface $connection
+     * @param \Wandu\Database\Contracts\Connection $connection
      */
-    abstract public function rollback(ConnectionInterface $connection);
+    abstract public function rollback(Connection $connection);
 }

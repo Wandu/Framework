@@ -22,7 +22,7 @@ class MetadataReader implements MetadataReaderInterface
     /**
      * {@inheritdoc}
      */
-    public function getMetadataFrom(string $class): Metadata
+    public function getMetadata(string $class): Metadata
     {
         $class = ltrim($class, '\\');
         $settings = [];

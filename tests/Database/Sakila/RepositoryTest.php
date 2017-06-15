@@ -1,12 +1,13 @@
 <?php
-namespace Wandu\Database;
+namespace Wandu\Database\Sakila;
 
 use InvalidArgumentException;
 use stdClass;
 use Wandu\Database\Query\SelectQuery;
-use Wandu\Database\Sakila\SakilaActor;
+use Wandu\Database\QueryBuilder;
+use Wandu\Database\Sakila\Models\SakilaActor;
 
-class RepositoryTest extends SakilaTestCase 
+class RepositoryTest extends TestCase 
 {
     /** @var \Wandu\Database\Repository */
     protected $repository;
@@ -56,6 +57,7 @@ class RepositoryTest extends SakilaTestCase
     {
         $expectedActor = new SakilaActor(138, 'LUCILLE', 'DEE', '2006-02-15 04:34:33');
 
+        
         $actor = $this->repository->first(function (SelectQuery $query) {
             return $query->where('actor_id', 138);
         });
@@ -129,7 +131,7 @@ class RepositoryTest extends SakilaTestCase
             );
         }
 
-        /* @var \Wandu\Database\Sakila\SakilaActor $actor */
+        /* @var \Wandu\Database\Sakila\Models\SakilaActor $actor */
         $actor = $repository->first("SELECT * FROM `actor` WHERE `actor_id` = ?", ['80']);
 
         static::assertEquals('RALPH', $actor->getFirstName());
@@ -140,7 +142,7 @@ class RepositoryTest extends SakilaTestCase
         
         static::assertEquals(1, $repository->persist($actor));
 
-        /* @var \Wandu\Database\Sakila\SakilaActor $actor */
+        /* @var \Wandu\Database\Sakila\Models\SakilaActor $actor */
         $actor = $repository->first("SELECT * FROM `actor` WHERE `actor_id` = ?", ['80']);
 
         static::assertEquals('CHANGWAN', $actor->getFirstName());
