@@ -3,7 +3,7 @@ namespace Wandu\Database\Sakila\Models;
 
 use Wandu\Database\Annotations\Cast;
 use Wandu\Database\Annotations\Column;
-use Wandu\Database\Annotations\RelatedToMany;
+use Wandu\Database\Annotations\HasMany;
 use Wandu\Database\Annotations\Table;
 
 /**
@@ -33,8 +33,8 @@ class SakilaCountry
 
     /**
      * @Column(name="country_id")
-     * @RelatedToMany(related=\Wandu\Database\Sakila\SakilaCity::class, key="country_id")
-     * @var \Wandu\Collection\Contracts\ListInterface|\Wandu\Database\Sakila\SakilaCity[]
+     * @HasMany(related=\Wandu\Database\Sakila\Models\SakilaCity::class, key="country_id")
+     * @var \Wandu\Collection\Contracts\ListInterface|\Wandu\Database\Sakila\Models\SakilaCity[]
      */
     private $cities;
 
@@ -63,7 +63,7 @@ class SakilaCountry
     }
 
     /**
-     * @return \Wandu\Collection\Contracts\ListInterface|\Wandu\Database\Sakila\SakilaCity[]
+     * @return \Wandu\Collection\Contracts\ListInterface|\Wandu\Database\Sakila\Models\SakilaCity[]
      */
     public function getCities()
     {

@@ -57,6 +57,7 @@ class DatabaseManager
             $prefix = $this->connectors[$connection]->getPrefix();
 
             $this->repositories[$class] = new Repository(
+                $this,
                 $this->connections[$connection],
                 new QueryBuilder($prefix . $meta->getTable()),
                 $meta,

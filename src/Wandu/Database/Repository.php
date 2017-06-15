@@ -36,8 +36,14 @@ class Repository
     /** @var array */
     protected static $entityCache = [];
     
-    public function __construct(Connection $connection, QueryBuilder $queryBuilder, Metadata $meta, Configuration $config)
-    {
+    public function __construct(
+        DatabaseManager $manager,
+        Connection $connection,
+        QueryBuilder $queryBuilder,
+        Metadata $meta,
+        Configuration $config
+    ) {
+        $this->manager = $manager;
         $this->connection = $connection;
         $this->caster = $config->getCaster();
         $this->queryBuilder = $queryBuilder;
@@ -247,7 +253,7 @@ class Repository
         foreach ($this->meta->getColumns() as $propertyName => $column) {
             if (!isset($attributes[$column->name])) continue;
             if (isset($relations[$propertyName])) {
-//                $value = $relations[$propertyName]->getRelation($this->manager, $attributes[$column->name]);
+                $value = $relations[$propertyName]->getRelation($this->manager, $attributes[$column->name]);
             } elseif (isset($casts[$propertyName])) {
                 $value = $this->caster->cast($attributes[$column->name], $casts[$propertyName]->type);
             } else {

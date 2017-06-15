@@ -38,7 +38,7 @@ trait Assertions
         $depth = ob_get_level();
         ob_start();
         
-        $closure->__invoke();
+        $result = $closure->__invoke();
 
         $contents = '';
         while (ob_get_level() - $depth > 0) {
@@ -46,6 +46,7 @@ trait Assertions
             ob_end_clean();
         }
         Assert::assertEquals($expected, $contents, $message);
+        return $result;
     }
     
     public static function assertException($expected, Closure $closure, $message = '')

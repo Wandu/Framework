@@ -3,7 +3,7 @@ namespace Wandu\Database\Sakila\Models;
 
 use Wandu\Database\Annotations\Cast;
 use Wandu\Database\Annotations\Column;
-use Wandu\Database\Annotations\RelatedToOne;
+use Wandu\Database\Annotations\BelongsTo;
 use Wandu\Database\Annotations\Table;
 
 /**
@@ -33,8 +33,8 @@ class SakilaCity
 
     /**
      * @Column(name="country_id")
-     * @RelatedToOne(related=\Wandu\Database\Sakila\SakilaCountry::class, key="country_id")
-     * @var \Wandu\Database\Sakila\SakilaCountry
+     * @BelongsTo(related=\Wandu\Database\Sakila\Models\SakilaCountry::class, key="country_id")
+     * @var \Wandu\Database\Sakila\Models\SakilaCountry
      */
     private $country;
 
@@ -63,7 +63,7 @@ class SakilaCity
     }
 
     /**
-     * @return \Wandu\Database\Sakila\SakilaCountry
+     * @return \Wandu\Database\Sakila\Models\SakilaCountry
      */
     public function getCountry()
     {

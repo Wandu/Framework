@@ -1,9 +1,9 @@
 <?php
 namespace Wandu\Database\Sakila\Models;
 
+use Wandu\Database\Annotations\BelongsTo;
 use Wandu\Database\Annotations\Cast;
 use Wandu\Database\Annotations\Column;
-use Wandu\Database\Annotations\RelatedToOne;
 use Wandu\Database\Annotations\Table;
 
 /**
@@ -38,8 +38,8 @@ class SakilaFilm
 
     /**
      * @Column(name="language_id")
-     * @RelatedToOne(related=SakilaLanguage::class, key="language_id")
-     * @var \Wandu\Database\Sakila\SakilaLanguage
+     * @BelongsTo(related=SakilaLanguage::class, key="language_id")
+     * @var \Wandu\Database\Sakila\Models\SakilaLanguage
      */
     private $language;
 
@@ -88,7 +88,7 @@ class SakilaFilm
     }
     
     /**
-     * @return \Wandu\Database\Sakila\SakilaLanguage
+     * @return \Wandu\Database\Sakila\Models\SakilaLanguage
      */
     public function getLanguage(): SakilaLanguage
     {
