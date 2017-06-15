@@ -106,7 +106,7 @@ class EventEmitter implements EventEmitterContract
      * @param $event
      * @return \Generator|void
      */
-    public function getListeners($event)
+    protected function getListeners($event)
     {
         if (!isset($this->listeners[$event])) return;
         foreach ($this->listeners[$event] as $listener) {
