@@ -29,6 +29,14 @@ class Worker
     /**
      * @return void 
      */
+    public function flush()
+    {
+        $this->queue->flush();
+    }
+    
+    /**
+     * @return void 
+     */
     public function stop()
     {
         if ($this->logger) {
