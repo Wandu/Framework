@@ -11,7 +11,7 @@ use Wandu\Router\Contracts\LoaderInterface;
 use Wandu\Router\Contracts\MiddlewareInterface;
 use Wandu\Router\Exception\HandlerNotFoundException;
 
-class PsrLoader implements LoaderInterface
+class SingletonControllerPsrLoader implements LoaderInterface
 {
     /** @var \Psr\Container\ContainerInterface */
     protected $container;
@@ -29,9 +29,10 @@ class PsrLoader implements LoaderInterface
      */
     public function middleware(string $className, ServerRequestInterface $request): MiddlewareInterface
     {
-        /** @var \Wandu\Router\Contracts\MiddlewareInterface $instance */
-        $instance = $this->createInstance($className, $request);
-        return $instance;
+        if ($this->container->has($className)) {
+            return $this->container->get($className);
+        }
+        throw new HandlerNotFoundException($className);
     }
 
     /**
@@ -39,8 +40,8 @@ class PsrLoader implements LoaderInterface
      */
     public function execute(string $className, string $methodName, ServerRequestInterface $request)
     {
-        try {
-            $object = $this->createInstance($className, $request);
+        if ($this->container->has($className)) {
+            $object = $this->container->get($className);
             try {
                 $reflMethod = (new ReflectionClass($className))->getMethod($methodName);
             } catch (ReflectionException $e) {
@@ -53,42 +54,11 @@ class PsrLoader implements LoaderInterface
             if (method_exists($object, '__call')) {
                 return $object->__call($methodName, [$request]);
             }
-        } catch (HandlerNotFoundException $e) {
-            throw new HandlerNotFoundException($className, $methodName);
         }
         throw new HandlerNotFoundException($className, $methodName);
     }
 
-    /**
-     * @param string $className
-     * @param \Psr\Http\Message\ServerRequestInterface $request
-     * @return object
-     */
-    public function createInstance(string $className, ServerRequestInterface $request)
-    {
-        if (class_exists($className)) {
-            $classRefl = new ReflectionClass($className);
-            $constructor = $classRefl->getConstructor();
-            try {
-                if ($constructor) {
-                    $arguments = $this->getArguments($constructor, $request);
-                    return new $className(...$arguments);
-                } else {
-                    return new $className();
-                }
-            } catch (RuntimeException $e) {}
-        } elseif ($this->container->has($className)) { // for alias
-            return $this->container->get($className);
-        }
-        throw new HandlerNotFoundException($className);
-    }
-
-    /**
-     * @param \ReflectionFunctionAbstract $refl
-     * @param \Psr\Http\Message\ServerRequestInterface $request
-     * @return array
-     */
-    protected function getArguments(\ReflectionFunctionAbstract $refl, ServerRequestInterface $request)
+    public function getArguments(\ReflectionFunctionAbstract $refl, ServerRequestInterface $request)
     {
         $arguments = [];
         // it from container Resolver..

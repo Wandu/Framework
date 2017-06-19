@@ -21,7 +21,7 @@ use Wandu\Router\Contracts\MiddlewareInterface;
 use Wandu\Router\Exception\HandlerNotFoundException;
 use Wandu\Router\Middleware\Parameterify;
 
-class PsrLoaderTest extends TestCase
+class SingletonControllerPsrLoaderTest extends TestCase
 {
     use Assertions;
 
@@ -95,10 +95,6 @@ class PsrLoaderTest extends TestCase
 
 class PsrLoaderTestMiddleware implements MiddlewareInterface
 {
-    public function __construct(ServerRequestInterface $request)
-    {
-    }
-
     public function __invoke(ServerRequestInterface $request, Closure $next)
     {
     }

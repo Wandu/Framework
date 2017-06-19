@@ -31,7 +31,7 @@ class RouteExecutor
     public function execute(ServerRequestInterface $request, $className, $methodName, array $middlewares = [])
     {
         if (count($middlewares)) {
-            $middleware = $this->loader->middleware(array_shift($middlewares));
+            $middleware = $this->loader->middleware(array_shift($middlewares), $request);
             $response = $middleware->__invoke($request, function (ServerRequestInterface $request) use ($className, $methodName, $middlewares) {
                 return $this->execute($request, $className, $methodName, $middlewares);
             });
