@@ -10,13 +10,11 @@ class BeanstalkdAdapter implements Adapter
     /** @var \Pheanstalk\PheanstalkInterface */
     protected $client;
     
-    /** @var string */
-    protected $channel;
-    
     public function __construct(PheanstalkInterface $client, string $channel = "default")
     {
         $this->client = $client;
-        $this->channel = $channel;
+        $this->client->useTube($channel);
+        $this->client->watch($channel);
     }
 
     /**
@@ -24,13 +22,12 @@ class BeanstalkdAdapter implements Adapter
      */
     public function flush()
     {
-        $client = $this->client->useTube($this->channel);
         try {
-            while ($client->delete($client->peekDelayed())) {}
+            while ($this->client->delete($this->client->peekDelayed())) {}
         } catch (ServerException $e) {
         }
         try {
-            while ($client->delete($client->peekReady())) {}
+            while ($this->client->delete($this->client->peekReady())) {}
         } catch (ServerException $e) {
         }
     }
@@ -40,7 +37,7 @@ class BeanstalkdAdapter implements Adapter
      */
     public function send(string $payload)
     {
-        $this->client->useTube($this->channel)->put($payload);
+        $this->client->put($payload);
     }
 
     /**
@@ -49,7 +46,7 @@ class BeanstalkdAdapter implements Adapter
     public function receive()
     {
         try {
-            return new BeanstalkdJob($this->client->watch($this->channel)->peekReady());
+            return new BeanstalkdJob($this->client->peekReady());
         } catch (ServerException $e) {
             return null;
         }
