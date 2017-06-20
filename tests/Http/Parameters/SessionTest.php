@@ -25,9 +25,9 @@ class SessionTest extends ParameterTest
         $cookieJar->shouldReceive('has')->with('WdSessId')->andReturn(true);
         $cookieJar->shouldReceive('get')->with('WdSessId')->andReturn(sha1('something'));
 
-        $this->param1 = new Session($cookieJar, $this->createHandler($this->param1Attributes));
-        $this->param2 = new Session($cookieJar, $this->createHandler($this->param2Attributes));
-        $this->param3 = new Session($cookieJar, $this->createHandler($this->param3Attributes), null, new Parameter($this->param3FallbackAttributes));
+        $this->param1 = Session::createFromCookieJar($cookieJar, $this->createHandler($this->param1Attributes));
+        $this->param2 = Session::createFromCookieJar($cookieJar, $this->createHandler($this->param2Attributes));
+        $this->param3 = Session::createFromCookieJar($cookieJar, $this->createHandler($this->param3Attributes), null, new Parameter($this->param3FallbackAttributes));
     }
     
     public function testInvalidName()

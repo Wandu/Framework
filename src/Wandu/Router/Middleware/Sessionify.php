@@ -36,7 +36,7 @@ class Sessionify implements MiddlewareInterface
     public function __invoke(ServerRequestInterface $request, Closure $next)
     {
         $cookieJar = new CookieJar($request);
-        $session = new Session($cookieJar, $this->handler, $this->config);
+        $session = Session::createFromCookieJar($cookieJar, $this->handler, $this->config);
 
         $request = $request
             ->withAttribute('cookie', $cookieJar)
