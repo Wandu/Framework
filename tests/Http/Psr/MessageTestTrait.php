@@ -4,6 +4,7 @@ namespace Wandu\Http\Psr;
 use Mockery;
 use InvalidArgumentException;
 use Psr\Http\Message\StreamInterface;
+use Wandu\Http\Cookie\Cookie;
 
 trait MessageTestTrait
 {
@@ -218,5 +219,18 @@ trait MessageTestTrait
         // new body stream.
         static::assertInstanceOf(StreamInterface::class, $messageWithBody->getBody());
         static::assertSame($mockBody, $messageWithBody->getBody());
+    }
+    
+    public function testHandleSetCookieHeader()
+    {
+        $cookie = new Cookie('SESSIONID', 'value', (new \DateTime())->setTimestamp(time() + 3600));
+        $this->message = $this->message->withAddedHeader('Set-Cookie', $cookie->__toString());
+        
+        $setCookieHeader = $this->message->getHeader('set-cookie');
+        static::assertCount(1, $setCookieHeader);
+        static::assertRegExp(
+            '~^SESSIONID\=value\;\ Expires\=Wednesday\,\ \d{2}-[A-Z][a-z]{2}-\d{4}\ \d{2}\:\d{2}\:\d{2}\ GMT\;\ Path\=\/\;\ HttpOnly$~',
+            $setCookieHeader[0]
+        );
     }
 }
