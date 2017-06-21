@@ -87,21 +87,13 @@ class ServerRequestFactoryTest extends TestCase
             'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.116 Safari/537.36'
         ], $request->getHeader('user-agent'));
         static::assertEquals([
-            'text/html',
-            'application/xhtml+xml',
-            'application/xml;q=0.9',
-            'image/webp',
-            '*/*;q=0.8',
+            'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
         ], $request->getHeader('accept'));
         static::assertEquals([
-            'gzip',
-            'deflate',
-            'sdch',
+            'gzip, deflate, sdch',
         ], $request->getHeader('accept-encoding'));
         static::assertEquals([
-            'ko',
-            'en;q=0.8',
-            'en-US;q=0.6',
+            'ko,en;q=0.8,en-US;q=0.6',
         ], $request->getHeader('accept-language'));
         static::assertEquals([
             'intercom-id=b5998208-7329-4a94-a338-bdd555d042e3; wcs_bt=unknown:1470904067|s_5943a5ef73da:1472693733; _ga=GA1.2.1905714981.1465871995',

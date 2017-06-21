@@ -147,11 +147,7 @@ trait MessageTestTrait
         ], $messageWithHeader->withHeader('test', 'blabla')->withHeader('test', 'abc')->getHeader('test'));
 
         static::assertEquals([
-            'text/html',
-            'application/xhtml+xml',
-            'application/xml;q=0.9',
-            'image/webp',
-            '*/*;q=0.8',
+            'text/html, application/xhtml+xml, application/xml;q=0.9, image/webp, */*;q=0.8',
         ], $messageWithHeader->withHeader('accept', 'text/html, application/xhtml+xml, application/xml;q=0.9, image/webp, */*;q=0.8')->getHeader('accept'));
 
         static::assertEquals([
