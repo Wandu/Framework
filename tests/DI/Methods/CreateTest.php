@@ -93,6 +93,18 @@ class CreateTest extends TestCase
         static::assertSame($param2, $object->param2);
         static::assertSame('param3', $object->param3);
         static::assertSame($param4, $object->param4);
+        
+        // assoc with class name
+        $object = $container->create(CreateTestHasMultiParam::class, [
+            CreateTestDependencyInterface::class => $param1 = new CreateTestDependency(),
+            'param2' => $param2 = new stdClass,
+            'param4' => $param4 = new stdClass,
+        ]);
+        static::assertInstanceOf(CreateTestDependencyInterface::class, $object->param1);
+        static::assertSame($param1, $object->param1);
+        static::assertSame($param2, $object->param2);
+        static::assertSame('param3', $object->param3);
+        static::assertSame($param4, $object->param4);
 
         // complex
         $object = $container->create(CreateTestHasMultiParam::class, [

@@ -65,7 +65,10 @@ class BindResolver implements ResolverInterface
                 $paramClass = $param->getClass();
                 if ($paramClass) { // #2.
                     $paramClassName = $paramClass->getName();
-                    if ($container->has($paramClassName)) { // #2.1.
+                    if (array_key_exists($paramClassName, $arguments)) {
+                        $parametersToReturn[] = $arguments[$paramClassName];
+                        continue;
+                    } elseif ($container->has($paramClassName)) { // #2.1.
                         $parametersToReturn[] = $container->get($paramClassName);
                         continue;
                     }
