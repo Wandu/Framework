@@ -1,8 +1,8 @@
 <?php
 namespace Wandu\Router;
 
-use Mockery;
 use Psr\Http\Message\ServerRequestInterface;
+use Wandu\Http\Psr\ServerRequest;
 
 class CachedDispatcherTest extends TestCase
 {
@@ -11,7 +11,7 @@ class CachedDispatcherTest extends TestCase
         @unlink(__DIR__ . '/router.cache.php');
     }
 
-    public function testDispatchWithNonCache()
+    public function testDispatch()
     {
         $dispatcher = $this->createDispatcher();
 
@@ -21,11 +21,37 @@ class CachedDispatcherTest extends TestCase
             $router->get('admin', TestCachedDispatcherController::class, 'index');
         };
         $dispatcher->setRoutes($routes);
+        $dispatcher->dispatch(new ServerRequest([], [], [], [], [], [], 'GET', '/admin'));
+
         $dispatcher->setRoutes($routes);
+        $dispatcher->dispatch(new ServerRequest([], [], [], [], [], [], 'GET', '/admin'));
+
         $dispatcher->setRoutes($routes);
+        $dispatcher->dispatch(new ServerRequest([], [], [], [], [], [], 'GET', '/admin'));
+
         $dispatcher->setRoutes($routes);
+        $dispatcher->dispatch(new ServerRequest([], [], [], [], [], [], 'GET', '/admin'));
 
         static::assertEquals(4, $count);
+    }
+
+    public function testInstanceCache()
+    {
+        $dispatcher = $this->createDispatcher();
+
+        $count = 0;
+        $routes = function (Router $router) use (&$count) {
+            $count++;
+            $router->get('admin', TestCachedDispatcherController::class, 'index');
+        };
+        $dispatcher->setRoutes($routes);
+
+        $dispatcher->dispatch(new ServerRequest([], [], [], [], [], [], 'GET', '/admin'));
+        $dispatcher->dispatch(new ServerRequest([], [], [], [], [], [], 'GET', '/admin'));
+        $dispatcher->dispatch(new ServerRequest([], [], [], [], [], [], 'GET', '/admin'));
+        $dispatcher->dispatch(new ServerRequest([], [], [], [], [], [], 'GET', '/admin'));
+
+        static::assertEquals(1, $count);
     }
 
     public function testDispatchWithCache()
@@ -40,10 +66,18 @@ class CachedDispatcherTest extends TestCase
             $count++;
             $router->get('admin', TestCachedDispatcherController::class, 'index');
         };
+
         $dispatcher->setRoutes($routes);
+        $dispatcher->dispatch(new ServerRequest([], [], [], [], [], [], 'GET', '/admin'));
+
         $dispatcher->setRoutes($routes);
+        $dispatcher->dispatch(new ServerRequest([], [], [], [], [], [], 'GET', '/admin'));
+
         $dispatcher->setRoutes($routes);
+        $dispatcher->dispatch(new ServerRequest([], [], [], [], [], [], 'GET', '/admin'));
+
         $dispatcher->setRoutes($routes);
+        $dispatcher->dispatch(new ServerRequest([], [], [], [], [], [], 'GET', '/admin'));
 
         static::assertEquals(1, $count);
     }
@@ -61,13 +95,24 @@ class CachedDispatcherTest extends TestCase
             $router->get('admin', TestCachedDispatcherController::class, 'index');
         };
         $dispatcher->setRoutes($routes);
-        $dispatcher->setRoutes($routes);
-        $dispatcher->setRoutes($routes);
-        $dispatcher->setRoutes($routes);
-        $dispatcher->setRoutes($routes);
+        $dispatcher->dispatch(new ServerRequest([], [], [], [], [], [], 'GET', '/admin'));
 
-        $dispatcher->flush();
         $dispatcher->setRoutes($routes);
+        $dispatcher->dispatch(new ServerRequest([], [], [], [], [], [], 'GET', '/admin'));
+
+        $dispatcher->setRoutes($routes);
+        $dispatcher->dispatch(new ServerRequest([], [], [], [], [], [], 'GET', '/admin'));
+
+        $dispatcher->setRoutes($routes);
+        $dispatcher->dispatch(new ServerRequest([], [], [], [], [], [], 'GET', '/admin'));
+
+        $dispatcher->setRoutes($routes);
+        $dispatcher->dispatch(new ServerRequest([], [], [], [], [], [], 'GET', '/admin'));
+        
+        $dispatcher->flush();
+
+        $dispatcher->setRoutes($routes);
+        $dispatcher->dispatch(new ServerRequest([], [], [], [], [], [], 'GET', '/admin'));
 
         static::assertEquals(2, $count);
     }
@@ -75,17 +120,17 @@ class CachedDispatcherTest extends TestCase
 
 class TestCachedDispatcherController
 {
-    public function index(ServerRequestInterface $request)
+    public static function index(ServerRequestInterface $request)
     {
         return "[{$request->getMethod()}] index@Admin";
     }
 
-    public function action(ServerRequestInterface $request)
+    public static function action(ServerRequestInterface $request)
     {
         return "[{$request->getMethod()}] action@Admin";
     }
 
-    public function users(ServerRequestInterface $request)
+    public static function users(ServerRequestInterface $request)
     {
         return "[{$request->getMethod()}] users/{$request->getAttribute('user')}@Admin";
     }

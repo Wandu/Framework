@@ -2,15 +2,10 @@
 namespace Wandu\Router;
 
 use Closure;
-use FastRoute\DataGenerator\GroupCountBased as GCBGenerator;
 use FastRoute\Dispatcher as FastDispatcher;
-use FastRoute\Dispatcher\GroupCountBased as GCBDispatcher;
 use Psr\Http\Message\ServerRequestInterface;
 use Wandu\Router\Contracts\LoaderInterface;
 use Wandu\Router\Contracts\ResponsifierInterface;
-use Wandu\Router\Exception\MethodNotAllowedException;
-use Wandu\Router\Exception\RouteNotFoundException;
-use Wandu\Router\Path\Pattern;
 
 class Dispatcher
 {
@@ -23,15 +18,12 @@ class Dispatcher
     /** @var \Wandu\Router\Configuration */
     protected $config;
     
-    /** @var \Wandu\Router\Route[] */
-    protected $routes = [];
-
-    /** @var \Wandu\Router\Route[] */
-    protected $namedPattern;
+    /** @var \Closure */
+    protected $handler;
     
-    /** @var array */
-    protected $compiledRoutes = [];
-
+    /** @var \Wandu\Router\CompiledRoutes */
+    protected $compiledRoutes;
+    
     public function __construct(
         LoaderInterface $loader = null,
         ResponsifierInterface $responsifier = null,
@@ -51,16 +43,26 @@ class Dispatcher
 
     /**
      * @deprecated use setRoutes
-     * @param \Closure $routes
+     * 
+     * @param \Closure $handler
      * @return \Wandu\Router\Dispatcher
      */
-    public function withRoutes(Closure $routes)
+    public function withRoutes(Closure $handler)
     {
         $inst = clone $this;
-        $inst->setRoutes($routes);
+        $inst->setRoutes($handler);
         return $inst;
     }
 
+    /**
+     * @param \Closure $handler
+     */
+    public function setRoutes(Closure $handler)
+    {
+        $this->compiledRoutes = null;
+        $this->handler = $handler;
+    }
+    
     /**
      * @param string $name
      * @param array $attributes
@@ -68,63 +70,7 @@ class Dispatcher
      */
     public function getPath($name, array $attributes = [])
     {
-        if (!isset($this->namedPattern[$name])) {
-            throw new RouteNotFoundException("Route \"{$name}\" not found.");
-        }
-        $pattern = new Pattern($this->namedPattern[$name]);
-        return $pattern->path($attributes);
-    }
-
-    /**
-     * @param \Closure $routes
-     */
-    public function setRoutes(Closure $routes)
-    {
-        $cacheEnabled = $this->config->isCacheEnabled();
-        if ($this->isCached()) {
-            $cache = $this->restoreCache();
-            $this->compiledRoutes = $cache['dispatch_data'];
-            $this->routes = $cache['routes'];
-            $this->namedPattern = isset($cache['named_routes']) ? $cache['named_routes'] : [];
-        } else {
-            $resultRoutes = [];
-            $resultNamedPath = [];
-            
-            $router = new Router;
-            $router->middleware($this->config->getMiddleware(), $routes);
-            
-            $generator = new GCBGenerator();
-            /**
-             * @var array|string[] $methods
-             * @var string $path
-             * @var \Wandu\Router\Route $route
-             * @var string $host
-             */
-            foreach ($router as list($methods, $path, $route, $host)) {
-                $pathPattern = new Pattern($path);
-                if ($routeName = $route->getName()) {
-                    $resultNamedPath[$routeName] = $path;
-                }
-                foreach ($pathPattern->parse() as $parsedPath) {
-                    foreach ($methods as $method) {
-                        $handleId = uniqid('HANDLER');
-                        $generator->addRoute($method, $parsedPath, $handleId);
-                        $resultRoutes[$handleId] = $route;
-                    }
-                }
-            }
-            $this->routes = $resultRoutes;
-            $this->namedPattern = $resultNamedPath;
-            $this->compiledRoutes = $generator->getData();
-            
-            if ($cacheEnabled) {
-                $this->storeCache([
-                    'dispatch_data' => $this->compiledRoutes,
-                    'routes' => $this->routes,
-                    'named_routes' => $this->namedPattern,
-                ]);
-            }
-        }
+        return $this->getCompiledRoutes()->getPattern($name)->path($attributes);
     }
 
     /**
@@ -133,16 +79,25 @@ class Dispatcher
      */
     public function dispatch(ServerRequestInterface $request)
     {
+        $compiledRoutes = $this->getCompiledRoutes();
         $request = $this->applyVirtualMethod($request);
-        $routeInfo = $this->runDispatcher(
-            new GCBDispatcher($this->compiledRoutes),
-            $request->getMethod(),
-            $request->getUri()->getPath()
-        );
-        foreach ($routeInfo[2] as $key => $value) {
-            $request = $request->withAttribute($key, $value);
+        return $compiledRoutes->dispatch($request, $this->loader, $this->responsifier);
+    }
+    
+    protected function getCompiledRoutes(): CompiledRoutes
+    {
+        if (!$this->compiledRoutes) {
+            $cacheEnabled = $this->config->isCacheEnabled();
+            if ($this->isCached()) {
+                $this->compiledRoutes = $this->restoreCache();
+            } else {
+                $this->compiledRoutes = CompiledRoutes::compile($this->handler, $this->config);
+                if ($cacheEnabled) {
+                    $this->storeCache($this->compiledRoutes);
+                }
+            }
         }
-        return $this->routes[$routeInfo[1]]->execute($request, $this->loader, $this->responsifier);
+        return $this->compiledRoutes;
     }
 
     /**
@@ -165,25 +120,6 @@ class Dispatcher
     }
 
     /**
-     * @param \FastRoute\Dispatcher $dispatcher
-     * @param string $method
-     * @param string $path
-     * @return array
-     */
-    protected function runDispatcher(FastDispatcher $dispatcher, $method, $path)
-    {
-        $routeInfo = $dispatcher->dispatch($method, $path);
-        switch ($routeInfo[0]) {
-            case FastDispatcher::NOT_FOUND:
-                throw new RouteNotFoundException();
-            case FastDispatcher::METHOD_NOT_ALLOWED:
-                throw new MethodNotAllowedException();
-            case FastDispatcher::FOUND:
-                return $routeInfo;
-        }
-    }
-
-    /**
      * @return bool
      */
     public function isCached(): bool
@@ -193,19 +129,13 @@ class Dispatcher
         return $cacheEnabled && file_exists($cacheFile);
     }
     
-    /**
-     * @param array $attributes
-     */
-    private function storeCache(array $attributes = [])
+    private function storeCache(CompiledRoutes $routes)
     {
-        file_put_contents($this->config->getCacheFile(), '<?php return ' . var_export($attributes, true) .';');
+        file_put_contents($this->config->getCacheFile(), serialize($routes));
     }
 
-    /**
-     * @return array
-     */
-    private function restoreCache()
+    private function restoreCache(): CompiledRoutes
     {
-        return require $this->config->getCacheFile();
+        return unserialize(file_get_contents($this->config->getCacheFile()));
     }
 }

@@ -171,7 +171,7 @@ class DispatcherTest extends TestCase
             $dispatcher->dispatch($request)->getBody()->__toString()
         );
     }
-
+    
     public function testMiddlewares()
     {
         $dispatcher = $this->createDispatcher();
