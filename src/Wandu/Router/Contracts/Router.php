@@ -4,6 +4,12 @@ namespace Wandu\Router\Contracts;
 interface Router
 {
     /**
+     * @param string $host
+     * @param callable $handler
+     */
+    public function host(string $host, callable $handler);
+    
+    /**
      * @param string $prefix
      * @param callable $handler
      */

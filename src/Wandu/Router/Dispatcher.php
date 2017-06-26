@@ -98,8 +98,9 @@ class Dispatcher
              * @var array|string[] $methods
              * @var string $path
              * @var \Wandu\Router\Route $route
+             * @var string $host
              */
-            foreach ($router as list($methods, $path, $route)) {
+            foreach ($router as list($methods, $path, $route, $host)) {
                 $pathPattern = new Pattern($path);
                 if ($routeName = $route->getName()) {
                     $resultNamedPath[$routeName] = $path;

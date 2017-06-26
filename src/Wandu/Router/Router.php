@@ -11,14 +11,14 @@ class Router implements IteratorAggregate, RouterInterface
     protected $routes = [];
 
     /** @var string */
+    protected $host = '';
+    
+    /** @var string */
     protected $prefix = '';
 
     /** @var array */
     protected $middlewares = [];
 
-    /** @var string */
-    protected $host;
-    
     /**
      * @param string $prefix
      * @param callable $handler
@@ -31,6 +31,17 @@ class Router implements IteratorAggregate, RouterInterface
         call_user_func($handler, $this);
 
         $this->prefix = $beforePrefix;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function host(string $host, callable $handler)
+    {
+        $beforeHost = $this->host;
+        $this->host = $host;
+        call_user_func($handler, $this);
+        $this->host = $beforeHost;
     }
 
     /**
@@ -152,7 +163,7 @@ class Router implements IteratorAggregate, RouterInterface
         }
         $path = '/' . $path;
         $route = new Route($className, $methodName, $this->middlewares);
-        $this->routes[] = [$methods, $path, $route];
+        $this->routes[] = [$methods, $path, $route, $this->host];
         return $route;
     }
 
