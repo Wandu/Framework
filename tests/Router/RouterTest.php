@@ -14,8 +14,8 @@ class RouterTest extends TestCase
 
         static::assertEquals(
             [
-                [['GET'], '/admin', new Route("TestSimpleController", "index"), ''],
-                [['POST', 'PUT'], '/admin', new Route("TestSimpleController", "action"), ''],
+                [['GET'], '/admin', new Route("TestSimpleController", "index"), ],
+                [['POST', 'PUT'], '/admin', new Route("TestSimpleController", "action"), ],
             ],
             iterator_to_array($router)
         );
@@ -37,10 +37,10 @@ class RouterTest extends TestCase
 
         static::assertEquals(
             [
-                [['GET'], '/', new Route("TestGroupController", "index"), ''],
-                [['GET'], '/admin', new Route("TestGroupController2", "index", ["TestGroupMiddleware"]), ''],
-                [['POST'], '/admin', new Route("TestGroupController2", "store", ["TestGroupMiddleware"]), ''],
-                [['GET'], '/admin/users/:user', new Route("TestGroupController2", "show", ["TestGroupMiddleware"]), ''],
+                [['GET'], '/', new Route("TestGroupController", "index"), ],
+                [['GET'], '/admin', new Route("TestGroupController2", "index", ["TestGroupMiddleware"]), ],
+                [['POST'], '/admin', new Route("TestGroupController2", "store", ["TestGroupMiddleware"]), ],
+                [['GET'], '/admin/users/:user', new Route("TestGroupController2", "show", ["TestGroupMiddleware"]), ],
             ],
             iterator_to_array($router)
         );

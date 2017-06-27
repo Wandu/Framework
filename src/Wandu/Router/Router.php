@@ -11,7 +11,7 @@ class Router implements IteratorAggregate, RouterInterface
     protected $routes = [];
 
     /** @var string */
-    protected $host = '';
+    protected $domains = [];
     
     /** @var string */
     protected $prefix = '';
@@ -36,21 +36,21 @@ class Router implements IteratorAggregate, RouterInterface
     /**
      * {@inheritdoc}
      */
-    public function host(string $host, callable $handler)
+    public function domain($domain, callable $handler)
     {
-        $beforeHost = $this->host;
-        $this->host = $host;
+        $domains = array_filter((array) $domain);
+        $beforeDomains = $this->domains;
+        $this->domains = array_merge($beforeDomains, $domains);
         call_user_func($handler, $this);
-        $this->host = $beforeHost;
+        $this->domains = $beforeDomains;
     }
 
     /**
-     * @param array|string $middlewares
-     * @param callable $handler
+     * {@inheritdoc}
      */
-    public function middleware($middlewares, callable $handler)
+    public function middleware($middleware, callable $handler)
     {
-        $middlewares = array_filter((array) $middlewares);
+        $middlewares = array_filter((array) $middleware);
         $beforeMiddlewares = $this->middlewares;
         $this->middlewares = array_merge($beforeMiddlewares, $middlewares);
         call_user_func($handler, $this);
@@ -162,8 +162,8 @@ class Router implements IteratorAggregate, RouterInterface
             $path = str_replace('//', '/', $path);
         }
         $path = '/' . $path;
-        $route = new Route($className, $methodName, $this->middlewares);
-        $this->routes[] = [$methods, $path, $route, $this->host];
+        $route = new Route($className, $methodName, $this->middlewares, $this->domains);
+        $this->routes[] = [$methods, $path, $route];
         return $route;
     }
 

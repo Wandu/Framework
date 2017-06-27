@@ -171,7 +171,107 @@ class DispatcherTest extends TestCase
             $dispatcher->dispatch($request)->getBody()->__toString()
         );
     }
-    
+
+    public function testDomain()
+    {
+        $dispatcher = $this->createDispatcher();
+
+        $dispatcher->setRoutes(function (Router $router) {
+            $router->createRoute(['GET'], '/', TestDispatcherHomeController::class, 'index');
+            $router->domain(["admin.wandu.io", "admin.wandu.dev"], function (Router $router) {
+                $router->prefix('/admin', function (Router $router) {
+                    $router->createRoute(['GET'], '/', TestDispatcherAdminController::class, 'index');
+                    $router->createRoute(['POST'], '/', TestDispatcherAdminController::class, 'action');
+                    $router->createRoute(['GET'], '/users/:user', TestDispatcherAdminController::class, 'users');
+                });
+            });
+        });
+
+        // all safe
+        $request = $this->createRequest('GET', '/');
+        $request->shouldReceive('getHeaderLine')->with('host')->andReturn('wandu.io');
+
+        static::assertEquals(
+            '[GET] index@Home',
+            $dispatcher->dispatch($request)->getBody()->__toString()
+        );
+
+        $request = $this->createRequest('GET', '/');
+        $request->shouldReceive('getHeaderLine')->with('host')->andReturn('admin.wandu.io');
+
+        static::assertEquals(
+            '[GET] index@Home',
+            $dispatcher->dispatch($request)->getBody()->__toString()
+        );
+
+        // cannot access
+        static::assertException(new RouteNotFoundException(), function () use ($dispatcher) {
+            $request = $this->createRequest('GET', '/admin');
+            $request->shouldReceive('getHeaderLine')->with('host')->andReturn('wandu.io');
+            $dispatcher->dispatch($request)->getBody()->__toString();
+        });
+        static::assertException(new RouteNotFoundException(), function () use ($dispatcher) {
+            $request = $this->createRequest('POST', '/admin');
+            $request->shouldReceive('getHeaderLine')->with('host')->andReturn('wandu.io');
+            $dispatcher->dispatch($request)->getBody()->__toString();
+        });
+        static::assertException(new RouteNotFoundException(), function () use ($dispatcher) {
+            $request = $this->createRequest('GET', '/admin/users/81');
+            $request->shouldReceive('getHeaderLine')->with('host')->andReturn('wandu.io');
+            $dispatcher->dispatch($request)->getBody()->__toString();
+        });
+        
+        // can access if admin.wandu.io
+        $request = $this->createRequest('GET', '/admin');
+        $request->shouldReceive('getHeaderLine')->with('host')->andReturn('admin.wandu.io');
+        static::assertEquals(
+            '[GET] index@Admin',
+            $dispatcher->dispatch($request)->getBody()->__toString()
+        );
+
+        $request = $this->createRequest('POST', '/admin');
+        $request->shouldReceive('getHeaderLine')->with('host')->andReturn('admin.wandu.io');
+        static::assertEquals(
+            '[POST] action@Admin',
+            $dispatcher->dispatch($request)->getBody()->__toString()
+        );
+
+        $request = $this->createRequest('GET', '/admin/users/81');
+        $request->shouldReceive('getHeaderLine')->with('host')->andReturn('admin.wandu.io');
+        $request->shouldReceive('withAttribute')->with('user', '81')->andReturn($request);
+        $request->shouldReceive('getAttribute')->with('user')->andReturn('81');
+
+        static::assertEquals(
+            '[GET] users/81@Admin',
+            $dispatcher->dispatch($request)->getBody()->__toString()
+        );
+
+        // can access if admin.wandu.dev
+        $request = $this->createRequest('GET', '/admin');
+        $request->shouldReceive('getHeaderLine')->with('host')->andReturn('admin.wandu.dev');
+        static::assertEquals(
+            '[GET] index@Admin',
+            $dispatcher->dispatch($request)->getBody()->__toString()
+        );
+
+        $request = $this->createRequest('POST', '/admin');
+        $request->shouldReceive('getHeaderLine')->with('host')->andReturn('admin.wandu.dev');
+        static::assertEquals(
+            '[POST] action@Admin',
+            $dispatcher->dispatch($request)->getBody()->__toString()
+        );
+
+        $request = $this->createRequest('GET', '/admin/users/81');
+        $request->shouldReceive('getHeaderLine')->with('host')->andReturn('admin.wandu.dev');
+        $request->shouldReceive('withAttribute')->with('user', '81')->andReturn($request);
+        $request->shouldReceive('getAttribute')->with('user')->andReturn('81');
+
+        static::assertEquals(
+            '[GET] users/81@Admin',
+            $dispatcher->dispatch($request)->getBody()->__toString()
+        );
+    }
+
     public function testMiddlewares()
     {
         $dispatcher = $this->createDispatcher();

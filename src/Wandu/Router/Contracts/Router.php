@@ -4,10 +4,10 @@ namespace Wandu\Router\Contracts;
 interface Router
 {
     /**
-     * @param string $host
+     * @param array|string $domain
      * @param callable $handler
      */
-    public function host(string $host, callable $handler);
+    public function domain($domain, callable $handler);
     
     /**
      * @param string $prefix
@@ -16,10 +16,10 @@ interface Router
     public function prefix(string $prefix, callable $handler);
 
     /**
-     * @param array|string $middlewares
+     * @param array|string $middleware
      * @param callable $handler
      */
-    public function middleware($middlewares, callable $handler);
+    public function middleware($middleware, callable $handler);
 
     /**
      * @param array $attributes

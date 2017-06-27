@@ -21,16 +21,16 @@ class CachedDispatcherTest extends TestCase
             $router->get('admin', TestCachedDispatcherController::class, 'index');
         };
         $dispatcher->setRoutes($routes);
-        $dispatcher->dispatch(new ServerRequest([], [], [], [], [], [], 'GET', '/admin'));
+        $dispatcher->dispatch(new ServerRequest('GET', '/admin'));
 
         $dispatcher->setRoutes($routes);
-        $dispatcher->dispatch(new ServerRequest([], [], [], [], [], [], 'GET', '/admin'));
+        $dispatcher->dispatch(new ServerRequest('GET', '/admin'));
 
         $dispatcher->setRoutes($routes);
-        $dispatcher->dispatch(new ServerRequest([], [], [], [], [], [], 'GET', '/admin'));
+        $dispatcher->dispatch(new ServerRequest('GET', '/admin'));
 
         $dispatcher->setRoutes($routes);
-        $dispatcher->dispatch(new ServerRequest([], [], [], [], [], [], 'GET', '/admin'));
+        $dispatcher->dispatch(new ServerRequest('GET', '/admin'));
 
         static::assertEquals(4, $count);
     }
@@ -46,10 +46,10 @@ class CachedDispatcherTest extends TestCase
         };
         $dispatcher->setRoutes($routes);
 
-        $dispatcher->dispatch(new ServerRequest([], [], [], [], [], [], 'GET', '/admin'));
-        $dispatcher->dispatch(new ServerRequest([], [], [], [], [], [], 'GET', '/admin'));
-        $dispatcher->dispatch(new ServerRequest([], [], [], [], [], [], 'GET', '/admin'));
-        $dispatcher->dispatch(new ServerRequest([], [], [], [], [], [], 'GET', '/admin'));
+        $dispatcher->dispatch(new ServerRequest('GET', '/admin'));
+        $dispatcher->dispatch(new ServerRequest('GET', '/admin'));
+        $dispatcher->dispatch(new ServerRequest('GET', '/admin'));
+        $dispatcher->dispatch(new ServerRequest('GET', '/admin'));
 
         static::assertEquals(1, $count);
     }
@@ -68,16 +68,16 @@ class CachedDispatcherTest extends TestCase
         };
 
         $dispatcher->setRoutes($routes);
-        $dispatcher->dispatch(new ServerRequest([], [], [], [], [], [], 'GET', '/admin'));
+        $dispatcher->dispatch(new ServerRequest('GET', '/admin'));
 
         $dispatcher->setRoutes($routes);
-        $dispatcher->dispatch(new ServerRequest([], [], [], [], [], [], 'GET', '/admin'));
+        $dispatcher->dispatch(new ServerRequest('GET', '/admin'));
 
         $dispatcher->setRoutes($routes);
-        $dispatcher->dispatch(new ServerRequest([], [], [], [], [], [], 'GET', '/admin'));
+        $dispatcher->dispatch(new ServerRequest('GET', '/admin'));
 
         $dispatcher->setRoutes($routes);
-        $dispatcher->dispatch(new ServerRequest([], [], [], [], [], [], 'GET', '/admin'));
+        $dispatcher->dispatch(new ServerRequest('GET', '/admin'));
 
         static::assertEquals(1, $count);
     }
@@ -95,24 +95,24 @@ class CachedDispatcherTest extends TestCase
             $router->get('admin', TestCachedDispatcherController::class, 'index');
         };
         $dispatcher->setRoutes($routes);
-        $dispatcher->dispatch(new ServerRequest([], [], [], [], [], [], 'GET', '/admin'));
+        $dispatcher->dispatch(new ServerRequest('GET', '/admin'));
 
         $dispatcher->setRoutes($routes);
-        $dispatcher->dispatch(new ServerRequest([], [], [], [], [], [], 'GET', '/admin'));
+        $dispatcher->dispatch(new ServerRequest('GET', '/admin'));
 
         $dispatcher->setRoutes($routes);
-        $dispatcher->dispatch(new ServerRequest([], [], [], [], [], [], 'GET', '/admin'));
+        $dispatcher->dispatch(new ServerRequest('GET', '/admin'));
 
         $dispatcher->setRoutes($routes);
-        $dispatcher->dispatch(new ServerRequest([], [], [], [], [], [], 'GET', '/admin'));
+        $dispatcher->dispatch(new ServerRequest('GET', '/admin'));
 
         $dispatcher->setRoutes($routes);
-        $dispatcher->dispatch(new ServerRequest([], [], [], [], [], [], 'GET', '/admin'));
+        $dispatcher->dispatch(new ServerRequest('GET', '/admin'));
         
         $dispatcher->flush();
 
         $dispatcher->setRoutes($routes);
-        $dispatcher->dispatch(new ServerRequest([], [], [], [], [], [], 'GET', '/admin'));
+        $dispatcher->dispatch(new ServerRequest('GET', '/admin'));
 
         static::assertEquals(2, $count);
     }

@@ -8,21 +8,6 @@ use Wandu\Router\Contracts\Route as RouteContract;
 
 class Route implements RouteContract
 {
-    /**
-     * @param array $dataSet
-     * @return static
-     */
-    public static function __set_state(array $dataSet)
-    {
-        return new static(
-            $dataSet['className'],
-            $dataSet['methodName'],
-            $dataSet['middlewares'],
-            $dataSet['host'] ?? null,
-            $dataSet['name'] ?? null
-        );
-    }
-
     /** @var string */
     protected $className;
 
@@ -33,7 +18,7 @@ class Route implements RouteContract
     protected $middlewares;
 
     /** @var string */
-    protected $host;
+    protected $domains;
 
     /** @var string */
     protected $name;
@@ -42,16 +27,14 @@ class Route implements RouteContract
      * @param string $className
      * @param string $methodName
      * @param array $middlewares
-     * @param string $host
-     * @param string $name
+     * @param array $domains
      */
-    public function __construct($className, $methodName, array $middlewares = [], $host = null, $name = null)
+    public function __construct($className, $methodName, array $middlewares = [], array $domains = [])
     {
         $this->className = $className;
         $this->methodName = $methodName;
         $this->middlewares = $middlewares;
-        $this->host = $host;
-        $this->name = $name;
+        $this->domains = $domains;
     }
 
     /**
@@ -90,21 +73,21 @@ class Route implements RouteContract
     }
 
     /**
-     * @param string $host
+     * @param string $domains
      * @return \Wandu\Router\Route|self
      */
-    public function host(string $host)
+    public function domains(string $domains)
     {
-        $this->host = $host;
+        $this->domains = $domains;
         return $this;
     }
 
     /**
-     * @return string
+     * @return array
      */
-    public function getHost()
+    public function getDomains()
     {
-        return $this->host;
+        return $this->domains;
     }
     
     /**

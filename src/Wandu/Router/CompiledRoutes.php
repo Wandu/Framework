@@ -32,9 +32,8 @@ class CompiledRoutes
          * @var array|string[] $methods
          * @var string $path
          * @var \Wandu\Router\Route $route
-         * @var string $host
          */
-        foreach ($router as list($methods, $path, $route, $host)) {
+        foreach ($router as list($methods, $path, $route)) {
             $pathPattern = new Pattern($path);
             if ($routeName = $route->getName()) {
                 $resultNamedPath[$routeName] = $pathPattern;
@@ -90,9 +89,16 @@ class CompiledRoutes
             case FastDispatcher::METHOD_NOT_ALLOWED:
                 throw new MethodNotAllowedException();
         }
+        $route = $this->routes[$routeInfo[1]];
+        if (count($domains = $route->getDomains())) {
+            if (!in_array($request->getHeaderLine('host'), $domains)) {
+                throw new RouteNotFoundException();
+            }
+        }
         foreach ($routeInfo[2] as $key => $value) {
             $request = $request->withAttribute($key, $value);
         }
-        return $this->routes[$routeInfo[1]]->execute($request, $loader, $responsifier);
+        
+        return $route->execute($request, $loader, $responsifier);
     }
 }
