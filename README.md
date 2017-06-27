@@ -18,6 +18,10 @@ Wandu is PHP Framework.
 
 - [wandu.github.io](https://wandu.github.io)
 
+## Contributing
+
+The contribution guide can be found in the [CONTRIBUTING.md](CONTRIBUTING.md).
+
 ## Slack
 
 - Join [wandu-team.slack.com](https://join.slack.com/wandu-team/shared_invite/MjAzMzY5Mzc2Njc2LTE0OTg0NTU3ODItYzNhMzhhNGI0Mg)
