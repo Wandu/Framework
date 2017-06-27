@@ -26,7 +26,7 @@ class CookieTest extends TestCase
     public function testDeleteCookie()
     {
         static::assertEquals(
-            "hello=deleted; Expires=Thursday, 01-Jan-1970 00:00:00 GMT; Path=/; HttpOnly",
+            "hello=deleted; Expires=Thursday, 01-Jan-1970 00:00:00 GMT; Max-Age=0; Path=/; HttpOnly",
             (new Cookie('hello'))->__toString()
         );
     }
@@ -44,7 +44,7 @@ class CookieTest extends TestCase
         $dateTime = new DateTime();
         $dateTime->setTimestamp(10);
         static::assertEquals(
-            "hello=world; Expires=Thursday, 01-Jan-1970 00:00:10 GMT; Path=/; HttpOnly",
+            "hello=world; Expires=Thursday, 01-Jan-1970 00:00:10 GMT; Max-Age=-1; Path=/; HttpOnly",
             (new Cookie('hello', 'world', $dateTime))->__toString()
         );
     }

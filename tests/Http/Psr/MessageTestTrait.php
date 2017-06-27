@@ -225,7 +225,7 @@ trait MessageTestTrait
         $setCookieHeader = $this->message->getHeader('set-cookie');
         static::assertCount(1, $setCookieHeader);
         static::assertRegExp(
-            '~^SESSIONID\=value\;\ Expires\=[A-Z][a-z]+\,\ \d{2}-[A-Z][a-z]{2}-\d{4}\ \d{2}\:\d{2}\:\d{2}\ GMT\;\ Path\=\/\;\ HttpOnly$~',
+            '~^SESSIONID\=value\;\ Expires\=[A-Z][a-z]+\,\ \d{2}-[A-Z][a-z]{2}-\d{4}\ \d{2}\:\d{2}\:\d{2}\ GMT\;\ Max-Age\=\d+\;\ Path\=\/\;\ HttpOnly$~',
             $setCookieHeader[0]
         );
     }
