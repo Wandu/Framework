@@ -76,13 +76,13 @@ class ServerParamsTest extends ParameterTest
         $serverParams = new ServerParams($request);
         static::assertEquals(null, $serverParams->getIpAddress());
 
-        $serverParams = new ServerParams(new ServerRequest(['REMOTE_ADDR' => '0.0.0.1']));
+        $serverParams = new ServerParams(new ServerRequest(null, null, null, [], '1.1', ['REMOTE_ADDR' => '0.0.0.1']));
         static::assertEquals('0.0.0.1', $serverParams->getIpAddress());
 
         $serverParams = new ServerParams($request->withHeader('x-forwarded-for', '0.0.0.2'));
         static::assertEquals('0.0.0.2', $serverParams->getIpAddress());
 
-        $serverParams = new ServerParams((new ServerRequest(['REMOTE_ADDR' => '0.0.0.3']))->withHeader('x-forwarded-for', '0.0.0.4'));
+        $serverParams = new ServerParams((new ServerRequest(null, null, null, [], '1.1', ['REMOTE_ADDR' => '0.0.0.3']))->withHeader('x-forwarded-for', '0.0.0.4'));
         static::assertEquals('0.0.0.4', $serverParams->getIpAddress()); // x-forwarded-for first
     }
 

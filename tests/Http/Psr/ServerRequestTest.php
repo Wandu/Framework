@@ -45,6 +45,16 @@ class ServerRequestTest extends TestCase
         $mockUri->shouldReceive('getQuery')->andReturn('hello=world');
 
         $request = new ServerRequest(
+            'GET',
+            $mockUri,
+            null,
+            [
+                'host' => ['localhost:8002'],
+                'connection' => ['keep-alive'],
+                'user-agent' => ['Mozilla/5.0'],
+                'cookie' => ['PHPSESSID=32eo4tk9dcaacb2f3hqg0s6s54'],
+            ],
+            '2.0',
             [
                 'SERVER_SOFTWARE' => 'PHP 5.6.8 Development Server',
                 'SERVER_PROTOCOL' => 'HTTP/1.1',
@@ -72,17 +82,7 @@ class ServerRequestTest extends TestCase
             ['id' => 'wan2land'],
             ['PHPSESSID' => '32eo4tk9dcaacb2f3hqg0s6s54'],
             ['profileImage' => $mockFile],
-            ['status' => 'join'],
-            'GET',
-            $mockUri,
-            null,
-            [
-                'host' => ['localhost:8002'],
-                'connection' => ['keep-alive'],
-                'user-agent' => ['Mozilla/5.0'],
-                'cookie' => ['PHPSESSID=32eo4tk9dcaacb2f3hqg0s6s54'],
-            ],
-            '2.0'
+            ['status' => 'join']
         );
         static::assertEquals(['PHPSESSID' => '32eo4tk9dcaacb2f3hqg0s6s54'], $request->getCookieParams());
         static::assertEquals(['page' => 1, 'order' => false], $request->getQueryParams());
@@ -103,7 +103,7 @@ class ServerRequestTest extends TestCase
     public function testConstructWithFail()
     {
         try {
-            new ServerRequest([], [], [], [], ['hello' => ['world' => new \stdClass()]]);
+            new ServerRequest(null, null, null, [], '1.1', [], [], [], [], ['hello' => ['world' => new \stdClass()]]);
             static::fail();
         } catch (InvalidArgumentException $e) {
             static::assertEquals(
@@ -160,7 +160,7 @@ class ServerRequestTest extends TestCase
 
     public function testGetAttribute()
     {
-        $request = new ServerRequest([], [], [], [], [], [
+        $request = new ServerRequest(null, null, null, [], '1.1', [], [], [], [], [], [
             'id' => 'wan2land',
             'status' => 'modify'
         ]);
@@ -183,7 +183,7 @@ class ServerRequestTest extends TestCase
 
     public function testWithoutAttribute()
     {
-        $request = new ServerRequest([], [], [], [], [], [
+        $request = new ServerRequest(null, null, null, [], '1.1', [], [], [], [], [], [
             'id' => 'wan2land',
             'status' => 'modify'
         ]);
