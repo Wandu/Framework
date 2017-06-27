@@ -18,14 +18,6 @@ Wandu is PHP Framework.
 
 - [wandu.github.io](https://wandu.github.io)
 
-## Contributing
-
-The contribution guide can be found in the [CONTRIBUTING.md](CONTRIBUTING.md).
-
-## Slack
-
-- Join [wandu-team.slack.com](https://join.slack.com/wandu-team/shared_invite/MjAzMzY5Mzc2Njc2LTE0OTg0NTU3ODItYzNhMzhhNGI0Mg)
-
 ## Index
 
 - [Wandu Annotation](src/Wandu/Annotation) (Git Repository : [Wandu/Annotation](https://github.com/Wandu/Annotation))
@@ -44,3 +36,11 @@ The contribution guide can be found in the [CONTRIBUTING.md](CONTRIBUTING.md).
 - [Wandu Transformer](src/Wandu/Transformer) (Git Repository : [Wandu/Transformer](https://github.com/Wandu/Transformer))
 - [Wandu Validator](src/Wandu/Validator) (Git Repository : [Wandu/Validator](https://github.com/Wandu/Validator))
 - [Wandu View](src/Wandu/View) (Git Repository : [Wandu/View](https://github.com/Wandu/View))
+
+## Contributing
+
+The contribution guide can be found in the [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## Slack
+
+- Join [wandu-team.slack.com](https://join.slack.com/wandu-team/shared_invite/MjAzMzY5Mzc2Njc2LTE0OTg0NTU3ODItYzNhMzhhNGI0Mg) !
