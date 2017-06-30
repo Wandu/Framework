@@ -81,7 +81,7 @@ class CompiledRoutes
     public function dispatch(ServerRequestInterface $request, LoaderInterface $loader = null, ResponsifierInterface $responsifier = null)
     {
         $routeInfo = (new GCBDispatcher($this->compiledRoutes))
-            ->dispatch($request->getMethod(), $request->getUri()->getPath());
+            ->dispatch($request->getMethod(), '/' . trim($request->getUri()->getPath(), '/'));
         
         switch ($routeInfo[0]) {
             case FastDispatcher::NOT_FOUND:

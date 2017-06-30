@@ -149,12 +149,22 @@ class DispatcherTest extends TestCase
 
         static::assertEquals(
             '[GET] index@Home',
+            $dispatcher->dispatch($this->createRequest('GET', ''))->getBody()->__toString()
+        );
+
+        static::assertEquals(
+            '[GET] index@Home',
             $dispatcher->dispatch($this->createRequest('GET', '/'))->getBody()->__toString()
         );
 
         static::assertEquals(
             '[GET] index@Admin',
             $dispatcher->dispatch($this->createRequest('GET', '/admin'))->getBody()->__toString()
+        );
+
+        static::assertEquals(
+            '[GET] index@Admin',
+            $dispatcher->dispatch($this->createRequest('GET', '/admin/'))->getBody()->__toString()
         );
 
         static::assertEquals(
