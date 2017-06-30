@@ -2,26 +2,27 @@
 
 namespace Wandu\Validator\Testers;
 
-class FileSizeTester extends PropertyTesterAbstract
+use Wandu\Validator\Contracts\Tester;
+
+class FileSizeTester implements Tester
 {
+    /** @var int */
+    protected $max;
     
-    /**
-	 * [test :: check the file size]
-	 * @param  [type] $data   [description]
-	 * @param  [type] $origin [description]
-	 * @param  [type] $keys   [description]
-	 * @return bool           [a]
-	 */
-    public function test(array $data = [], $origin = null, array $keys = []): bool
+	/**
+     * @param int $max
+     */
+    public function __construct($max)
     {
-        if ( !$data['max'] || $data['mix'] ) {
-            return false;
-        }
-        
-        $checkIsMax = ( $data['max'] );
-        return (  $checkIsMax ? ( $data['max'] > $data['value']  ) :  ( $data['min'] < $data['value'] ) );
+        $this->max = $max;
+    }
+	
+    /**
+     * {@inheritdoc}
+     */
+    public function test($data, $origin = null, array $keys = []): bool
+    {
+        return (  $this->max > $data );
     }
 }
 
-/* End of file FileSizeTester.php */
-/* Location: /src/Wandu/Validator/Testers/FileSizeTester.php */
