@@ -58,7 +58,7 @@ class HttpExceptionTest extends TestCase
         static::assertSame(500, $httpException->getStatusCode());
         static::assertSame("Internal Server Error", $httpException->getReasonPhrase());
         
-        $response = response()->create('Hello World?');
+        $response = response()->string('Hello World?');
         $httpException = new InternalServerErrorException($response);
 
         static::assertSame(500, $httpException->getStatusCode());

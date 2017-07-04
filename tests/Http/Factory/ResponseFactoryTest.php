@@ -20,6 +20,14 @@ class ResponseFactoryTest extends TestCase
         Mockery::close();
     }
 
+    public function testString()
+    {
+        $response = $this->factory->string("Hello World!\n");
+
+        static::assertInstanceOf(ResponseInterface::class, $response);
+        static::assertEquals("Hello World!\n", $response->getBody()->__toString());
+    }
+
     public function testCapture()
     {
         $response = $this->factory->capture(function () {
@@ -27,11 +35,7 @@ class ResponseFactoryTest extends TestCase
         });
 
         static::assertInstanceOf(ResponseInterface::class, $response);
-        static::assertEquals(<<<TXT
-Hello World!
-
-TXT
-        , $response->getBody()->__toString());
+        static::assertEquals("Hello World!\n", $response->getBody()->__toString());
     }
 
     public function testJson()
