@@ -1,7 +1,6 @@
 <?php
 namespace Wandu\Http\Psr;
 
-use Mockery;
 use RuntimeException;
 
 trait StreamTestTrait
@@ -26,7 +25,7 @@ trait StreamTestTrait
         $this->stream->write("Hello World");
         try {
             $this->stream->seek(100);
-            $this->fail();
+            static::fail();
         } catch (RuntimeException $e) {
         }
         $this->stream->seek(6);
