@@ -27,9 +27,7 @@ class Router implements IteratorAggregate, RouterInterface
     {
         $beforePrefix = $this->prefix;
         $this->prefix = "{$beforePrefix}/" . ($prefix ?? '');
-
         call_user_func($handler, $this);
-
         $this->prefix = $beforePrefix;
     }
 

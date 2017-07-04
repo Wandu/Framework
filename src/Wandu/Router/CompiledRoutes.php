@@ -78,6 +78,7 @@ class CompiledRoutes
         return $this->namedPattern[$name];
 
     }
+
     public function dispatch(ServerRequestInterface $request, LoaderInterface $loader = null, ResponsifierInterface $responsifier = null)
     {
         $routeInfo = (new GCBDispatcher($this->compiledRoutes))

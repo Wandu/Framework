@@ -6,6 +6,7 @@ use Psr\Log\LoggerInterface;
 use Wandu\Config\Contracts\Config;
 use Wandu\Foundation\Contracts\HttpErrorHandler;
 use Wandu\Http\Exception\HttpException;
+use Wandu\Http\Psr\Stream\StringStream;
 use Wandu\Router\Exception\MethodNotAllowedException as RouteMethodException;
 use Wandu\Router\Exception\RouteNotFoundException;
 use Wandu\Validator\Exception\InvalidValueException;
@@ -58,7 +59,7 @@ class DefaultHttpErrorHandler implements HttpErrorHandler
         }
         if ($this->config->get('debug', true)) {
             $whoops = $this->getWhoops($request);
-            return create($whoops->handleException($exception), 500);
+            return create(new StringStream($whoops->handleException($exception)), 500);
         }
 
         $statusCode = 500;
@@ -82,7 +83,7 @@ class DefaultHttpErrorHandler implements HttpErrorHandler
                 'reason' => $reasonPhrase,
             ], $statusCode);
         }
-        return create("{$statusCode} {$reasonPhrase}", $statusCode);
+        return create(new StringStream("{$statusCode} {$reasonPhrase}"), $statusCode);
     }
 
     /**

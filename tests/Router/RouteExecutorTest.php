@@ -82,7 +82,7 @@ class TestRouterExecutorFailMiddleware implements MiddlewareInterface
 {
     public function __invoke(ServerRequestInterface $request, Closure $next)
     {
-        return response()->create("Fail", 400);
+        return response()->string("Fail", 400);
     }
 }
 
@@ -90,6 +90,6 @@ class TestRouterExecutorController
 {
     static public function index(ServerRequestInterface $request)
     {
-        return response()->create('index');
+        return response()->string('index');
     }
 }

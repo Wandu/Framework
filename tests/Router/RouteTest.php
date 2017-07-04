@@ -113,6 +113,6 @@ class TestAuthFailMiddleware implements MiddlewareInterface
      */
     public function __invoke(ServerRequestInterface $request, Closure $next)
     {
-        return response()->create("Fail...");
+        return response()->string("Fail...");
     }
 }
