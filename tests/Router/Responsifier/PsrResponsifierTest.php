@@ -20,7 +20,7 @@ class PsrResponsifierTest extends TestCase
         $response = $responsify->responsify(null);
 
         static::assertInstanceOf(ResponseInterface::class, $response);
-        static::assertSame('', $response->getBody()->__toString());
+        static::assertNull($response->getBody());
     }
 
     public function testReturnString()
@@ -113,18 +113,6 @@ class PsrResponsifierTest extends TestCase
 
         static::assertInstanceOf(ResponseInterface::class, $response);
         static::assertSame("stub-text.txt contents\n", $response->getBody()->__toString());
-    }
-
-    public function testReturnUnreadableResource()
-    {
-        $responsify = new PsrResponsifier();
-
-        try {
-            $responsify->responsify(fopen(__DIR__ . '/stub-text.txt', 'a'));
-            static::fail();
-        } catch (RuntimeException $e) {
-            static::assertEquals('Unsupported Type of Response.', $e->getMessage());
-        }
     }
 
     public function testReturnCallable()
