@@ -20,9 +20,6 @@ class Route implements RouteContract
     /** @var string */
     protected $domains;
 
-    /** @var string */
-    protected $name;
-
     /**
      * @param string $className
      * @param string $methodName
@@ -38,9 +35,7 @@ class Route implements RouteContract
     }
 
     /**
-     * @param string|array $middlewares
-     * @param bool $overwrite
-     * @return \Wandu\Router\Contracts\Route|self
+     * {@inheritdoc}
      */
     public function middleware($middlewares, $overwrite = false): RouteContract
     {
@@ -54,30 +49,13 @@ class Route implements RouteContract
     }
 
     /**
-     * @param string $name
-     * @return \Wandu\Router\Contracts\Route|self
+     * {@inheritdoc}
      */
-    public function name(string $name): RouteContract
+    public function domains($domains): RouteContract
     {
-        $this->name = $name;
-        return $this;
-    }
-
-    /**
-     * @internal
-     * @return string
-     */
-    public function getName()
-    {
-        return $this->name;
-    }
-
-    /**
-     * @param string $domains
-     * @return \Wandu\Router\Route|self
-     */
-    public function domains(string $domains)
-    {
+        if (is_string($domains)) {
+            $domains = [$domains];
+        }
         $this->domains = $domains;
         return $this;
     }

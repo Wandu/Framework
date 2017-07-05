@@ -21,13 +21,12 @@ class CompiledRoutes
      */
     public static function compile(Closure $handler, Configuration $config)
     {
-        $resultRoutes = [];
-        $resultNamedPath = [];
-
+        $routeMap = [];
         $router = new Router;
         $router->middleware($config->getMiddleware(), $handler);
 
-        $generator = new GCBGenerator();
+        /** @var \FastRoute\DataGenerator\GroupCountBased[] $generators */
+        $generators = [];
         /**
          * @var array|string[] $methods
          * @var string $path
@@ -35,53 +34,52 @@ class CompiledRoutes
          */
         foreach ($router as list($methods, $path, $route)) {
             $pathPattern = new Pattern($path);
-            if ($routeName = $route->getName()) {
-                $resultNamedPath[$routeName] = $pathPattern;
-            }
+
+            $handleId = uniqid('HANDLER');
+            $routeMap[$handleId] = $route;
+
             foreach ($pathPattern->parse() as $parsedPath) {
                 foreach ($methods as $method) {
-                    $handleId = uniqid('HANDLER');
-                    $generator->addRoute($method, $parsedPath, $handleId);
-                    $resultRoutes[$handleId] = $route;
+                    foreach ($route->getDomains() as $domain) {
+                        if (!isset($generators[$domain])) {
+                            $generators[$domain] = new GCBGenerator();
+                        }
+                        $generators[$domain]->addRoute($method, $parsedPath, $handleId);
+                    }
                 }
             }
         }
-        return new static($resultRoutes, $resultNamedPath, $generator->getData());
+
+        $compiledRoutes = array_map(function (GCBGenerator $generator) {
+            return $generator->getData();
+        }, $generators);
+        return new static($compiledRoutes, $routeMap);
     }
 
     /** @var \Wandu\Router\Route[] */
-    protected $routes = [];
-
-    /** @var \Wandu\Router\Route[] */
-    protected $namedPattern;
+    protected $routeMap = [];
 
     /** @var array */
     protected $compiledRoutes = [];
 
     /**
-     * @param array $routes
-     * @param array $namedPattern
      * @param array $compiledRoutes
+     * @param array $routeMap
      */
-    public function __construct(array $routes, array $namedPattern, array $compiledRoutes)
+    public function __construct(array $compiledRoutes, array $routeMap)
     {
-        $this->routes = $routes;
-        $this->namedPattern = $namedPattern;
+        $this->routeMap = $routeMap;
         $this->compiledRoutes = $compiledRoutes;
     }
     
-    public function getPattern($name): Pattern
-    {
-        if (!isset($this->namedPattern[$name])) {
-            throw new RouteNotFoundException("Route \"{$name}\" not found.");
-        }
-        return $this->namedPattern[$name];
-
-    }
-
     public function dispatch(ServerRequestInterface $request, LoaderInterface $loader = null, ResponsifierInterface $responsifier = null)
     {
-        $routeInfo = (new GCBDispatcher($this->compiledRoutes))
+        $host = $request->getHeaderLine('host');
+        $compiledRoutes = array_key_exists($host, $this->compiledRoutes)
+            ? $this->compiledRoutes[$host]
+            : $this->compiledRoutes['@'];
+        
+        $routeInfo = (new GCBDispatcher($compiledRoutes))
             ->dispatch($request->getMethod(), '/' . trim($request->getUri()->getPath(), '/'));
         
         switch ($routeInfo[0]) {
@@ -90,12 +88,7 @@ class CompiledRoutes
             case FastDispatcher::METHOD_NOT_ALLOWED:
                 throw new MethodNotAllowedException();
         }
-        $route = $this->routes[$routeInfo[1]];
-        if (count($domains = $route->getDomains())) {
-            if (!in_array($request->getHeaderLine('host'), $domains)) {
-                throw new RouteNotFoundException();
-            }
-        }
+        $route = $this->routeMap[$routeInfo[1]];
         foreach ($routeInfo[2] as $key => $value) {
             $request = $request->withAttribute($key, $value);
         }

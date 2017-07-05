@@ -11,7 +11,7 @@ class Router implements IteratorAggregate, RouterInterface
     protected $routes = [];
 
     /** @var string */
-    protected $domains = [];
+    protected $domains = ['@'];
     
     /** @var string */
     protected $prefix = '';
@@ -38,7 +38,7 @@ class Router implements IteratorAggregate, RouterInterface
     {
         $domains = array_filter((array) $domain);
         $beforeDomains = $this->domains;
-        $this->domains = array_merge($beforeDomains, $domains);
+        $this->domains = $domains;
         call_user_func($handler, $this);
         $this->domains = $beforeDomains;
     }

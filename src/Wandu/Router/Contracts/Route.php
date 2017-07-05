@@ -11,8 +11,8 @@ interface Route
     public function middleware($middlewares, $overwrite = false): Route;
 
     /**
-     * @param string $name
+     * @param string|array $domains
      * @return \Wandu\Router\Contracts\Route
      */
-    public function name(string $name): Route;
+    public function domains($domains): Route;
 }

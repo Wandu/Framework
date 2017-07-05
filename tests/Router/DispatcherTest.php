@@ -6,7 +6,6 @@ use Psr\Http\Message\ServerRequestInterface;
 use Wandu\Assertions;
 use Wandu\Http\Psr\Stream\StringStream;
 use Wandu\Router\Contracts\MiddlewareInterface;
-use Wandu\Router\Exception\CannotGetPathException;
 use Wandu\Router\Exception\MethodNotAllowedException;
 use Wandu\Router\Exception\RouteNotFoundException;
 use Wandu\Router\Loader\DefaultLoader;
@@ -188,66 +187,54 @@ class DispatcherTest extends TestCase
 
         $dispatcher->setRoutes(function (Router $router) {
             $router->createRoute(['GET'], '/', TestDispatcherHomeController::class, 'index');
+            $router->createRoute(['GET'], '/something', TestDispatcherHomeController::class, 'something');
             $router->domain(["admin.wandu.io", "admin.wandu.dev"], function (Router $router) {
-                $router->prefix('/admin', function (Router $router) {
-                    $router->createRoute(['GET'], '/', TestDispatcherAdminController::class, 'index');
-                    $router->createRoute(['POST'], '/', TestDispatcherAdminController::class, 'action');
-                    $router->createRoute(['GET'], '/users/:user', TestDispatcherAdminController::class, 'users');
-                });
+                $router->createRoute(['GET'], '/', TestDispatcherAdminController::class, 'index');
+                $router->createRoute(['POST'], '/', TestDispatcherAdminController::class, 'action');
+                $router->createRoute(['GET'], '/users/:user', TestDispatcherAdminController::class, 'users');
             });
         });
 
-        // all safe
         $request = $this->createRequest('GET', '/');
-        $request->shouldReceive('getHeaderLine')->with('host')->andReturn('wandu.io');
-
         static::assertEquals(
             '[GET] index@Home',
             $dispatcher->dispatch($request)->getBody()->__toString()
         );
 
-        $request = $this->createRequest('GET', '/');
-        $request->shouldReceive('getHeaderLine')->with('host')->andReturn('admin.wandu.io');
-
-        static::assertEquals(
-            '[GET] index@Home',
-            $dispatcher->dispatch($request)->getBody()->__toString()
-        );
-
-        // cannot access
-        static::assertException(new RouteNotFoundException(), function () use ($dispatcher) {
-            $request = $this->createRequest('GET', '/admin');
-            $request->shouldReceive('getHeaderLine')->with('host')->andReturn('wandu.io');
-            $dispatcher->dispatch($request)->getBody()->__toString();
-        });
-        static::assertException(new RouteNotFoundException(), function () use ($dispatcher) {
-            $request = $this->createRequest('POST', '/admin');
-            $request->shouldReceive('getHeaderLine')->with('host')->andReturn('wandu.io');
-            $dispatcher->dispatch($request)->getBody()->__toString();
-        });
-        static::assertException(new RouteNotFoundException(), function () use ($dispatcher) {
-            $request = $this->createRequest('GET', '/admin/users/81');
-            $request->shouldReceive('getHeaderLine')->with('host')->andReturn('wandu.io');
-            $dispatcher->dispatch($request)->getBody()->__toString();
-        });
-        
-        // can access if admin.wandu.io
-        $request = $this->createRequest('GET', '/admin');
-        $request->shouldReceive('getHeaderLine')->with('host')->andReturn('admin.wandu.io');
+        $request = $this->createRequest('GET', '/', 'admin.wandu.io');
         static::assertEquals(
             '[GET] index@Admin',
             $dispatcher->dispatch($request)->getBody()->__toString()
         );
 
-        $request = $this->createRequest('POST', '/admin');
-        $request->shouldReceive('getHeaderLine')->with('host')->andReturn('admin.wandu.io');
+        // cannot access
+        static::assertException(new RouteNotFoundException(), function () use ($dispatcher) {
+            $request = $this->createRequest('GET', '/users/30');
+            $dispatcher->dispatch($request)->getBody()->__toString();
+        });
+        static::assertException(new MethodNotAllowedException(), function () use ($dispatcher) {
+            $request = $this->createRequest('POST', '/');
+            $dispatcher->dispatch($request)->getBody()->__toString();
+        });
+        static::assertException(new RouteNotFoundException(), function () use ($dispatcher) {
+            $request = $this->createRequest('GET', '/users/81');
+            $dispatcher->dispatch($request)->getBody()->__toString();
+        });
+        
+        // can access if admin.wandu.io
+        $request = $this->createRequest('GET', '/', 'admin.wandu.io');
+        static::assertEquals(
+            '[GET] index@Admin',
+            $dispatcher->dispatch($request)->getBody()->__toString()
+        );
+
+        $request = $this->createRequest('POST', '/', 'admin.wandu.io');
         static::assertEquals(
             '[POST] action@Admin',
             $dispatcher->dispatch($request)->getBody()->__toString()
         );
 
-        $request = $this->createRequest('GET', '/admin/users/81');
-        $request->shouldReceive('getHeaderLine')->with('host')->andReturn('admin.wandu.io');
+        $request = $this->createRequest('GET', '/users/81', 'admin.wandu.io');
         $request->shouldReceive('withAttribute')->with('user', '81')->andReturn($request);
         $request->shouldReceive('getAttribute')->with('user')->andReturn('81');
 
@@ -257,22 +244,19 @@ class DispatcherTest extends TestCase
         );
 
         // can access if admin.wandu.dev
-        $request = $this->createRequest('GET', '/admin');
-        $request->shouldReceive('getHeaderLine')->with('host')->andReturn('admin.wandu.dev');
+        $request = $this->createRequest('GET', '/', 'admin.wandu.dev');
         static::assertEquals(
             '[GET] index@Admin',
             $dispatcher->dispatch($request)->getBody()->__toString()
         );
 
-        $request = $this->createRequest('POST', '/admin');
-        $request->shouldReceive('getHeaderLine')->with('host')->andReturn('admin.wandu.dev');
+        $request = $this->createRequest('POST', '/', 'admin.wandu.dev');
         static::assertEquals(
             '[POST] action@Admin',
             $dispatcher->dispatch($request)->getBody()->__toString()
         );
 
-        $request = $this->createRequest('GET', '/admin/users/81');
-        $request->shouldReceive('getHeaderLine')->with('host')->andReturn('admin.wandu.dev');
+        $request = $this->createRequest('GET', '/users/81', 'admin.wandu.dev');
         $request->shouldReceive('withAttribute')->with('user', '81')->andReturn($request);
         $request->shouldReceive('getAttribute')->with('user')->andReturn('81');
 
@@ -382,32 +366,6 @@ class DispatcherTest extends TestCase
             $dispatcher->dispatch($request)->getBody()->__toString()
         );
     }
-
-    public function testRouteName()
-    {
-        $dispatcher = $this->createDispatcher();
-
-        $dispatcher->setRoutes(function (Router $router) {
-            $router->get('/admin', "DummyController", 'index')->name('admin.index');
-            $router->post('/admin', "DummyController", 'store')->name('admin.store');
-            $router->get('/users/:id', "DummyController", 'show')->name('users.show');
-        });
-        
-        static::assertException(new RouteNotFoundException('Route "admin.unknown" not found.'), function () use ($dispatcher) {
-            $dispatcher->getPath('admin.unknown');
-        });
-
-        static::assertSame('/admin', $dispatcher->getPath('admin.index'));
-        static::assertSame('/admin', $dispatcher->getPath('admin.store'));
-
-        static::assertSame('/users/10', $dispatcher->getPath('users.show', ['id' => 10]));
-        
-        static::assertException(new CannotGetPathException(['id']), function () use ($dispatcher) {
-            static::assertSame('/users', $dispatcher->getPath('users.show'));
-        });
-
-        static::assertSame('/users/10?other=something', $dispatcher->getPath('users.show', ['id' => 10, 'other' => 'something']));
-    }
 }
 
 class TestDispatcherHomeController
@@ -415,6 +373,11 @@ class TestDispatcherHomeController
     static public function index(ServerRequestInterface $request)
     {
         return "[{$request->getMethod()}] index@Home";
+    }
+
+    static public function something(ServerRequestInterface $request)
+    {
+        return "[{$request->getMethod()}] something@Home";
     }
 }
 

@@ -17,11 +17,13 @@ class TestCase extends PHPUnitTestCase
     /**
      * @param string $method
      * @param string $path
+     * @param string $host
      * @return \Psr\Http\Message\ServerRequestInterface
      */
-    public function createRequest($method, $path)
+    public function createRequest($method, $path, $host = 'wandu.io')
     {
         $mockRequest = Mockery::mock(ServerRequestInterface::class);
+        $mockRequest->shouldReceive('getHeaderLine')->with('host')->andReturn($host);
         $mockRequest->shouldReceive('getMethod')->andReturn($method);
         $mockRequest->shouldReceive('getUri->getPath')->andReturn($path);
         return $mockRequest;

@@ -64,16 +64,6 @@ class Dispatcher
     }
     
     /**
-     * @param string $name
-     * @param array $attributes
-     * @return string
-     */
-    public function getPath($name, array $attributes = [])
-    {
-        return $this->getCompiledRoutes()->getPattern($name)->path($attributes);
-    }
-
-    /**
      * @param \Psr\Http\Message\ServerRequestInterface $request
      * @return \Psr\Http\Message\ResponseInterface
      */
