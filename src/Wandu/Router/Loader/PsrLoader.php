@@ -90,6 +90,7 @@ class PsrLoader implements LoaderInterface
      */
     protected function getArguments(\ReflectionFunctionAbstract $refl, ServerRequestInterface $request)
     {
+        $requestAttrs = $request->getAttributes();
         $arguments = [];
         // it from container Resolver..
         foreach ($refl->getParameters() as $param) {
@@ -100,8 +101,8 @@ class PsrLoader implements LoaderInterface
                     continue;
                 }
                 $paramClassName = $paramClass->getName();
-                if ($attribute = $request->getAttribute($paramClassName)) {
-                    $arguments[] = $attribute;
+                if (array_key_exists($paramClassName, $requestAttrs)) {
+                    $arguments[] = $requestAttrs[$paramClassName];
                     continue;
                 }
                 if ($this->container->has($paramClassName)) {
@@ -116,8 +117,9 @@ class PsrLoader implements LoaderInterface
                 $arguments[] = $param->getDefaultValue();
                 continue;
             }
-            if ($attribute = $request->getAttribute($param->getName())) {
-                $arguments[] = $attribute;
+            $paramName = $param->getName();
+            if (array_key_exists($paramName, $requestAttrs)) {
+                $arguments[] = $requestAttrs[$paramName];
                 continue;
             }
             throw new RuntimeException("not found parameter named \"{$param->getName()}\".");

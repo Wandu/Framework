@@ -91,6 +91,16 @@ class PsrLoaderTest extends TestCase
             );
         });
     }
+
+    public function testWithRequestAttributes()
+    {
+        $request = (new ServerRequest)->withAttribute('id', 1)->withAttribute('index', 0);
+        $result = $this->loader->execute(PsrLoaderTestController::class, 'withRequestAttributes', $request);
+        static::assertEquals([
+            'id' => 1,
+            'index' => 0,
+        ], $result);
+    }
 }
 
 class PsrLoaderTestMiddleware implements MiddlewareInterface
@@ -156,5 +166,13 @@ class PsrLoaderTestController
         SessionInterface $sessionInterface
     ) {
         return $session === $sessionInterface;
+    }
+    
+    public function withRequestAttributes($id, $index)
+    {
+        return [
+            'id' => $id,
+            'index' => $index,
+        ];
     }
 }
