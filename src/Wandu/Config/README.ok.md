@@ -13,3 +13,19 @@ Simple Config Based On Dot Array.
 ```bash
 composer require wandu/config
 ```
+
+## Usage
+
+@code("../../../tests/Config/ReadmeTest.php@basic-usage")
+
+### Use Default Value
+
+@code("../../../tests/Config/ReadmeTest.php@get-default-value")
+
+### Config Types
+
+- PHP (example, [test.config.php](../../../tests/Config/test.config.php))
+- Env(require `m1/env`) (example, [test.config.env](../../../tests/Config/test.config.env))
+- YAML(require `symfony/yaml`) (example, [test.config.yml](../../../tests/Config/test.config.yml))
+
+@code("../../../tests/Config/ReadmeTest.php@config-types")
