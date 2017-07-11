@@ -55,12 +55,13 @@ class ReadmeTest extends TestCase
         // endsection
     }
 
-    public function testConfigTypes()
+    public function testSupportLoader()
     {
-        // section:config-types
+        // section:support-loader
         $config = new \Wandu\Config\Config();
 
         $config->append(new \Wandu\Config\Loader\PhpLoader(__DIR__ . '/test.config.php'));
+        $config->append(new \Wandu\Config\Loader\JsonLoader(__DIR__ . '/test.config.json'));
         $config->append(new \Wandu\Config\Loader\EnvLoader(__DIR__ . '/test.config.env'));
         $config->append(new \Wandu\Config\Loader\YmlLoader(__DIR__ . '/test.config.yml'));
 
@@ -85,6 +86,11 @@ class ReadmeTest extends TestCase
                     'name' => 'vendor2 service2 name..',
                     'path' => 'vendor2 service2 path..',
                 ],
+            ],
+            'json1' => 'json 1 string',
+            'json2' => [
+                'json2-1',
+                'json2-2',
             ],
             'env1' => 'what the',
             'env2' => false,

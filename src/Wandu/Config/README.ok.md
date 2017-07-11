@@ -22,10 +22,11 @@ composer require wandu/config
 
 @code("../../../tests/Config/ReadmeTest.php@get-default-value")
 
-### Config Types
+### Support Loader
 
 - PHP (example, [test.config.php](../../../tests/Config/test.config.php))
+- JSON (example, [test.config.json](../../../tests/Config/test.config.json))
 - Env(require `m1/env`) (example, [test.config.env](../../../tests/Config/test.config.env))
 - YAML(require `symfony/yaml`) (example, [test.config.yml](../../../tests/Config/test.config.yml))
 
-@code("../../../tests/Config/ReadmeTest.php@config-types")
+@code("../../../tests/Config/ReadmeTest.php@support-loader")

@@ -1,0 +1,4 @@
+{
+    "json1": "json 1 string",
+    "json2": ["json2-1", "json2-2"]
+}
