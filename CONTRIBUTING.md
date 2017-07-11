@@ -3,6 +3,11 @@ Wandu Framework Contribution Guide
 
 Thank you for considering contributing.
 
+## Document
+
+- do not edit `README.md` directly. edit `README.ok.md`. use
+  [okreadme](https://github.com/wan2land/okreadme) that is pre-processor of Markdown.
+   
 ## Test
 
 - [PHPUnit](https://phpunit.de/)
