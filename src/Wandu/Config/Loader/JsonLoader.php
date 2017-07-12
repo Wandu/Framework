@@ -1,13 +1,23 @@
 <?php
 namespace Wandu\Config\Loader;
 
-class JsonLoader extends LoaderAbstract
+use Wandu\Config\Contracts\Loader;
+
+class JsonLoader implements Loader
 {
     /**
      * {@inheritdoc}
      */
-    public function load()
+    public function test(string $path): bool
     {
-        return json_decode(file_get_contents($this->fileName), true);
+        return substr($path, -5) === '.json' && file_exists($path);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function load(string $path)
+    {
+        return json_decode(file_get_contents($path), true);
     }
 }

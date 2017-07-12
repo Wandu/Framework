@@ -1,13 +1,23 @@
 <?php
 namespace Wandu\Config\Loader;
 
-class PhpLoader extends LoaderAbstract
+use Wandu\Config\Contracts\Loader;
+
+class PhpLoader implements Loader
 {
     /**
      * {@inheritdoc}
      */
-    public function load()
+    public function test(string $path): bool
     {
-        return require $this->fileName;
+        return substr($path, -4) === '.php' && file_exists($path);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function load(string $path)
+    {
+        return require $path;
     }
 }

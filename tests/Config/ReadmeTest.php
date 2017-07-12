@@ -2,9 +2,6 @@
 namespace Wandu\Config;
 
 use PHPUnit\Framework\TestCase;
-use Wandu\Config\Loader\EnvLoader;
-use Wandu\Config\Loader\PhpLoader;
-use Wandu\Config\Loader\YmlLoader;
 
 class ReadmeTest extends TestCase
 {
@@ -60,10 +57,15 @@ class ReadmeTest extends TestCase
         // section:support-loader
         $config = new \Wandu\Config\Config();
 
-        $config->append(new \Wandu\Config\Loader\PhpLoader(__DIR__ . '/test.config.php'));
-        $config->append(new \Wandu\Config\Loader\JsonLoader(__DIR__ . '/test.config.json'));
-        $config->append(new \Wandu\Config\Loader\EnvLoader(__DIR__ . '/test.config.env'));
-        $config->append(new \Wandu\Config\Loader\YmlLoader(__DIR__ . '/test.config.yml'));
+        $config->pushLoader(new \Wandu\Config\Loader\PhpLoader());
+        $config->pushLoader(new \Wandu\Config\Loader\JsonLoader());
+        $config->pushLoader(new \Wandu\Config\Loader\EnvLoader());
+        $config->pushLoader(new \Wandu\Config\Loader\YmlLoader());
+
+        $config->load(__DIR__ . '/test.config.php');
+        $config->load(__DIR__ . '/test.config.json');
+        $config->load(__DIR__ . '/test.config.env');
+        $config->load(__DIR__ . '/test.config.yml');
 
         static::assertSame([
             'foo' => 'foo string',

@@ -59,18 +59,25 @@ static::assertSame(null, $config->get('cache_dir', "/")); // check by array_key_
 static::assertSame("unknown text..", $config->get('unknown', "unknown text.."));
 ```
 
-### Config Types
+### Support Loader
 
 - PHP (example, [test.config.php](../../../tests/Config/test.config.php))
+- JSON (example, [test.config.json](../../../tests/Config/test.config.json))
 - Env(require `m1/env`) (example, [test.config.env](../../../tests/Config/test.config.env))
 - YAML(require `symfony/yaml`) (example, [test.config.yml](../../../tests/Config/test.config.yml))
 
 ```php
 $config = new \Wandu\Config\Config();
 
-$config->append(new \Wandu\Config\Loader\PhpLoader(__DIR__ . '/test.config.php'));
-$config->append(new \Wandu\Config\Loader\EnvLoader(__DIR__ . '/test.config.env'));
-$config->append(new \Wandu\Config\Loader\YmlLoader(__DIR__ . '/test.config.yml'));
+$config->pushLoader(new \Wandu\Config\Loader\PhpLoader());
+$config->pushLoader(new \Wandu\Config\Loader\JsonLoader());
+$config->pushLoader(new \Wandu\Config\Loader\EnvLoader());
+$config->pushLoader(new \Wandu\Config\Loader\YmlLoader());
+
+$config->load(__DIR__ . '/test.config.php');
+$config->load(__DIR__ . '/test.config.json');
+$config->load(__DIR__ . '/test.config.env');
+$config->load(__DIR__ . '/test.config.yml');
 
 static::assertSame([
     'foo' => 'foo string',
@@ -93,6 +100,11 @@ static::assertSame([
             'name' => 'vendor2 service2 name..',
             'path' => 'vendor2 service2 path..',
         ],
+    ],
+    'json1' => 'json 1 string',
+    'json2' => [
+        'json2-1',
+        'json2-2',
     ],
     'env1' => 'what the',
     'env2' => false,

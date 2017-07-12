@@ -5,6 +5,7 @@ use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use Wandu\Config\Exception\NotAllowedMethodException;
 use Wandu\Config\Loader\EnvLoader;
+use Wandu\Config\Loader\JsonLoader;
 use Wandu\Config\Loader\PhpLoader;
 use Wandu\Config\Loader\YmlLoader;
 
@@ -266,9 +267,15 @@ class ConfigTest extends TestCase
     {
         $config = new Config();
 
-        $config->append(new PhpLoader(__DIR__ . '/test.config.php'));
-        $config->append(new EnvLoader(__DIR__ . '/test.config.env'));
-        $config->append(new YmlLoader(__DIR__ . '/test.config.yml'));
+        $config->pushLoader(new PhpLoader());
+        $config->pushLoader(new JsonLoader());
+        $config->pushLoader(new EnvLoader());
+        $config->pushLoader(new YmlLoader());
+
+        $config->load(__DIR__ . '/test.config.php');
+        $config->load(__DIR__ . '/test.config.json');
+        $config->load(__DIR__ . '/test.config.env');
+        $config->load(__DIR__ . '/test.config.yml');
         
         static::assertSame([
             'foo' => 'foo string',
@@ -291,6 +298,11 @@ class ConfigTest extends TestCase
                     'name' => 'vendor2 service2 name..',
                     'path' => 'vendor2 service2 path..',
                 ],
+            ],
+            'json1' => 'json 1 string',
+            'json2' => [
+                'json2-1',
+                'json2-2',
             ],
             'env1' => 'what the',
             'env2' => false,

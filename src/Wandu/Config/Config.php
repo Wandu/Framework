@@ -4,12 +4,16 @@ namespace Wandu\Config;
 use InvalidArgumentException;
 use Wandu\Config\Contracts\Config as ConfigContract;
 use Wandu\Config\Contracts\Loader;
+use Wandu\Config\Exception\CannotLoadException;
 use Wandu\Config\Exception\NotAllowedMethodException;
 
 class Config implements ConfigContract
 {
     /** @var array */
     protected $items;
+    
+    /** @var \Wandu\Config\Contracts\Loader[] */
+    protected $loaders = [];
 
     /**
      * @param array $items
@@ -22,9 +26,23 @@ class Config implements ConfigContract
     /**
      * @param \Wandu\Config\Contracts\Loader $loader
      */
-    public function append(Loader $loader)
+    public function pushLoader(Loader $loader)
     {
-        $this->merge($loader->load());
+        $this->loaders[] = $loader;
+    }
+
+    /**
+     * @param string $path
+     */
+    public function load(string $path)
+    {
+        foreach ($this->loaders as $loader) {
+            if ($loader->test($path)) {
+                $this->merge($loader->load($path));
+                return;
+            }
+        }
+        throw new CannotLoadException($path);
     }
 
     /**
