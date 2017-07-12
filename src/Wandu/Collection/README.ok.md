@@ -13,3 +13,25 @@ Collection Library Like Java. Provides List, Map, and Set.
 ```bash
 composer require wandu/collection
 ```
+
+## Usage
+
+### List
+
+there is one list.
+
+- `Wandu\Collection\ArrayList`
+
+**Interface**
+
+@code("Contracts/ListInterface.php")
+
+### Map
+
+there is one map.
+
+- `Wandu\Collection\ArrayMap`
+
+**Interface**
+
+@code("Contracts/MapInterface.php")

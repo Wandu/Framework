@@ -1,7 +1,6 @@
 <?php
 namespace Wandu\Collection;
 
-use ArrayIterator;
 use InvalidArgumentException;
 use Wandu\Collection\Contracts\MapInterface;
 
@@ -126,7 +125,9 @@ class ArrayMap implements MapInterface
      */
     public function getIterator()
     {
-        return new ArrayIterator($this->items);
+        foreach ($this->items as $key => $value) {
+            yield $key => $value;
+        }
     }
 
     /**
