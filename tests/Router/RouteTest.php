@@ -1,118 +1,67 @@
 <?php
 namespace Wandu\Router;
 
-use Closure;
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
-use Wandu\Http\Psr\Stream\StringStream;
-use Wandu\Router\Contracts\MiddlewareInterface;
-use Wandu\Router\Responsifier\PsrResponsifier;
-use function Wandu\Http\response;
+use Wandu\Assertions;
 
 class RouteTest extends TestCase
 {
-    public function testExecuteWithoutMiddlewares()
+    use Assertions;
+    
+    public function provideRoutesForTestConstructor()
     {
-        $route = new Route(TestRouteController::class, 'index');
-
-        $request = $this->createRequest('GET', '/');
-
-        ob_start();
-        $response = $route->execute($request, null, new PsrResponsifier());
-        $contents = ob_get_contents();
-        ob_end_clean();
-
-        static::assertEquals('call!', $contents);
-        static::assertInstanceOf(ResponseInterface::class, $response);
-        static::assertEquals('[GET] index@TestRouteController', $response->getBody()->__toString());
+        return [
+            [
+                new Route('HomeController', 'index', 'Middleware1', 'wandu.github.io'),
+            ],
+            [
+                new Route('HomeController', 'index', ['Middleware1'], ['wandu.github.io']),
+            ],
+            [
+                (new Route('HomeController', 'index'))->middleware('Middleware1')->domains('wandu.github.io'), // by fluent
+            ],
+            [
+                (new Route('HomeController', 'index'))->middleware(['Middleware1'])->domains(['wandu.github.io']), // by fluent
+            ]
+        ];
     }
 
-    public function testExecuteWithMiddleware()
+    /**
+     * @dataProvider provideRoutesForTestConstructor
+     * @param \Wandu\Router\Route $route
+     */
+    public function testConstructor(Route $route)
     {
-        $route = new Route(TestRouteController::class, 'index', [
-            TestAuthSuccessMiddleware::class
-        ]);
-
-        $request = $this->createRequest('GET', '/');
-
-        ob_start();
-        $response = $route->execute($request, null, new PsrResponsifier());
-        $contents = ob_get_contents();
-        ob_end_clean();
-
-        static::assertEquals('call!', $contents);
-        static::assertInstanceOf(ResponseInterface::class, $response);
-        static::assertEquals('[GET] auth success; [GET] index@TestRouteController', $response->getBody()->__toString());
+        static::assertEquals('HomeController', $route->getClassName());
+        static::assertEquals('index', $route->getMethodName());
+        static::assertEquals(['Middleware1'], $route->getMiddlewares()); // always array
+        static::assertEquals(['wandu.github.io'], $route->getDomains()); // always array
     }
-
-    public function testExecuteWithMiddlewareViaChain()
+    
+    public function testMiddlewareFluent()
     {
-        $route = new Route(TestRouteController::class, 'index');
+        $route = new Route('HomeController', 'index', ['Middleware1']);
+        $route->middleware('Middleware2');
         
-        $route->middleware(TestAuthSuccessMiddleware::class);
+        static::assertEquals(['Middleware1', 'Middleware2'], $route->getMiddlewares());
 
-        $request = $this->createRequest('GET', '/');
 
-        ob_start();
-        $response = $route->execute($request, null, new PsrResponsifier());
-        $contents = ob_get_contents();
-        ob_end_clean();
+        $route = new Route('HomeController', 'index', ['Middleware1']);
+        $route->middleware('Middleware2', true);
 
-        static::assertEquals('call!', $contents);
-        static::assertInstanceOf(ResponseInterface::class, $response);
-        static::assertEquals('[GET] auth success; [GET] index@TestRouteController', $response->getBody()->__toString());
+        static::assertEquals(['Middleware2'], $route->getMiddlewares());
     }
 
-    public function testExecuteWithPreventedMiddleware()
+    public function testDomainFluent()
     {
-        $route = new Route(TestRouteController::class, 'index', [
-            TestAuthFailMiddleware::class
-        ]);
+        $route = new Route('HomeController', 'index', [], ['wandu.github.io']);
+        $route->domains(['wandu2.github.io']); // always overwrite
 
-        $request = $this->createRequest('GET', '/');
+        static::assertEquals(['wandu2.github.io'], $route->getDomains());
 
-        ob_start();
-        $response = $route->execute($request, null, new PsrResponsifier());
-        $contents = ob_get_contents();
-        ob_end_clean();
 
-        static::assertEquals('', $contents);
-        static::assertInstanceOf(ResponseInterface::class, $response);
-        static::assertEquals('Fail...', $response->getBody()->__toString());
-    }
-}
+        $route = new Route('HomeController', 'index', [], ['wandu.github.io']);
+        $route->domains(); // always overwrite
 
-class TestRouteController
-{
-    static public function index(ServerRequestInterface $request)
-    {
-        echo "call!";
-        return "[{$request->getMethod()}] index@TestRouteController";
-    }
-}
-
-class TestAuthSuccessMiddleware implements MiddlewareInterface
-{
-    /**
-     * {@inheritdoc}
-     */
-    public function __invoke(ServerRequestInterface $request, Closure $next)
-    {
-        /** @var \Psr\Http\Message\ResponseInterface $response */
-        $response = $next($request);
-        $message = "[{$request->getMethod()}] auth success; " . $response->getBody()->__toString();
-
-        return $response->withBody(new StringStream($message));
-    }
-}
-
-class TestAuthFailMiddleware implements MiddlewareInterface
-{
-    /**
-     * {@inheritdoc}
-     */
-    public function __invoke(ServerRequestInterface $request, Closure $next)
-    {
-        return response()->string("Fail...");
+        static::assertEquals([], $route->getDomains());
     }
 }

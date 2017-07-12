@@ -1,12 +1,10 @@
 <?php
 namespace Wandu\Router;
 
-use Psr\Http\Message\ServerRequestInterface;
-use Wandu\Router\Contracts\LoaderInterface;
-use Wandu\Router\Contracts\ResponsifierInterface;
-use Wandu\Router\Contracts\Route as RouteContract;
+use Wandu\Router\Contracts\RouteFluent;
+use Wandu\Router\Contracts\RouteInformation;
 
-class Route implements RouteContract
+class Route implements RouteFluent, RouteInformation
 {
     /** @var string */
     protected $className;
@@ -17,27 +15,27 @@ class Route implements RouteContract
     /** @var array */
     protected $middlewares;
 
-    /** @var string */
+    /** @var array */
     protected $domains;
 
     /**
      * @param string $className
      * @param string $methodName
-     * @param array $middlewares
-     * @param array $domains
+     * @param string|array $middlewares
+     * @param string|array $domains
      */
-    public function __construct($className, $methodName, array $middlewares = [], array $domains = [])
+    public function __construct($className, $methodName, $middlewares = [], $domains = [])
     {
         $this->className = $className;
         $this->methodName = $methodName;
-        $this->middlewares = $middlewares;
-        $this->domains = $domains;
+        $this->middlewares = is_array($middlewares) ? $middlewares : [$middlewares];
+        $this->domains = is_array($domains) ? $domains : [$domains];
     }
 
     /**
      * {@inheritdoc}
      */
-    public function middleware($middlewares, $overwrite = false): RouteContract
+    public function middleware($middlewares, $overwrite = false): RouteFluent
     {
         if (is_string($middlewares)) {
             $middlewares = [$middlewares];
@@ -51,7 +49,7 @@ class Route implements RouteContract
     /**
      * {@inheritdoc}
      */
-    public function domains($domains): RouteContract
+    public function domains($domains = []): RouteFluent
     {
         if (is_string($domains)) {
             $domains = [$domains];
@@ -61,25 +59,34 @@ class Route implements RouteContract
     }
 
     /**
-     * @return array
+     * {@inheritdoc}
      */
-    public function getDomains()
+    public function getDomains(): array
     {
         return $this->domains;
     }
-    
+
     /**
-     * @param \Psr\Http\Message\ServerRequestInterface $request
-     * @param \Wandu\Router\Contracts\LoaderInterface|null $loader
-     * @param \Wandu\Router\Contracts\ResponsifierInterface|null $responsifier
-     * @return \Psr\Http\Message\ResponseInterface
+     * {@inheritdoc}
      */
-    public function execute(
-        ServerRequestInterface $request,
-        LoaderInterface $loader = null,
-        ResponsifierInterface $responsifier = null
-    ) {
-        $pipeline = new RouteExecutor($loader, $responsifier);
-        return $pipeline->execute($request, $this->className, $this->methodName, $this->middlewares);
+    public function getClassName(): string
+    {
+        return $this->className;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getMethodName(): string
+    {
+        return $this->methodName;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getMiddlewares(): array
+    {
+        return $this->middlewares;
     }
 }

@@ -36,64 +36,64 @@ interface Router
      * @param string $path
      * @param string $className
      * @param string $methodName
-     * @return \Wandu\Router\Contracts\Route
+     * @return \Wandu\Router\Contracts\RouteFluent
      */
-    public function get(string $path, string $className, string $methodName = 'index'): Route;
+    public function get(string $path, string $className, string $methodName = 'index'): RouteFluent;
 
     /**
      * @param string $path
      * @param string $className
      * @param string $methodName
-     * @return \Wandu\Router\Contracts\Route
+     * @return \Wandu\Router\Contracts\RouteFluent
      */
-    public function post(string $path, string $className, string $methodName = 'index'): Route;
+    public function post(string $path, string $className, string $methodName = 'index'): RouteFluent;
 
     /**
      * @param string $path
      * @param string $className
      * @param string $methodName
-     * @return \Wandu\Router\Contracts\Route
+     * @return \Wandu\Router\Contracts\RouteFluent
      */
-    public function put(string $path, string $className, string $methodName = 'index'): Route;
+    public function put(string $path, string $className, string $methodName = 'index'): RouteFluent;
 
     /**
      * @param string $path
      * @param string $className
      * @param string $methodName
-     * @return \Wandu\Router\Contracts\Route
+     * @return \Wandu\Router\Contracts\RouteFluent
      */
-    public function delete(string $path, string $className, string $methodName = 'index'): Route;
+    public function delete(string $path, string $className, string $methodName = 'index'): RouteFluent;
 
     /**
      * @param string $path
      * @param string $className
      * @param string $methodName
-     * @return \Wandu\Router\Contracts\Route
+     * @return \Wandu\Router\Contracts\RouteFluent
      */
-    public function options(string $path, string $className, string $methodName = 'index'): Route;
+    public function options(string $path, string $className, string $methodName = 'index'): RouteFluent;
 
     /**
      * @param string $path
      * @param string $className
      * @param string $methodName
-     * @return \Wandu\Router\Contracts\Route
+     * @return \Wandu\Router\Contracts\RouteFluent
      */
-    public function patch(string $path, string $className, string $methodName = 'index'): Route;
+    public function patch(string $path, string $className, string $methodName = 'index'): RouteFluent;
 
     /**
      * @param string $path
      * @param string $className
      * @param string $methodName
-     * @return \Wandu\Router\Contracts\Route
+     * @return \Wandu\Router\Contracts\RouteFluent
      */
-    public function any(string $path, string $className, string $methodName = 'index'): Route;
+    public function any(string $path, string $className, string $methodName = 'index'): RouteFluent;
 
     /**
      * @param array $methods
      * @param string $path
      * @param string $className
      * @param string $methodName
-     * @return \Wandu\Router\Contracts\Route
+     * @return \Wandu\Router\Contracts\RouteFluent
      */
-    public function createRoute(array $methods, string $path, string $className, string $methodName = 'index'): Route;
+    public function createRoute(array $methods, string $path, string $className, string $methodName = 'index'): RouteFluent;
 }

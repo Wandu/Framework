@@ -2,64 +2,51 @@
 namespace Wandu\Router;
 
 use Closure;
+use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Wandu\Http\Psr\ServerRequest;
 use Wandu\Router\Contracts\MiddlewareInterface;
 use function Wandu\Http\response;
 
 class RouteExecutorTest extends TestCase
 {
-    public function testExecuteWithoutMiddlewares()
+    public function testWithoutMiddlewares()
     {
         $executor = new RouteExecutor();
-
+        
         $response = $executor->execute(
-            $this->createRequest('GET', '/'),
-            TestRouterExecutorController::class,
-            'index',
-            []
+            new Route(RouterExecutorTestController::class, 'index'),
+            new ServerRequest('GET', '/')
         );
 
         static::assertInstanceOf(ResponseInterface::class, $response);
-        static::assertEquals('index', $response->getBody()->__toString());
-        static::assertEquals(
-            '',
-            $response->getHeaderLine('x-via-proxy')
-        );
+        static::assertEquals('', $response->getBody()->__toString());
+        static::assertEquals('', $response->getHeaderLine('x-via-proxy'));
     }
 
-    public function testExecuteWithMiddleware()
+    public function testBypassByMiddleware()
     {
+        
         $executor = new RouteExecutor();
 
         $response = $executor->execute(
-            $this->createRequest('GET', '/'),
-            TestRouterExecutorController::class,
-            'index',
-            [
-                TestRouterExecutorProxyMiddleware::class,
-            ]
+            new Route(RouterExecutorTestController::class, 'index', RouterExecutorTestBypassMiddleware::class),
+            new ServerRequest('GET', '/')
         );
 
         static::assertInstanceOf(ResponseInterface::class, $response);
-        static::assertEquals('index', $response->getBody()->__toString());
-        static::assertEquals(
-            TestRouterExecutorProxyMiddleware::class,
-            $response->getHeaderLine('x-via-proxy')
-        );
+        static::assertEquals('request, bypass-middleware', $response->getBody()->__toString());
+        static::assertEquals('response, bypass-middleware', $response->getHeaderLine('x-via-middleware'));
     }
 
-    public function testExecuteWithPreventedMiddleware()
+    public function testPreventByMiddlewares()
     {
         $executor = new RouteExecutor();
 
         $response = $executor->execute(
-            $this->createRequest('GET', '/'),
-            TestRouterExecutorController::class,
-            'index',
-            [
-                TestRouterExecutorFailMiddleware::class,
-            ]
+            new Route(RouterExecutorTestController::class, 'index', RouterExecutorTestPreventMiddleware::class),
+            new ServerRequest('GET', '/')
         );
 
         static::assertInstanceOf(ResponseInterface::class, $response);
@@ -68,17 +55,17 @@ class RouteExecutorTest extends TestCase
     }
 }
 
-class TestRouterExecutorProxyMiddleware implements MiddlewareInterface
+class RouterExecutorTestBypassMiddleware implements MiddlewareInterface
 {
     public function __invoke(ServerRequestInterface $request, Closure $next)
     {
         /** @var \Psr\Http\Message\ResponseInterface $response */
-        $response = $next($request);
-        return $response->withAddedHeader('X-Via-Proxy', static::class);
+        $response = $next($request->withAttribute('viaMiddleware', 'request, bypass-middleware'));
+        return $response->withAddedHeader('X-Via-Middleware', 'response, bypass-middleware');
     }
 }
 
-class TestRouterExecutorFailMiddleware implements MiddlewareInterface
+class RouterExecutorTestPreventMiddleware implements MiddlewareInterface
 {
     public function __invoke(ServerRequestInterface $request, Closure $next)
     {
@@ -86,10 +73,10 @@ class TestRouterExecutorFailMiddleware implements MiddlewareInterface
     }
 }
 
-class TestRouterExecutorController
+class RouterExecutorTestController
 {
     static public function index(ServerRequestInterface $request)
     {
-        return response()->string('index');
+        return response()->string($request->getAttribute('viaMiddleware') ?? '');
     }
 }
