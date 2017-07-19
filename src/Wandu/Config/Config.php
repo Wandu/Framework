@@ -24,6 +24,19 @@ class Config implements ConfigContract
     }
 
     /**
+     * @param string $name
+     * @return \Wandu\Config\Contracts\Config|mixed
+     */
+    public function __get($name)
+    {
+        $subset = $this->get($name);
+        if (!is_array($subset)) {
+            return $subset;
+        }
+        return new static($subset);
+    }
+
+    /**
      * @param \Wandu\Config\Contracts\Loader $loader
      */
     public function pushLoader(Loader $loader)

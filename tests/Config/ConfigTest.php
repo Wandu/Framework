@@ -33,6 +33,26 @@ class ConfigTest extends TestCase
         static::assertSame(null, $config->get('null.isnull'));
     }
 
+    public function testGetter()
+    {
+        $config = new Config([
+            'foo' => 'foo string!',
+            'bar' => [
+                'bar1' => 'bar1 string!',
+                'bar2' => 'bar2 string!',
+            ],
+            'null' => null,
+        ]);
+
+        static::assertSame('foo string!', $config->foo);
+        static::assertEquals(new Config([
+            'bar1' => 'bar1 string!',
+            'bar2' => 'bar2 string!',
+        ]), $config->bar);
+        static::assertSame('bar1 string!', $config->bar->bar1);
+        static::assertSame(null, $config->null);
+    }
+
     public function testGetDefault()
     {
         $config = new Config([
