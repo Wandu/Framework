@@ -6,7 +6,7 @@ use Wandu\Router\Contracts\LoaderInterface;
 use Wandu\Router\Contracts\MiddlewareInterface;
 use Wandu\Router\Exception\HandlerNotFoundException;
 
-class DefaultLoader implements LoaderInterface
+class SimpleLoader implements LoaderInterface
 {
     /**
      * {@inheritdoc}

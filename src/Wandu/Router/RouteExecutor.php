@@ -2,11 +2,9 @@
 namespace Wandu\Router;
 
 use Psr\Http\Message\ServerRequestInterface;
-use Wandu\Router\Contracts\RouteInformation;
-use Wandu\Router\Loader\DefaultLoader;
 use Wandu\Router\Contracts\LoaderInterface;
 use Wandu\Router\Contracts\ResponsifierInterface;
-use Wandu\Router\Responsifier\NullResponsifier;
+use Wandu\Router\Contracts\RouteInformation;
 
 class RouteExecutor
 {
@@ -14,12 +12,10 @@ class RouteExecutor
      * @param \Wandu\Router\Contracts\LoaderInterface $loader
      * @param \Wandu\Router\Contracts\ResponsifierInterface $responsifier
      */
-    public function __construct(
-        LoaderInterface $loader = null,
-        ResponsifierInterface $responsifier = null
-    ) {
-        $this->loader = $loader ?: new DefaultLoader();
-        $this->responsifier = $responsifier ?: new NullResponsifier();
+    public function __construct(LoaderInterface $loader, ResponsifierInterface $responsifier)
+    {
+        $this->loader = $loader;
+        $this->responsifier = $responsifier;
     }
 
     /**

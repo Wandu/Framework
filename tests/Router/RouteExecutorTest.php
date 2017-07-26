@@ -7,13 +7,15 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Wandu\Http\Psr\ServerRequest;
 use Wandu\Router\Contracts\MiddlewareInterface;
+use Wandu\Router\Loader\SimpleLoader;
+use Wandu\Router\Responsifier\NullResponsifier;
 use function Wandu\Http\response;
 
 class RouteExecutorTest extends TestCase
 {
     public function testWithoutMiddlewares()
     {
-        $executor = new RouteExecutor();
+        $executor = new RouteExecutor(new SimpleLoader(), new NullResponsifier());
         
         $response = $executor->execute(
             new Route(RouterExecutorTestController::class, 'index'),
@@ -27,8 +29,7 @@ class RouteExecutorTest extends TestCase
 
     public function testBypassByMiddleware()
     {
-        
-        $executor = new RouteExecutor();
+        $executor = new RouteExecutor(new SimpleLoader(), new NullResponsifier());
 
         $response = $executor->execute(
             new Route(RouterExecutorTestController::class, 'index', RouterExecutorTestBypassMiddleware::class),
@@ -42,7 +43,7 @@ class RouteExecutorTest extends TestCase
 
     public function testPreventByMiddlewares()
     {
-        $executor = new RouteExecutor();
+        $executor = new RouteExecutor(new SimpleLoader(), new NullResponsifier());
 
         $response = $executor->execute(
             new Route(RouterExecutorTestController::class, 'index', RouterExecutorTestPreventMiddleware::class),
