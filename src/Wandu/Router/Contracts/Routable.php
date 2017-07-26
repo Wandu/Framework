@@ -1,7 +1,7 @@
 <?php
 namespace Wandu\Router\Contracts;
 
-interface Router
+interface Routable
 {
     /**
      * @param array|string $domain

@@ -14,5 +14,5 @@ interface RouteFluent
      * @param string|array $domains
      * @return \Wandu\Router\Contracts\RouteFluent
      */
-    public function domains($domains): RouteFluent;
+    public function domains($domains = []): RouteFluent;
 }

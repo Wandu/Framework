@@ -2,24 +2,46 @@
 namespace Wandu\Router;
 
 use IteratorAggregate;
-use Wandu\Router\Contracts\Route as RouteInterface;
-use Wandu\Router\Contracts\Router as RouterInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use Wandu\Router\Contracts\Dispatchable;
+use Wandu\Router\Contracts\LoaderInterface;
+use Wandu\Router\Contracts\ResponsifierInterface;
+use Wandu\Router\Contracts\RouteFluent;
+use Wandu\Router\Contracts\Routable;
 
-class Router implements RouterInterface, IteratorAggregate 
+class RouteCollection implements Routable, IteratorAggregate, Dispatchable
 {
-    /** @var \Wandu\Router\Router[] */
+    /** @var \Wandu\Router\RouteCollection[] */
     protected $routers = [];
 
     /** @var \Wandu\Router\Route[] */
     protected $routes = [];
 
     /** @var array */
-    protected $status = [
-        'domains' => ['@'],
-        'prefix' => '',
-        'middlewares' => [],
-    ];
+    protected $status;
 
+    /**
+     * @param string $prefix
+     * @param array $middlewares
+     * @param array $domains
+     */
+    public function __construct($prefix = '', $middlewares = [], $domains = [])
+    {
+        $this->status = [
+            'prefix' => $prefix,
+            'middlewares' => $middlewares,
+            'domains' => $domains,
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    public function toArray()
+    {
+        return iterator_to_array($this->getIterator());
+    }
+    
     /**
      * {@inheritdoc}
      */
@@ -49,24 +71,25 @@ class Router implements RouterInterface, IteratorAggregate
      */
     public function group(array $attributes, callable $handler)
     {
-        $router = new Router();
-        $status = $this->status;
+        $prefix = '';
         if (isset($attributes['prefix'])) {
-            $status['prefix'] = "{$status['prefix']}/" . $attributes['prefix'];
+            $prefix = "{$this->status['prefix']}/" . $attributes['prefix'];
         }
+        $middlewares = $this->status['middlewares'];
         if (isset($attributes['middleware'])) {
-            $status['middlewares'] = array_merge($status['middlewares'], array_filter((array)$attributes['middleware']));
+            $middlewares = array_merge($middlewares, array_filter((array)$attributes['middleware']));
         }
         if (isset($attributes['middlewares'])) {
-            $status['middlewares'] = array_merge($status['middlewares'], array_filter((array)$attributes['middlewares']));
+            $middlewares = array_merge($middlewares, array_filter((array)$attributes['middlewares']));
         }
+        $domains = [];
         if (isset($attributes['domain'])) {
-            $status['domains'] = (array) $attributes['domain'];
+            $domains = (array) $attributes['domain'];
         }
         if (isset($attributes['domains'])) {
-            $status['domains'] = (array) $attributes['domains'];
+            $domains = (array) $attributes['domains'];
         }
-        $router->status = $status;
+        $router = new RouteCollection($prefix, $middlewares, $domains);
         call_user_func($handler, $router);
         $this->routers[] = $router;
     }
@@ -93,7 +116,7 @@ class Router implements RouterInterface, IteratorAggregate
     /**
      * {@inheritdoc}
      */
-    public function get(string $path, string $className, string $methodName = 'index'): RouteInterface
+    public function get(string $path, string $className, string $methodName = 'index'): RouteFluent
     {
         return $this->createRoute(['GET', 'HEAD'], $path, $className, $methodName);
     }
@@ -101,7 +124,7 @@ class Router implements RouterInterface, IteratorAggregate
     /**
      * {@inheritdoc}
      */
-    public function post(string $path, string $className, string $methodName = 'index'): RouteInterface
+    public function post(string $path, string $className, string $methodName = 'index'): RouteFluent
     {
         return $this->createRoute(['POST'], $path, $className, $methodName);
     }
@@ -109,7 +132,7 @@ class Router implements RouterInterface, IteratorAggregate
     /**
      * {@inheritdoc}
      */
-    public function put(string $path, string $className, string $methodName = 'index'): RouteInterface
+    public function put(string $path, string $className, string $methodName = 'index'): RouteFluent
     {
         return $this->createRoute(['PUT'], $path, $className, $methodName);
     }
@@ -117,7 +140,7 @@ class Router implements RouterInterface, IteratorAggregate
     /**
      * {@inheritdoc}
      */
-    public function delete(string $path, string $className, string $methodName = 'index'): RouteInterface
+    public function delete(string $path, string $className, string $methodName = 'index'): RouteFluent
     {
         return $this->createRoute(['DELETE'], $path, $className, $methodName);
     }
@@ -125,7 +148,7 @@ class Router implements RouterInterface, IteratorAggregate
     /**
      * {@inheritdoc}
      */
-    public function options(string $path, string $className, string $methodName = 'index'): RouteInterface
+    public function options(string $path, string $className, string $methodName = 'index'): RouteFluent
     {
         return $this->createRoute(['OPTIONS'], $path, $className, $methodName);
     }
@@ -133,7 +156,7 @@ class Router implements RouterInterface, IteratorAggregate
     /**
      * {@inheritdoc}
      */
-    public function patch(string $path, string $className, string $methodName = 'index'): RouteInterface
+    public function patch(string $path, string $className, string $methodName = 'index'): RouteFluent
     {
         return $this->createRoute(['PATCH'], $path, $className, $methodName);
     }
@@ -141,7 +164,7 @@ class Router implements RouterInterface, IteratorAggregate
     /**
      * {@inheritdoc}
      */
-    public function any(string $path, string $className, string $methodName = 'index'): RouteInterface
+    public function any(string $path, string $className, string $methodName = 'index'): RouteFluent
     {
         return $this->createRoute([
             'GET',
@@ -157,7 +180,7 @@ class Router implements RouterInterface, IteratorAggregate
     /**
      * {@inheritdoc}
      */
-    public function createRoute(array $methods, string $path, string $className, string $methodName = 'index'): RouteInterface
+    public function createRoute(array $methods, string $path, string $className, string $methodName = 'index'): RouteFluent
     {
         $path = trim("{$this->status['prefix']}/{$path}", '/');
         while(strpos($path, '//') !== false) {
@@ -182,5 +205,18 @@ class Router implements RouterInterface, IteratorAggregate
                 yield $route;
             }
         }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function dispatch(LoaderInterface $loader, ResponsifierInterface $responsifier, ServerRequestInterface $request)
+    {
+        return $this->compile()->dispatch($loader, $responsifier, $request);
+    }
+
+    public function compile()
+    {
+        return CompiledRoutes::compile($this);
     }
 }
