@@ -101,6 +101,15 @@ class PsrLoaderTest extends TestCase
             'index' => 0,
         ], $result);
     }
+    
+    public function testResolveWithNullable()
+    {
+        $result = $this->loader->execute(PsrLoaderTestController::class, 'index', new ServerRequest());
+        static::assertNull($result);
+
+        $result = $this->loader->execute(PsrLoaderTestController::class, 'index', (new ServerRequest())->withAttribute('user', ['id' => 1]));
+        static::assertEquals(['id' => 1], $result);
+    }
 }
 
 class PsrLoaderTestMiddleware implements MiddlewareInterface
@@ -174,5 +183,10 @@ class PsrLoaderTestController
             'id' => $id,
             'index' => $index,
         ];
+    }
+    
+    public function index($user = null)
+    {
+        return $user;
     }
 }

@@ -5,8 +5,10 @@ use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use ReflectionClass;
-use RuntimeException;
 use ReflectionException;
+use ReflectionFunctionAbstract;
+use ReflectionParameter;
+use RuntimeException;
 use Wandu\Router\Contracts\LoaderInterface;
 use Wandu\Router\Contracts\MiddlewareInterface;
 use Wandu\Router\Exception\HandlerNotFoundException;
@@ -48,10 +50,10 @@ class PsrLoader implements LoaderInterface
             }
             if ($reflMethod) {
                 $arguments = $this->getArguments($reflMethod, $request);
-                return call_user_func_array([$object, $methodName], $arguments);
+                return $object->{$methodName}(...$arguments);
             }
             if (method_exists($object, '__call')) {
-                return $object->__call($methodName, [$request]);
+                return $object->{$methodName}($request);
             }
         } catch (HandlerNotFoundException $e) {
             throw new HandlerNotFoundException($className, $methodName);
@@ -67,15 +69,9 @@ class PsrLoader implements LoaderInterface
     public function createInstance(string $className, ServerRequestInterface $request)
     {
         if (class_exists($className)) {
-            $classRefl = new ReflectionClass($className);
-            $constructor = $classRefl->getConstructor();
             try {
-                if ($constructor) {
-                    $arguments = $this->getArguments($constructor, $request);
-                    return new $className(...$arguments);
-                } else {
-                    return new $className();
-                }
+                $arguments = $this->getArguments((new ReflectionClass($className))->getConstructor(), $request);
+                return new $className(...$arguments);
             } catch (RuntimeException $e) {}
         } elseif ($this->container->has($className)) { // for alias
             return $this->container->get($className);
@@ -88,42 +84,50 @@ class PsrLoader implements LoaderInterface
      * @param \Psr\Http\Message\ServerRequestInterface $request
      * @return array
      */
-    protected function getArguments(\ReflectionFunctionAbstract $refl, ServerRequestInterface $request)
+    protected function getArguments(ReflectionFunctionAbstract $refl = null, ServerRequestInterface $request)
     {
-        $requestAttrs = $request->getAttributes();
+        if (!$refl) {
+            return [];
+        }
+        $attributes = $request->getAttributes();
         $arguments = [];
-        // it from container Resolver..
         foreach ($refl->getParameters() as $param) {
-            $paramClass = $param->getClass();
-            if ($paramClass) { // #2.
-                if ($paramClass->isInstance($request)) {
-                    $arguments[] = $request;
-                    continue;
-                }
-                $paramClassName = $paramClass->getName();
-                if (array_key_exists($paramClassName, $requestAttrs)) {
-                    $arguments[] = $requestAttrs[$paramClassName];
-                    continue;
-                }
-                if ($this->container->has($paramClassName)) {
-                    try {
-                        $arguments[] = $this->container->get($paramClassName);
-                        continue;
-                    } catch (NotFoundExceptionInterface $e) {
-                    }
-                }
-            }
-            if ($param->isDefaultValueAvailable()) {
-                $arguments[] = $param->getDefaultValue();
-                continue;
-            }
-            $paramName = $param->getName();
-            if (array_key_exists($paramName, $requestAttrs)) {
-                $arguments[] = $requestAttrs[$paramName];
-                continue;
-            }
-            throw new RuntimeException("not found parameter named \"{$param->getName()}\".");
+            $arguments[] = $this->getArgument($param, $request, $attributes);
         }
         return $arguments;
+    }
+
+    /**
+     * @param \ReflectionParameter $param
+     * @param \Psr\Http\Message\ServerRequestInterface $request
+     * @param array $attributes
+     * @return mixed
+     */
+    protected function getArgument(ReflectionParameter $param, ServerRequestInterface $request, array $attributes = [])
+    {
+        $paramClassRefl = $param->getClass();
+        if ($paramClassRefl) { // #2.
+            if ($paramClassRefl->isInstance($request)) {
+                return $request;
+            }
+            $paramClassName = $paramClassRefl->getName();
+            if (array_key_exists($paramClassName, $attributes)) {
+                return $attributes[$paramClassName];
+            }
+            if ($this->container->has($paramClassName)) {
+                try {
+                    return $this->container->get($paramClassName);
+                } catch (NotFoundExceptionInterface $e) {
+                }
+            }
+        }
+        $paramName = $param->getName();
+        if (array_key_exists($paramName, $attributes)) {
+            return $attributes[$paramName];
+        }
+        if ($param->isDefaultValueAvailable()) {
+            return $param->getDefaultValue();
+        }
+        throw new RuntimeException("not found parameter named \"{$param->getName()}\".");
     }
 }

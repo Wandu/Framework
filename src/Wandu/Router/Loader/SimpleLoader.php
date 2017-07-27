@@ -24,7 +24,7 @@ class SimpleLoader implements LoaderInterface
      */
     public function execute(string $className, string $methodName, ServerRequestInterface $request)
     {
-        if (!method_exists($className, $methodName)) {
+        if (!method_exists($className, $methodName) && !method_exists($className, '__callStatic')) {
             throw new HandlerNotFoundException($className, $methodName);
         }
         return call_user_func([$className, $methodName], $request);
