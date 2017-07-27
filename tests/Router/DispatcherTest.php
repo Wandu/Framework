@@ -21,8 +21,8 @@ class DispatcherTest extends TestCase
     {
         return [
             [ new Dispatcher(), 'POST', ], // default = disabled
-            [ new Dispatcher(null, null, null, ['method_spoofing_enabled' => false]), 'POST', ],
-            [ new Dispatcher(null, null, null, ['method_spoofing_enabled' => true]), 'PUT', ],
+            [ new Dispatcher(null, null, ['method_spoofing_enabled' => false]), 'POST', ],
+            [ new Dispatcher(null, null, ['method_spoofing_enabled' => true]), 'PUT', ],
         ];
     }
 
@@ -49,8 +49,8 @@ class DispatcherTest extends TestCase
     {
         return [
             [ new Dispatcher(), 'PUT', ], // default = enabled
-            [ new Dispatcher(null, null, null, ['method_override_enabled' => false]), 'POST', ],
-            [ new Dispatcher(null, null, null, ['method_override_enabled' => true]), 'PUT', ],
+            [ new Dispatcher(null, null, ['method_override_enabled' => false]), 'POST', ],
+            [ new Dispatcher(null, null, ['method_override_enabled' => true]), 'PUT', ],
         ];
     }
 
@@ -87,7 +87,7 @@ class DispatcherTest extends TestCase
             ]
         ], $routes->toArray());
 
-        $dispatcher = new Dispatcher(null, null, null, [
+        $dispatcher = new Dispatcher(null, null, [
             'defined_domains' => 'admin.wandu.io',
             'defined_prefix' => 'admin',
             'defined_middlewares' => 'AuthMiddleware',
@@ -103,7 +103,7 @@ class DispatcherTest extends TestCase
             ]
         ], $routes->toArray());
 
-        $dispatcher = new Dispatcher(null, null, null, [
+        $dispatcher = new Dispatcher(null, null, [
             'defined_domains' => ['admin.wandu.io', 'admin.wandu.dev', ],
             'defined_prefix' => 'admin',
             'defined_middlewares' => ['Sessionify', 'AuthMiddleware', ],

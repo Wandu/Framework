@@ -1,13 +1,15 @@
 <?php
 namespace Wandu\Router;
 
+use FastRoute\DataGenerator\GroupCountBased as GCBGenerator;
 use IteratorAggregate;
 use Psr\Http\Message\ServerRequestInterface;
 use Wandu\Router\Contracts\Dispatchable;
 use Wandu\Router\Contracts\LoaderInterface;
 use Wandu\Router\Contracts\ResponsifierInterface;
-use Wandu\Router\Contracts\RouteFluent;
 use Wandu\Router\Contracts\Routable;
+use Wandu\Router\Contracts\RouteFluent;
+use Wandu\Router\Path\Pattern;
 
 class RouteCollection implements Routable, IteratorAggregate, Dispatchable
 {
@@ -215,8 +217,50 @@ class RouteCollection implements Routable, IteratorAggregate, Dispatchable
         return $this->compile()->dispatch($loader, $responsifier, $request);
     }
 
-    public function compile()
+    /**
+     * @return \Wandu\Router\CompiledRouteCollection
+     */
+    public function compile(): CompiledRouteCollection
     {
-        return CompiledRoutes::compile($this);
+        $routeMap = [];
+
+        /** @var \FastRoute\DataGenerator\GroupCountBased[] $generators */
+        $generators = [];
+
+        /**
+         * @var array|string[] $methods
+         * @var string $path
+         * @var \Wandu\Router\Route $route
+         */
+        foreach ($this->getIterator() as list($methods, $path, $route)) {
+            $pathPattern = new Pattern($path);
+
+            $handleId = uniqid('HANDLER');
+            $routeMap[$handleId] = $route;
+
+            foreach ($pathPattern->parse() as $parsedPath) {
+                foreach ($methods as $method) {
+                    $domains = $route->getDomains();
+                    if (count($domains)) {
+                        foreach ($domains as $domain) {
+                            if (!isset($generators[$domain])) {
+                                $generators[$domain] = new GCBGenerator();
+                            }
+                            $generators[$domain]->addRoute($method, $parsedPath, $handleId);
+                        }
+                    } else {
+                        if (!isset($generators['@'])) {
+                            $generators['@'] = new GCBGenerator();
+                        }
+                        $generators['@']->addRoute($method, $parsedPath, $handleId);
+                    }
+                }
+            }
+        }
+
+        $compiledRoutes = array_map(function (GCBGenerator $generator) {
+            return $generator->getData();
+        }, $generators);
+        return new CompiledRouteCollection($compiledRoutes, $routeMap);
     }
 }

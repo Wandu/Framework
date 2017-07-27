@@ -14,9 +14,19 @@ FastRoute with PSR-7 Wrapper Library.
 composer require wandu/router
 ```
 
-## Websites
+## Basic Usage
 
-- [wandu.github.io/#router](https://wandu.github.io/#router)
+@code("../../../tests/Router/ReadmeTest.php@basic-usage")
+
+@code("../../../tests/Router/ReadmeTest.php@basic-usage-controller")
+
+## Pattern Routes
+
+@code("../../../tests/Router/ReadmeTest.php@pattern-routes")
+
+@code("../../../tests/Router/ReadmeTest.php@pattern-routes-controller")
+
+You can use all patterns in [path-to-regexp](https://github.com/pillarjs/path-to-regexp).
 
 ## Reference
 

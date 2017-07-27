@@ -1,8 +1,8 @@
 <?php
 namespace Wandu\Router;
 
+use Closure;
 use Psr\Http\Message\ServerRequestInterface;
-use Psr\SimpleCache\CacheInterface;
 use Wandu\Router\Contracts\Dispatchable;
 use Wandu\Router\Contracts\LoaderInterface;
 use Wandu\Router\Contracts\ResponsifierInterface;
@@ -17,21 +17,16 @@ class Dispatcher
     /** @var \Wandu\Router\Responsifier\NullResponsifier */
     protected $responsifier;
 
-    /** @var \Psr\SimpleCache\CacheInterface */
-    protected $cache;
-    
     /** @var array */
     protected $options;
     
     public function __construct(
         LoaderInterface $loader = null,
         ResponsifierInterface $responsifier = null,
-        CacheInterface $cache = null,
         array $options = []
     ) {
         $this->loader = $loader ?: new SimpleLoader();
         $this->responsifier = $responsifier ?: new NullResponsifier();
-        $this->cache = $cache;
         $this->setOptions($options);
     }
 
@@ -46,8 +41,6 @@ class Dispatcher
             'defined_prefix' => '',
             'defined_middlewares' => [],
             'defined_domains' => [],
-//            'cache' => '',
-//            'cache_key' => '',
         ], $options);
     }
 

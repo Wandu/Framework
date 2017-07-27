@@ -7,6 +7,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Wandu\Http\Psr\Response;
 use Wandu\Http\Psr\ServerRequest;
 use Wandu\Http\Psr\Stream\StringStream;
+use Wandu\Router\Contracts\Routable;
 use Wandu\Router\Exception\RouteNotFoundException;
 
 class ReadmeTest extends TestCase
@@ -15,21 +16,21 @@ class ReadmeTest extends TestCase
     {
         // section:basic-usage
         $dispatcher = new \Wandu\Router\Dispatcher();
-        $route = new \Wandu\Router\RouteCollection();
+        $routes = $dispatcher->createRouteCollection();
 
-        $route->get('/', HomeController::class);
-        $route->get('/users', UserController::class, 'index');
-        $route->get('/users/:id', UserController::class, 'show');
+        $routes->get('/', HomeController::class);
+        $routes->get('/users', UserController::class, 'index');
+        $routes->get('/users/:id', UserController::class, 'show');
 
         $request = new ServerRequest('GET', '/'); // PSR7 ServerRequestInterface implementation
-        $response = $dispatcher->dispatch($route, $request);
+        $response = $dispatcher->dispatch($routes, $request);
 
         static::assertInstanceOf(ResponseInterface::class, $response);
         static::assertEquals('index', $response->getBody()->__toString());
 
         $request = new ServerRequest('GET', '/nothing'); // PSR7 ServerRequestInterface implementation
         try {
-            $dispatcher->dispatch($route, $request);
+            $dispatcher->dispatch($routes, $request);
         } catch (RouteNotFoundException $e) {
             static::assertEquals('Route not found.', $e->getMessage());
         }
@@ -39,20 +40,38 @@ class ReadmeTest extends TestCase
     public function testPatternRoutes()
     {
         $dispatcher = new \Wandu\Router\Dispatcher();
-        $route = new \Wandu\Router\RouteCollection();
+        $routes = $dispatcher->createRouteCollection();
 
         // section:pattern-routes
-        $route->get('/users/:id(\d+)?', UserController::class, 'show');
-        $route->get('/users-:id', UserController::class, 'show');
+        $routes->get('/users/:id(\d+)?', UserController::class, 'show');
+        $routes->get('/users-:id', UserController::class, 'show');
         // endsection
 
-        $response = $dispatcher->dispatch($route, new ServerRequest('GET', '/users/300'));
+        $response = $dispatcher->dispatch($routes, new ServerRequest('GET', '/users/300'));
         static::assertEquals('300', $response->getBody()->__toString());
 
-        $response = $dispatcher->dispatch($route, new ServerRequest('GET', '/users'));
+        $response = $dispatcher->dispatch($routes, new ServerRequest('GET', '/users'));
         static::assertEquals('', $response->getBody()->__toString());
 
-        $response = $dispatcher->dispatch($route, new ServerRequest('GET', '/users-300'));
+        $response = $dispatcher->dispatch($routes, new ServerRequest('GET', '/users-300'));
+        static::assertEquals('300', $response->getBody()->__toString());
+    }
+
+    public function testCache()
+    {
+        $dispatcher = new \Wandu\Router\Dispatcher();
+        
+        $routes = $dispatcher->createRouteCollection();
+        $routes->get('/users/:id(\d+)?', UserController::class, 'show');
+        $routes->get('/users-:id', UserController::class, 'show');
+
+        $response = $dispatcher->dispatch($routes->compile(), new ServerRequest('GET', '/users/300'));
+        static::assertEquals('300', $response->getBody()->__toString());
+
+        $response = $dispatcher->dispatch($routes, new ServerRequest('GET', '/users'));
+        static::assertEquals('', $response->getBody()->__toString());
+
+        $response = $dispatcher->dispatch($routes, new ServerRequest('GET', '/users-300'));
         static::assertEquals('300', $response->getBody()->__toString());
     }
 }
