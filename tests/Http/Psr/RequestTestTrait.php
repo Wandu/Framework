@@ -37,15 +37,9 @@ trait RequestTestTrait
 
         try {
             $this->request->withMethod([]);
-            $this->fail();
+            static::fail();
         } catch (InvalidArgumentException $e) {
             static::assertEquals('Unsupported HTTP method. It must be a string.', $e->getMessage());
-        }
-        try {
-            $this->request->withMethod('UNKNOWN');
-            $this->fail();
-        } catch (InvalidArgumentException $e) {
-            static::assertEquals('Unsupported HTTP method. "UNKNOWN" provided.', $e->getMessage());
         }
     }
 
