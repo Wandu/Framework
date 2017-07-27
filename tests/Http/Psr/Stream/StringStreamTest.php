@@ -36,4 +36,11 @@ class StringStreamTest extends TestCase
             static::addToAssertionCount(1);
         }
     }
+    
+    public function testAddedWrite()
+    {
+        $stream = new StringStream("hello world");
+        $stream->write(", and all!");
+        static::assertEquals("hello world, and all!", $stream->__toString());
+    }
 }
