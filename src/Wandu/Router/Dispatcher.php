@@ -1,11 +1,13 @@
 <?php
 namespace Wandu\Router;
 
-use Closure;
-use FastRoute\Dispatcher as FastDispatcher;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\SimpleCache\CacheInterface;
+use Wandu\Router\Contracts\Dispatchable;
 use Wandu\Router\Contracts\LoaderInterface;
 use Wandu\Router\Contracts\ResponsifierInterface;
+use Wandu\Router\Loader\SimpleLoader;
+use Wandu\Router\Responsifier\NullResponsifier;
 
 class Dispatcher
 {
@@ -14,80 +16,61 @@ class Dispatcher
 
     /** @var \Wandu\Router\Responsifier\NullResponsifier */
     protected $responsifier;
+
+    /** @var \Psr\SimpleCache\CacheInterface */
+    protected $cache;
     
-    /** @var \Wandu\Router\Configuration */
-    protected $config;
-    
-    /** @var \Closure */
-    protected $handler;
-    
-    /** @var \Wandu\Router\CompiledRoutes */
-    protected $compiledRoutes;
+    /** @var array */
+    protected $options;
     
     public function __construct(
         LoaderInterface $loader = null,
         ResponsifierInterface $responsifier = null,
-        Configuration $config = null
+        CacheInterface $cache = null,
+        array $options = []
     ) {
-        $this->loader = $loader;
-        $this->responsifier = $responsifier;
-        $this->config = $config ?: new Configuration([]);
-    }
-
-    public function flush()
-    {
-        if ($this->config->isCacheEnabled()) {
-            @unlink($this->config->getCacheFile());
-        }
+        $this->loader = $loader ?: new SimpleLoader();
+        $this->responsifier = $responsifier ?: new NullResponsifier();
+        $this->cache = $cache;
+        $this->setOptions($options);
     }
 
     /**
-     * @deprecated use setRoutes
-     * 
-     * @param \Closure $handler
-     * @return \Wandu\Router\Dispatcher
+     * @param array $options
      */
-    public function withRoutes(Closure $handler)
+    public function setOptions(array $options)
     {
-        $inst = clone $this;
-        $inst->setRoutes($handler);
-        return $inst;
+        $this->options = array_merge([
+            'method_override_enabled' => true,
+            'method_spoofing_enabled' => false,
+            'defined_prefix' => '',
+            'defined_middlewares' => [],
+            'defined_domains' => [],
+//            'cache' => '',
+//            'cache_key' => '',
+        ], $options);
     }
 
     /**
-     * @param \Closure $handler
+     * @return \Wandu\Router\RouteCollection
      */
-    public function setRoutes(Closure $handler)
+    public function createRouteCollection(): RouteCollection
     {
-        $this->compiledRoutes = null;
-        $this->handler = $handler;
+        return new RouteCollection(
+            $this->options['defined_prefix'],
+            $this->options['defined_middlewares'],
+            $this->options['defined_domains']
+        );
     }
     
     /**
+     * @param \Wandu\Router\Contracts\Dispatchable $dispatcher
      * @param \Psr\Http\Message\ServerRequestInterface $request
      * @return \Psr\Http\Message\ResponseInterface
      */
-    public function dispatch(ServerRequestInterface $request)
+    public function dispatch(Dispatchable $dispatcher, ServerRequestInterface $request)
     {
-        $compiledRoutes = $this->getCompiledRoutes();
-        $request = $this->applyVirtualMethod($request);
-        return $compiledRoutes->dispatch($request, $this->loader, $this->responsifier);
-    }
-    
-    protected function getCompiledRoutes(): CompiledRoutes
-    {
-        if (!$this->compiledRoutes) {
-            $cacheEnabled = $this->config->isCacheEnabled();
-            if ($this->isCached()) {
-                $this->compiledRoutes = $this->restoreCache();
-            } else {
-                $this->compiledRoutes = CompiledRoutes::compile($this->handler, $this->config);
-                if ($cacheEnabled) {
-                    $this->storeCache($this->compiledRoutes);
-                }
-            }
-        }
-        return $this->compiledRoutes;
+        return $dispatcher->dispatch($this->loader, $this->responsifier, $this->applyVirtualMethod($request));
     }
 
     /**
@@ -96,36 +79,15 @@ class Dispatcher
      */
     protected function applyVirtualMethod(ServerRequestInterface $request)
     {
-        if (!$this->config->isVirtualMethodEnabled()) {
-            return $request;
-        }
-        $parsedBody = $request->getParsedBody();
-        if (isset($parsedBody['_method'])) {
-            return $request->withMethod(strtoupper($parsedBody['_method']));
-        }
-        if ($request->hasHeader('X-Http-Method-Override')) {
+        if ($this->options['method_override_enabled'] && $request->hasHeader('X-Http-Method-Override')) {
             return $request->withMethod(strtoupper($request->getHeaderLine('X-Http-Method-Override')));
         }
+        if ($this->options['method_spoofing_enabled']) {
+            $parsedBody = $request->getParsedBody();
+            if (isset($parsedBody['_method'])) {
+                return $request->withMethod($parsedBody['_method']);
+            }
+        }
         return $request;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isCached(): bool
-    {
-        $cacheEnabled = $this->config->isCacheEnabled();
-        $cacheFile = $this->config->getCacheFile();
-        return $cacheEnabled && file_exists($cacheFile);
-    }
-    
-    private function storeCache(CompiledRoutes $routes)
-    {
-        file_put_contents($this->config->getCacheFile(), serialize($routes));
-    }
-
-    private function restoreCache(): CompiledRoutes
-    {
-        return unserialize(file_get_contents($this->config->getCacheFile()));
     }
 }

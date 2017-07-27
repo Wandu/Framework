@@ -1,6 +1,7 @@
 <?php
 namespace Wandu\Router;
 
+use PHPUnit\Framework\TestCase;
 use Wandu\Assertions;
 
 class RouteTest extends TestCase

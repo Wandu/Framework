@@ -1,6 +1,7 @@
 <?php
 namespace Wandu\Router;
 
+use Closure;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -8,6 +9,8 @@ use Wandu\Assertions;
 use Wandu\Http\Psr\Response;
 use Wandu\Http\Psr\ServerRequest;
 use Wandu\Http\Psr\Stream\StringStream;
+use Wandu\Router\Contracts\MiddlewareInterface;
+use Wandu\Router\Contracts\Routable;
 use Wandu\Router\Exception\HandlerNotFoundException;
 use Wandu\Router\Exception\MethodNotAllowedException;
 use Wandu\Router\Exception\RouteNotFoundException;
@@ -161,6 +164,68 @@ class RouteCollectionTest extends TestCase
             );
         });
     }
+    
+    public function testDispatchDomains()
+    {
+        $router = new RouteCollection();
+
+        $router->createRoute(['GET'], '/', RouteCollectionTestHomeController::class, 'index');
+        $router->createRoute(['GET'], '/something', RouteCollectionTestHomeController::class, 'something');
+        $router->domain(["admin.wandu.io", "admin.wandu.dev"], function (Routable $router) {
+            $router->createRoute(['GET'], '/', RouteCollectionTestUserController::class, 'index');
+            $router->createRoute(['GET'], '/:id', RouteCollectionTestUserController::class, 'show');
+        });
+
+        $response = $router->dispatch(
+            new SimpleLoader(),
+            new NullResponsifier(),
+            new ServerRequest('GET', '/', null, ['host' => 'wandu.io'])
+        );
+        static::assertEquals('[GET] index@HomeController', $response->getBody()->__toString());
+
+        $response = $router->dispatch(
+            new SimpleLoader(),
+            new NullResponsifier(),
+            new ServerRequest('GET', '/something', null, ['host' => 'wandu.io'])
+        );
+        static::assertEquals('[GET] something@HomeController', $response->getBody()->__toString());
+
+        static::assertException(new RouteNotFoundException(), function () use ($router) {
+            $router->dispatch(
+                new SimpleLoader(),
+                new NullResponsifier(),
+                new ServerRequest('GET', '/otherthing', null, ['host' => 'wandu.io'])
+            );
+        });         
+
+        $response = $router->dispatch(
+            new SimpleLoader(),
+            new NullResponsifier(),
+            new ServerRequest('GET', '/', null, ['host' => 'admin.wandu.io'])
+        );
+        static::assertEquals('[GET] index@UserController', $response->getBody()->__toString());
+
+        $response = $router->dispatch(
+            new SimpleLoader(),
+            new NullResponsifier(),
+            new ServerRequest('GET', '/something', null, ['host' => 'admin.wandu.io'])
+        );
+        static::assertEquals('[GET] show:something@UserController', $response->getBody()->__toString());
+
+        $response = $router->dispatch(
+            new SimpleLoader(),
+            new NullResponsifier(),
+            new ServerRequest('GET', '/', null, ['host' => 'admin.wandu.dev'])
+        );
+        static::assertEquals('[GET] index@UserController', $response->getBody()->__toString());
+
+        $response = $router->dispatch(
+            new SimpleLoader(),
+            new NullResponsifier(),
+            new ServerRequest('GET', '/something', null, ['host' => 'admin.wandu.dev'])
+        );
+        static::assertEquals('[GET] show:something@UserController', $response->getBody()->__toString());
+    }
 
     public function testPrefix()
     {
@@ -191,6 +256,66 @@ class RouteCollectionTest extends TestCase
         static::assertEquals($expected->toArray(), $router1->toArray());
         static::assertEquals($expected->toArray(), $router2->toArray());
     }
+
+    public function testMiddlewares()
+    {
+        $routes = new RouteCollection();
+
+        $routes->get('/', "HomeController", 'index');
+        $routes->middleware(RouteCollectionTestAuthMiddleware::class, function (Routable $routes) {
+            $routes->get('/users/', RouteCollectionTestUserController::class, 'index');
+            $routes->post('/users/', RouteCollectionTestUserController::class, 'store');
+            $routes->get('/users/:id', RouteCollectionTestUserController::class, 'show');
+        });
+
+        $response = $routes->dispatch(
+            new SimpleLoader(),
+            new NullResponsifier(),
+            new ServerRequest('GET', '/users/300')
+        );
+        static::assertEquals('[GET] show:300@UserController and middleware!', $response->getBody()->__toString());
+    }
+    
+    public function provideShortenMethodsTest()
+    {
+        return [
+            ['get', ['GET', 'HEAD'], ['POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH', 'CUSTOM_METHOD'], ],
+            ['post', ['POST'], ['GET', 'HEAD', 'PUT', 'DELETE', 'OPTIONS', 'PATCH', 'CUSTOM_METHOD'], ],
+            ['put', ['PUT'], ['GET', 'HEAD', 'POST', 'DELETE', 'OPTIONS', 'PATCH', 'CUSTOM_METHOD'], ],
+            ['delete', ['DELETE'], ['GET', 'HEAD', 'POST', 'PUT', 'OPTIONS', 'PATCH', 'CUSTOM_METHOD'], ],
+            ['options', ['OPTIONS'], ['GET', 'HEAD', 'POST', 'PUT', 'DELETE', 'PATCH', 'CUSTOM_METHOD'], ],
+            ['patch', ['PATCH'], ['GET', 'HEAD', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'CUSTOM_METHOD'], ],
+            ['any', ['GET', 'HEAD', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'], ['CUSTOM_METHOD'], ],
+        ];
+    }
+
+    /**
+     * @dataProvider provideShortenMethodsTest
+     */
+    public function testShortenMethods($method, $allowedMethods, $disallowedMethods)
+    {
+        $routes = new RouteCollection();
+        $routes->{$method}('/', RouteCollectionTestHomeController::class, 'index');
+
+        // success
+        foreach ($allowedMethods as $method) {
+            $response = $routes->dispatch(
+                new SimpleLoader(),
+                new NullResponsifier(),
+                new ServerRequest($method, '/')
+            );
+            static::assertEquals("[{$method}] index@HomeController", $response->getBody()->__toString());
+        }
+        foreach ($disallowedMethods as $method) {
+            static::assertException(new MethodNotAllowedException(), function () use ($routes, $method) {
+                $routes->dispatch(
+                    new SimpleLoader(),
+                    new NullResponsifier(),
+                    new ServerRequest($method, '/')
+                );                
+            });
+        }
+    }
 }
 
 class RouteCollectionTestHomeController
@@ -198,6 +323,11 @@ class RouteCollectionTestHomeController
     static public function index(ServerRequestInterface $request)
     {
         return new Response(200, new StringStream("[{$request->getMethod()}] index@HomeController"));
+    }
+
+    static public function something(ServerRequestInterface $request)
+    {
+        return new Response(200, new StringStream("[{$request->getMethod()}] something@HomeController"));
     }
 }
 
@@ -216,5 +346,16 @@ class RouteCollectionTestUserController
     static public function show(ServerRequestInterface $request)
     {
         return new Response(200, new StringStream("[{$request->getMethod()}] show:{$request->getAttribute('id')}@UserController"));
+    }
+}
+
+class RouteCollectionTestAuthMiddleware implements MiddlewareInterface 
+{
+    public function __invoke(ServerRequestInterface $request, Closure $next)
+    {
+        /** @var \Psr\Http\Message\ResponseInterface $response */
+        $response = $next($request);
+        $response->getBody()->write(" and middleware!");
+        return $response;
     }
 }

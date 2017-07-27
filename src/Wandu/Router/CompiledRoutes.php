@@ -1,32 +1,31 @@
 <?php
 namespace Wandu\Router;
 
-use Closure;
 use FastRoute\DataGenerator\GroupCountBased as GCBGenerator;
 use FastRoute\Dispatcher as FastDispatcher;
 use FastRoute\Dispatcher\GroupCountBased as GCBDispatcher;
 use Psr\Http\Message\ServerRequestInterface;
+use Wandu\Router\Contracts\Dispatchable;
 use Wandu\Router\Contracts\LoaderInterface;
 use Wandu\Router\Contracts\ResponsifierInterface;
+use Wandu\Router\Contracts\Routable;
 use Wandu\Router\Exception\MethodNotAllowedException;
 use Wandu\Router\Exception\RouteNotFoundException;
 use Wandu\Router\Path\Pattern;
 
-class CompiledRoutes
+class CompiledRoutes implements Dispatchable
 {
     /**
-     * @param \Closure $handler
-     * @param \Wandu\Router\Configuration $config
+     * @param \Wandu\Router\Contracts\Routable $router
      * @return \Wandu\Router\CompiledRoutes
      */
-    public static function compile(Closure $handler, Configuration $config)
+    public static function compile(Routable $router)
     {
         $routeMap = [];
-        $router = new Router;
-        $router->middleware($config->getMiddleware(), $handler);
 
         /** @var \FastRoute\DataGenerator\GroupCountBased[] $generators */
         $generators = [];
+
         /**
          * @var array|string[] $methods
          * @var string $path
@@ -40,11 +39,19 @@ class CompiledRoutes
 
             foreach ($pathPattern->parse() as $parsedPath) {
                 foreach ($methods as $method) {
-                    foreach ($route->getDomains() as $domain) {
-                        if (!isset($generators[$domain])) {
-                            $generators[$domain] = new GCBGenerator();
+                    $domains = $route->getDomains();
+                    if (count($domains)) {
+                        foreach ($domains as $domain) {
+                            if (!isset($generators[$domain])) {
+                                $generators[$domain] = new GCBGenerator();
+                            }
+                            $generators[$domain]->addRoute($method, $parsedPath, $handleId);
                         }
-                        $generators[$domain]->addRoute($method, $parsedPath, $handleId);
+                    } else {
+                        if (!isset($generators['@'])) {
+                            $generators['@'] = new GCBGenerator();
+                        }
+                        $generators['@']->addRoute($method, $parsedPath, $handleId);
                     }
                 }
             }
@@ -72,7 +79,7 @@ class CompiledRoutes
         $this->compiledRoutes = $compiledRoutes;
     }
     
-    public function dispatch(ServerRequestInterface $request, LoaderInterface $loader = null, ResponsifierInterface $responsifier = null)
+    public function dispatch(LoaderInterface $loader, ResponsifierInterface $responsifier, ServerRequestInterface $request)
     {
         $host = $request->getHeaderLine('host');
         $compiledRoutes = array_key_exists($host, $this->compiledRoutes)
@@ -92,7 +99,7 @@ class CompiledRoutes
         foreach ($routeInfo[2] as $key => $value) {
             $request = $request->withAttribute($key, $value);
         }
-        
-        return $route->execute($request, $loader, $responsifier);
+        $executor = new RouteExecutor($loader, $responsifier);
+        return $executor->execute($route, $request);
     }
 }

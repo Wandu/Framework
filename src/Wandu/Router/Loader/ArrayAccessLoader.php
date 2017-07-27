@@ -1,7 +1,6 @@
 <?php
 namespace Wandu\Router\Loader;
 
-use ArrayAccess;
 use Psr\Http\Message\ServerRequestInterface;
 use Wandu\Router\Contracts\LoaderInterface;
 use Wandu\Router\Contracts\MiddlewareInterface;
@@ -13,9 +12,9 @@ class ArrayAccessLoader implements LoaderInterface
     protected $container;
 
     /**
-     * @param \ArrayAccess $container
+     * @param \ArrayAccess|array $container
      */
-    public function __construct(ArrayAccess $container)
+    public function __construct($container)
     {
         $this->container = $container;
     }
