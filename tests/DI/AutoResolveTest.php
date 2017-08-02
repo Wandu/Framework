@@ -17,13 +17,13 @@ class AutoResolveTest extends TestCase
     {
         $container = new Container();
 
-        $container->bind(AutoResolveTestDependInterface::class, AutoResolveTestDepend::class);
+        $container->bind(AutoResolveTestSimpleInterface::class, AutoResolveTestSimple::class);
 
-        $instance1 = $container->get(AutoResolveTestDepend::class);
-        $instance2 = $container->get(AutoResolveTestDependInterface::class);
+        $instance1 = $container->get(AutoResolveTestSimple::class);
+        $instance2 = $container->get(AutoResolveTestSimpleInterface::class);
 
-        static::assertInstanceOf(AutoResolveTestDepend::class, $instance1);
-        static::assertInstanceOf(AutoResolveTestDependInterface::class, $instance1);
+        static::assertInstanceOf(AutoResolveTestSimple::class, $instance1);
+        static::assertInstanceOf(AutoResolveTestSimpleInterface::class, $instance1);
         
         static::assertSame($instance1, $instance2);
     }
@@ -34,27 +34,27 @@ class AutoResolveTest extends TestCase
 
         /** @var \Wandu\DI\Exception\CannotResolveException $exception */
         $exception = static::catchException(function () use ($container) {
-            $container->get(AutoResolveTestExceptionDepth1::class);
+            $container->get(AutoResolveTestDependency::class);
         });
 
         static::assertInstanceOf(CannotResolveException::class, $exception);
         static::assertEquals('unknown', $exception->getParameter());
         static::assertEquals(__FILE__, $exception->getFile());
         static::assertEquals(
-            (new ReflectionClass(AutoResolveTestExceptionDepth1::class))->getConstructor()->getStartLine(),
+            (new ReflectionClass(AutoResolveTestDependency::class))->getConstructor()->getStartLine(),
             $exception->getLine()
         );
 
         /** @var \Wandu\DI\Exception\CannotResolveException $exception */
         $exception = static::catchException(function () use ($container) {
-            $container->get(AutoResolveTestDepth2::class);
+            $container->get(AutoResolveTestClass::class);
         });
 
         static::assertInstanceOf(CannotResolveException::class, $exception);
         static::assertEquals('unknown', $exception->getParameter());
         static::assertEquals(__FILE__, $exception->getFile());
         static::assertEquals(
-            (new ReflectionClass(AutoResolveTestExceptionDepth1::class))->getConstructor()->getStartLine(),
+            (new ReflectionClass(AutoResolveTestDependency::class))->getConstructor()->getStartLine(),
             $exception->getLine()
         );
     }
@@ -79,19 +79,19 @@ class AutoResolveTest extends TestCase
     }
 }
 
-interface AutoResolveTestDependInterface {}
-class AutoResolveTestDepend implements AutoResolveTestDependInterface {}
+interface AutoResolveTestSimpleInterface {}
+class AutoResolveTestSimple implements AutoResolveTestSimpleInterface {}
 
-class AutoResolveTestExceptionDepth1
+class AutoResolveTestDependency
 {
     public function __construct(UnknownDepend $unknown)
     {
     }
 }
 
-class AutoResolveTestDepth2
+class AutoResolveTestClass
 {
-    public function __construct(AutoResolveTestExceptionDepth1 $depth1)
+    public function __construct(AutoResolveTestDependency $depth1)
     {
     }
 }

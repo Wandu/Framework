@@ -5,42 +5,44 @@ use PHPUnit\Framework\TestCase;
 use Wandu\Assertions;
 use Wandu\DI\Container;
 
-class InjectTest extends TestCase
+class WireValueTest extends TestCase
 {
     use Assertions;
 
-    public function testInjectWithBind()
+    public function testWireValueWithBind()
     {
         $container = new Container();
-        $container->bind('class', InjectTestClass::class)->inject('property', 'inject property value!');
+        $container->bind('class', WireValueTestClass::class)
+            ->wire('property', ['value' => 'inject property value!']);
 
-        static::assertInstanceOf(InjectTestClass::class, $container['class']);
+        static::assertInstanceOf(WireValueTestClass::class, $container['class']);
         static::assertEquals('inject property value!', $container['class']->getProperty());
     }
 
-    public function testInjectWithInstance()
+    public function testWireValueWithInstance()
     {
         $container = new Container();
-        $container->instance('instance', $renderer = new InjectTestClass())->inject('property', 'inject property value!');
+        $container->instance('instance', $renderer = new WireValueTestClass())
+            ->wire('property', ['value' => 'inject property value!']);
 
         static::assertNull($container['instance']->getProperty());
         static::assertSame($renderer, $container['instance']);
     }
 
-    public function testInjectWithClosure()
+    public function testWireValueWithClosure()
     {
         $container = new Container();
 
         $container->bind('closure', function () {
-            return new InjectTestClass();
-        })->inject('property', 'inject property value!');
+            return new WireValueTestClass();
+        })->wire('property', ['value' => 'inject property value!']);
 
-        static::assertInstanceOf(InjectTestClass::class, $container['closure']);
+        static::assertInstanceOf(WireValueTestClass::class, $container['closure']);
         static::assertEquals('inject property value!', $container['closure']->getProperty());
     }
 }
 
-class InjectTestClass {
+class WireValueTestClass {
     private $property;
     public function getProperty()
     {

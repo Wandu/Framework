@@ -11,55 +11,8 @@ class AssignTest extends TestCase
 {
     use Assertions;
 
-    public function testAssignFail()
+    public function testAssignFailByAssigningUnknown()
     {
-        // bind interface
-        $container = new Container();
-        $container->bind(AssignTestClassIF::class, AssignTestClass::class);
-
-        /** @var \Wandu\DI\Exception\CannotResolveException $exception */
-        $exception = static::catchException(function () use ($container) {
-            $container->get(AssignTestClass::class);
-        });
-
-        static::assertInstanceOf(CannotResolveException::class, $exception);
-        static::assertEquals('dep', $exception->getParameter());
-        static::assertEquals(__FILE__, $exception->getFile());
-        static::assertEquals(
-            (new ReflectionClass(AssignTestClass::class))->getConstructor()->getStartLine(),
-            $exception->getLine()
-        );
-
-        /** @var \Wandu\DI\Exception\CannotResolveException $exception */
-        $exception = static::catchException(function () use ($container) {
-            $container->get(AssignTestClassIF::class);
-        });
-
-        static::assertInstanceOf(CannotResolveException::class, $exception);
-        static::assertEquals('dep', $exception->getParameter());
-        static::assertEquals(__FILE__, $exception->getFile());
-        static::assertEquals(
-            (new ReflectionClass(AssignTestClass::class))->getConstructor()->getStartLine(),
-            $exception->getLine()
-        );
-
-        // bind class directly
-        $container = new Container();
-        $container->bind(AssignTestClass::class);
-
-        /** @var \Wandu\DI\Exception\CannotResolveException $exception */
-        $exception = static::catchException(function () use ($container) {
-            $container->get(AssignTestClass::class);
-        });
-
-        static::assertInstanceOf(CannotResolveException::class, $exception);
-        static::assertEquals('dep', $exception->getParameter());
-        static::assertEquals(__FILE__, $exception->getFile());
-        static::assertEquals(
-            (new ReflectionClass(AssignTestClass::class))->getConstructor()->getStartLine(),
-            $exception->getLine()
-        );
-
         // assign unknown
         $container = new Container();
         $container->bind(AssignTestClass::class)->assign('dep', 'unknown');
@@ -78,7 +31,7 @@ class AssignTest extends TestCase
         );
     }
 
-    public function testAssignSuccess()
+    public function testAssignByBind()
     {
         // bind interface
         $container = new Container();
@@ -103,7 +56,7 @@ class AssignTest extends TestCase
         static::assertSame("hello dependency!", $object->getDep());
     }
 
-    public function testBindClosureFail()
+    public function testAssignFailByClosure()
     {
         $container = new Container();
         $container->bind(AssignTestClass::class, function ($dep) {
@@ -121,7 +74,7 @@ class AssignTest extends TestCase
         static::assertEquals(__LINE__ - 12, $exception->getLine());
     }
 
-    public function testClosureSuccess()
+    public function testAssignSuccessByClosure()
     {
         $container = new Container();
         $container->instance('dep_dependency', 'hello dependency!');

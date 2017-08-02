@@ -200,10 +200,10 @@ class Container implements ContainerInterface
             return $this->descriptors[$name] = new Descriptor();
         }
         if (is_string($className) && class_exists($className)) {
-            $this->destroy($name);
-            $this->classes[$name] = $className;
-            $this->alias($className, $name);
-            return $this->descriptors[$name] = new Descriptor();
+            $this->destroy($name, $className);
+            $this->classes[$className] = $className;
+            $this->alias($name, $className);
+            return $this->descriptors[$className] = new Descriptor();
         } elseif (is_callable($className)) {
             $this->destroy($name);
             $this->closures[$name] = $className;
@@ -301,7 +301,14 @@ class Container implements ContainerInterface
     
     public function registerFromArray(array $provider)
     {
-        
+        foreach ($provider as $name => $information) {
+            $descriptor = $this->bind($name, $information['class']);
+            $descriptor->assignMany($information['assigns'] ?? []);
+            $descriptor->wireMany($information['wires'] ?? []);
+            if ($information['factory'] ?? false) {
+                $descriptor->factory();
+            }
+        }
     }
 
     /**
@@ -338,14 +345,14 @@ class Container implements ContainerInterface
         }
         $descriptor = $this->descriptors[$name];
         if (array_key_exists($name, $this->classes)) {
-            $instance = $this->create($this->classes[$name], $this->getArgumentFromDescriptor($descriptor));
+            $instance = $this->create($this->classes[$name], $this->resolveArguments($descriptor->assigns));
         } elseif (array_key_exists($name, $this->closures)) {
-            $instance = $this->call($this->closures[$name], $this->getArgumentFromDescriptor($descriptor));
+            $instance = $this->call($this->closures[$name], $this->resolveArguments($descriptor->assigns));
         }
         foreach ($descriptor->afterHandlers as $handler) {
             call_user_func($handler, $instance);
         }
-        foreach ($this->getInjectsFromDescriptor($descriptor) as $propertyName => $value) {
+        foreach ($this->resolveArguments($descriptor->wires) as $propertyName => $value) {
             $refl = (new \ReflectionObject($instance))->getProperty($propertyName);
             $refl->setAccessible(true);
             $refl->setValue($instance, $value);
@@ -357,33 +364,24 @@ class Container implements ContainerInterface
     }
 
     /**
-     * @param \Wandu\DI\Descriptor $descriptor
+     * @param array $arguments
      * @return array
      */
-    protected function getArgumentFromDescriptor(Descriptor $descriptor)
+    protected function resolveArguments(array $arguments)
     {
-        $arguments = [];
-        foreach ($descriptor->assigns as $key => $value) {
-            try {
-                $arguments[$key] = $this->get($value);
-            } catch (NullReferenceException $e) {}
+        $argumentsToReturn = [];
+        foreach ($arguments as $key => $value) {
+            if (is_array($value)) {
+                if (array_key_exists('value', $value)) {
+                    $argumentsToReturn[$key] = $value['value'];
+                }
+            } else {
+                try {
+                    $argumentsToReturn[$key] = $this->get($value);
+                } catch (NullReferenceException $e) {}
+            }
         }
-        return $descriptor->arguments + $arguments;
-    }
-
-    /**
-     * @param \Wandu\DI\Descriptor $descriptor
-     * @return array
-     */
-    protected function getInjectsFromDescriptor(Descriptor $descriptor)
-    {
-        $arguments = [];
-        foreach ($descriptor->wires as $key => $value) {
-            try {
-                $arguments[$key] = $this->get($value);
-            } catch (NullReferenceException $e) {}
-        }
-        return $descriptor->injects + $arguments;
+        return $argumentsToReturn;
     }
 
     /**
