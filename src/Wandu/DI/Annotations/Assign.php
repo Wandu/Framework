@@ -30,7 +30,7 @@ class Assign implements MethodDecoratorInterface
         Descriptor $desc,
         ContainerInterface $container
     ) {
-        $desc->assign([
+        $desc->argument([
             $this->target => $container->get($this->name),
         ]);
     }

@@ -7,7 +7,7 @@ use Wandu\DI\Container;
 use Wandu\DI\Exception\CannotResolveException;
 use ReflectionClass;
 
-class WithTest extends TestCase
+class ArgumentsTest extends TestCase
 {
     use Assertions;
 
@@ -15,48 +15,48 @@ class WithTest extends TestCase
     {
         // bind interface
         $container = new Container();
-        $container->bind(WithTestAssignIF::class, WithTestAssign::class);
+        $container->bind(ArgumentsTestAssignIF::class, ArgumentsTestAssign::class);
 
         /** @var \Wandu\DI\Exception\CannotResolveException $exception */
         $exception = static::catchException(function () use ($container) {
-            $container->get(WithTestAssign::class);
+            $container->get(ArgumentsTestAssign::class);
         });
 
         static::assertInstanceOf(CannotResolveException::class, $exception);
         static::assertEquals('dep', $exception->getParameter());
         static::assertEquals(__FILE__, $exception->getFile());
         static::assertEquals(
-            (new ReflectionClass(WithTestAssign::class))->getConstructor()->getStartLine(),
+            (new ReflectionClass(ArgumentsTestAssign::class))->getConstructor()->getStartLine(),
             $exception->getLine()
         );
 
         /** @var \Wandu\DI\Exception\CannotResolveException $exception */
         $exception = static::catchException(function () use ($container) {
-            $container->get(WithTestAssignIF::class);
+            $container->get(ArgumentsTestAssignIF::class);
         });
 
         static::assertInstanceOf(CannotResolveException::class, $exception);
         static::assertEquals('dep', $exception->getParameter());
         static::assertEquals(__FILE__, $exception->getFile());
         static::assertEquals(
-            (new ReflectionClass(WithTestAssign::class))->getConstructor()->getStartLine(),
+            (new ReflectionClass(ArgumentsTestAssign::class))->getConstructor()->getStartLine(),
             $exception->getLine()
         );
 
         // bind class directly
         $container = new Container();
-        $container->bind(WithTestAssign::class);
+        $container->bind(ArgumentsTestAssign::class);
 
         /** @var \Wandu\DI\Exception\CannotResolveException $exception */
         $exception = static::catchException(function () use ($container) {
-            $container->get(WithTestAssign::class);
+            $container->get(ArgumentsTestAssign::class);
         });
 
         static::assertInstanceOf(CannotResolveException::class, $exception);
         static::assertEquals('dep', $exception->getParameter());
         static::assertEquals(__FILE__, $exception->getFile());
         static::assertEquals(
-            (new ReflectionClass(WithTestAssign::class))->getConstructor()->getStartLine(),
+            (new ReflectionClass(ArgumentsTestAssign::class))->getConstructor()->getStartLine(),
             $exception->getLine()
         );
     }
@@ -65,35 +65,35 @@ class WithTest extends TestCase
     {
         // bind interface
         $container = new Container();
-        $container->bind(WithTestAssignIF::class, WithTestAssign::class)->with('dep', "hello dependency!");
+        $container->bind(ArgumentsTestAssignIF::class, ArgumentsTestAssign::class)->arguments(['dep' => "hello dependency!"]);
 
-        $object = $container->get(WithTestAssign::class);
-        static::assertInstanceOf(WithTestAssign::class, $object);
+        $object = $container->get(ArgumentsTestAssign::class);
+        static::assertInstanceOf(ArgumentsTestAssign::class, $object);
         static::assertSame("hello dependency!", $object->getDep());
 
-        $object = $container->get(WithTestAssignIF::class);
-        static::assertInstanceOf(WithTestAssign::class, $object);
+        $object = $container->get(ArgumentsTestAssignIF::class);
+        static::assertInstanceOf(ArgumentsTestAssign::class, $object);
         static::assertSame("hello dependency!", $object->getDep());
 
         // bind class directly
         $container = new Container();
-        $container->bind(WithTestAssign::class)->with('dep', "hello dependency!");
+        $container->bind(ArgumentsTestAssign::class)->arguments(['dep' => "hello dependency!"]);
 
-        $object = $container->get(WithTestAssign::class);
-        static::assertInstanceOf(WithTestAssign::class, $object);
+        $object = $container->get(ArgumentsTestAssign::class);
+        static::assertInstanceOf(ArgumentsTestAssign::class, $object);
         static::assertSame("hello dependency!", $object->getDep());
     }
 
     public function testBindClosureFail()
     {
         $container = new Container();
-        $container->bind(WithTestAssignIF::class, function ($dep) {
-            return new WithTestAssign($dep . ' from closure');
+        $container->bind(ArgumentsTestAssignIF::class, function ($dep) {
+            return new ArgumentsTestAssign($dep . ' from closure');
         });
 
         /** @var \Wandu\DI\Exception\CannotResolveException $exception */
         $exception = static::catchException(function () use ($container) {
-            $container->get(WithTestAssignIF::class);
+            $container->get(ArgumentsTestAssignIF::class);
         });
 
         static::assertInstanceOf(CannotResolveException::class, $exception);
@@ -108,21 +108,21 @@ class WithTest extends TestCase
     public function testBindClosureSuccess()
     {
         $container = new Container();
-        $container->bind(WithTestAssignIF::class, function ($dep) {
-            return new WithTestAssign($dep . ' from closure');
-        })->with('dep', "hello dependency!");
+        $container->bind(ArgumentsTestAssignIF::class, function ($dep) {
+            return new ArgumentsTestAssign($dep . ' from closure');
+        })->arguments(['dep' => "hello dependency!"]);
 
-        $object = $container->get(WithTestAssignIF::class);
-        static::assertInstanceOf(WithTestAssign::class, $object);
+        $object = $container->get(ArgumentsTestAssignIF::class);
+        static::assertInstanceOf(ArgumentsTestAssign::class, $object);
         static::assertSame("hello dependency! from closure", $object->getDep());
     }
 }
 
-interface WithTestDependInterface {}
-class WithTestDepend implements WithTestDependInterface {}
+interface ArgumentsTestDependInterface {}
+class ArgumentsTestDepend implements ArgumentsTestDependInterface {}
 
-interface WithTestAssignIF {}
-class WithTestAssign implements WithTestAssignIF
+interface ArgumentsTestAssignIF {}
+class ArgumentsTestAssign implements ArgumentsTestAssignIF
 {
     protected $dep;
     public function __construct($dep)

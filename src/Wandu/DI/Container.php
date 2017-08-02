@@ -2,13 +2,12 @@
 namespace Wandu\DI;
 
 use InvalidArgumentException;
-use ReflectionFunctionAbstract;
-use ReflectionClass;
-use ReflectionException;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface as PsrContainerInterface;
+use ReflectionClass;
+use ReflectionException;
+use ReflectionFunctionAbstract;
 use Wandu\DI\Contracts\ContainerFluent;
-use Wandu\DI\Contracts\ResolverInterface;
 use Wandu\DI\Exception\CannotChangeException;
 use Wandu\DI\Exception\CannotFindParameterException;
 use Wandu\DI\Exception\CannotResolveException;
@@ -50,6 +49,11 @@ class Container implements ContainerInterface
             PsrContainerInterface::class => $this,
             'container' => $this,
         ];
+        $this->descriptors[Container::class]
+            = $this->descriptors[ContainerInterface::class]
+            = $this->descriptors[PsrContainerInterface::class]
+            = $this->descriptors['container']
+            = (new Descriptor())->freeze();
     }
 
     public function __clone()
@@ -283,8 +287,21 @@ class Container implements ContainerInterface
      */
     public function register(ServiceProviderInterface $provider)
     {
+        $this->registerFromServiceProvider($provider);
+    }
+
+    /**
+     * @param \Wandu\DI\ServiceProviderInterface $provider
+     */
+    public function registerFromServiceProvider(ServiceProviderInterface $provider)
+    {
         $provider->register($this);
         $this->providers[] = $provider;
+    }
+    
+    public function registerFromArray(array $provider)
+    {
+        
     }
 
     /**
@@ -301,6 +318,10 @@ class Container implements ContainerInterface
         return $this;
     }
 
+    /**
+     * @param string $name
+     * @return mixed|object
+     */
     protected function resolve($name)
     {
         while (isset($this->aliases[$name])) {
@@ -324,6 +345,11 @@ class Container implements ContainerInterface
         foreach ($descriptor->afterHandlers as $handler) {
             call_user_func($handler, $instance);
         }
+        foreach ($this->getInjectsFromDescriptor($descriptor) as $propertyName => $value) {
+            $refl = (new \ReflectionObject($instance))->getProperty($propertyName);
+            $refl->setAccessible(true);
+            $refl->setValue($instance, $value);
+        }
         if (!$descriptor->factory) {
             $this->instances[$name] = $instance;
         }
@@ -342,9 +368,24 @@ class Container implements ContainerInterface
                 $arguments[$key] = $this->get($value);
             } catch (NullReferenceException $e) {}
         }
-        return $descriptor->values + $arguments;
+        return $descriptor->arguments + $arguments;
     }
-    
+
+    /**
+     * @param \Wandu\DI\Descriptor $descriptor
+     * @return array
+     */
+    protected function getInjectsFromDescriptor(Descriptor $descriptor)
+    {
+        $arguments = [];
+        foreach ($descriptor->wires as $key => $value) {
+            try {
+                $arguments[$key] = $this->get($value);
+            } catch (NullReferenceException $e) {}
+        }
+        return $descriptor->injects + $arguments;
+    }
+
     /**
      * @param \ReflectionFunctionAbstract $reflectionFunction
      * @param array $arguments

@@ -6,10 +6,13 @@ use Wandu\DI\Contracts\ContainerFluent;
 class Descriptor implements ContainerFluent 
 {
     /** @var array */
-    public $values = [];
+    public $assigns = [];
     
     /** @var array */
-    public $assigns = [];
+    public $arguments = [];
+    
+    /** @var array */
+    public $wires = [];
     
     /** @var array */
     public $injects = [];
@@ -26,36 +29,45 @@ class Descriptor implements ContainerFluent
     /**
      * {@inheritdoc}
      */
-    public function with(string $paramName, $value): ContainerFluent
+    public function assign(string $paramName, string $targetName): ContainerFluent
     {
-        $this->values[$paramName] = $value;
+        $this->assigns[$paramName] = $targetName;
         return $this;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function withMany(array $params = []): ContainerFluent
+    public function assignMany(array $arguments = []): ContainerFluent
     {
-        $this->values = $params + $this->values;
+        $this->assigns = $arguments + $this->assigns;
         return $this;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function assign(string $paramName, $value): ContainerFluent
+    public function arguments(array $arguments = []): ContainerFluent
     {
-        $this->assigns[$paramName] = $value;
+        $this->arguments = $arguments + $this->arguments;
         return $this;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function assignMany(array $assigns = []): ContainerFluent
+    public function wire(string $propertyName, string $targetName): ContainerFluent
     {
-        $this->assigns = $assigns + $this->assigns;
+        $this->wires[$propertyName] = $targetName;
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function wireMany(array $properties): ContainerFluent
+    {
+        $this->wires = $properties + $this->wires;
         return $this;
     }
 
@@ -71,9 +83,9 @@ class Descriptor implements ContainerFluent
     /**
      * {@inheritdoc}
      */
-    public function injectMany(array $values): ContainerFluent
+    public function injectMany(array $properties): ContainerFluent
     {
-        $this->injects = $values + $this->injects;
+        $this->injects = $properties + $this->injects;
         return $this;
     }
 

@@ -11,108 +11,108 @@ class AssignTest extends TestCase
 {
     use Assertions;
 
-    public function testBindFail()
+    public function testAssignFail()
     {
         // bind interface
         $container = new Container();
-        $container->bind(ChainMethodTestAssignIF::class, ChainMethodTestAssign::class);
+        $container->bind(AssignTestClassIF::class, AssignTestClass::class);
 
         /** @var \Wandu\DI\Exception\CannotResolveException $exception */
         $exception = static::catchException(function () use ($container) {
-            $container->get(ChainMethodTestAssign::class);
+            $container->get(AssignTestClass::class);
         });
 
         static::assertInstanceOf(CannotResolveException::class, $exception);
         static::assertEquals('dep', $exception->getParameter());
         static::assertEquals(__FILE__, $exception->getFile());
         static::assertEquals(
-            (new ReflectionClass(ChainMethodTestAssign::class))->getConstructor()->getStartLine(),
+            (new ReflectionClass(AssignTestClass::class))->getConstructor()->getStartLine(),
             $exception->getLine()
         );
 
         /** @var \Wandu\DI\Exception\CannotResolveException $exception */
         $exception = static::catchException(function () use ($container) {
-            $container->get(ChainMethodTestAssignIF::class);
+            $container->get(AssignTestClassIF::class);
         });
 
         static::assertInstanceOf(CannotResolveException::class, $exception);
         static::assertEquals('dep', $exception->getParameter());
         static::assertEquals(__FILE__, $exception->getFile());
         static::assertEquals(
-            (new ReflectionClass(ChainMethodTestAssign::class))->getConstructor()->getStartLine(),
+            (new ReflectionClass(AssignTestClass::class))->getConstructor()->getStartLine(),
             $exception->getLine()
         );
 
         // bind class directly
         $container = new Container();
-        $container->bind(ChainMethodTestAssign::class);
+        $container->bind(AssignTestClass::class);
 
         /** @var \Wandu\DI\Exception\CannotResolveException $exception */
         $exception = static::catchException(function () use ($container) {
-            $container->get(ChainMethodTestAssign::class);
+            $container->get(AssignTestClass::class);
         });
 
         static::assertInstanceOf(CannotResolveException::class, $exception);
         static::assertEquals('dep', $exception->getParameter());
         static::assertEquals(__FILE__, $exception->getFile());
         static::assertEquals(
-            (new ReflectionClass(ChainMethodTestAssign::class))->getConstructor()->getStartLine(),
+            (new ReflectionClass(AssignTestClass::class))->getConstructor()->getStartLine(),
             $exception->getLine()
         );
 
         // assign unknown
         $container = new Container();
-        $container->bind(ChainMethodTestAssign::class)->assign('dep', 'unknown');
+        $container->bind(AssignTestClass::class)->assign('dep', 'unknown');
 
         /** @var \Wandu\DI\Exception\CannotResolveException $exception */
         $exception = static::catchException(function () use ($container) {
-            $container->get(ChainMethodTestAssign::class);
+            $container->get(AssignTestClass::class);
         });
 
         static::assertInstanceOf(CannotResolveException::class, $exception);
         static::assertEquals('dep', $exception->getParameter());
         static::assertEquals(__FILE__, $exception->getFile());
         static::assertEquals(
-            (new ReflectionClass(ChainMethodTestAssign::class))->getConstructor()->getStartLine(),
+            (new ReflectionClass(AssignTestClass::class))->getConstructor()->getStartLine(),
             $exception->getLine()
         );
     }
 
-    public function testBindSuccess()
+    public function testAssignSuccess()
     {
         // bind interface
         $container = new Container();
         $container->instance('dep_dependency', 'hello dependency!');
-        $container->bind(ChainMethodTestAssignIF::class, ChainMethodTestAssign::class)->assign('dep', "dep_dependency");
+        $container->bind(AssignTestClassIF::class, AssignTestClass::class)->assign('dep', "dep_dependency");
 
-        $object = $container->get(ChainMethodTestAssign::class);
-        static::assertInstanceOf(ChainMethodTestAssign::class, $object);
+        $object = $container->get(AssignTestClass::class);
+        static::assertInstanceOf(AssignTestClass::class, $object);
         static::assertSame("hello dependency!", $object->getDep());
 
-        $object = $container->get(ChainMethodTestAssignIF::class);
-        static::assertInstanceOf(ChainMethodTestAssign::class, $object);
+        $object = $container->get(AssignTestClassIF::class);
+        static::assertInstanceOf(AssignTestClass::class, $object);
         static::assertSame("hello dependency!", $object->getDep());
 
         // bind class directly
         $container = new Container();
         $container->instance('dep_dependency', 'hello dependency!');
-        $container->bind(ChainMethodTestAssign::class)->assign('dep', 'dep_dependency');
+        $container->bind(AssignTestClass::class)->assign('dep', 'dep_dependency');
 
-        $object = $container->get(ChainMethodTestAssign::class);
-        static::assertInstanceOf(ChainMethodTestAssign::class, $object);
+        $object = $container->get(AssignTestClass::class);
+        static::assertInstanceOf(AssignTestClass::class, $object);
         static::assertSame("hello dependency!", $object->getDep());
     }
 
     public function testBindClosureFail()
     {
         $container = new Container();
-        $container->bind(ChainMethodTestAssign::class, function ($dep) {
-            return new ChainMethodTestAssign($dep . ' from closure');
+        $container->bind(AssignTestClass::class, function ($dep) {
+            return new AssignTestClass($dep . ' from closure');
         });
 
         /** @var \Wandu\DI\Exception\CannotResolveException $exception */
         $exception = static::catchException(function () use ($container) {
-            $container->get(ChainMethodTestAssign::class);
+            $container->get(AssignTestClass::class);
         });
 
         static::assertInstanceOf(CannotResolveException::class, $exception);
@@ -125,21 +125,18 @@ class AssignTest extends TestCase
     {
         $container = new Container();
         $container->instance('dep_dependency', 'hello dependency!');
-        $container->bind(ChainMethodTestAssignIF::class, function ($dep) {
-            return new ChainMethodTestAssign($dep . ' from closure');
+        $container->bind(AssignTestClassIF::class, function ($dep) {
+            return new AssignTestClass($dep . ' from closure');
         })->assign('dep', "dep_dependency");
 
-        $object = $container->get(ChainMethodTestAssignIF::class);
-        static::assertInstanceOf(ChainMethodTestAssign::class, $object);
+        $object = $container->get(AssignTestClassIF::class);
+        static::assertInstanceOf(AssignTestClass::class, $object);
         static::assertSame("hello dependency! from closure", $object->getDep());
     }
 }
 
-interface ChainMethodTestDependInterface {}
-class ChainMethodTestDepend implements ChainMethodTestDependInterface {}
-
-interface ChainMethodTestAssignIF {}
-class ChainMethodTestAssign implements ChainMethodTestAssignIF
+interface AssignTestClassIF {}
+class AssignTestClass implements AssignTestClassIF
 {
     protected $dep;
     public function __construct($dep)
