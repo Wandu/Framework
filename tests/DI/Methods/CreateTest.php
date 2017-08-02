@@ -3,79 +3,87 @@ namespace Wandu\DI\Methods;
 
 use PHPUnit\Framework\TestCase;
 use stdClass;
+use Wandu\Assertions;
 use Wandu\DI\Container;
+use ReflectionClass;
 use Wandu\DI\Exception\CannotResolveException;
 
 class CreateTest extends TestCase
 {
-    public function testCreate()
+    use Assertions;
+
+    public function testCreateAutoResolveFail()
     {
         $container = new Container();
 
-        // create fail..
-        try {
-            $container->create(CreateTestHasTypeParam::class);
-            static::fail();
-        } catch (CannotResolveException $e) {
-            static::assertEquals(CreateTestHasTypeParam::class, $e->getClass());
-            static::assertEquals('param', $e->getParameter());
-        }
+        /** @var \Wandu\DI\Exception\CannotResolveException $exception */
+        $exception = static::catchException(function () use ($container) {
+            $container->create(CreateTestHasTypedParam::class);
+        });
 
+        static::assertInstanceOf(CannotResolveException::class, $exception);
+        static::assertEquals('typedParam', $exception->getParameter());
+        static::assertEquals(__FILE__, $exception->getFile());
+        static::assertEquals(
+            (new ReflectionClass(CreateTestHasTypedParam::class))->getConstructor()->getStartLine(),
+            $exception->getLine()
+        );
+    }
+    
+    public function testCreateAutoResolveSuccess()
+    {
+        $container = new Container();
         $container->bind(CreateTestDependencyInterface::class, CreateTestDependency::class);
 
-        // create success
-        $object = $container->create(CreateTestHasTypeParam::class);
-        static::assertInstanceOf(CreateTestHasTypeParam::class, $object);
-
-        // get dependency
-        static::assertInstanceOf(CreateTestDependencyInterface::class, $object->param);
-        static::assertInstanceOf(CreateTestDependency::class, $object->param);
+        $object = $container->create(CreateTestHasTypedParam::class);
+        static::assertInstanceOf(CreateTestHasTypedParam::class, $object);
+        static::assertInstanceOf(CreateTestDependencyInterface::class, $object->typedParam);
+        static::assertInstanceOf(CreateTestDependency::class, $object->typedParam);
     }
 
-    public function testCreateSingleParamClassWithArguments()
+    public function testCreateUntypedParamClassSuccess()
     {
         $container = new Container();
 
-        try {
-            $container->create(CreateTestHasParam::class);
-            static::fail();
-        } catch (CannotResolveException $e) {
-            static::assertEquals(CreateTestHasParam::class, $e->getClass());
-            static::assertEquals('param', $e->getParameter());
-        }
+        // by seq array
+        $object = $container->create(CreateTestHasUntypedParam::class, [['username' => 'wan2land']]);
+        static::assertSame(['username' => 'wan2land'], $object->untypedParam);
 
-        // single param class
-        $object = $container->create(CreateTestHasParam::class, [['username' => 'wan2land']]);
-        static::assertSame(['username' => 'wan2land'], $object->param);
-
-        $object = $container->create(CreateTestHasParam::class, ['param' => ['username' => 'wan3land']]);
-        static::assertSame(['username' => 'wan3land'], $object->param);
+        // by param name
+        $object = $container->create(CreateTestHasUntypedParam::class, ['untypedParam' => ['username' => 'wan3land']]);
+        static::assertSame(['username' => 'wan3land'], $object->untypedParam);
     }
 
-    public function testCreateMultiParamsClassWithArguments()
+    public function testCreateUntypedParamClassFail()
     {
         $container = new Container();
 
-        try {
-            $container->create(CreateTestHasMultiParam::class);
-            static::fail();
-        } catch (CannotResolveException $e) {
-            static::assertEquals(CreateTestHasMultiParam::class, $e->getClass());
-            static::assertEquals('param1', $e->getParameter());
-        }
+        /** @var \Wandu\DI\Exception\CannotResolveException $exception */
+        $exception = static::catchException(function () use ($container) {
+            $container->create(CreateTestHasUntypedParam::class);
+        });
 
-        $container->bind(CreateTestDependencyInterface::class, CreateTestDependency::class);
+        static::assertInstanceOf(CannotResolveException::class, $exception);
+        static::assertEquals('untypedParam', $exception->getParameter());
+        static::assertEquals(__FILE__, $exception->getFile());
+        static::assertEquals(
+            (new ReflectionClass(CreateTestHasUntypedParam::class))->getConstructor()->getStartLine(),
+            $exception->getLine()
+        );
+    }
 
-        try {
-            $container->create(CreateTestHasMultiParam::class);
-            static::fail();
-        } catch (CannotResolveException $e) {
-            static::assertEquals(CreateTestHasMultiParam::class, $e->getClass());
-            static::assertEquals('param2', $e->getParameter());
-        }
+    public function testCreateComplexParamsClassSuccess()
+    {
+        $container = new Container();
 
-        // only sequential
-        $object = $container->create(CreateTestHasMultiParam::class, [
+        // by assoc classname
+        $object = $container->create(CreateTestHasTypedParam::class, [
+            CreateTestDependencyInterface::class => $dep = new CreateTestDependency,
+        ]);
+        static::assertSame($dep, $object->typedParam);
+        
+        // by sequential
+        $object = $container->create(CreateTestHasComplexParam::class, [
             $param1 = new CreateTestDependency(),
             $param2 = new stdClass,
         ]);
@@ -84,18 +92,19 @@ class CreateTest extends TestCase
         static::assertSame('param3', $object->param3);
         static::assertSame('param4', $object->param4);
 
-        // only assoc
-        $object = $container->create(CreateTestHasMultiParam::class, [
+        // by assoc paramname
+        $object = $container->create(CreateTestHasComplexParam::class, [
+            'param1' => $param1 = new CreateTestDependency(),
             'param2' => $param2 = new stdClass,
             'param4' => $param4 = new stdClass,
         ]);
-        static::assertInstanceOf(CreateTestDependencyInterface::class, $object->param1);
+        static::assertSame($param1, $object->param1);
         static::assertSame($param2, $object->param2);
         static::assertSame('param3', $object->param3);
         static::assertSame($param4, $object->param4);
         
         // assoc with class name
-        $object = $container->create(CreateTestHasMultiParam::class, [
+        $object = $container->create(CreateTestHasComplexParam::class, [
             CreateTestDependencyInterface::class => $param1 = new CreateTestDependency(),
             'param2' => $param2 = new stdClass,
             'param4' => $param4 = new stdClass,
@@ -107,7 +116,7 @@ class CreateTest extends TestCase
         static::assertSame($param4, $object->param4);
 
         // complex
-        $object = $container->create(CreateTestHasMultiParam::class, [
+        $object = $container->create(CreateTestHasComplexParam::class, [
             $param1 = new CreateTestDependency(),
             $param2 = new stdClass,
             'param4' => $param4 = new stdClass,
@@ -118,28 +127,61 @@ class CreateTest extends TestCase
         static::assertSame($param3, $object->param3);
         static::assertSame($param4, $object->param4);
     }
+
+    public function testCreateComplexParamsClassFail()
+    {
+        $container = new Container();
+
+        /** @var \Wandu\DI\Exception\CannotResolveException $exception */
+        $exception = static::catchException(function () use ($container) {
+            $container->create(CreateTestHasComplexParam::class);
+        });
+
+        static::assertInstanceOf(CannotResolveException::class, $exception);
+        static::assertEquals('param1', $exception->getParameter());
+        static::assertEquals(__FILE__, $exception->getFile());
+        static::assertEquals(
+            (new ReflectionClass(CreateTestHasComplexParam::class))->getConstructor()->getStartLine(),
+            $exception->getLine()
+        );
+
+        $container->bind(CreateTestDependencyInterface::class, CreateTestDependency::class);
+
+        /** @var \Wandu\DI\Exception\CannotResolveException $exception */
+        $exception = static::catchException(function () use ($container) {
+            $container->create(CreateTestHasComplexParam::class);
+        });
+
+        static::assertInstanceOf(CannotResolveException::class, $exception);
+        static::assertEquals('param2', $exception->getParameter());
+        static::assertEquals(__FILE__, $exception->getFile());
+        static::assertEquals(
+            (new ReflectionClass(CreateTestHasComplexParam::class))->getConstructor()->getStartLine(),
+            $exception->getLine()
+        );
+    }
 }
 
 interface CreateTestDependencyInterface {}
 class CreateTestDependency implements CreateTestDependencyInterface {}
 
-class CreateTestHasTypeParam
+class CreateTestHasTypedParam
 {
-    public function __construct(CreateTestDependencyInterface $param)
+    public function __construct(CreateTestDependencyInterface $typedParam)
     {
-        $this->param = $param;
+        $this->typedParam = $typedParam;
     }
 }
 
-class CreateTestHasParam
+class CreateTestHasUntypedParam
 {
-    public function __construct($param)
+    public function __construct($untypedParam)
     {
-        $this->param = $param;
+        $this->untypedParam = $untypedParam;
     }
 }
 
-class CreateTestHasMultiParam
+class CreateTestHasComplexParam
 {
     public function __construct(CreateTestDependencyInterface $param1, $param2, $param3 = 'param3', $param4 = 'param4')
     {

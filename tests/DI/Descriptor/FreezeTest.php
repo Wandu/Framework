@@ -18,12 +18,11 @@ class FreezeTest extends TestCase
         $container->instance('obj1', new stdClass);
         $container->destroy('obj1');
 
-        try {
+        $exception = static::catchException(function () use ($container) {
             $container->instance('obj2', new stdClass)->freeze();
             $container->destroy('obj2');
-            static::fail();
-        } catch (CannotChangeException $e) {
-            static::addToAssertionCount(1);
-        }
+        });
+        
+        static::assertInstanceOf(CannotChangeException::class, $exception);
     }
 }

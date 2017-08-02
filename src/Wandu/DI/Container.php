@@ -1,17 +1,20 @@
 <?php
 namespace Wandu\DI;
 
+use InvalidArgumentException;
+use ReflectionFunctionAbstract;
+use ReflectionClass;
+use ReflectionException;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface as PsrContainerInterface;
+use Wandu\DI\Contracts\ContainerFluent;
 use Wandu\DI\Contracts\ResolverInterface;
 use Wandu\DI\Exception\CannotChangeException;
 use Wandu\DI\Exception\CannotFindParameterException;
 use Wandu\DI\Exception\CannotResolveException;
 use Wandu\DI\Exception\NullReferenceException;
 use Wandu\DI\Exception\RequirePackageException;
-use Wandu\DI\Resolvers\BindResolver;
-use Wandu\DI\Resolvers\CallableResolver;
-use Wandu\DI\Resolvers\InstanceResolver;
+use Wandu\Reflection\ReflectionCallable;
 
 class Container implements ContainerInterface
 {
@@ -20,30 +23,41 @@ class Container implements ContainerInterface
     
     /** @var \Wandu\DI\Descriptor[] */
     protected $descriptors = [];
+
+    /** @var array */
+    protected $instances = [];
+
+    /** @var array */
+    protected $classes = [];
     
     /** @var array */
-    protected $caches = [];
+    protected $closures = [];
+    
+    /** @var array */
+    protected $aliases = [];
 
     /** @var \Wandu\DI\ServiceProviderInterface[] */
     protected $providers = [];
 
-    /** @var array */
-    protected $aliases = [];
-
-    /** @var array */
-    protected $aliasIndex = [];
-    
     /** @var bool */
     protected $isBooted = false;
 
-    public function __construct()
+    public function __construct(array $options = [])
     {
-        $this->caches = [
+        $this->instances = [
             Container::class => $this,
             ContainerInterface::class => $this,
             PsrContainerInterface::class => $this,
             'container' => $this,
         ];
+    }
+
+    public function __clone()
+    {
+        $this->instances[Container::class] = $this;
+        $this->instances[ContainerInterface::class] = $this;
+        $this->instances[PsrContainerInterface::class] = $this;
+        $this->instances['container'] = $this;
     }
 
     /**
@@ -54,14 +68,6 @@ class Container implements ContainerInterface
         $instance = static::$instance;
         static::$instance = $this;
         return $instance;
-    }
-
-    public function __clone()
-    {
-        $this->caches[Container::class] = $this;
-        $this->caches[ContainerInterface::class] = $this;
-        $this->caches[PsrContainerInterface::class] = $this;
-        $this->caches['container'] = $this;
     }
 
     /**
@@ -109,26 +115,10 @@ class Container implements ContainerInterface
      */
     public function get($name)
     {
-        while (isset($this->aliases[$name])) {
-            $name = $this->aliases[$name];
+        if (isset($this->descriptors[$name])) {
+            $this->descriptors[$name]->freeze();
         }
-        if (array_key_exists($name, $this->caches)) {
-            return $this->caches[$name];
-        }
-        try {
-            try {
-                $instance = $this->descriptor($name)->createInstance($this);
-            } catch (NullReferenceException $e) {
-                if (!class_exists($name)) {
-                    throw $e;
-                }
-                $this->bind($name);
-                $instance = $this->descriptor($name)->createInstance($this);
-            }
-        } catch (CannotFindParameterException $e) {
-            throw new CannotResolveException($name, $e->getParameter());
-        }
-        return $instance;
+        return $this->resolve($name);
     }
 
     /**
@@ -148,57 +138,76 @@ class Container implements ContainerInterface
      */
     public function has($name)
     {
-        return
-            array_key_exists($name, $this->caches) ||
-            array_key_exists($name, $this->descriptors) || 
-            class_exists($name) ||
-            isset($this->aliases[$name]);
+        try {
+            $this->resolve($name);
+            return true;
+        } catch (NullReferenceException $e) {
+        } catch (CannotResolveException $e) {
+        }
+        return false;
     }
-
+    
     /**
      * {@inheritdoc}
      */
     public function destroy(...$names)
     {
         foreach ($names as $name) {
-            if (array_key_exists($name, $this->caches)) {
-                throw new CannotChangeException($name);
-            }
             if (array_key_exists($name, $this->descriptors)) {
                 if ($this->descriptors[$name]->frozen) {
                     throw new CannotChangeException($name);
                 }
             }
-            unset($this->descriptors[$name]);
+            unset(
+                $this->descriptors[$name],
+                $this->instances[$name],
+                $this->classes[$name],
+                $this->closures[$name]
+            );
         }
     }
 
     /**
      * {@inheritdoc}
      */
-    public function instance(string $name, $value): Descriptor
+    public function instance(string $name, $value): ContainerFluent
     {
-        return $this->createDescriptor($name, new InstanceResolver($value), class_exists($name) ? $name : null);
+        $this->destroy($name);
+        $this->instances[$name] = $value;
+        return $this->descriptors[$name] = new Descriptor();
+    }
+
+    /**
+     * @deprecated
+     */
+    public function closure(string $name, callable $handler): ContainerFluent
+    {
+        return $this->bind($name, $handler);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function closure(string $name, callable $handler): Descriptor
+    public function bind(string $name, $className = null): ContainerFluent
     {
-        return $this->createDescriptor($name, new CallableResolver($handler), class_exists($name) ? $name : null);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function bind(string $name, string $className = null): Descriptor
-    {
-        if (isset($className)) {
+        if (!isset($className)) {
+            $this->destroy($name);
+            $this->classes[$name] = $name;
+            return $this->descriptors[$name] = new Descriptor();
+        }
+        if (is_string($className) && class_exists($className)) {
+            $this->destroy($name);
+            $this->classes[$name] = $className;
             $this->alias($className, $name);
-            return $this->createDescriptor($name, new BindResolver($className), $className);
+            return $this->descriptors[$name] = new Descriptor();
+        } elseif (is_callable($className)) {
+            $this->destroy($name);
+            $this->closures[$name] = $className;
+            return $this->descriptors[$name] = new Descriptor();
         }
-        return $this->createDescriptor($name, new BindResolver($name), $name);
+        throw new InvalidArgumentException(
+            sprintf('Argument 2 must be class name or Closure, "%s" given', is_object($className) ? get_class($className) : gettype($className))
+        );
     }
 
     /**
@@ -206,17 +215,13 @@ class Container implements ContainerInterface
      */
     public function alias(string $alias, string $target)
     {
-        if (!array_key_exists($target, $this->aliasIndex)) {
-            $this->aliasIndex[$target] = [];
-        }
-        $this->aliasIndex[$target][] = $alias;
         $this->aliases[$alias] = $target;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function descriptor(string $name): Descriptor
+    public function descriptor(string $name): ContainerFluent
     {
         while (isset($this->aliases[$name])) {
             $name = $this->aliases[$name];
@@ -234,11 +239,7 @@ class Container implements ContainerInterface
     {
         $new = clone $this;
         foreach ($arguments as $name => $argument) {
-            if ($argument instanceof Descriptor) {
-                 $new->createDescriptor($name, $argument);
-            } else {
-                $new->instance($name, $argument);
-            }
+            $new->instance($name, $argument);
         }
         return $new;
     }
@@ -248,23 +249,30 @@ class Container implements ContainerInterface
      */
     public function create(string $className, array $arguments = [])
     {
+        if (!class_exists($className)) {
+            throw new NullReferenceException($className);
+        }
         try {
-            if (!class_exists($className)) {
-                throw new NullReferenceException($className);
+            if ($constructor = (new ReflectionClass($className))->getConstructor()) {
+                $arguments = $this->getParameters($constructor, $arguments);
+                return new $className(...$arguments);
             }
-            return (new Descriptor($className, new BindResolver($className)))->assign($arguments)->createInstance($this);
         } catch (CannotFindParameterException $e) {
             throw new CannotResolveException($className, $e->getParameter());
         }
+        return new $className;
     }
-
+    
     /**
      * {@inheritdoc}
      */
     public function call(callable $callee, array $arguments = [])
     {
         try {
-            return (new Descriptor(null, new CallableResolver($callee)))->assign($arguments)->createInstance($this);
+            return call_user_func_array(
+                $callee,
+                $this->getParameters(new ReflectionCallable($callee), $arguments)
+            );
         } catch (CannotFindParameterException $e) {
             throw new CannotResolveException($callee, $e->getParameter());
         }
@@ -293,9 +301,116 @@ class Container implements ContainerInterface
         return $this;
     }
 
-    protected function createDescriptor($name, ResolverInterface $resolver, $className = null): Descriptor
+    protected function resolve($name)
     {
-        $this->destroy($name);
-        return $this->descriptors[$name] = new Descriptor($className, $resolver);
+        while (isset($this->aliases[$name])) {
+            $name = $this->aliases[$name];
+        }
+        if (array_key_exists($name, $this->instances)) {
+            return $this->instances[$name];
+        }
+        if (!array_key_exists($name, $this->descriptors)) {
+            if (!class_exists($name)) {
+                throw new NullReferenceException($name);
+            }
+            $this->bind($name);
+        }
+        $descriptor = $this->descriptors[$name];
+        if (array_key_exists($name, $this->classes)) {
+            $instance = $this->create($this->classes[$name], $this->getArgumentFromDescriptor($descriptor));
+        } elseif (array_key_exists($name, $this->closures)) {
+            $instance = $this->call($this->closures[$name], $this->getArgumentFromDescriptor($descriptor));
+        }
+        foreach ($descriptor->afterHandlers as $handler) {
+            call_user_func($handler, $instance);
+        }
+        if (!$descriptor->factory) {
+            $this->instances[$name] = $instance;
+        }
+        return $instance;
     }
+
+    /**
+     * @param \Wandu\DI\Descriptor $descriptor
+     * @return array
+     */
+    protected function getArgumentFromDescriptor(Descriptor $descriptor)
+    {
+        $arguments = [];
+        foreach ($descriptor->assigns as $key => $value) {
+            try {
+                $arguments[$key] = $this->get($value);
+            } catch (NullReferenceException $e) {}
+        }
+        return $descriptor->values + $arguments;
+    }
+    
+    /**
+     * @param \ReflectionFunctionAbstract $reflectionFunction
+     * @param array $arguments
+     * @return array
+     */
+    protected function getParameters(ReflectionFunctionAbstract $reflectionFunction, array $arguments = [])
+    {
+        $parametersToReturn = static::getSeqArray($arguments);
+
+        $reflectionParameters = array_slice($reflectionFunction->getParameters(), count($parametersToReturn));
+        if (!count($reflectionParameters)) {
+            return $parametersToReturn;
+        }
+        /* @var \ReflectionParameter $param */
+        foreach ($reflectionParameters as $param) {
+            /*
+             * #1. search in arguments by parameter name
+             * #1.1. search in arguments by class name
+             * #2. if parameter has type hint
+             * #2.1. search in container by class name
+             * #3. if has default value, insert default value.
+             * #4. exception
+             */
+            $paramName = $param->getName();
+            try {
+                if (array_key_exists($paramName, $arguments)) { // #1.
+                    $parametersToReturn[] = $arguments[$paramName];
+                    continue;
+                }
+                $paramClass = $param->getClass();
+                if ($paramClass) { // #2.
+                    $paramClassName = $paramClass->getName();
+                    if (array_key_exists($paramClassName, $arguments)) {
+                        $parametersToReturn[] = $arguments[$paramClassName];
+                        continue;
+                    } else { // #2.1.
+                        try {
+                            $parametersToReturn[] = $this->get($paramClassName);
+                            continue;
+                        } catch (NullReferenceException $e) {}
+                    }
+                }
+                if ($param->isDefaultValueAvailable()) { // #3.
+                    $parametersToReturn[] = $param->getDefaultValue();
+                    continue;
+                }
+                throw new CannotFindParameterException($paramName); // #4.
+            } catch (ReflectionException $e) {
+                throw new CannotFindParameterException($paramName);
+            }
+        }
+        return $parametersToReturn;
+    }
+
+    /**
+     * @param array $array
+     * @return array
+     */
+    protected static function getSeqArray(array $array)
+    {
+        $arrayToReturn = [];
+        foreach ($array as $key => $item) {
+            if (is_int($key)) {
+                $arrayToReturn[] = $item;
+            }
+        }
+        return $arrayToReturn;
+    } 
 }

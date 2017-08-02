@@ -3,6 +3,7 @@ namespace Wandu\DI;
 
 use ArrayAccess;
 use Psr\Container\ContainerInterface as PsrContainerInterface;
+use Wandu\DI\Contracts\ContainerFluent;
 
 interface ContainerInterface extends ArrayAccess, PsrContainerInterface
 {
@@ -23,23 +24,16 @@ interface ContainerInterface extends ArrayAccess, PsrContainerInterface
     /**
      * @param string $className
      * @param mixed $value
-     * @return \Wandu\DI\Descriptor
+     * @return \Wandu\DI\Contracts\ContainerFluent
      */
-    public function instance(string $className, $value): Descriptor;
-
-    /**
-     * @param string $className
-     * @param callable $handler
-     * @return \Wandu\DI\Descriptor
-     */
-    public function closure(string $className, callable $handler): Descriptor;
+    public function instance(string $className, $value): ContainerFluent;
 
     /**
      * @param string $name
-     * @param string $className
-     * @return \Wandu\DI\Descriptor
+     * @param string|\Closure $className
+     * @return \Wandu\DI\Contracts\ContainerFluent
      */
-    public function bind(string $name, string $className = null): Descriptor;
+    public function bind(string $name, $className = null): ContainerFluent;
 
     /**
      * @param string $alias
@@ -50,9 +44,9 @@ interface ContainerInterface extends ArrayAccess, PsrContainerInterface
 
     /**
      * @param string $name
-     * @return \Wandu\DI\Descriptor
+     * @return \Wandu\DI\Contracts\ContainerFluent
      */
-    public function descriptor(string $name): Descriptor;
+    public function descriptor(string $name): ContainerFluent;
 
     /**
      * @param array $arguments
@@ -73,10 +67,6 @@ interface ContainerInterface extends ArrayAccess, PsrContainerInterface
      * @return mixed
      */
     public function call(callable $callee, array $arguments = []);
-
-    /*
-     * for service provider
-     */
 
     /**
      * @param \Wandu\DI\ServiceProviderInterface $provider

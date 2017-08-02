@@ -2,10 +2,13 @@
 namespace Wandu\DI\Descriptor;
 
 use PHPUnit\Framework\TestCase;
+use Wandu\Assertions;
 use Wandu\DI\Container;
 
 class AfterTest extends TestCase
 {
+    use Assertions;
+    
     public function testAfterBind()
     {
         $container = new Container();
@@ -26,15 +29,15 @@ class AfterTest extends TestCase
         });
 
         // after
-        static::assertEquals('instance contents', $container['instance']->contents);
+        static::assertFalse(isset($container['instance']->contents));
         static::assertSame($renderer, $container['instance']);
     }
     
-    public function testAfterClosure()
+    public function testAfterBindClosure()
     {
         $container = new Container();
 
-        $container->closure('closure', function () {
+        $container->bind('closure', function () {
             return new AfterTestJsonRenderer();
         })->after(function ($item) {
             $item->contents = 'closure contents';
@@ -49,7 +52,7 @@ class AfterTest extends TestCase
     {
         $container = new Container();
 
-        $container->instance('xml', $renderer = new AfterTestXmlRenderer);
+        $container->bind('xml', AfterTestXmlRenderer::class);
 
         $container->alias('xml.alias', 'xml');
         $container->alias('xml.other.alias', 'xml.alias');
@@ -60,36 +63,8 @@ class AfterTest extends TestCase
         });
 
         static::assertEquals('alias contents', $container['xml']->contents);
-        static::assertSame($renderer, $container['xml.other.alias']);
+        static::assertInstanceOf(AfterTestXmlRenderer::class, $container['xml.other.alias']);
     }
-
-//    public function testAliasAfterPropagation()
-//    {
-//        $container = new Container();
-//
-//        // extend first,,
-//        $container->descriptor('xml.other.alias')->after(function ($item) {
-//            $item->contents = 'alias contents';
-//        });
-//
-//        $container->instance('xml', $renderer = new AfterTestXmlRenderer);
-//
-//        $container->alias('xml.alias', 'xml');
-//        $container->alias('xml.other.alias', 'xml.alias');
-//
-//        static::assertEquals('alias contents', $container['xml']->contents);
-//
-//        // and equal :-)
-//        static::assertSame($renderer, $container['xml.other.alias']);
-//    }
-//
-//    public function testAfterUnknown()
-//    {
-//        $container = new Container();
-//        $container->descriptor('unknown')->after(function ($item) {
-//            return $item .' extended..';
-//        });
-//    }
 }
 
 interface AfterTestRenderable {}

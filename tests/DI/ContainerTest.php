@@ -29,12 +29,15 @@ class ContainerTest extends TestCase
         static::assertTrue($container->has(ContainerTestRenderable::class)); // set by instance
         static::assertTrue($container->has(ContainerTestJsonRenderer::class)); // class true
         static::assertFalse($container->has(ContainerTestServerAccessible::class)); // interface false
+        static::assertFalse($container->has(ContainerTestHttpController::class));
         static::assertFalse($container->has('Unknown\\Class')); // not defined class
 
         // "has" map to offsetExists
         static::assertTrue(isset($container[ContainerTestRenderable::class]));
-        static::assertFalse(isset($container[ContainerTestServerAccessible::class]));
         static::assertTrue(isset($container[ContainerTestJsonRenderer::class]));
+        static::assertFalse(isset($container[ContainerTestServerAccessible::class]));
+        static::assertFalse(isset($container[ContainerTestHttpController::class]));
+        static::assertFalse(isset($container['Unknown\\Class']));
     }
 
     public function testHasNull()

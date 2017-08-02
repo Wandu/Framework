@@ -2,33 +2,40 @@
 namespace Wandu\DI\Methods;
 
 use PHPUnit\Framework\TestCase;
+use ReflectionClass;
 use stdClass;
 use Wandu\Assertions;
 use Wandu\DI\Container;
 use Wandu\DI\Exception\CannotResolveException;
+use Wandu\Reflection\ReflectionCallable;
 
 class CallTest extends TestCase 
 {
     use Assertions;
     
-    public function testCall()
+    public function testCallAutoResolveFail()
     {
         $container = new Container();
 
-        // create fail..
-        try {
-            $container->call(__NAMESPACE__ . '\\callTestFunctionHasTypeParam');
-            static::fail();
-        } catch (CannotResolveException $e) {
-            static::assertEquals(null, $e->getClass());
-            static::assertEquals(__NAMESPACE__ . '\\callTestFunctionHasTypeParam', $e->getCallee());
-            static::assertEquals('param', $e->getParameter());
-        }
+        /** @var \Wandu\DI\Exception\CannotResolveException $exception */
+        $exception = static::catchException(function () use ($container) {
+            $container->call(__NAMESPACE__ . '\\callTestHasTypedParam');
+        });
+
+        static::assertInstanceOf(CannotResolveException::class, $exception);
+        static::assertEquals('param', $exception->getParameter());
+        static::assertEquals(__FILE__, $exception->getFile());
+        static::assertEquals((new ReflectionCallable(__NAMESPACE__ . '\\callTestHasTypedParam'))->getStartLine(),
+            $exception->getLine());
+    }
+
+    public function testCallAutoResolveSuccess()
+    {
+        $container = new Container();
 
         $container->bind(CallTestDependencyInterface::class, CallTestDependency::class);
 
-        // create success
-        $result = $container->call(__NAMESPACE__ . '\\callTestFunctionHasTypeParam');
+        $result = $container->call(__NAMESPACE__ . '\\callTestHasTypedParam');
         static::assertInstanceOf(CallTestDependencyInterface::class, $result);
         static::assertInstanceOf(CallTestDependency::class, $result);
     }
@@ -37,20 +44,24 @@ class CallTest extends TestCase
     {
         $container = new Container();
 
-        try {
-            $container->call(__NAMESPACE__ . '\\callTestFunctionHasParam');
-            static::fail();
-        } catch (CannotResolveException $e) {
-            static::assertEquals(null, $e->getClass());
-            static::assertEquals(__NAMESPACE__ . '\\callTestFunctionHasParam', $e->getCallee());
-            static::assertEquals('param', $e->getParameter());
-        }
+        /** @var \Wandu\DI\Exception\CannotResolveException $exception */
+        $exception = static::catchException(function () use ($container) {
+            $container->call(__NAMESPACE__ . '\\callTestHasUntypedParam');
+        });
+
+        static::assertInstanceOf(CannotResolveException::class, $exception);
+        static::assertEquals('param', $exception->getParameter());
+        static::assertEquals(__FILE__, $exception->getFile());
+        static::assertEquals(
+            (new ReflectionCallable(__NAMESPACE__ . '\\callTestHasUntypedParam'))->getStartLine(),
+            $exception->getLine()
+        );
 
         // single param class
-        $result = $container->call(__NAMESPACE__ . '\\callTestFunctionHasParam', [['username' => 'wan2land']]);
+        $result = $container->call(__NAMESPACE__ . '\\callTestHasUntypedParam', [['username' => 'wan2land']]);
         static::assertSame(['username' => 'wan2land'], $result);
 
-        $result = $container->call(__NAMESPACE__ . '\\callTestFunctionHasParam', ['param' => ['username' => 'wan3land']]);
+        $result = $container->call(__NAMESPACE__ . '\\callTestHasUntypedParam', ['param' => ['username' => 'wan3land']]);
         static::assertSame(['username' => 'wan3land'], $result);
     }
 
@@ -58,27 +69,35 @@ class CallTest extends TestCase
     {
         $container = new Container();
 
-        try {
-            $container->call(__NAMESPACE__ . '\\callTestFunctionHasMultiParam');
-            static::fail();
-        } catch (CannotResolveException $e) {
-            static::assertEquals(null, $e->getClass());
-            static::assertEquals(__NAMESPACE__ . '\\callTestFunctionHasMultiParam', $e->getCallee());
-            static::assertEquals('param1', $e->getParameter());
-        }
+        /** @var \Wandu\DI\Exception\CannotResolveException $exception */
+        $exception = static::catchException(function () use ($container) {
+            $container->call(__NAMESPACE__ . '\\callTestHasComplexParam');
+        });
 
+        static::assertInstanceOf(CannotResolveException::class, $exception);
+        static::assertEquals('param1', $exception->getParameter());
+        static::assertEquals(__FILE__, $exception->getFile());
+        static::assertEquals(
+            (new ReflectionCallable(__NAMESPACE__ . '\\callTestHasComplexParam'))->getStartLine(),
+            $exception->getLine()
+        );
+        
         $container->bind(CallTestDependencyInterface::class, CallTestDependency::class);
 
-        try {
-            $container->call(__NAMESPACE__ . '\\callTestFunctionHasMultiParam');
-            static::fail();
-        } catch (CannotResolveException $e) {
-            static::assertEquals(null, $e->getClass());
-            static::assertEquals('param2', $e->getParameter());
-        }
+        $exception = static::catchException(function () use ($container) {
+            $container->call(__NAMESPACE__ . '\\callTestHasComplexParam');
+        });
+
+        static::assertInstanceOf(CannotResolveException::class, $exception);
+        static::assertEquals('param2', $exception->getParameter());
+        static::assertEquals(__FILE__, $exception->getFile());
+        static::assertEquals(
+            (new ReflectionCallable(__NAMESPACE__ . '\\callTestHasComplexParam'))->getStartLine(),
+            $exception->getLine()
+        );
 
         // only sequential
-        $result = $container->call(__NAMESPACE__ . '\\callTestFunctionHasMultiParam', [
+        $result = $container->call(__NAMESPACE__ . '\\callTestHasComplexParam', [
             $param1 = new CallTestDependency(),
             $param2 = new stdClass,
         ]);
@@ -88,7 +107,7 @@ class CallTest extends TestCase
         static::assertSame('param4', $result[3]);
 
         // only assoc
-        $result = $container->call(__NAMESPACE__ . '\\callTestFunctionHasMultiParam', [
+        $result = $container->call(__NAMESPACE__ . '\\callTestHasComplexParam', [
             'param2' => $param2 = new stdClass,
             'param4' => $param4 = new stdClass,
         ]);
@@ -98,7 +117,7 @@ class CallTest extends TestCase
         static::assertSame($param4, $result[3]);
 
         // complex
-        $result = $container->call(__NAMESPACE__ . '\\callTestFunctionHasMultiParam', [
+        $result = $container->call(__NAMESPACE__ . '\\callTestHasComplexParam', [
             $param1 = new CallTestDependency(),
             $param2 = new stdClass,
             'param4' => $param4 = new stdClass,
@@ -157,13 +176,19 @@ class CallTest extends TestCase
         $container = new Container();
         $container->alias(CallTestCallWithOnlyAliasInterface::class, CallTestCallWithOnlyAlias::class);
 
-        static::assertException(
-            new CannotResolveException(CallTestCallWithOnlyAlias::class, 'param'),
-            function () use ($container) {
-                $container->call(function (CallTestCallWithOnlyAliasInterface $depend) {
-                    return $depend;
-                });
-            }
+        /** @var \Wandu\DI\Exception\CannotResolveException $exception */
+        $exception = static::catchException(function () use ($container) {
+            $container->call(function (CallTestCallWithOnlyAliasInterface $depend) {
+                return $depend;
+            });
+        });
+
+        static::assertInstanceOf(CannotResolveException::class, $exception);
+        static::assertEquals('param', $exception->getParameter());
+        static::assertEquals(__FILE__, $exception->getFile());
+        static::assertEquals(
+            (new ReflectionClass(CallTestCallWithOnlyAlias::class))->getConstructor()->getStartLine(),
+            $exception->getLine()
         );
 
         $expected = new CallTestCallWithOnlyAlias(1111);
@@ -185,9 +210,9 @@ class CallTestCallWithOnlyAlias implements CallTestCallWithOnlyAliasInterface {
     public function __construct($param) {}
 }
 
-function callTestFunctionHasTypeParam(CallTestDependencyInterface $param) { return $param; }
-function callTestFunctionHasParam($param) { return $param; }
-function callTestFunctionHasMultiParam(CallTestDependencyInterface $param1, $param2, $param3 = 'param3', $param4 = 'param4')
+function callTestHasTypedParam(CallTestDependencyInterface $param) { return $param; }
+function callTestHasUntypedParam($param) { return $param; }
+function callTestHasComplexParam(CallTestDependencyInterface $param1, $param2, $param3 = 'param3', $param4 = 'param4')
 {
     return [$param1, $param2, $param3, $param4];
 }

@@ -3,12 +3,16 @@ namespace Wandu\DI;
 
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ServerRequestInterface;
+use Wandu\Assertions;
+use ReflectionClass;
 use Wandu\DI\Exception\CannotResolveException;
 use Wandu\Http\Parameters\ParsedBody;
 use Wandu\Http\Psr\ServerRequest;
 
 class AutoResolveTest extends TestCase
 {
+    use Assertions;
+    
     public function testBind()
     {
         $container = new Container();
@@ -28,21 +32,31 @@ class AutoResolveTest extends TestCase
     {
         $container = new Container();
 
-        try {
+        /** @var \Wandu\DI\Exception\CannotResolveException $exception */
+        $exception = static::catchException(function () use ($container) {
             $container->get(AutoResolveTestExceptionDepth1::class);
-            static::fail();
-        } catch (CannotResolveException $e) {
-            static::assertEquals('unknown', $e->getParameter());
-            static::assertEquals(AutoResolveTestExceptionDepth1::class, $e->getClass());
-        }
+        });
 
-        try {
+        static::assertInstanceOf(CannotResolveException::class, $exception);
+        static::assertEquals('unknown', $exception->getParameter());
+        static::assertEquals(__FILE__, $exception->getFile());
+        static::assertEquals(
+            (new ReflectionClass(AutoResolveTestExceptionDepth1::class))->getConstructor()->getStartLine(),
+            $exception->getLine()
+        );
+
+        /** @var \Wandu\DI\Exception\CannotResolveException $exception */
+        $exception = static::catchException(function () use ($container) {
             $container->get(AutoResolveTestDepth2::class);
-            static::fail();
-        } catch (CannotResolveException $e) {
-            static::assertEquals('unknown', $e->getParameter());
-            static::assertEquals(AutoResolveTestExceptionDepth1::class, $e->getClass());
-        }
+        });
+
+        static::assertInstanceOf(CannotResolveException::class, $exception);
+        static::assertEquals('unknown', $exception->getParameter());
+        static::assertEquals(__FILE__, $exception->getFile());
+        static::assertEquals(
+            (new ReflectionClass(AutoResolveTestExceptionDepth1::class))->getConstructor()->getStartLine(),
+            $exception->getLine()
+        );
     }
     
     public function testCascadeResolve()

@@ -10,11 +10,11 @@ class FactoryTest extends TestCase
 {
     use Assertions;
     
-    public function testClosureFactory()
+    public function testBindClosureFactory()
     {
         $container = new Container();
 
-        $container->closure('obj1', function () {
+        $container->bind('obj1', function () {
             return new stdClass();
         });
 
@@ -25,7 +25,7 @@ class FactoryTest extends TestCase
         static::assertSame($object1, $container['obj1']);
 
 
-        $container->closure('obj2', function () {
+        $container->bind('obj2', function () {
             return new stdClass();
         })->factory();
         $object2 = $container['obj2'];
