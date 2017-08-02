@@ -63,6 +63,16 @@ trait Assertions
         Assert::fail($message);
     }
 
+    static public function catchException(Closure $handler)
+    {
+        try {
+            $handler();
+        } catch (Throwable $e) {
+            return $e;
+        }
+        return null;
+    }
+    
     public static function assertExceptionInstanceOf($expected, Closure $closure, $message = '')
     {
         try {
