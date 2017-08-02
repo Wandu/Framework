@@ -3,7 +3,6 @@ namespace Wandu\DI;
 
 use ArrayAccess;
 use Psr\Container\ContainerInterface as PsrContainerInterface;
-use Wandu\DI\Contracts\ContainerFluent;
 
 interface ContainerInterface extends ArrayAccess, PsrContainerInterface
 {
@@ -24,14 +23,14 @@ interface ContainerInterface extends ArrayAccess, PsrContainerInterface
     /**
      * @param string $className
      * @param mixed $value
-     * @return \Wandu\DI\Contracts\ContainerFluent
+     * @return \Wandu\DI\ContainerFluent
      */
     public function instance(string $className, $value): ContainerFluent;
 
     /**
      * @param string $name
      * @param string|\Closure $className
-     * @return \Wandu\DI\Contracts\ContainerFluent
+     * @return \Wandu\DI\ContainerFluent
      */
     public function bind(string $name, $className = null): ContainerFluent;
 
@@ -44,7 +43,7 @@ interface ContainerInterface extends ArrayAccess, PsrContainerInterface
 
     /**
      * @param string $name
-     * @return \Wandu\DI\Contracts\ContainerFluent
+     * @return \Wandu\DI\ContainerFluent
      */
     public function descriptor(string $name): ContainerFluent;
 
@@ -67,15 +66,4 @@ interface ContainerInterface extends ArrayAccess, PsrContainerInterface
      * @return mixed
      */
     public function call(callable $callee, array $arguments = []);
-
-    /**
-     * @param \Wandu\DI\ServiceProviderInterface $provider
-     * @return void
-     */
-    public function register(ServiceProviderInterface $provider);
-
-    /**
-     * @return void
-     */
-    public function boot();
 }

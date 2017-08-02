@@ -6,13 +6,10 @@ use Doctrine\Common\Annotations\Annotation\Target;
 
 /**
  * @Annotation
- * @Target({"METHOD"})
+ * @Target({"PROPERTY"})
  */
-class Assign
+class Wire
 {
-    /** @Required @var string */
-    public $name;
-    
     /** @Required @var string */
     public $target;
 }

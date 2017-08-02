@@ -1,13 +1,19 @@
 <?php
 namespace Wandu\DI;
 
+use Doctrine\Common\Annotations\Reader;
 use InvalidArgumentException;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface as PsrContainerInterface;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionFunctionAbstract;
-use Wandu\DI\Contracts\ContainerFluent;
+use Wandu\DI\Annotations\Alias;
+use Wandu\DI\Annotations\Assign;
+use Wandu\DI\Annotations\AssignValue;
+use Wandu\DI\Annotations\Factory;
+use Wandu\DI\Annotations\Wire;
+use Wandu\DI\Annotations\WireValue;
 use Wandu\DI\Exception\CannotChangeException;
 use Wandu\DI\Exception\CannotFindParameterException;
 use Wandu\DI\Exception\CannotResolveException;
@@ -307,6 +313,41 @@ class Container implements ContainerInterface
             $descriptor->wireMany($information['wires'] ?? []);
             if ($information['factory'] ?? false) {
                 $descriptor->factory();
+            }
+        }
+    }
+    
+    public function registerFromAnnotation($classes)
+    {
+        $reader = $this->get(Reader::class);
+        if (is_string($classes)) $classes = [$classes];
+        foreach ($classes as $class) {
+            $descriptor = $this->bind($class);
+            $reflClass = new ReflectionClass($class);
+            foreach ($reader->getClassAnnotations($reflClass) as $annotation) {
+                if ($annotation instanceof Alias) {
+                    $this->alias($annotation->name, $class);
+                } elseif ($annotation instanceof Factory) {
+                    $descriptor->factory();
+                }
+            }
+            if ($reflConstructor = $reflClass->getConstructor()) {
+                foreach ($reader->getMethodAnnotations($reflConstructor) as $annotation) {
+                    if ($annotation instanceof Assign) {
+                        $descriptor->assign($annotation->name, $annotation->target);
+                    } elseif ($annotation instanceof AssignValue) {
+                        $descriptor->assign($annotation->name, ['value' => $annotation->value]);
+                    }
+                }
+            }
+            foreach ($reflClass->getProperties() as $reflProperty) {
+                foreach ($reader->getPropertyAnnotations($reflProperty) as $annotation) {
+                    if ($annotation instanceof Wire) {
+                        $descriptor->wire($reflProperty->getName(), $annotation->target);
+                    } elseif ($annotation instanceof WireValue) {
+                        $descriptor->wire($reflProperty->getName(), ['value' => $annotation->value]);
+                    }
+                }
             }
         }
     }

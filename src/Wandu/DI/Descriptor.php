@@ -1,7 +1,7 @@
 <?php
 namespace Wandu\DI;
 
-use Wandu\DI\Contracts\ContainerFluent;
+use Wandu\DI\ContainerFluent;
 
 class Descriptor implements ContainerFluent 
 {

@@ -8,11 +8,11 @@ use Doctrine\Common\Annotations\Annotation\Target;
  * @Annotation
  * @Target({"METHOD"})
  */
-class Assign
+class AssignValue
 {
     /** @Required @var string */
     public $name;
-    
-    /** @Required @var string */
-    public $target;
+
+    /** @Required @var mixed */
+    public $value;
 }

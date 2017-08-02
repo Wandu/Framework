@@ -6,13 +6,10 @@ use Doctrine\Common\Annotations\Annotation\Target;
 
 /**
  * @Annotation
- * @Target({"METHOD"})
+ * @Target({"CLASS"})
  */
-class Assign
+class Alias
 {
     /** @Required @var string */
     public $name;
-    
-    /** @Required @var string */
-    public $target;
 }
