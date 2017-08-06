@@ -292,10 +292,10 @@ class ConfigTest extends TestCase
         $config->pushLoader(new EnvLoader());
         $config->pushLoader(new YmlLoader());
 
-        $config->load(__DIR__ . '/test.config.php');
-        $config->load(__DIR__ . '/test.config.json');
-        $config->load(__DIR__ . '/test.config.env');
-        $config->load(__DIR__ . '/test.config.yml');
+        $config->load(__DIR__ . '/test_php.php');
+        $config->load(__DIR__ . '/test_json.json');
+        $config->load(__DIR__ . '/test_env.env');
+        $config->load(__DIR__ . '/test_yml.yml');
         
         static::assertSame([
             'foo' => 'foo string',

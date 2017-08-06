@@ -61,11 +61,15 @@ class ReadmeTest extends TestCase
         $config->pushLoader(new \Wandu\Config\Loader\JsonLoader());
         $config->pushLoader(new \Wandu\Config\Loader\EnvLoader());
         $config->pushLoader(new \Wandu\Config\Loader\YmlLoader());
+        $config->pushLoader(new \Wandu\Config\Loader\PathLoader([
+            new \Wandu\Config\Loader\YmlLoader(),
+        ]));
 
-        $config->load(__DIR__ . '/test.config.php');
-        $config->load(__DIR__ . '/test.config.json');
-        $config->load(__DIR__ . '/test.config.env');
-        $config->load(__DIR__ . '/test.config.yml');
+        $config->load(__DIR__ . '/test_php.php');
+        $config->load(__DIR__ . '/test_json.json');
+        $config->load(__DIR__ . '/test_env.env');
+        $config->load(__DIR__ . '/test_yml.yml');
+        $config->load(__DIR__ . '/test_path');
 
         static::assertSame([
             'foo' => 'foo string',
@@ -105,6 +109,10 @@ class ReadmeTest extends TestCase
             'yml3' => [
                 'yml3_1',
                 'yml3_2',
+            ],
+            'app' => [
+                'debug' => true,
+                'env' => 'test',
             ],
         ], $config->toArray());
         // endsection

@@ -24,9 +24,9 @@ composer require wandu/config
 
 ### Support Loader
 
-- PHP (example, [test.config.php](../../../tests/Config/test.config.php))
-- JSON (example, [test.config.json](../../../tests/Config/test.config.json))
-- Env(require `m1/env`) (example, [test.config.env](../../../tests/Config/test.config.env))
-- YAML(require `symfony/yaml`) (example, [test.config.yml](../../../tests/Config/test.config.yml))
+- PHP (example, [test_php.php](../../../tests/Config/test_php.php))
+- JSON (example, [test_json.json](../../../tests/Config/test_json.json))
+- Env(require `m1/env`) (example, [test_env.env](../../../tests/Config/test_env.env))
+- YAML(require `symfony/yaml`) (example, [test_yml.yml](../../../tests/Config/test_yml.yml))
 
 @code("../../../tests/Config/ReadmeTest.php@support-loader")

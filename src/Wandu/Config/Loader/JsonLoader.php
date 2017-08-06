@@ -5,12 +5,20 @@ use Wandu\Config\Contracts\Loader;
 
 class JsonLoader implements Loader
 {
+    /** @var string */
+    protected $pattern;
+
+    public function __construct(string $pattern = '~^[a-z_][a-z0-9_]*\.json$~')
+    {
+        $this->pattern = $pattern;
+    }
+
     /**
      * {@inheritdoc}
      */
     public function test(string $path): bool
     {
-        return substr($path, -5) === '.json' && file_exists($path);
+        return file_exists($path) && preg_match($this->pattern, pathinfo($path)['basename']);
     }
 
     /**

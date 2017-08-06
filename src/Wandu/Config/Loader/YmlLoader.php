@@ -6,12 +6,20 @@ use Wandu\Config\Contracts\Loader;
 
 class YmlLoader implements Loader
 {
+    /** @var string */
+    protected $pattern;
+
+    public function __construct(string $pattern = '~^[a-z_][a-z0-9_]*\.yml$~')
+    {
+        $this->pattern = $pattern;
+    }
+
     /**
      * {@inheritdoc}
      */
     public function test(string $path): bool
     {
-        return substr($path, -4) === '.yml' && file_exists($path);
+        return file_exists($path) && preg_match($this->pattern, pathinfo($path)['basename']);
     }
 
     /**
