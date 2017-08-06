@@ -14,6 +14,8 @@ namespace Wandu\Event
 
 namespace Wandu\Foundation
 {
+
+    use Wandu\Config\Contracts\Config;
     use function Wandu\DI\container;
 
     /**
@@ -32,24 +34,7 @@ namespace Wandu\Foundation
      */
     function config($name, $default = null)
     {
-        return container()->get('config')->get($name, $default);
-    }
-}
-
-namespace Wandu\View
-{
-    use Wandu\View\Contracts\RenderInterface;
-    use function Wandu\DI\container;
-
-    /**
-     * @param string $template
-     * @param array $attributes
-     * @param string $basePath
-     * @return string
-     */
-    function render($template, array $attributes = [], $basePath = null)
-    {
-        return container()->get(RenderInterface::class)->render($template, $attributes, $basePath);
+        return container()->get(Config::class)->get($name, $default);
     }
 }
 

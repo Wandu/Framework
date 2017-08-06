@@ -1,10 +1,10 @@
 <?php
-namespace Wandu\Foundation\Error;
+namespace Wandu\Foundation\WebApp;
 
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
 use Wandu\Config\Contracts\Config;
-use Wandu\Foundation\Contracts\HttpErrorHandler;
+use Wandu\Foundation\WebApp\Contracts\HttpErrorHandler;
 use Wandu\Http\Exception\HttpException;
 use Wandu\Http\Psr\Stream\StringStream;
 use Wandu\Router\Exception\MethodNotAllowedException as RouteMethodException;
@@ -57,7 +57,7 @@ class DefaultHttpErrorHandler implements HttpErrorHandler
             }
             return $exception;
         }
-        if ($this->config->get('debug', true)) {
+        if ($this->config->get('server.debug', true)) {
             $whoops = $this->getWhoops($request);
             return create(new StringStream($whoops->handleException($exception)), 500);
         }

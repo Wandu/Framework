@@ -1,19 +1,21 @@
 <?php
-namespace Wandu\Foundation\Bootstrap;
+namespace Wandu\Foundation\WebApp;
 
 use Throwable;
 use Wandu\Config\ConfigServiceProvider;
+use Wandu\Config\Contracts\Config;
 use Wandu\DI\ContainerInterface;
-use Wandu\Foundation\Contracts\Bootstrap;
-use Wandu\Foundation\Contracts\HttpErrorHandler;
-use Wandu\Foundation\Error\DefaultHttpErrorHandler;
+use Wandu\Foundation\Contracts\Bootstrap as BootstrapContract;
+use Wandu\Foundation\WebApp\Contracts\HttpErrorHandler;
+use Wandu\Foundation\WebApp\DefaultHttpErrorHandler;
 use Wandu\Http\Factory\ServerRequestFactory;
 use Wandu\Http\HttpServiceProvider;
 use Wandu\Http\Sender\ResponseSender;
+use Wandu\Router\Contracts\Routable;
 use Wandu\Router\Dispatcher;
 use Wandu\Router\RouterServiceProvider;
 
-class HttpRouterBootstrap implements Bootstrap
+abstract class Bootstrap implements BootstrapContract
 {
     /**
      * {@inheritdoc}
@@ -26,12 +28,13 @@ class HttpRouterBootstrap implements Bootstrap
             new RouterServiceProvider(),
         ];
     }
-
+    
     /**
      * {@inheritdoc}
      */
     public function boot(ContainerInterface $app)
     {
+        $this->registerConfiguration($app->get(Config::class));
     }
 
     /**
@@ -46,7 +49,9 @@ class HttpRouterBootstrap implements Bootstrap
         $request = $app->get(ServerRequestFactory::class)->createFromGlobals();
         
         try {
-            $response = $app->get(Dispatcher::class)->dispatch($request);
+            $dispatcher = $app->get(Dispatcher::class);
+            $this->setRoutes($routeCollection = $dispatcher->createRouteCollection());
+            $response = $dispatcher->dispatch($routeCollection->compile(), $request);
         } catch (Throwable $exception) {
             // output buffer clean
             while (ob_get_level() > 0) {
@@ -61,4 +66,14 @@ class HttpRouterBootstrap implements Bootstrap
         $app->get(ResponseSender::class)->sendToGlobal($response);
         return 0;
     }
+
+    /**
+     * @param \Wandu\Config\Contracts\Config $config
+     */
+    abstract public function registerConfiguration(Config $config);
+
+    /**
+     * @param \Wandu\Router\Contracts\Routable $router
+     */
+    abstract public function setRoutes(Routable $router);
 }

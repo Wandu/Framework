@@ -15,7 +15,7 @@ class Application extends Container
     public function __construct(Bootstrap $bootstrapper)
     {
         parent::__construct();
-        $this->instance(Bootstrap::class, $this->bootstrapper = $bootstrapper);
+        $this->bootstrapper = $bootstrapper;
     }
 
     /**

@@ -1,5 +1,5 @@
 <?php
-namespace Wandu\Foundation\Contracts;
+namespace Wandu\Foundation\WebApp\Contracts;
 
 use Psr\Http\Message\ServerRequestInterface;
 
