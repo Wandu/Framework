@@ -1,32 +1,25 @@
 <?php
 namespace Wandu\Console;
 
-use Symfony\Component\Console\Application as SymfonyApplication;
+use Symfony\Component\Console\Application;
 use Wandu\DI\ContainerInterface;
 use Wandu\DI\ServiceProviderInterface;
-use Wandu\Foundation\Application;
+use Wandu\Foundation\Application as WanduApplication;
 
 class ConsoleServiceProvider implements ServiceProviderInterface 
 {
     /** @var string */
-    protected $name = Application::NAME;
+    protected $name = WanduApplication::NAME;
     
     /** @var string */
-    protected $version = Application::VERSION;
-    
-    /** @var array */
-    protected $commands = [];
+    protected $version = WanduApplication::VERSION;
     
     public function register(ContainerInterface $app)
     {
-        $app->closure(SymfonyApplication::class, function () {
-            return new SymfonyApplication($this->name, $this->version);
-        });
-        $app->bind(Dispatcher::class)->after(function (Dispatcher $dispatcher) {
-            foreach ($this->commands as $name => $command) {
-                $dispatcher->add($name, $command);
-            }
-        });
+        $app->bind(Application::class)->assignMany([
+            'name', ['value' => $this->name],
+            'version', ['value' => $this->version],
+        ]);
     }
 
     public function boot(ContainerInterface $app)

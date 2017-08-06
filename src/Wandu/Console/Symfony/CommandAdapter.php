@@ -15,13 +15,11 @@ class CommandAdapter extends SymfonyCommand
     protected $command;
     
     /**
-     * @param string $name
      * @param \Wandu\Console\Command $command
      */
-    public function __construct($name, Command $command)
+    public function __construct(Command $command)
     {
-        parent::__construct($name);
-
+        parent::__construct('_');
         $this->command = $command;
 
         $this->setDescription($command->getDescription());

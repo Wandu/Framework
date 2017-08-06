@@ -2,11 +2,13 @@
 namespace Wandu\Console;
 
 use Psr\Container\ContainerInterface;
-use Symfony\Component\Console\Application as SymfonyApplication;
+use Symfony\Component\Console\Application;
+use Symfony\Component\Console\Command\Command as SymfonyCommand;
+use Wandu\Console\Contracts\CommandAttachable;
 use Wandu\Console\Symfony\CommandAdapter;
-use Wandu\DI\Exception\NullReferenceException;
+use RuntimeException;
 
-class Dispatcher
+class Dispatcher implements CommandAttachable
 {
     /** @var \Psr\Container\ContainerInterface */
     protected $container;
@@ -14,36 +16,34 @@ class Dispatcher
     /** @var \Symfony\Component\Console\Application */
     protected $application;
 
-    /** @var string[] */
-    protected $commands;
-
-    public function __construct(ContainerInterface $container, SymfonyApplication $application)
+    public function __construct(Application $application, ContainerInterface $container)
     {
-        $this->container = $container;
         $this->application = $application;
-        $this->commands = [];
+        $this->container = $container;
     }
 
     /**
-     * @param string $name
-     * @param string $className
+     * {@inheritdoc}
      */
-    public function add($name, $className)
+    public function attach(string $name, $command): SymfonyCommand
     {
-        $this->commands[$name] = $className;
+        if (is_string($command)) {
+            $command = $this->container->get($command);
+        }
+        if ($command instanceof Command) {
+            $command = new CommandAdapter($command);
+        }
+        if ($command = $this->application->add($command->setName($name))) {
+            return $command;
+        }
+        throw new RuntimeException("cannot attach the command");
     }
 
+    /**
+     * @return int
+     */
     public function execute()
     {
-        foreach ($this->commands as $name => $command) {
-            try {
-                $this->application->add(
-                    new CommandAdapter($name, $this->container->get($command))
-                );
-            } catch (NullReferenceException $e) { // typo is continue
-                continue;
-            }
-            
-        }
+        return $this->application->run();
     }
 }
