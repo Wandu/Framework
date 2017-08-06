@@ -6,6 +6,11 @@ use ArrayAccess;
 interface Config extends ArrayAccess
 {
     /**
+     * @param string $path
+     */
+    public function load(string $path);
+
+    /**
      * @return array
      */
     public function toArray(): array;

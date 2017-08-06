@@ -45,7 +45,7 @@ class Config implements ConfigContract
     }
 
     /**
-     * @param string $path
+     * {@inheritdoc}
      */
     public function load(string $path)
     {
