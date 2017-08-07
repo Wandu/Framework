@@ -1,5 +1,5 @@
 <?php
-namespace Wandu\Database\Commands;
+namespace Wandu\Database\Migrator\Commands;
 
 use Wandu\Console\Command;
 use Wandu\Database\Migrator\Migrator;
@@ -19,12 +19,12 @@ class MigrateCommand extends Command
 
     public function execute()
     {
-        $migrations = $this->manager->migrations();
+        $migrations = $this->manager->getMigrationInformations();
         $isNoMigration = true;
         foreach ($migrations as $migration) {
-            if (!$migration->isApplied()) {
+            if (!$this->manager->isApplied($migration)) {
                 $isNoMigration = false;
-                $migration->up();
+                $this->manager->up($migration->getId());
                 $this->output->writeln(sprintf("<info>up</info> %s", $migration->getId()));
             }
         }

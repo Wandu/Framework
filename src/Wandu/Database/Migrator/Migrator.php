@@ -4,13 +4,13 @@ namespace Wandu\Database\Migrator;
 use DirectoryIterator;
 use RuntimeException;
 use SplFileInfo;
-use Wandu\Database\Contracts\Migrator\MigrateAdapterInterface;
-use Wandu\Database\Contracts\Migrator\MigrationInterface;
+use Wandu\Database\Migrator\Contracts\Adapter;
+use Wandu\Database\Migrator\Contracts\MigrationInformation;
 use Wandu\DI\ContainerInterface;
 
 class Migrator
 {
-    /** @var \Wandu\Database\Contracts\Migrator\MigrateAdapterInterface */
+    /** @var \Wandu\Database\Migrator\Contracts\Adapter */
     protected $adapter;
     
     /** @var \Wandu\Database\Migrator\Configuration */
@@ -20,11 +20,11 @@ class Migrator
     protected $container;
     
     /**
-     * @param \Wandu\Database\Contracts\Migrator\MigrateAdapterInterface $adapter
+     * @param \Wandu\Database\Migrator\Contracts\Adapter $adapter
      * @param \Wandu\Database\Migrator\Configuration $config
      * @param \Wandu\DI\ContainerInterface $container
      */
-    public function __construct(MigrateAdapterInterface $adapter, Configuration $config, ContainerInterface $container)
+    public function __construct(Adapter $adapter, Configuration $config, ContainerInterface $container)
     {
         $this->adapter = $adapter;
         $this->config = $config;
@@ -32,29 +32,31 @@ class Migrator
     }
 
     /**
-     * @return array|\Wandu\Database\Migrator\MigrationContainer[]
+     * @return array|\Wandu\Database\Migrator\Contracts\MigrationInformation[]
      */
-    public function migrations()
+    public function getMigrationInformations()
     {
         $migrations = [];
         foreach ($this->getAllMigrationFiles() as $file) {
-            $migrations[] = new MigrationContainer($file, $this->adapter, $this->container);
+            $migration = new FileMigrationInformation($file);
+            $migrations[$migration->getId()] = $migration;
         }
-        return $migrations;
+        foreach ($this->adapter->getAppliedIds() as $version) {
+            if (!array_key_exists($version, $migrations)) {
+                $migrations[$version] = new UnknownMigrationInformation($version);
+            }
+        }
+        ksort($migrations);
+        return array_values($migrations);
     }
 
     /**
-     * @param string $migrationId
-     * @return \Wandu\Database\Migrator\MigrationContainer
+     * @param \Wandu\Database\Migrator\Contracts\MigrationInformation $information
+     * @return bool
      */
-    public function migration($migrationId)
+    public function isApplied(MigrationInformation $information): bool
     {
-        foreach ($this->getAllMigrationFiles() as $file) {
-            if (strpos($file, $migrationId . '_') !== false) {
-                return new MigrationContainer($file, $this->adapter, $this->container);
-            }
-        }
-        throw new RuntimeException("there is no migration id \"{$migrationId}\".");
+        return $this->adapter->isApplied($information->getId());
     }
 
     /**
@@ -65,12 +67,16 @@ class Migrator
         if (!preg_match('/^\d{6}_\d{6}$/', $migrationId)) {
             throw new RuntimeException("invalid migration id. it must be like 000000_000000.");
         }
-        $version = $this->adapter->version($migrationId);
-        if ($version) {
+        if ($this->adapter->isApplied($migrationId)) {
             throw new RuntimeException("this {$migrationId} is already applied.");
         }
-        
-        $this->migration($migrationId)->up();
+
+        $migrationInfo = $this->getFileMigrationInformation($migrationId);
+        $migrationInfo->loadMigrationFile();
+
+        $this->adapter->getMigrationInstance($migrationInfo->getId(), $migrationInfo->getName())->up();
+        $this->adapter->initialize();
+        $this->adapter->up($migrationId);
     }
 
     /**
@@ -81,28 +87,46 @@ class Migrator
         if (!preg_match('/^\d{6}_\d{6}$/', $migrationId)) {
             throw new RuntimeException("invalid migration id. it must be like 000000_000000.");
         }
-        $version = $this->adapter->version($migrationId);
-        if (!$version) {
+        if (!$this->adapter->isApplied($migrationId)) {
             throw new RuntimeException("this {$migrationId} is not already applied.");
         }
 
-        $this->migration($migrationId)->down();
+        $migrationInfo = $this->getFileMigrationInformation($migrationId);
+        $migrationInfo->loadMigrationFile();
+
+        $this->adapter->getMigrationInstance($migrationInfo->getId(), $migrationInfo->getName())->down();
+        $this->adapter->initialize();
+        $this->adapter->down($migrationId);
     }
 
     /**
-     * @return array|\Wandu\Database\Migrator\MigrationContainer[]
+     * @return array|\Wandu\Database\Migrator\FileMigrationInformation[]
      */
     public function migrate()
     {
         $migratedMigrations = [];
-        $migrations = $this->migrations();
+        $migrations = $this->getMigrationInformations();
         foreach ($migrations as $migration) {
-            if (!$this->adapter->version($migration->getId())) {
-                $migration->up();
+            if (!$this->adapter->isApplied($migration->getId())) {
+                $this->up($migration->getId());
                 $migratedMigrations[] = $migration;
             }
         }
         return $migratedMigrations;
+    }
+
+    /**
+     * @param string $migrationId
+     * @return \Wandu\Database\Migrator\FileMigrationInformation
+     */
+    protected function getFileMigrationInformation($migrationId): FileMigrationInformation
+    {
+        foreach ($this->getAllMigrationFiles() as $file) {
+            if (strpos($file, $migrationId . '_') !== false) {
+                return new FileMigrationInformation($file);
+            }
+        }
+        throw new RuntimeException("there is no migration id \"{$migrationId}\".");
     }
     
     /**
@@ -111,6 +135,9 @@ class Migrator
     protected function getAllMigrationFiles()
     {
         $files = [];
+        if (!is_dir($this->config->getPath())) {
+            mkdir($this->config->getPath());
+        }
         foreach (new DirectoryIterator($this->config->getPath()) as $file) {
             if ($file->isDot() || $file->isDir() || $file->getFilename()[0] === '.') continue;
             $files[] = $file->getFileInfo();

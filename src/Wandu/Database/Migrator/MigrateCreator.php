@@ -2,24 +2,24 @@
 namespace Wandu\Database\Migrator;
 
 use InvalidArgumentException;
-use Wandu\Database\Contracts\Migrator\MigrationTemplateInterface;
+use Wandu\Database\Migrator\Contracts\MigrationTemplate;
 
 class MigrateCreator
 {
     /** @var \Wandu\Database\Migrator\Configuration */
     protected $config;
     
-    /** @var \Wandu\Database\Contracts\Migrator\MigrationTemplateInterface */
+    /** @var \Wandu\Database\Migrator\Contracts\MigrationTemplate */
     protected $template;
 
     /**
+     * @param \Wandu\Database\Migrator\Contracts\MigrationTemplate $template
      * @param \Wandu\Database\Migrator\Configuration $config
-     * @param \Wandu\Database\Contracts\Migrator\MigrationTemplateInterface $template
      */
-    public function __construct(Configuration $config, MigrationTemplateInterface $template)
+    public function __construct(MigrationTemplate $template, Configuration $config)
     {
-        $this->config = $config;
         $this->template = $template;
+        $this->config = $config;
     }
 
     /**
@@ -34,9 +34,7 @@ class MigrateCreator
             throw new InvalidArgumentException(sprintf('cannot write the file at %s.', $filePath));
         }
 
-        $contents = $this->template->template($name);
-
-        file_put_contents($filePath, $contents);
+        file_put_contents($filePath, $this->template->template($name));
         return $filePath;
     }
 }

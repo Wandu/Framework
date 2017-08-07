@@ -12,7 +12,7 @@ class MigratorServiceProvider implements ServiceProviderInterface
      */
     public function register(ContainerInterface $app)
     {
-        $app->closure(Configuration::class, function (Config $config) {
+        $app->bind(Configuration::class, function (Config $config) {
             return new Configuration([
                 'connection' => $config->get('database.migrator.connection'),
                 'table' => $config->get('database.migrator.table'),

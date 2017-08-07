@@ -1,7 +1,7 @@
 <?php
-namespace Wandu\Database\Contracts\Migrator;
+namespace Wandu\Database\Migrator\Contracts;
 
-interface MigrationTemplateInterface
+interface MigrationTemplate
 {
     /**
      * @param string $migrateName

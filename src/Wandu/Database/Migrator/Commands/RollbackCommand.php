@@ -1,10 +1,10 @@
 <?php
-namespace Wandu\Database\Commands;
+namespace Wandu\Database\Migrator\Commands;
 
 use Wandu\Console\Command;
 use Wandu\Database\Migrator\Migrator;
 
-class MigrateRollbackCommand extends Command
+class RollbackCommand extends Command
 {
     /** @var string */
     protected $description = 'Run rollback.';
@@ -29,15 +29,15 @@ class MigrateRollbackCommand extends Command
     {
         $untilMigrationId = $this->input->getArgument('until');
         
-        /** @var \Wandu\Database\Migrator\MigrationContainer[] $migrations */
-        $migrations = array_reverse($this->manager->migrations());
+        /** @var \Wandu\Database\Migrator\FileMigrationInformation[] $migrations */
+        $migrations = array_reverse($this->manager->getMigrationInformations());
 
         if (!count($migrations)) {
             $this->output->writeln("<comment>there is no migration to rollback.</comment>");
             return 2;
         }
         foreach ($migrations as $migration) {
-            if (!$migration->isApplied()) {
+            if (!$this->manager->isApplied($migration)) {
                 continue;
             }
             $this->manager->down($migration->getId());
