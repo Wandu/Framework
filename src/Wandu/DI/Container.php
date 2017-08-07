@@ -391,7 +391,7 @@ class Container implements ContainerInterface
             $instance = $this->call($this->closures[$name], $this->resolveArguments($descriptor->assigns));
         }
         foreach ($descriptor->afterHandlers as $handler) {
-            call_user_func($handler, $instance);
+            $this->call($handler, [$instance]);
         }
         foreach ($this->resolveArguments($descriptor->wires) as $propertyName => $value) {
             $refl = (new \ReflectionObject($instance))->getProperty($propertyName);
