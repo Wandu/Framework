@@ -1,8 +1,8 @@
 <?php
-namespace Wandu\Database\Migrator\Commands;
+namespace Wandu\Migrator\Commands;
 
 use Wandu\Console\Command;
-use Wandu\Database\Migrator\MigrateCreator;
+use Wandu\Migrator\Migrator;
 
 class CreateCommand extends Command
 {
@@ -14,18 +14,18 @@ class CreateCommand extends Command
         'name' => 'the name for the migration',
     ];
     
-    /** @var \Wandu\Database\Migrator\MigrateCreator */
-    protected $creator;
+    /** @var \Wandu\Migrator\Migrator */
+    protected $migrator;
 
-    public function __construct(MigrateCreator $creator)
+    public function __construct(Migrator $migrator)
     {
-        $this->creator = $creator;
+        $this->migrator = $migrator;
     }
 
     public function execute()
     {
         $name = $this->input->getArgument('name');
-        $filePath = $this->creator->create($name);
+        $filePath = $this->migrator->createTemplate($name);
         $this->output->writeln(
             '<info>create</info> .' . str_replace(getcwd(), '', $filePath)
         );

@@ -1,10 +1,10 @@
 <?php
-namespace Wandu\Database\Migrator\Commands;
+namespace Wandu\Migrator\Commands;
 
 use RuntimeException;
 use Wandu\Console\Command;
 use Wandu\Console\Exception\ConsoleException;
-use Wandu\Database\Migrator\Migrator;
+use Wandu\Migrator\Migrator;
 
 class UpCommand extends Command
 {
@@ -16,11 +16,11 @@ class UpCommand extends Command
         'id' => 'the migrate id for the migration',
     ];
 
-    /** @var \Wandu\Database\Migrator\Migrator */
+    /** @var \Wandu\Migrator\Migrator */
     protected $manager;
 
     /**
-     * @param \Wandu\Database\Migrator\Migrator $manager
+     * @param \Wandu\Migrator\Migrator $manager
      */
     public function __construct(Migrator $manager)
     {

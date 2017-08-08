@@ -1,5 +1,5 @@
 <?php
-namespace Wandu\Database\Migrator\Contracts;
+namespace Wandu\Migrator\Contracts;
 
 interface Migration
 {

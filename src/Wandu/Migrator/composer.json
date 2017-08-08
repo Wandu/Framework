@@ -1,0 +1,22 @@
+{
+    "name": "wandu/migrator",
+    "description": "Simple Database Migrator",
+    "keywords": ["database", "migrator"],
+    "license": "MIT",
+    "require": {
+        "php": ">=7.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Wandu\\Migrator\\": ""
+        }
+    },
+    "suggest": {
+        "wandu/service-eloquent": "for Laravel Eloquent database."
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "4.0-dev"
+        }
+    }
+}

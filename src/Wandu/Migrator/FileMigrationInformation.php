@@ -1,8 +1,8 @@
 <?php
-namespace Wandu\Database\Migrator;
+namespace Wandu\Migrator;
 
 use SplFileInfo;
-use Wandu\Database\Migrator\Contracts\MigrationInformation;
+use Wandu\Migrator\Contracts\MigrationInformation;
 
 class FileMigrationInformation implements MigrationInformation
 {

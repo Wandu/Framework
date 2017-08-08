@@ -1,38 +1,55 @@
 <?php
-namespace Wandu\Database\Migrator;
+namespace Wandu\Migrator;
 
 use DirectoryIterator;
 use RuntimeException;
 use SplFileInfo;
-use Wandu\Database\Migrator\Contracts\Adapter;
-use Wandu\Database\Migrator\Contracts\MigrationInformation;
-use Wandu\DI\ContainerInterface;
+use InvalidArgumentException;
+use Wandu\Migrator\Contracts\Adapter;
+use Wandu\Migrator\Contracts\MigrationInformation;
+use Wandu\Migrator\Contracts\MigrationTemplate;
 
 class Migrator
 {
-    /** @var \Wandu\Database\Migrator\Contracts\Adapter */
+    /** @var \Wandu\Migrator\Contracts\Adapter */
     protected $adapter;
     
-    /** @var \Wandu\Database\Migrator\Configuration */
+    /** @var \Wandu\Migrator\Contracts\MigrationTemplate */
+    protected $template;
+    
+    /** @var \Wandu\Migrator\Configuration */
     protected $config;
 
-    /** @var \Wandu\DI\ContainerInterface */
-    protected $container;
-    
     /**
-     * @param \Wandu\Database\Migrator\Contracts\Adapter $adapter
-     * @param \Wandu\Database\Migrator\Configuration $config
-     * @param \Wandu\DI\ContainerInterface $container
+     * @param \Wandu\Migrator\Contracts\Adapter $adapter
+     * @param \Wandu\Migrator\Contracts\MigrationTemplate $template
+     * @param \Wandu\Migrator\Configuration $config
      */
-    public function __construct(Adapter $adapter, Configuration $config, ContainerInterface $container)
+    public function __construct(Adapter $adapter, MigrationTemplate $template, Configuration $config)
     {
         $this->adapter = $adapter;
+        $this->template = $template;
         $this->config = $config;
-        $this->container = $container;
     }
 
     /**
-     * @return array|\Wandu\Database\Migrator\Contracts\MigrationInformation[]
+     * @param string $name
+     * @return string
+     */
+    public function createTemplate($name): string
+    {
+        $fileName = date('ymd_His_') . $name . '.php';
+        $filePath = $this->config->getPath() . '/' . $fileName;
+        if (file_exists($filePath) || !is_dir($this->config->getPath())) {
+            throw new InvalidArgumentException(sprintf('cannot write the file at %s.', $filePath));
+        }
+
+        file_put_contents($filePath, $this->template->template($name));
+        return $filePath;
+    }
+
+    /**
+     * @return array|\Wandu\Migrator\Contracts\MigrationInformation[]
      */
     public function getMigrationInformations()
     {
@@ -51,7 +68,7 @@ class Migrator
     }
 
     /**
-     * @param \Wandu\Database\Migrator\Contracts\MigrationInformation $information
+     * @param \Wandu\Migrator\Contracts\MigrationInformation $information
      * @return bool
      */
     public function isApplied(MigrationInformation $information): bool
@@ -76,7 +93,7 @@ class Migrator
 
         $this->adapter->getMigrationInstance($migrationInfo->getId(), $migrationInfo->getName())->up();
         $this->adapter->initialize();
-        $this->adapter->up($migrationId);
+        $this->adapter->addToMigrationTable($migrationId);
     }
 
     /**
@@ -96,11 +113,11 @@ class Migrator
 
         $this->adapter->getMigrationInstance($migrationInfo->getId(), $migrationInfo->getName())->down();
         $this->adapter->initialize();
-        $this->adapter->down($migrationId);
+        $this->adapter->removeFromMigrationTable($migrationId);
     }
 
     /**
-     * @return array|\Wandu\Database\Migrator\FileMigrationInformation[]
+     * @return array|\Wandu\Migrator\FileMigrationInformation[]
      */
     public function migrate()
     {
@@ -117,7 +134,7 @@ class Migrator
 
     /**
      * @param string $migrationId
-     * @return \Wandu\Database\Migrator\FileMigrationInformation
+     * @return \Wandu\Migrator\FileMigrationInformation
      */
     protected function getFileMigrationInformation($migrationId): FileMigrationInformation
     {

@@ -1,5 +1,5 @@
 <?php
-namespace Wandu\Database\Migrator;
+namespace Wandu\Migrator;
 
 use Wandu\Config\Contracts\Config;
 use Wandu\DI\ContainerInterface;

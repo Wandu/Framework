@@ -1,8 +1,8 @@
 <?php
-namespace Wandu\Database\Migrator\Commands;
+namespace Wandu\Migrator\Commands;
 
 use Wandu\Console\Command;
-use Wandu\Database\Migrator\Migrator;
+use Wandu\Migrator\Migrator;
 use RuntimeException;
 
 class StatusCommand extends Command
@@ -10,11 +10,11 @@ class StatusCommand extends Command
     /** @var string */
     protected $description = 'Show the status of all migrations.';
     
-    /** @var \Wandu\Database\Migrator\Migrator */
+    /** @var \Wandu\Migrator\Migrator */
     protected $manager;
 
     /**
-     * @param \Wandu\Database\Migrator\Migrator $manager
+     * @param \Wandu\Migrator\Migrator $manager
      */
     public function __construct(Migrator $manager) {
         $this->manager = $manager;

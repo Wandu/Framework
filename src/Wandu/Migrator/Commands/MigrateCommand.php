@@ -1,15 +1,15 @@
 <?php
-namespace Wandu\Database\Migrator\Commands;
+namespace Wandu\Migrator\Commands;
 
 use Wandu\Console\Command;
-use Wandu\Database\Migrator\Migrator;
+use Wandu\Migrator\Migrator;
 
 class MigrateCommand extends Command
 {
     /** @var string */
     protected $description = 'Run migrate.';
 
-    /** @var \Wandu\Database\Migrator\Migrator */
+    /** @var \Wandu\Migrator\Migrator */
     protected $manager;
 
     public function __construct(Migrator $manager)

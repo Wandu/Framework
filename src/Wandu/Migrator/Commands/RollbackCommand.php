@@ -1,8 +1,8 @@
 <?php
-namespace Wandu\Database\Migrator\Commands;
+namespace Wandu\Migrator\Commands;
 
 use Wandu\Console\Command;
-use Wandu\Database\Migrator\Migrator;
+use Wandu\Migrator\Migrator;
 
 class RollbackCommand extends Command
 {
@@ -14,11 +14,11 @@ class RollbackCommand extends Command
         'until?' => 'the migrate id for the rollback',
     ];
 
-    /** @var \Wandu\Database\Migrator\Migrator */
+    /** @var \Wandu\Migrator\Migrator */
     protected $manager;
 
     /**
-     * @param \Wandu\Database\Migrator\Migrator $manager
+     * @param \Wandu\Migrator\Migrator $manager
      */
     public function __construct(Migrator $manager)
     {
@@ -29,7 +29,7 @@ class RollbackCommand extends Command
     {
         $untilMigrationId = $this->input->getArgument('until');
         
-        /** @var \Wandu\Database\Migrator\FileMigrationInformation[] $migrations */
+        /** @var \Wandu\Migrator\FileMigrationInformation[] $migrations */
         $migrations = array_reverse($this->manager->getMigrationInformations());
 
         if (!count($migrations)) {

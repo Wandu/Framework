@@ -1,0 +1,20 @@
+{
+    "name": "wandu/service-eloquent",
+    "license": "MIT",
+    "require": {
+        "php": ">=7.0",
+        "illuminate/database": "^5.4",
+        "psr/container": "^1",
+        "wandu/migrator": "^4.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Wandu\\Service\\Eloquent\\": ""
+        }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "4.0-dev"
+        }
+    }
+}

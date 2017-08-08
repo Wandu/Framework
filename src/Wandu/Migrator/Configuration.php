@@ -1,5 +1,5 @@
 <?php
-namespace Wandu\Database\Migrator;
+namespace Wandu\Migrator;
 
 class Configuration
 {
