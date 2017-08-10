@@ -17,6 +17,6 @@ okreadme $PREFIX"/src/Wandu/Foundation/README.ok.md" > $PREFIX"/src/Wandu/DateTi
 okreadme $PREFIX"/src/Wandu/Http/README.ok.md" > $PREFIX"/src/Wandu/Http/README.md"
 okreadme $PREFIX"/src/Wandu/Q/README.ok.md" > $PREFIX"/src/Wandu/Q/README.md"
 okreadme $PREFIX"/src/Wandu/Router/README.ok.md" > $PREFIX"/src/Wandu/Router/README.md"
-okreadme $PREFIX"/src/Wandu/Transformer/README.ok.md" > $PREFIX"/src/Wandu/Transformer/README.md"
+okreadme $PREFIX"/src/Wandu/Restifier/README.ok.md" > $PREFIX"/src/Wandu/Restifier/README.md"
 okreadme $PREFIX"/src/Wandu/Validator/README.ok.md" > $PREFIX"/src/Wandu/Validator/README.md"
 okreadme $PREFIX"/src/Wandu/View/README.ok.md" > $PREFIX"/src/Wandu/View/README.md"

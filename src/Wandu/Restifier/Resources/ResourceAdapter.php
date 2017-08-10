@@ -1,7 +1,7 @@
 <?php
-namespace Wandu\Transformer\Resources;
+namespace Wandu\Restifier\Resources;
 
-use Wandu\Transformer\Contracts\TransformResource;
+use Wandu\Restifier\Contracts\TransformResource;
 
 class ResourceAdapter implements TransformResource
 {

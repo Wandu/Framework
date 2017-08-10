@@ -1,13 +1,13 @@
 <?php
-namespace Wandu\Transformer;
+namespace Wandu\Restifier;
 
-use Wandu\Transformer\Contracts\TransformResource;
+use Wandu\Restifier\Contracts\TransformResource;
 use Traversable;
 
-class Transformer
+class Restifier
 {
     /**
-     * @param \Wandu\Transformer\Contracts\TransformResource|array|\Traversable $resource
+     * @param \Wandu\Restifier\Contracts\TransformResource|array|\Traversable $resource
      * @param array $includes
      * @return array
      */
@@ -56,7 +56,7 @@ class Transformer
     }
 
     /**
-     * @param \Wandu\Transformer\Contracts\TransformResource $origin
+     * @param \Wandu\Restifier\Contracts\TransformResource $origin
      * @param array $includes
      * @return array
      */

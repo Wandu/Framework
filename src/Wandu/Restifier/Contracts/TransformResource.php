@@ -1,5 +1,5 @@
 <?php
-namespace Wandu\Transformer\Contracts;
+namespace Wandu\Restifier\Contracts;
 
 interface TransformResource
 {

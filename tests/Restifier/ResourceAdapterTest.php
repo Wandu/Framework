@@ -1,21 +1,21 @@
 <?php
-namespace Wandu\Transformer;
+namespace Wandu\Restifier;
 
 use PHPUnit\Framework\TestCase;
-use Wandu\Transformer\Contracts\TransformResource;
-use Wandu\Transformer\Resources\ResourceAdapter;
+use Wandu\Restifier\Contracts\TransformResource;
+use Wandu\Restifier\Resources\ResourceAdapter;
 
 class ResourceAdapterTest extends TestCase
 {
-    /** @var \Wandu\Transformer\Transformer */
-    protected $transformer;
+    /** @var \Wandu\Restifier\Restifier */
+    protected $restifier;
     
-    /** @var \Wandu\Transformer\Resources\ResourceAdapter */
+    /** @var \Wandu\Restifier\Resources\ResourceAdapter */
     protected $singleResource;
     
     public function setUp()
     {
-        $this->transformer = new Transformer();
+        $this->restifier = new Restifier();
         $this->singleResource = new ResourceAdapter(
             new TransformResourceTestUser("wan2land", new TransformResourceTestGroup("admin")),
             function (TransformResourceTestUser $user) {
@@ -39,7 +39,7 @@ class ResourceAdapterTest extends TestCase
     {
         static::assertEquals([
             "username" => "wan2land",
-        ], $this->transformer->transform($this->singleResource));
+        ], $this->restifier->transform($this->singleResource));
     }
 
     public function testSingleItemWithIncludes()
@@ -49,33 +49,33 @@ class ResourceAdapterTest extends TestCase
             "group" => [
                 "name" => "admin",
             ],
-        ], $this->transformer->transform($this->singleResource, ['group']));
+        ], $this->restifier->transform($this->singleResource, ['group']));
 
         static::assertEquals([
             "username" => "wan2land",
-        ], $this->transformer->transform($this->singleResource, ['group' => false]));
-
-        static::assertEquals([
-            "username" => "wan2land",
-            "group" => [
-                "name" => "admin",
-            ],
-        ], $this->transformer->transform($this->singleResource, ['group' => true]));
-
-        static::assertEquals([
-            "username" => "wan2land",
-        ], $this->transformer->transform($this->singleResource, ['group' => function () { return false; }]));
+        ], $this->restifier->transform($this->singleResource, ['group' => false]));
 
         static::assertEquals([
             "username" => "wan2land",
             "group" => [
                 "name" => "admin",
             ],
-        ], $this->transformer->transform($this->singleResource, ['group' => function () { return true; }]));
+        ], $this->restifier->transform($this->singleResource, ['group' => true]));
 
         static::assertEquals([
             "username" => "wan2land",
-        ], $this->transformer->transform($this->singleResource, ['group' => function (TransformResource $origin) {
+        ], $this->restifier->transform($this->singleResource, ['group' => function () { return false; }]));
+
+        static::assertEquals([
+            "username" => "wan2land",
+            "group" => [
+                "name" => "admin",
+            ],
+        ], $this->restifier->transform($this->singleResource, ['group' => function () { return true; }]));
+
+        static::assertEquals([
+            "username" => "wan2land",
+        ], $this->restifier->transform($this->singleResource, ['group' => function (TransformResource $origin) {
             return $origin->transform()['username'] !== 'wan2land';
         }]));
 
@@ -84,7 +84,7 @@ class ResourceAdapterTest extends TestCase
             "group" => [
                 "name" => "admin",
             ],
-        ], $this->transformer->transform($this->singleResource, ['group' => function (TransformResource $origin) {
+        ], $this->restifier->transform($this->singleResource, ['group' => function (TransformResource $origin) {
             return $origin->transform()['username'] === 'wan2land';
         }]));
     }
@@ -143,7 +143,7 @@ class TransformResourceTestUser
     }
 
     /**
-     * @return \Wandu\Transformer\TransformResourceTestGroup
+     * @return \Wandu\Restifier\TransformResourceTestGroup
      */
     public function getGroup()
     {

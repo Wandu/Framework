@@ -1,24 +1,24 @@
 <?php
-namespace Wandu\Transformer;
+namespace Wandu\Restifier;
 
 use PHPUnit\Framework\TestCase;
-use Wandu\Transformer\Contracts\TransformResource;
+use Wandu\Restifier\Contracts\TransformResource;
 
-class TransformerTest extends TestCase
+class RestifierTest extends TestCase
 {
-    /** @var \Wandu\Transformer\Transformer */
-    protected $transformer;
+    /** @var \Wandu\Restifier\Restifier */
+    protected $restifier;
 
     public function setUp()
     {
-        $this->transformer = new Transformer();
+        $this->restifier = new Restifier();
     }
     
     public function testSingle()
     {
         static::assertEquals([
             "username" => "wan2land",
-        ], $this->transformer->transform($this->createUser("wan2land", "admin")));
+        ], $this->restifier->transform($this->createUser("wan2land", "admin")));
     }
 
     public function testSingleWithIncludes()
@@ -28,22 +28,22 @@ class TransformerTest extends TestCase
             "group" => [
                 "name" => "admin",
             ],
-        ], $this->transformer->transform($this->createUser("wan2land", "admin"), ['group']));
+        ], $this->restifier->transform($this->createUser("wan2land", "admin"), ['group']));
 
         static::assertEquals([
             "username" => "wan2land",
-        ], $this->transformer->transform($this->createUser("wan2land", "admin"), ['group' => false]));
+        ], $this->restifier->transform($this->createUser("wan2land", "admin"), ['group' => false]));
 
         static::assertEquals([
             "username" => "wan2land",
             "group" => [
                 "name" => "admin",
             ],
-        ], $this->transformer->transform($this->createUser("wan2land", "admin"), ['group' => true]));
+        ], $this->restifier->transform($this->createUser("wan2land", "admin"), ['group' => true]));
 
         static::assertEquals([
             "username" => "wan2land",
-        ], $this->transformer->transform($this->createUser("wan2land", "admin"), ['group' => function () {
+        ], $this->restifier->transform($this->createUser("wan2land", "admin"), ['group' => function () {
             return false;
         }]));
 
@@ -52,13 +52,13 @@ class TransformerTest extends TestCase
             "group" => [
                 "name" => "admin",
             ],
-        ], $this->transformer->transform($this->createUser("wan2land", "admin"), ['group' => function () {
+        ], $this->restifier->transform($this->createUser("wan2land", "admin"), ['group' => function () {
             return true;
         }]));
 
         static::assertEquals([
             "username" => "wan2land",
-        ], $this->transformer->transform($this->createUser("wan2land", "admin"), ['group' => function (TransformerTestUser $entity) {
+        ], $this->restifier->transform($this->createUser("wan2land", "admin"), ['group' => function (RestifierTestUser $entity) {
             return $entity->getUsername() !== "wan2land";
         }]));
 
@@ -67,7 +67,7 @@ class TransformerTest extends TestCase
             "group" => [
                 "name" => "admin",
             ],
-        ], $this->transformer->transform($this->createUser("wan2land", "admin"), ['group' => function (TransformerTestUser $entity) {
+        ], $this->restifier->transform($this->createUser("wan2land", "admin"), ['group' => function (RestifierTestUser $entity) {
             return $entity->getUsername() === "wan2land";
         }]));
     }
@@ -94,7 +94,7 @@ class TransformerTest extends TestCase
             ["username" => "wan2land",],
             ["username" => "foo",],
             ["username" => "bar",],
-        ], $this->transformer->transform($resources));
+        ], $this->restifier->transform($resources));
     }
 
     /**
@@ -106,48 +106,48 @@ class TransformerTest extends TestCase
             ["username" => "wan2land", "group" => ["name" => "admin"],],
             ["username" => "foo", "group" => ["name" => "normal"],],
             ["username" => "bar", "group" => ["name" => "normal"],],
-        ], $this->transformer->transform($resources, ['group']));
+        ], $this->restifier->transform($resources, ['group']));
 
         static::assertEquals([
             ["username" => "wan2land",],
             ["username" => "foo",],
             ["username" => "bar",],
-        ], $this->transformer->transform($resources, ['group' => false]));
+        ], $this->restifier->transform($resources, ['group' => false]));
 
         static::assertEquals([
             ["username" => "wan2land", "group" => ["name" => "admin"],],
             ["username" => "foo", "group" => ["name" => "normal"],],
             ["username" => "bar", "group" => ["name" => "normal"],],
-        ], $this->transformer->transform($resources, ['group' => true]));
+        ], $this->restifier->transform($resources, ['group' => true]));
 
         static::assertEquals([
             ["username" => "wan2land",],
             ["username" => "foo",],
             ["username" => "bar",],
-        ], $this->transformer->transform($resources, ['group' => function () { return false; }]));
+        ], $this->restifier->transform($resources, ['group' => function () { return false; }]));
 
         static::assertEquals([
             ["username" => "wan2land", "group" => ["name" => "admin"],],
             ["username" => "foo", "group" => ["name" => "normal"],],
             ["username" => "bar", "group" => ["name" => "normal"],],
-        ], $this->transformer->transform($resources, ['group' => function () { return true; }]));
+        ], $this->restifier->transform($resources, ['group' => function () { return true; }]));
 
         static::assertEquals([
             ["username" => "wan2land", "group" => ["name" => "admin"],],
             ["username" => "foo",],
             ["username" => "bar",],
-        ], $this->transformer->transform($resources, ['group' => function (TransformerTestUser $entity) {
+        ], $this->restifier->transform($resources, ['group' => function (RestifierTestUser $entity) {
             return $entity->getGroup()->getName() !== 'normal';
         }]));
     }
 
     protected function createUser($username, $groupName)
     {
-        return new TransformerTestUser($username, new TransformerTestGroup($groupName));
+        return new RestifierTestUser($username, new RestifierTestGroup($groupName));
     }
 }
 
-class TransformerTestGroup implements TransformResource
+class RestifierTestGroup implements TransformResource
 {
     protected $name;
     protected $createdAt;
@@ -179,14 +179,14 @@ class TransformerTestGroup implements TransformResource
     }
 }
 
-class TransformerTestUser implements TransformResource
+class RestifierTestUser implements TransformResource
 {
     protected $group;
     protected $username;
     protected $createdAt;
     protected $updatedAt;
 
-    public function __construct($username, TransformerTestGroup $group)
+    public function __construct($username, RestifierTestGroup $group)
     {
         $this->group = $group;
         $this->username = $username;
@@ -194,7 +194,7 @@ class TransformerTestUser implements TransformResource
     }
 
     /**
-     * @return \Wandu\Transformer\TransformerTestGroup
+     * @return \Wandu\Restifier\RestifierTestGroup
      */
     public function getGroup()
     {
