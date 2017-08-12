@@ -12,8 +12,11 @@ git subsplit publish --heads="master 3.0" --no-tags src/Wandu/DI:git@github.com:
 git subsplit publish --heads="master 3.0" --no-tags src/Wandu/Event:git@github.com:Wandu/Event.git
 git subsplit publish --heads="master 3.0" --no-tags src/Wandu/Foundation:git@github.com:Wandu/Foundation.git
 git subsplit publish --heads="master 3.0" --no-tags src/Wandu/Http:git@github.com:Wandu/Http.git
+git subsplit publish --heads="master"     --no-tags src/Wandu/Migrator:git@github.com:Wandu/Migrator.git
 git subsplit publish --heads="master 3.0" --no-tags src/Wandu/Q:git@github.com:Wandu/Q.git
+git subsplit publish --heads="master"     --no-tags src/Wandu/Restifier:git@github.com:Wandu/Restifier.git
 git subsplit publish --heads="master 3.0" --no-tags src/Wandu/Router:git@github.com:Wandu/Router.git
+git subsplit publish --heads="master"     --no-tags src/Wandu/Service/Eloquent:git@github.com:Wandu/ServiceEloquent.git
 git subsplit publish --heads="master 3.0" --no-tags src/Wandu/Validator:git@github.com:Wandu/Validator.git
 git subsplit publish --heads="master 3.0" --no-tags src/Wandu/View:git@github.com:Wandu/View.git
 

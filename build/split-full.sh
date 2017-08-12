@@ -1,15 +1,16 @@
 
 split_parallel() {
-    PACKAGENAME=$1
-    HEAD=$2
-    TAG=$3
+    PACKAGEPATH=$1
+    PACKAGENAME=$2
+    HEAD=$3
+    TAG=$4
     mkdir $PACKAGENAME
     pushd $PACKAGENAME
     git subsplit init git@github.com:Wandu/Framework.git
     if [ ! -z "$TAG" ]; then
-        git subsplit publish --heads="$HEAD" --tags="$TAG" src/Wandu/$PACKAGENAME:git@github.com:Wandu/$PACKAGENAME.git
+        git subsplit publish --heads="$HEAD" --tags="$TAG" src/Wandu/$PACKAGEPATH:git@github.com:Wandu/$PACKAGENAME.git
     else
-        git subsplit publish --heads="$HEAD" --no-tags src/Wandu/$PACKAGENAME:git@github.com:Wandu/$PACKAGENAME.git
+        git subsplit publish --heads="$HEAD" --no-tags src/Wandu/$PACKAGEPATH:git@github.com:Wandu/$PACKAGENAME.git
     fi
     popd
     rm -rf $PACKAGENAME
@@ -18,21 +19,25 @@ split_parallel() {
 TAG=$1
 PIDS=()
 
-split_parallel Annotation   "master"     $TAG & PIDS+=($!)
-split_parallel Caster       "master 3.0" $TAG & PIDS+=($!)
-split_parallel Collection   "master"     $TAG & PIDS+=($!)
-split_parallel Config       "master 3.0" $TAG & PIDS+=($!)
-split_parallel Console      "master 3.0" $TAG & PIDS+=($!)
-split_parallel Database     "master 3.0" $TAG & PIDS+=($!)
-split_parallel DateTime     "master 3.0" $TAG & PIDS+=($!)
-split_parallel DI           "master 3.0" $TAG & PIDS+=($!)
-split_parallel Event        "master 3.0" $TAG & PIDS+=($!)
-split_parallel Foundation   "master 3.0" $TAG & PIDS+=($!)
-split_parallel Http         "master 3.0" $TAG & PIDS+=($!)
-split_parallel Q            "master 3.0" $TAG & PIDS+=($!)
-split_parallel Router       "master 3.0" $TAG & PIDS+=($!)
-split_parallel Validator    "master 3.0" $TAG & PIDS+=($!)
-split_parallel View         "master 3.0" $TAG & PIDS+=($!)
+split_parallel Annotation       Annotation       "master"     $TAG & PIDS+=($!)
+split_parallel Caster           Caster           "master 3.0" $TAG & PIDS+=($!)
+split_parallel Collection       Collection       "master"     $TAG & PIDS+=($!)
+split_parallel Config           Config           "master 3.0" $TAG & PIDS+=($!)
+split_parallel Console          Console          "master 3.0" $TAG & PIDS+=($!)
+split_parallel Database         Database         "master 3.0" $TAG & PIDS+=($!)
+split_parallel DateTime         DateTime         "master 3.0" $TAG & PIDS+=($!)
+split_parallel DI               DI               "master 3.0" $TAG & PIDS+=($!)
+split_parallel Event            Event            "master 3.0" $TAG & PIDS+=($!)
+split_parallel Foundation       Foundation       "master 3.0" $TAG & PIDS+=($!)
+split_parallel Http             Http             "master 3.0" $TAG & PIDS+=($!)
+split_parallel Migrator         Migrator         "master"     $TAG & PIDS+=($!)
+split_parallel Q                Q                "master 3.0" $TAG & PIDS+=($!)
+split_parallel Restifier        Restifier        "master"     $TAG & PIDS+=($!)
+split_parallel Router           Router           "master 3.0" $TAG & PIDS+=($!)
+split_parallel Validator        Validator        "master 3.0" $TAG & PIDS+=($!)
+split_parallel View             View             "master 3.0" $TAG & PIDS+=($!)
+
+split_parallel Service/Eloquent ServiceEloquent  "master"     $TAG & PIDS+=($!)
 
 for PID in "${PIDS[@]}"
 do

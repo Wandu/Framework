@@ -1,4 +1,4 @@
-Wandu Retifier
+Wandu Restifier
 =================
 
 [![Latest Stable Version](https://poser.pugx.org/wandu/restifier/v/stable.svg)](https://packagist.org/packages/wandu/restifier)
