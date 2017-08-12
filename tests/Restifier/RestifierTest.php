@@ -2,226 +2,178 @@
 namespace Wandu\Restifier;
 
 use PHPUnit\Framework\TestCase;
-use Wandu\Restifier\Contracts\TransformResource;
+use Wandu\Restifier\Sample\SampleCustomer;
+use Wandu\Restifier\Sample\SampleCustomerTransformer;
+use Wandu\Restifier\Sample\SampleUser;
+use Wandu\Restifier\Sample\SampleUserTransformer;
 
 class RestifierTest extends TestCase
 {
-    /** @var \Wandu\Restifier\Restifier */
-    protected $restifier;
-
-    public function setUp()
+    public function testSimple()
     {
-        $this->restifier = new Restifier();
-    }
-    
-    public function testSingle()
-    {
-        static::assertEquals([
-            "username" => "wan2land",
-        ], $this->restifier->transform($this->createUser("wan2land", "admin")));
-    }
-
-    public function testSingleWithIncludes()
-    {
-        static::assertEquals([
-            "username" => "wan2land",
-            "group" => [
-                "name" => "admin",
-            ],
-        ], $this->restifier->transform($this->createUser("wan2land", "admin"), ['group']));
-
-        static::assertEquals([
-            "username" => "wan2land",
-        ], $this->restifier->transform($this->createUser("wan2land", "admin"), ['group' => false]));
-
-        static::assertEquals([
-            "username" => "wan2land",
-            "group" => [
-                "name" => "admin",
-            ],
-        ], $this->restifier->transform($this->createUser("wan2land", "admin"), ['group' => true]));
-
-        static::assertEquals([
-            "username" => "wan2land",
-        ], $this->restifier->transform($this->createUser("wan2land", "admin"), ['group' => function () {
-            return false;
-        }]));
-
-        static::assertEquals([
-            "username" => "wan2land",
-            "group" => [
-                "name" => "admin",
-            ],
-        ], $this->restifier->transform($this->createUser("wan2land", "admin"), ['group' => function () {
-            return true;
-        }]));
-
-        static::assertEquals([
-            "username" => "wan2land",
-        ], $this->restifier->transform($this->createUser("wan2land", "admin"), ['group' => function (RestifierTestUser $entity) {
-            return $entity->getUsername() !== "wan2land";
-        }]));
-
-        static::assertEquals([
-            "username" => "wan2land",
-            "group" => [
-                "name" => "admin",
-            ],
-        ], $this->restifier->transform($this->createUser("wan2land", "admin"), ['group' => function (RestifierTestUser $entity) {
-            return $entity->getUsername() === "wan2land";
-        }]));
-    }
-
-    public function provideResources()
-    {
-        return [
-            [
-                [
-                    $this->createUser("wan2land", "admin"),
-                    $this->createUser("foo", "normal"),
-                    $this->createUser("bar", "normal"),
-                ]
-            ],
-        ];
-    }
-
-    /**
-     * @dataProvider provideResources
-     */
-    public function testCollection($resources)
-    {
-        static::assertEquals([
-            ["username" => "wan2land",],
-            ["username" => "foo",],
-            ["username" => "bar",],
-        ], $this->restifier->transform($resources));
-    }
-
-    /**
-     * @dataProvider provideResources
-     */
-    public function testCollectionWithIncludes($resources)
-    {
-        static::assertEquals([
-            ["username" => "wan2land", "group" => ["name" => "admin"],],
-            ["username" => "foo", "group" => ["name" => "normal"],],
-            ["username" => "bar", "group" => ["name" => "normal"],],
-        ], $this->restifier->transform($resources, ['group']));
-
-        static::assertEquals([
-            ["username" => "wan2land",],
-            ["username" => "foo",],
-            ["username" => "bar",],
-        ], $this->restifier->transform($resources, ['group' => false]));
-
-        static::assertEquals([
-            ["username" => "wan2land", "group" => ["name" => "admin"],],
-            ["username" => "foo", "group" => ["name" => "normal"],],
-            ["username" => "bar", "group" => ["name" => "normal"],],
-        ], $this->restifier->transform($resources, ['group' => true]));
-
-        static::assertEquals([
-            ["username" => "wan2land",],
-            ["username" => "foo",],
-            ["username" => "bar",],
-        ], $this->restifier->transform($resources, ['group' => function () { return false; }]));
-
-        static::assertEquals([
-            ["username" => "wan2land", "group" => ["name" => "admin"],],
-            ["username" => "foo", "group" => ["name" => "normal"],],
-            ["username" => "bar", "group" => ["name" => "normal"],],
-        ], $this->restifier->transform($resources, ['group' => function () { return true; }]));
-
-        static::assertEquals([
-            ["username" => "wan2land", "group" => ["name" => "admin"],],
-            ["username" => "foo",],
-            ["username" => "bar",],
-        ], $this->restifier->transform($resources, ['group' => function (RestifierTestUser $entity) {
-            return $entity->getGroup()->getName() !== 'normal';
-        }]));
-    }
-
-    protected function createUser($username, $groupName)
-    {
-        return new RestifierTestUser($username, new RestifierTestGroup($groupName));
-    }
-}
-
-class RestifierTestGroup implements TransformResource
-{
-    protected $name;
-    protected $createdAt;
-    protected $updatedAt;
-
-    public function __construct($name)
-    {
-        $this->name = $name;
-        $this->createdAt = $this->createdAt = time();
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getName()
-    {
-        return $this->name;
-    }
-
-    public function transform()
-    {
-        return [
-            'name' => $this->name,
-        ];
-    }
-
-    public function includeAttribute(string $name)
-    {
-    }
-}
-
-class RestifierTestUser implements TransformResource
-{
-    protected $group;
-    protected $username;
-    protected $createdAt;
-    protected $updatedAt;
-
-    public function __construct($username, RestifierTestGroup $group)
-    {
-        $this->group = $group;
-        $this->username = $username;
-        $this->createdAt = $this->createdAt = time();
-    }
-
-    /**
-     * @return \Wandu\Restifier\RestifierTestGroup
-     */
-    public function getGroup()
-    {
-        return $this->group;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getUsername()
-    {
-        return $this->username;
-    }
-    
-    public function transform()
-    {
-        return [
-            'username' => $this->username,
-        ];
-    }
-
-    public function includeAttribute(string $name)
-    {
-        switch ($name) {
-            case "group": return [
-                "group" => $this->group,
+        $restifier = new Restifier();
+        $restifier->addTransformer(SampleUser::class, function (SampleUser $user) {
+            return [
+                'username' => $user->username,
             ];
-        }
+        });
+
+        $user = new SampleUser([
+            'username' => 'wan2land',
+        ]);
+        
+        static::assertEquals([
+            "username" => "wan2land",
+        ], $restifier->restify($user));
+    }
+
+    public function testSimpleIterator()
+    {
+        $restifier = new Restifier();
+        $restifier->addTransformer(SampleUser::class, function (SampleUser $user) {
+            return [
+                'username' => $user->username,
+            ];
+        });
+
+        $user1 = new SampleUser([
+            'username' => 'wan2land',
+        ]);
+        $user2 = new SampleUser([
+            'username' => 'wan3land',
+        ]);
+        
+        // seq array
+        static::assertEquals([
+            ["username" => "wan2land", ],
+            ["username" => "wan3land", ],
+        ], $restifier->restifyMany([$user1, $user2]));
+
+        // assoc array
+        static::assertEquals([
+            'user1' => ["username" => "wan2land", ],
+            'user2' => ["username" => "wan3land", ],
+        ], $restifier->restifyMany(['user1' => $user1, 'user2' => $user2]));
+    }
+
+    public function testSimpleCascading()
+    {
+        $restifier = new Restifier();
+        $restifier->addTransformer(SampleUser::class, function (SampleUser $user, Restifier $restifier) {
+            return [
+                'username' => $user->username,
+                'customer' => $restifier->restify($user->customer),
+            ];
+        });
+        $restifier->addTransformer(SampleCustomer::class, function (SampleCustomer $customer) {
+            return [
+                'address' => $customer->address,
+            ];
+        });
+
+        $user = new SampleUser([
+            'username' => 'wan2land',
+            'customer' => new SampleCustomer([
+                'address' => 'seoul blabla',
+                'paymentmethods' => [], // critical data
+            ]),
+        ]);
+
+        static::assertEquals([
+            "username" => "wan2land",
+            'customer' => [
+                'address' => 'seoul blabla',
+            ],
+        ], $restifier->restify($user));
+    }
+
+    public function testTransformer()
+    {
+        $restifier = new Restifier();
+        $restifier->addTransformer(SampleUser::class, new SampleUserTransformer());
+        $restifier->addTransformer(SampleCustomer::class, new SampleCustomerTransformer());
+
+        $user = new SampleUser([
+            'username' => 'wan2land',
+            'customer' => new SampleCustomer([
+                'address' => 'seoul blabla',
+                'paymentmethods' => [], // critical data
+            ]),
+        ]);
+
+        static::assertEquals([
+            "username" => "wan2land",
+            'customer' => [
+                'address' => 'seoul blabla',
+            ],
+        ], $restifier->restify($user));
+    }
+    
+    public function testTransformerWithIncludes()
+    {
+        $restifier = new Restifier();
+        $restifier->addTransformer(SampleUser::class, new SampleUserTransformer());
+        $restifier->addTransformer(SampleCustomer::class, new SampleCustomerTransformer());
+
+        $user = new SampleUser([
+            'username' => 'wan2land',
+            'profile' => [
+                'source' => '/temp/wan2land/profile.png',
+            ],
+            'customer' => new SampleCustomer([
+                'address' => 'seoul blabla',
+                'paymentmethods' => [], // critical data
+            ]),
+        ]);
+
+        static::assertEquals([
+            "username" => "wan2land",
+            'profile' => [
+                'source' => '/temp/wan2land/profile.png',
+            ],
+            'customer' => [
+                'address' => 'seoul blabla',
+            ],
+        ], $restifier->restify($user, ['profile']));
+
+        static::assertEquals([
+            "username" => "wan2land",
+            'customer' => [
+                'address' => 'seoul blabla',
+            ],
+        ], $restifier->restify($user, ['profile' => false]));
+
+
+        static::assertEquals([
+            "username" => "wan2land",
+            'profile' => [
+                'source' => '/temp/wan2land/profile.png',
+            ],
+            'customer' => [
+                'address' => 'seoul blabla',
+            ],
+        ], $restifier->restify($user, ['profile' => true]));
+
+        static::assertEquals([
+            "username" => "wan2land",
+            'customer' => [
+                'address' => 'seoul blabla',
+            ],
+        ], $restifier->restify($user, ['profile' => function (SampleUser $user) {
+            return $user->username !== 'wan2land';
+        }]));
+
+
+        static::assertEquals([
+            "username" => "wan2land",
+            'profile' => [
+                'source' => '/temp/wan2land/profile.png',
+            ],
+            'customer' => [
+                'address' => 'seoul blabla',
+            ],
+        ], $restifier->restify($user, ['profile' => function (SampleUser $user) {
+            return $user->username === 'wan2land';
+        }]));
     }
 }

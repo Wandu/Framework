@@ -1,66 +1,75 @@
 <?php
 namespace Wandu\Restifier;
 
-use Wandu\Restifier\Contracts\TransformResource;
-use Traversable;
+use InvalidArgumentException;
+use Wandu\Restifier\Contracts\Restifiable;
 
-class Restifier
+class Restifier implements Restifiable
 {
+    /** @var callable[] */
+    protected $transformers = [];
+    
+    public function __construct(array $transformers = [])
+    {
+        foreach ($transformers as $name => $transformer) {
+            $this->addTransformer($name, $transformer);
+        }
+    }
+
     /**
-     * @param \Wandu\Restifier\Contracts\TransformResource|array|\Traversable $resource
+     * @param string $name
+     * @param callable $transformer
+     */
+    public function addTransformer(string $name, callable $transformer)
+    {
+        if (is_callable($transformer)) {
+            $this->transformers[$name] = $transformer;
+            return;
+        }
+        throw new InvalidArgumentException("Argument 2 passed to pushTransformer() must be callable");
+    }
+    
+    /**
+     * @param mixed $resource
      * @param array $includes
      * @return array
      */
-    public function transform($resource, array $includes = [])
+    public function restify($resource, array $includes = []): array
     {
-        if ($resource instanceof TransformResource) {
-            return $this->transformSingle($resource, $includes);
-        }
-        // iterator or Traversable
-        return $this->transformCollection($resource, $includes);
-    }
-    
-    private function transformSingle(TransformResource $resource, $includes = [])
-    {
-        $entity = $resource->transform();
-        if (!is_array($entity)) return $entity;
-
-        // now, result is always array
-        foreach ($this->parseIncludes($resource, $includes) as $key => $nextIncludes) {
-            $entity = array_merge(
-                $entity,
-                $this->transformCollection($resource->includeAttribute($key) ?: [], $nextIncludes)
-            );
+        $transformer = $this->transformers[get_class($resource)];
+        $parsedIncludes = $this->parseIncludes($includes, $resource);
+        $entity = call_user_func($transformer, $resource, $this, $parsedIncludes);
+        foreach ($parsedIncludes as $key => $nextIncludes) {
+            if (is_object($transformer) && method_exists($transformer, $key)) {
+                $entity = array_merge(
+                    $entity,
+                    $transformer->{$key}($resource, $this, $nextIncludes)
+                );
+            }
         }
         return $entity;
     }
 
     /**
-     * @param array|\Traversable $resources
+     * @param array|\Traversable $resource
      * @param array $includes
      * @return array
      */
-    private function transformCollection($resources, array $includes = [])
+    public function restifyMany($resource, array $includes = []): array
     {
         $result = [];
-        foreach ($resources as $key => $resource) {
-            if (is_array($resource) || $resource instanceof Traversable) {
-                $result[$key] = $this->transformCollection($resource, $includes);
-            } elseif ($resource instanceof TransformResource) {
-                $result[$key] = $this->transformSingle($resource, $includes);
-            } else {
-                $result[$key] = $resource;
-            }
+        foreach ($resource as $key => $value) {
+            $result[$key] = $this->restify($value, $includes);
         }
         return $result;
     }
 
     /**
-     * @param \Wandu\Restifier\Contracts\TransformResource $origin
      * @param array $includes
+     * @param mixed $resource
      * @return array
      */
-    private function parseIncludes(TransformResource $origin, array $includes = [])
+    private function parseIncludes(array $includes = [], $resource)
     {
         $parsedIncludes = [];
         foreach ($includes as $include => $condition) {
@@ -69,7 +78,7 @@ class Restifier
                 $condition = true;
             }
             while (is_callable($condition)) {
-                $condition = call_user_func($condition, $origin);
+                $condition = call_user_func($condition, $resource);
             }
             if (!$condition) continue;
             if (strpos($include, '.') === false) {
