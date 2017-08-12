@@ -2,6 +2,8 @@
 namespace Wandu\Restifier;
 
 use PHPUnit\Framework\TestCase;
+use Wandu\Assertions;
+use Wandu\Restifier\Exception\NotFoundTransformerException;
 use Wandu\Restifier\Sample\SampleCustomer;
 use Wandu\Restifier\Sample\SampleCustomerTransformer;
 use Wandu\Restifier\Sample\SampleUser;
@@ -9,6 +11,8 @@ use Wandu\Restifier\Sample\SampleUserTransformer;
 
 class RestifierTest extends TestCase
 {
+    use Assertions;
+    
     public function testSimple()
     {
         $restifier = new Restifier();
@@ -25,6 +29,46 @@ class RestifierTest extends TestCase
         static::assertEquals([
             "username" => "wan2land",
         ], $restifier->restify($user));
+    }
+
+    public function testTransformerDirect()
+    {
+        $restifier = new Restifier();
+
+        $user = new SampleUser([
+            'username' => 'wan2land',
+        ]);
+
+        static::assertEquals([
+            "username" => "wan2land",
+        ], $restifier->restify($user, [], function (SampleUser $user) {
+            return [
+                'username' => $user->username,
+            ];
+        }));
+    }
+
+    public function testSimpleFail()
+    {
+        $restifier = new Restifier();
+
+        $user = new SampleUser([
+            'username' => 'wan2land',
+        ]);
+
+        $exception = static::catchException(function () use ($restifier, $user) {
+            $restifier->restify($user);
+        });
+
+        static::assertInstanceOf(NotFoundTransformerException::class, $exception);
+        static::assertEquals('cannot find the transformer named Wandu\Restifier\Sample\SampleUser.', $exception->getMessage());
+
+        $exception = static::catchException(function () use ($restifier) {
+            $restifier->restify([]);
+        });
+
+        static::assertInstanceOf(NotFoundTransformerException::class, $exception);
+        static::assertEquals('resource is not an object.', $exception->getMessage());
     }
 
     public function testSimpleIterator()
@@ -175,5 +219,44 @@ class RestifierTest extends TestCase
         ], $restifier->restify($user, ['profile' => function (SampleUser $user) {
             return $user->username === 'wan2land';
         }]));
+    }
+
+    public function testTransformerWithCascadingIncludes()
+    {
+        $restifier = new Restifier();
+        $restifier->addTransformer(SampleUser::class, new SampleUserTransformer());
+        $restifier->addTransformer(SampleCustomer::class, new SampleCustomerTransformer());
+
+        $user = new SampleUser([
+            'username' => 'wan2land',
+            'profile' => [
+                'source' => '/temp/wan2land/profile.png',
+            ],
+            'customer' => new SampleCustomer([
+                'address' => 'seoul blabla',
+                'paymentmethods' => [], // critical data
+            ]),
+        ]);
+
+        static::assertEquals([
+            "username" => "wan2land",
+            'profile' => [
+                'source' => '/temp/wan2land/profile.png',
+            ],
+            'customer' => [
+                'address' => 'seoul blabla',
+            ],
+        ], $restifier->restify($user, ['profile', 'customer']));
+
+        static::assertEquals([
+            "username" => "wan2land",
+            'profile' => [
+                'source' => '/temp/wan2land/profile.png',
+            ],
+            'customer' => [
+                'address' => 'seoul blabla',
+                'paymentmethods' => [],
+            ],
+        ], $restifier->restify($user, ['profile', 'customer.paymentmethods']));
     }
 }

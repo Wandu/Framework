@@ -9,11 +9,18 @@ class SampleUserTransformer
     {
         return [
             'username' => $user->username,
+            'customer' => $restifier->restify($user->customer),
+        ];
+    }
+
+    public function customer(SampleUser $user, Restifiable $restifier, array $includes = [])
+    {
+        return [
             'customer' => $restifier->restify($user->customer, $includes),
         ];
     }
-    
-    public function profile(SampleUser $user)
+
+    public function profile(SampleUser $user, Restifiable $restifier, array $includes = [])
     {
         return [
             'profile' => $user->profile,

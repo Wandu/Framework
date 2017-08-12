@@ -3,6 +3,7 @@ namespace Wandu\Restifier;
 
 use InvalidArgumentException;
 use Wandu\Restifier\Contracts\Restifiable;
+use Wandu\Restifier\Exception\NotFoundTransformerException;
 
 class Restifier implements Restifiable
 {
@@ -32,11 +33,14 @@ class Restifier implements Restifiable
     /**
      * @param mixed $resource
      * @param array $includes
+     * @param callable $transformer
      * @return array
      */
-    public function restify($resource, array $includes = []): array
+    public function restify($resource, array $includes = [], callable $transformer = null): array
     {
-        $transformer = $this->transformers[get_class($resource)];
+        if (!$transformer) {
+            $transformer = $this->findTransformer($resource);
+        }
         $parsedIncludes = $this->parseIncludes($includes, $resource);
         $entity = call_user_func($transformer, $resource, $this, $parsedIncludes);
         foreach ($parsedIncludes as $key => $nextIncludes) {
@@ -53,17 +57,34 @@ class Restifier implements Restifiable
     /**
      * @param array|\Traversable $resource
      * @param array $includes
+     * @param callable $transformer
      * @return array
      */
-    public function restifyMany($resource, array $includes = []): array
+    public function restifyMany($resource, array $includes = [], callable $transformer = null): array
     {
         $result = [];
         foreach ($resource as $key => $value) {
-            $result[$key] = $this->restify($value, $includes);
+            $result[$key] = $this->restify($value, $includes, $transformer);
         }
         return $result;
     }
 
+    protected function findTransformer($resource)
+    {
+        $className = null;
+        if (is_object($resource) && $className = get_class($resource)) {
+            if (array_key_exists($className, $this->transformers)) {
+                return $this->transformers[$className];
+            }
+        }
+        if ($className) {
+            throw new NotFoundTransformerException(
+                sprintf("cannot find the transformer named %s.", $className)
+            );
+        }
+        throw new NotFoundTransformerException("resource is not an object.");
+    }
+    
     /**
      * @param array $includes
      * @param mixed $resource
