@@ -20,7 +20,7 @@ class DateTimeServiceProvider implements ServiceProviderInterface
     public function boot(ContainerInterface $app)
     {
         if ($config = $app->get(Config::class)) {
-            date_default_timezone_set($config->get('timezone', 'UTC'));
+            date_default_timezone_set($config->get('app.timezone', 'UTC'));
         }
     }
 }
