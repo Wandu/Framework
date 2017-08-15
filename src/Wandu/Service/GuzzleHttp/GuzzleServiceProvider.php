@@ -1,28 +1,22 @@
 <?php
-namespace Wandu\DI\Providers\GuzzleHttp;
+namespace Wandu\Service\GuzzleHttp;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
 use Wandu\Config\Contracts\Config;
 use Wandu\DI\ContainerInterface;
-use Wandu\DI\ServiceProviderInterface;
+use Wandu\DI\ServiceProvider;
 
-class GuzzleServiceProvider implements ServiceProviderInterface
+class GuzzleServiceProvider extends ServiceProvider
 {
     /**
      * {@inheritdoc}
      */
     public function register(ContainerInterface $app)
     {
-        $app->closure(ClientInterface::class, function (Config $config) {
+        $app->bind(Client::class, function (Config $config) {
             return new Client($config->get('guzzlehttp.guzzle', []));
         });
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function boot(ContainerInterface $app)
-    {
+        $app->alias(ClientInterface::class, Client::class);
     }
 }

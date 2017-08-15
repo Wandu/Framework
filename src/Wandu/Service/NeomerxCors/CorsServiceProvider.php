@@ -1,5 +1,5 @@
 <?php
-namespace Wandu\DI\Providers\Neomerx;
+namespace Wandu\Service\NeomerxCors;
 
 use Neomerx\Cors\Analyzer;
 use Neomerx\Cors\Contracts\AnalysisStrategyInterface;
@@ -11,24 +11,23 @@ use Wandu\Config\Contracts\Config;
 use Wandu\DI\ContainerInterface;
 use Wandu\DI\ServiceProviderInterface;
 
-class CorsPsr7ServiceProvider implements ServiceProviderInterface
+class CorsServiceProvider implements ServiceProviderInterface
 {
     /**
      * {@inheritdoc}
      */
     public function register(ContainerInterface $app)
     {
-        $app->bind(Settings::class)->after(function (Settings $settings) use ($app) {
-            $config = $app->get(Config::class);
-            $settings->setServerOrigin($config->get('neomerx.cors-psr7.server-origin'));
-            $settings->setRequestAllowedOrigins($config->get('neomerx.cors-psr7.allowed-origins', []));
-            $settings->setRequestAllowedMethods($config->get('neomerx.cors-psr7.allowed-methods', []));
-            $settings->setRequestAllowedHeaders($config->get('neomerx.cors-psr7.allowed-headers', []));
+        $app->bind(Settings::class)->after(function (Settings $settings, Config $config) {
+            $settings->setServerOrigin($config->get('cors.server_origin'));
+            $settings->setRequestAllowedOrigins($config->get('cors.allowed_origins', []));
+            $settings->setRequestAllowedMethods($config->get('cors.allowed_methods', []));
+            $settings->setRequestAllowedHeaders($config->get('cors.allowed_headers', []));
         });
         $app->alias(AnalysisStrategyInterface::class, Settings::class);
         $app->alias(SettingsStrategyInterface::class, Settings::class);
 
-        $app->closure(Analyzer::class, function (AnalysisStrategyInterface $strategy) {
+        $app->bind(Analyzer::class, function (AnalysisStrategyInterface $strategy) {
             return Analyzer::instance($strategy);
         })->after(function (Analyzer $analyzer) use ($app) {
             if ($app->has(LoggerInterface::class)) {

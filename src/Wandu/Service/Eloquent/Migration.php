@@ -3,7 +3,7 @@ namespace Wandu\Service\Eloquent;
 
 use Illuminate\Database\Capsule\Manager;
 use Illuminate\Database\Schema\Builder;
-use Wandu\Database\Configuration;
+use Wandu\Migrator\Configuration;
 use Wandu\Migrator\Contracts\Migration as MigrationContract;
 
 abstract class Migration implements MigrationContract 
