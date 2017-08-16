@@ -31,6 +31,13 @@ class RestifierTest extends TestCase
         ], $restifier->restify($user));
     }
 
+    public function testNull()
+    {
+        $restifier = new Restifier();
+
+        static::assertNull($restifier->restify(null));
+    }
+
     public function testTransformerDirect()
     {
         $restifier = new Restifier();

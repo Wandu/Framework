@@ -31,13 +31,11 @@ class Restifier implements Restifiable
     }
     
     /**
-     * @param mixed $resource
-     * @param array $includes
-     * @param callable $transformer
-     * @return array
+     * {@inheritdoc}
      */
-    public function restify($resource, array $includes = [], callable $transformer = null): array
+    public function restify($resource, array $includes = [], callable $transformer = null)
     {
+        if ($resource === null) return null;
         if (!$transformer) {
             $transformer = $this->findTransformer($resource);
         }
@@ -55,10 +53,7 @@ class Restifier implements Restifiable
     }
 
     /**
-     * @param array|\Traversable $resource
-     * @param array $includes
-     * @param callable $transformer
-     * @return array
+     * {@inheritdoc}
      */
     public function restifyMany($resource, array $includes = [], callable $transformer = null): array
     {

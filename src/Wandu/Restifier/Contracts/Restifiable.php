@@ -6,9 +6,9 @@ interface Restifiable
     /**
      * @param mixed $resource
      * @param array $includes
-     * @return array
+     * @return array|null
      */
-    public function restify($resource, array $includes = []): array;
+    public function restify($resource, array $includes = []);
     
     /**
      * @param array|\Traversable $resources
