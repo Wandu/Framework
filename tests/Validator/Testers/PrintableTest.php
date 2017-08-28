@@ -2,30 +2,29 @@
 namespace Wandu\Validator\Testers;
 
 use PHPUnit\Framework\TestCase;
-use function Wandu\Validator\tester;
-use Wandu\Validator\TesterFactory;
+use Wandu\Validator\TesterLoader;
 
 class PrintableTest extends TestCase 
 {
-    /** @var \Wandu\Validator\TesterFactory */
+    /** @var \Wandu\Validator\TesterLoader */
     protected $tester;
 
     public function setUp()
     {
-        $this->tester = new TesterFactory();
+        $this->tester = new TesterLoader();
     }
 
     public function testScalars()
     {
-        static::assertTrue($this->tester->parse("printable")->test('30'));
-        static::assertTrue($this->tester->parse("printable")->test(30));
-        static::assertTrue($this->tester->parse("printable")->test(40.5));
-        static::assertTrue($this->tester->parse("printable")->test('string'));
-        static::assertTrue($this->tester->parse("printable")->test('string'));
-        static::assertTrue($this->tester->parse("printable")->test(new TestPrintableValidator()));
+        static::assertTrue($this->tester->create("printable")->test('30'));
+        static::assertTrue($this->tester->create("printable")->test(30));
+        static::assertTrue($this->tester->create("printable")->test(40.5));
+        static::assertTrue($this->tester->create("printable")->test('string'));
+        static::assertTrue($this->tester->create("printable")->test('string'));
+        static::assertTrue($this->tester->create("printable")->test(new TestPrintableValidator()));
 
-        static::assertFalse($this->tester->parse("printable")->test([]));
-        static::assertFalse($this->tester->parse("printable")->test(new \stdClass()));
+        static::assertFalse($this->tester->create("printable")->test([]));
+        static::assertFalse($this->tester->create("printable")->test(new \stdClass()));
     }
 }
 

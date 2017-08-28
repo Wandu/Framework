@@ -20,7 +20,7 @@ class ValidatorServiceProviderTest extends ServiceProviderTestCase
     public function getRegisterClasses(): array
     {
         return [
-            TesterFactory::class,
+            TesterLoader::class,
         ];
     }
 

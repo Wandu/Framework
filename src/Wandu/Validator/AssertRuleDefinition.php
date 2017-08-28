@@ -7,7 +7,7 @@ use Wandu\Validator\Contracts\RuleDefinition;
 
 class AssertRuleDefinition implements RuleDefinition
 {
-    /** @var \Wandu\Validator\TesterFactory */
+    /** @var \Wandu\Validator\TesterLoader */
     protected $tester;
     
     /** @var \Wandu\Validator\ErrorBag */
@@ -19,7 +19,7 @@ class AssertRuleDefinition implements RuleDefinition
     /** @var mixed $origin */
     protected $origin;
     
-    public function __construct(TesterFactory $tester, ErrorBag $errors, $data, $origin)
+    public function __construct(TesterLoader $tester, ErrorBag $errors, $data, $origin)
     {
         $this->tester = $tester;
         $this->errors = $errors;
@@ -82,7 +82,7 @@ class AssertRuleDefinition implements RuleDefinition
             } elseif ($rule instanceof Closure) {
                 $rule->__invoke(new AssertRuleDefinition($this->tester, $this->errors, $data, $origin));
             } else {
-                if (!$this->tester->parse($rule)->test($data, $origin)) {
+                if (!$this->tester->load($rule)->test($data, $origin)) {
                     $this->errors->store($rule);
                 }
             }

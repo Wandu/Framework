@@ -22,13 +22,13 @@ class ValidatorTest extends TestCase
     public function testStringAssert()
     {
         static::assertException(new InvalidValueException(["string"]), function () {
-            $this->validator->create("string")->assert(1010);
+            $this->validator->factory("string")->assert(1010);
         });
     }
 
     public function testRuleAssert()
     {
-        $validator = $this->validator->create(new ValidatorTestPointRule());
+        $validator = $this->validator->factory(new ValidatorTestPointRule());
 
         $validator->assert(["name" => "wandu"]);
         $validator->assert([
@@ -54,7 +54,7 @@ class ValidatorTest extends TestCase
 
     public function testRuleByRuleAssert()
     {
-        $validator = $this->validator->create(new ValidatorTestCharterRule());
+        $validator = $this->validator->factory(new ValidatorTestCharterRule());
 
         $validator->assert([
             "departure" => ["name" => "busan"],

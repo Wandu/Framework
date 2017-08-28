@@ -1,17 +1,19 @@
 <?php
 namespace Wandu\Validator;
 
+use Wandu\Validator\Contracts\Rule;
+use Wandu\Validator\Contracts\Validator;
 use Wandu\Validator\Exception\InvalidValueException;
 
-class Validator
+class RuleValidator implements Validator
 {
-    /** @var \Wandu\Validator\TesterFactory */
+    /** @var \Wandu\Validator\TesterLoader */
     protected $tester;
-    
-    /** @var string|\Wandu\Validator\Contracts\Rule */
+
+    /** @var \Wandu\Validator\Contracts\Rule */
     protected $rule;
-    
-    public function __construct(TesterFactory $tester, $rule)
+
+    public function __construct(TesterLoader $tester, Rule $rule)
     {
         $this->tester = $tester;
         $this->rule = $rule;
@@ -23,13 +25,6 @@ class Validator
      */
     public function assert($data)
     {
-        if (is_string($this->rule)) {
-            if (!$this->tester->parse($this->rule)->test($data)) {
-                throw new InvalidValueException([$this->rule]);
-            }
-            return;
-        }
-
         $errorBag = new ErrorBag();
         $this->rule->define(new AssertRuleDefinition($this->tester, $errorBag, $data, $data));
         if (count($errorBag)) {
@@ -43,9 +38,6 @@ class Validator
      */
     public function validate($data): bool
     {
-        if (is_string($this->rule)) {
-            return $this->tester->parse($this->rule)->test($data);
-        }
         try {
             $this->assert($data);
             return true;

@@ -2,9 +2,9 @@
 namespace Wandu\Validator;
 
 use Wandu\DI\ContainerInterface;
-use Wandu\DI\ServiceProviderInterface;
+use Wandu\DI\ServiceProvider;
 
-class ValidatorServiceProvider implements ServiceProviderInterface
+class ValidatorServiceProvider extends ServiceProvider
 {
     /** @var array */
     protected $testers = [];
@@ -14,15 +14,6 @@ class ValidatorServiceProvider implements ServiceProviderInterface
      */
     public function register(ContainerInterface $app)
     {
-        $app->closure(TesterFactory::class, function () {
-            return new TesterFactory($this->testers);
-        });
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function boot(ContainerInterface $app)
-    {
+        $app->bind(TesterLoader::class)->assign('testers', ['value' => $this->testers]);
     }
 }

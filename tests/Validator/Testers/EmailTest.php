@@ -3,27 +3,27 @@ namespace Wandu\Validator\Testers;
 
 use Egulias\EmailValidator\Validation\DNSCheckValidation;
 use PHPUnit\Framework\TestCase;
-use Wandu\Validator\TesterFactory;
+use Wandu\Validator\TesterLoader;
 
 class EmailTest extends TestCase 
 {
-    /** @var \Wandu\Validator\TesterFactory */
+    /** @var \Wandu\Validator\TesterLoader */
     protected $tester;
 
     public function setUp()
     {
-        $this->tester = new TesterFactory();
+        $this->tester = new TesterLoader();
     }
 
     public function testEmail()
     {
-        static::assertTrue($this->tester->parse("email")->test('im@wani.kr'));
-        static::assertTrue($this->tester->parse("email")->test('im+kr@wani.kr'));
-        static::assertTrue($this->tester->parse("email")->test('i.m@wani.kr'));
+        static::assertTrue($this->tester->load("email")->test('im@wani.kr'));
+        static::assertTrue($this->tester->load("email")->test('im+kr@wani.kr'));
+        static::assertTrue($this->tester->load("email")->test('i.m@wani.kr'));
 
-        static::assertFalse($this->tester->parse("email")->test(111111));
-        static::assertFalse($this->tester->parse("email")->test('im@'));
-        static::assertFalse($this->tester->parse("email")->test([]));
+        static::assertFalse($this->tester->load("email")->test(111111));
+        static::assertFalse($this->tester->load("email")->test('im@'));
+        static::assertFalse($this->tester->load("email")->test([]));
     }
     
     public function testEmailWithOtherValidation()

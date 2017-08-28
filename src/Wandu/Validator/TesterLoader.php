@@ -27,7 +27,7 @@ use Wandu\Validator\Testers\RegExpTester;
 use Wandu\Validator\Testers\StringableTester;
 use Wandu\Validator\Testers\StringTester;
 
-class TesterFactory
+class TesterLoader
 {
     /** @var string[] */
     protected $testers;
@@ -71,7 +71,20 @@ class TesterFactory
                 'string' => StringTester::class,
             ];
     }
-    
+
+    /**
+     * @param string $tester
+     * @return \Wandu\Validator\Contracts\Tester
+     */
+    public function load(string $tester): Tester
+    {
+        list($name, $arguments) = $this->getMethodAndParams($tester);
+        if (!array_key_exists($tester, $this->caches)) {
+            $this->caches[$tester] = $this->create($name, $arguments);
+        }
+        return $this->caches[$tester];
+    }
+
     /**
      * @param string $tester
      * @param array $arguments
@@ -83,19 +96,6 @@ class TesterFactory
         return new $className(...$arguments);
     }
     
-    /**
-     * @param string $tester
-     * @return \Wandu\Validator\Contracts\Tester
-     */
-    public function parse(string $tester): Tester
-    {
-        list($name, $arguments) = $this->getMethodAndParams($tester);
-        if (!array_key_exists($tester, $this->caches)) {
-            $this->caches[$tester] = $this->create($name, $arguments);
-        }
-        return $this->caches[$tester];
-    }
-
     /**
      * @param string $pattern
      * @return array

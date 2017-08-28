@@ -14,7 +14,6 @@ namespace Wandu\Event
 
 namespace Wandu\Foundation
 {
-
     use Wandu\Config\Contracts\Config;
     use function Wandu\DI\container;
 
@@ -41,6 +40,7 @@ namespace Wandu\Foundation
 namespace Wandu\Validator
 {
     use Wandu\Validator\Contracts\Tester;
+    use Wandu\Validator\Contracts\Validator;
     use function Wandu\DI\container;
 
     /**
@@ -50,19 +50,19 @@ namespace Wandu\Validator
      */
     function tester(string $tester, array $arguments = []): Tester
     {
-        $factory = container()->get(TesterFactory::class);
+        $factory = container()->get(TesterLoader::class);
         if (count($arguments)) {
             return $factory->create($tester, $arguments);
         }
-        return $factory->parse($tester);
+        return $factory->load($tester);
     }
 
     /**
      * @param string|\Wandu\Validator\Contracts\Rule $rule
-     * @return \Wandu\Validator\Validator
+     * @return \Wandu\Validator\Contracts\Validator
      */
     function validator($rule): Validator
     {
-        return container()->get(ValidatorFactory::class)->create($rule);
+        return container()->get(ValidatorFactory::class)->factory($rule);
     }
 }
