@@ -23,6 +23,7 @@ class CorsServiceProvider implements ServiceProviderInterface
             $settings->setRequestAllowedOrigins($config->get('cors.allowed_origins', []));
             $settings->setRequestAllowedMethods($config->get('cors.allowed_methods', []));
             $settings->setRequestAllowedHeaders($config->get('cors.allowed_headers', []));
+            $settings->setRequestCredentialsSupported($config->get('cors.credentials_supported', false));
         });
         $app->alias(AnalysisStrategyInterface::class, Settings::class);
         $app->alias(SettingsStrategyInterface::class, Settings::class);
