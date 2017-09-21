@@ -146,7 +146,7 @@ class ValidatorTest extends TestCase
         });
 
         static::assertException(new InvalidValueException([
-            "required@waypoints.1.name",
+            "required@waypoints[1].name",
             "greater_than:timeToGo@timeToBack",
         ]), function () use ($validator) {
             $validator->assert([
@@ -160,5 +160,37 @@ class ValidatorTest extends TestCase
                 "people" => 50,
             ]);
         });
+    }
+
+    public function testMultiDemension()
+    {
+        $validator = $this->validator->factory([
+            'users[]' => [
+                'name' => 'string',
+            ],
+        ]);
+        $validator->assert([
+            'users' => [
+                ['name' => 'wan2'],
+                ['name' => 'wan3'],
+                ['name' => 'wan4'],
+            ]
+        ]);
+        $validator = $this->validator->factory([
+            'users[][]' => [
+                'name' => 'string',
+            ],
+        ]);
+        /** @var \Wandu\Validator\Exception\InvalidValueException $exception */
+        $exception = static::catchException(function () use ($validator) {
+            $validator->assert([
+                'users' => [
+                    [['name' => 'wan2']],
+                    [['wrong' => 'wan3']],
+                    [['name' => 'wan4']],
+                ]
+            ]);
+        });
+        static::assertEquals(['required@users[1][0].name', 'unknown@users[1][0].wrong'], $exception->getTypes());
     }
 }

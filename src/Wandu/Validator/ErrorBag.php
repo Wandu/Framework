@@ -50,10 +50,13 @@ class ErrorBag implements Countable
     public function errors(): array
     {
         return array_map(function ($error) {
-            $target = "";
-            if (count($error[1])) {
-                $target = implode(".", $error[1]);
-            }
+            $target = array_reduce($error[1] ?? [], function ($carry, $param) {
+                if ($carry === null) return $param;
+                if (is_numeric($param) &&is_int($param + 0)) {
+                    return $carry . '[' . $param . ']';
+                }
+                return $carry . '.' . $param;
+            });
             return $error[0] . ($target ? "@{$target}" : "");
         }, $this->errors);
     }
