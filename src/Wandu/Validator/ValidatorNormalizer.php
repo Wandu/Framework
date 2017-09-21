@@ -1,12 +1,12 @@
 <?php
 namespace Wandu\Validator;
 
-use InvalidArgumentException;
 use Wandu\Validator\Contracts\Rule;
+use Wandu\Validator\Contracts\RuleNormalizable;
 
-class RuleNormalizer
+class ValidatorNormalizer implements RuleNormalizable
 {
-    public function normalize($rule)
+    public function normalize($rule): array
     {
         while (is_callable($rule) || (is_object($rule) && $rule instanceof Rule)) {
             if (is_callable($rule)) {
@@ -19,12 +19,16 @@ class RuleNormalizer
         if (!is_array($rule)) {
             $rule = [$rule];
         }
-        $normalized = [];
+        $normalized = [[], []];
         foreach ($rule as $key => $value) {
             if (is_int($key) || $key === '' || $key === null) {
-                $normalized[''] = array_merge($normalized[''] ?? [], (array) $value);
+                $normalized[0] = array_merge($normalized[0] ?? [], (array) $value);
             } else {
-                $normalized[$key] = $this->normalize($value);
+                $target = TargetName::parse($key);
+                $normalized[1][] = [
+                    [$target->getName(), $target->getIterator(), $target->isOptional(), ],
+                    $this->normalize($value),
+                ];
             }
         }
         return $normalized;

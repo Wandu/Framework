@@ -11,17 +11,17 @@ class ValidatorFactory
     /** @var \Wandu\Validator\TesterLoader */
     protected $loader;
     
-    /** @var \Wandu\Validator\RuleNormalizer */
+    /** @var \Wandu\Validator\ValidatorNormalizer */
     protected $normalizer;
     
-    public function __construct(TesterLoader $loader = null, RuleNormalizer $normalizer = null)
+    public function __construct(TesterLoader $loader = null, ValidatorNormalizer $normalizer = null)
     {
         $this->loader = $loader ?: new TesterLoader();
-        $this->normalizer = $normalizer ?: new RuleNormalizer();
+        $this->normalizer = $normalizer ?: new ValidatorNormalizer();
     }
 
     /**
-     * @param string|\Wandu\Validator\Contracts\Rule $rule
+     * @param string|array|\Wandu\Validator\Contracts\Rule $rule
      * @return \Wandu\Validator\Contracts\Validatable
      */
     public function factory($rule): Validatable
