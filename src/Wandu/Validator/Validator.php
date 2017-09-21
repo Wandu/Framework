@@ -4,6 +4,7 @@ namespace Wandu\Validator;
 use Exception;
 use Throwable;
 use Wandu\Validator\Contracts\ErrorThrowable;
+use Wandu\Validator\Contracts\RuleNormalizable;
 use Wandu\Validator\Contracts\Validatable;
 use Wandu\Validator\Exception\InvalidValueException;
 use Wandu\Validator\Throwable\ErrorBag;
@@ -14,13 +15,13 @@ class Validator implements Validatable
     /** @var \Wandu\Validator\TesterLoader */
     protected $loader;
 
-    /** @var \Wandu\Validator\ValidatorNormalizer */
+    /** @var \Wandu\Validator\Contracts\RuleNormalizable */
     protected $normalizer;
     
     /** @var array */
     protected $rule;
 
-    public function __construct(TesterLoader $loader, ValidatorNormalizer $normalizer, $rule)
+    public function __construct(TesterLoader $loader, RuleNormalizable $normalizer, $rule)
     {
         $this->loader = $loader;
         $this->normalizer = $normalizer;

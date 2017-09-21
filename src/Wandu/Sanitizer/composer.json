@@ -1,0 +1,19 @@
+{
+    "name": "wandu/sanitizer",
+    "description": "Sanitizing Library.",
+    "license": "MIT",
+    "require": {
+        "php": ">=7.0",
+        "wandu/validator": "^4.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Wandu\\Sanitizer\\": ""
+        }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "4.0-dev"
+        }
+    }
+}

@@ -1,6 +1,7 @@
 <?php
 namespace Wandu\Validator;
 
+use Wandu\Validator\Contracts\RuleNormalizable;
 use Wandu\Validator\Contracts\Validatable;
 
 class ValidatorFactory
@@ -11,10 +12,10 @@ class ValidatorFactory
     /** @var \Wandu\Validator\TesterLoader */
     protected $loader;
     
-    /** @var \Wandu\Validator\ValidatorNormalizer */
+    /** @var \Wandu\Validator\Contracts\RuleNormalizable */
     protected $normalizer;
     
-    public function __construct(TesterLoader $loader = null, ValidatorNormalizer $normalizer = null)
+    public function __construct(TesterLoader $loader = null, RuleNormalizable $normalizer = null)
     {
         $this->loader = $loader ?: new TesterLoader();
         $this->normalizer = $normalizer ?: new ValidatorNormalizer();
