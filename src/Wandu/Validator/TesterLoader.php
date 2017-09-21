@@ -73,6 +73,15 @@ class TesterLoader
     }
 
     /**
+     * @param string $name
+     * @param string $testClassName
+     */
+    public function addTester($name, $testClassName)
+    {
+        $this->testers[$name] = $testClassName;
+    }
+    
+    /**
      * @param string $tester
      * @return \Wandu\Validator\Contracts\Tester
      */

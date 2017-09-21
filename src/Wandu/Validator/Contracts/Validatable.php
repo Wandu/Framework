@@ -1,7 +1,7 @@
 <?php
 namespace Wandu\Validator\Contracts;
 
-interface Validator
+interface Validatable
 {
     /**
      * @param mixed $data

@@ -3,9 +3,9 @@ namespace Wandu\Validator;
 
 use PHPUnit\Framework\TestCase;
 use Wandu\Assertions;
-use Wandu\Validator\Contracts\RuleDefinition;
-use Wandu\Validator\Contracts\Rule;
 use Wandu\Validator\Exception\InvalidValueException;
+use Wandu\Validator\Sample\SampleCharterRule;
+use Wandu\Validator\Sample\SamplePointRule;
 
 class ValidatorTest extends TestCase
 {
@@ -19,16 +19,33 @@ class ValidatorTest extends TestCase
         $this->validator = new ValidatorFactory();
     }
     
-    public function testStringAssert()
+    public function testStringRule()
     {
         static::assertException(new InvalidValueException(["string"]), function () {
             $this->validator->factory("string")->assert(1010);
         });
     }
 
-    public function testRuleAssert()
+    public function provideSimpleArrayRules()
     {
-        $validator = $this->validator->factory(new ValidatorTestPointRule());
+        return [
+            [[
+                "name" => "string",
+                "address?" => "string",
+                "lat?" => "float",
+                "lng?" => "float",
+            ],],
+            [new SamplePointRule(),],
+        ];
+    }
+
+    /**
+     * @dataProvider provideSimpleArrayRules
+     * @param mixed $rule
+     */
+    public function testSimpleArray($rule)
+    {
+        $validator = $this->validator->factory($rule);
 
         $validator->assert(["name" => "wandu"]);
         $validator->assert([
@@ -52,13 +69,49 @@ class ValidatorTest extends TestCase
         });
     }
 
-    public function testRuleByRuleAssert()
+    public function provideComplexArrayRules()
     {
-        $validator = $this->validator->factory(new ValidatorTestCharterRule());
+        return [
+            [[
+                "departure" => [
+                    "name" => "string",
+                    "address?" => "string",
+                    "lat?" => "float",
+                    "lng?" => "float",
+                ],
+                "arrival" => function () {
+                    return [
+                        "name" => "string",
+                        "address?" => "string",
+                        "lat?" => "float",
+                        "lng?" => "float",
+                    ];
+                },
+                "waypoints[]" => new SamplePointRule(),
+                "timeToGo" =>"int",
+                "timeToBack?" => [
+                    "int", "greater_than:timeToGo",
+                ],
+                "people" => "int",
+            ],],
+            [new SampleCharterRule(),],
+        ];
+    }
 
+    /**
+     * @dataProvider provideComplexArrayRules
+     * @param mixed $rule
+     */
+    public function testComplexArray($rule)
+    {
+        $validator = $this->validator->factory($rule);
         $validator->assert([
-            "departure" => ["name" => "busan"],
-            "arrival" => ["name" => "seoul"],
+            "departure" => [
+                "name" => "busan",
+            ],
+            "arrival" => [
+                "name" => "seoul",
+            ],
             "waypoints" => [],
             "timeToGo" => 1496139000,
             "timeToBack" => 1496139010,
@@ -85,34 +138,5 @@ class ValidatorTest extends TestCase
                 "people" => 50,
             ]);
         });
-    }
-}
-
-class ValidatorTestPointRule implements Rule
-{
-    public function define(RuleDefinition $rule)
-    {
-        $rule->prop("name", "string");
-        $rule->prop("address?", "string");
-        $rule->prop("lat?", "float");
-        $rule->prop("lng?", "float");
-    }
-}
-
-class ValidatorTestCharterRule implements Rule
-{
-    public function define(RuleDefinition $rule)
-    {
-        $rule->prop("departure", new ValidatorTestPointRule());
-        $rule->prop("arrival", function (RuleDefinition $rule) {
-            $rule->prop("name", "string");
-            $rule->prop("address?", "string");
-            $rule->prop("lat?", "float");
-            $rule->prop("lng?", "float");
-        });
-        $rule->prop("waypoints[]", new ValidatorTestPointRule());
-        $rule->prop("timeToGo", "int");
-        $rule->prop("timeToBack?", "int", "greater_than:timeToGo");
-        $rule->prop("people", "int");
     }
 }

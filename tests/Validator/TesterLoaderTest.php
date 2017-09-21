@@ -2,7 +2,7 @@
 namespace Wandu\Validator;
 
 use PHPUnit\Framework\TestCase;
-use Wandu\Validator\Contracts\Tester;
+use Wandu\Validator\Sample\SampleOverTenTester;
 
 class TesterLoaderTest extends TestCase
 {
@@ -351,7 +351,7 @@ class TesterLoaderTest extends TestCase
 
     public function testCustomTester()
     {
-        $tester = new TesterTestOverTenTester();
+        $tester = new SampleOverTenTester();
 
         static::assertTrue($tester->test(11));
         static::assertFalse($tester->test(10));
@@ -360,8 +360,8 @@ class TesterLoaderTest extends TestCase
     public function testRegisterCustomTest()
     {
         $this->tester = new TesterLoader([
-            "over_ten" => TesterTestOverTenTester::class, // register
-        ]); 
+            "over_ten" => SampleOverTenTester::class, // register
+        ]);
 
         static::assertTrue($this->tester->create("over_ten")->test(11));
         static::assertFalse($this->tester->create("over_ten")->test(10));
@@ -373,21 +373,10 @@ class TesterLoaderTest extends TestCase
         static::assertTrue($this->tester->create("always_true")->test(10));
 
         $this->tester = new TesterLoader([
-            "always_true" => TesterTestOverTenTester::class, // register
+            "always_true" => SampleOverTenTester::class, // register
         ]);
 
         static::assertTrue($this->tester->create("always_true")->test(11));
         static::assertFalse($this->tester->create("always_true")->test(10));
-    }
-}
-
-class TesterTestOverTenTester implements Tester 
-{
-    /**
-     * {@inheritdoc}
-     */
-    public function test($data, $origin = null, array $keys = []): bool
-    {
-        return $data > 10;
     }
 }

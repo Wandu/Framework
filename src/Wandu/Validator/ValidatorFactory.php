@@ -1,33 +1,27 @@
 <?php
 namespace Wandu\Validator;
 
-use Wandu\Validator\Contracts\Rule;
-use Wandu\Validator\Contracts\Validator;
+use Wandu\Validator\Contracts\Validatable;
 
 class ValidatorFactory
 {
     /** @var \Wandu\Validator\TesterLoader */
-    protected $tester;
+    protected $loader;
     
-    public function __construct(TesterLoader $tester = null)
+    public function __construct(TesterLoader $loader = null)
     {
-        if (!$tester) {
-            $tester = new TesterLoader();
+        if (!$loader) {
+            $loader = new TesterLoader();
         }
-        $this->tester = $tester;
+        $this->loader = $loader;
     }
 
     /**
      * @param string|\Wandu\Validator\Contracts\Rule $rule
-     * @return \Wandu\Validator\Contracts\Validator
+     * @return \Wandu\Validator\Contracts\Validatable
      */
-    public function factory($rule): Validator
+    public function factory($rule): Validatable
     {
-        if (is_string($rule)) {
-            return new TesterValidator($rule, $this->tester->load($rule));
-        }
-        if ($rule instanceof Rule) {
-            return new RuleValidator($this->tester, $rule);
-        }
+        return new Validator($this->loader, $rule);
     }
 }

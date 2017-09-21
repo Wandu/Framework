@@ -4,8 +4,7 @@ namespace Wandu\Validator\Contracts;
 interface Rule
 {
     /**
-     * @param \Wandu\Validator\Contracts\RuleDefinition $rule
-     * @return void
+     * @return array
      */
-    public function define(RuleDefinition $rule);
+    public function definition(): array;
 }
