@@ -34,6 +34,7 @@ split_parallel Migrator         Migrator         "master"     $TAG & PIDS+=($!)
 split_parallel Q                Q                "master 3.0" $TAG & PIDS+=($!)
 split_parallel Restifier        Restifier        "master"     $TAG & PIDS+=($!)
 split_parallel Router           Router           "master 3.0" $TAG & PIDS+=($!)
+split_parallel Sanitizer        Sanitizer        "master"     $TAG & PIDS+=($!)
 split_parallel Validator        Validator        "master 3.0" $TAG & PIDS+=($!)
 split_parallel View             View             "master 3.0" $TAG & PIDS+=($!)
 

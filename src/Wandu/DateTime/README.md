@@ -11,7 +11,7 @@ Wandu Framework Kernel.
 ## Installation
 
 ```bash
-composer require wandu/datetime
+composer require wandu/foundation
 ```
 
 ## Websites
