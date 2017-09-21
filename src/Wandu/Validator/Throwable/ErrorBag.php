@@ -1,39 +1,21 @@
 <?php
-namespace Wandu\Validator;
+namespace Wandu\Validator\Throwable;
 
 use Countable;
+use Wandu\Validator\Contracts\ErrorThrowable;
 
-class ErrorBag implements Countable
+class ErrorBag implements ErrorThrowable, Countable
 {
-    /** @var string[] */
-    private $prefixes = [];
-
     /** @var array */
     public $errors = [];
 
     /**
-     * @param string $prefix
-     */
-    public function pushPrefix(string $prefix)
-    {
-        array_push($this->prefixes, $prefix);
-    }
-    
-    public function popPrefix()
-    {
-        array_pop($this->prefixes);
-    }
-
-    /**
      * @param string $type
-     * @param array $target
+     * @param array $keys
      */
-    public function store(string $type, array $target = [])
+    public function throws(string $type, array $keys = [])
     {
-        array_push($this->errors, [
-            $type,
-            array_merge($this->prefixes, $target)
-        ]);
+        array_push($this->errors, [$type, $keys]);
     }
 
     /**

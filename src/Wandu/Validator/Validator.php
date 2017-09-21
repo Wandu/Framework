@@ -1,8 +1,13 @@
 <?php
 namespace Wandu\Validator;
 
+use Exception;
+use Throwable;
+use Wandu\Validator\Contracts\ErrorThrowable;
 use Wandu\Validator\Contracts\Validatable;
 use Wandu\Validator\Exception\InvalidValueException;
+use Wandu\Validator\Throwable\ErrorBag;
+use Wandu\Validator\Throwable\ErrorThrower;
 
 class Validator implements Validatable
 {
@@ -27,9 +32,10 @@ class Validator implements Validatable
      */
     public function assert($data)
     {
-        $this->check($this->rule, $errors = new ErrorBag(), $data, $data);
-        if (count($errors)) {
-            throw new InvalidValueException($errors->errors());
+        $errorBag = new ErrorBag();
+        $this->check($this->rule, $errorBag, $data, $data);
+        if (count($errorBag)) {
+            throw new InvalidValueException($errorBag->errors());
         }
     }
 
@@ -39,17 +45,23 @@ class Validator implements Validatable
      */
     public function validate($data): bool
     {
-//        return $this->tester->test($data);
+        try {
+            $this->check($this->rule, new ErrorThrower(), $data, $data);
+            return true;
+        } catch (Exception $e) {
+        } catch (Throwable $e) {
+        }
+        return false;
     }
 
-    public function check($rule, ErrorBag $errors, $data, $origin)
+    public function check($rule, ErrorThrowable $thrower, $data, $origin, $keys = [])
     {
         $dataKeys = array_flip(is_array($data) ? array_keys($data) : []);
         foreach ($this->normalizer->normalize($rule) as $target => $nextRule) {
             if (!$target) {
                 foreach ($nextRule as $condition) {
                     if (!$this->loader->load($condition)->test($data, $origin)) {
-                        $errors->store($condition);
+                        $thrower->throws($condition, $keys);
                     }
                 }
             } else {
@@ -60,40 +72,38 @@ class Validator implements Validatable
                 if ($target->isOptional() && !isset($data[$name])) {
                     continue;
                 }
-                if (!isset($data[$name])) {
-                    $errors->store("required", [$name]);
-                    continue;
-                }
-                if (count($target->getIterator()) && !is_array($data[$name])) {
-                    $errors->store("array", [$name]);
-                    continue;
-                }
 
-                $errors->pushPrefix($name);
-                $this->checkIterator($target->getIterator(), $nextRule, $errors, $data[$name], $origin);
-                $errors->popPrefix();
+                array_push($keys, $name);
+                if (!isset($data[$name])) {
+                    $thrower->throws("required", $keys);
+                } elseif (count($target->getIterator()) && !is_array($data[$name])) {
+                    $thrower->throws("array", $keys);
+                } else {
+                    $this->checkIterator($target->getIterator(), $nextRule, $thrower, $data[$name], $origin, $keys);
+                }
+                array_pop($keys);
             }
         }
         foreach ($dataKeys as $dataKey => $_) {
-            $errors->store('unknown', [$dataKey]);
+            $thrower->throws('unknown', array_merge($keys, [$dataKey]));
         }
     }
     
-    protected function checkIterator(array $iterators, $rule, ErrorBag $errors, $data, $origin)
+    protected function checkIterator(array $iterators, $rule, ErrorThrowable $thrower, $data, $origin, array $keys = [])
     {
         if (count($iterators)) {
             $iterator = array_shift($iterators);
             if ($iterator !== null && $iterator < count($data)) {
-                $errors->store("array_length:{$iterator}");
+                $thrower->throws("array_length:{$iterator}", $keys);
                 return;
             }
             foreach ($data as $index => $value) {
-                $errors->pushPrefix($index);
-                $this->checkIterator($iterators, $rule, $errors, $value, $origin);
-                $errors->popPrefix();
+                array_push($keys, $index);
+                $this->checkIterator($iterators, $rule, $thrower, $value, $origin, $keys);
+                array_pop($keys);
             }
         } else {
-            $this->check($rule, $errors, $data, $origin);
+            $this->check($rule, $thrower, $data, $origin, $keys);
         }
     }
 }

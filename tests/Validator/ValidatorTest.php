@@ -21,9 +21,14 @@ class ValidatorTest extends TestCase
     
     public function testStringRule()
     {
+        // assert
         static::assertException(new InvalidValueException(["string"]), function () {
             $this->validator->factory("string")->assert(1010);
         });
+
+        // validate
+        static::assertTrue($this->validator->factory("string")->validate('hello world!'));
+        static::assertFalse($this->validator->factory("string")->validate(1010));
     }
 
     public function provideSimpleArrayRules()
@@ -89,6 +94,30 @@ class ValidatorTest extends TestCase
                 "lng" => "lng!",
             ]);
         });
+
+        // validate
+        static::assertTrue($validator->validate(["name" => "wandu"]));
+        static::assertTrue($validator->validate([
+            "name" => "wandu",
+            "address" => "seoul",
+            "lat" => 30.33333,
+            "lng" => 127.00000,
+        ]));
+
+        static::assertFalse($validator->validate('...'));
+        static::assertFalse($validator->validate([]));
+        static::assertFalse($validator->validate([
+            "name" => "wandu",
+            "address" => "seoul",
+            "lat" => 30.33333,
+            "lng" => 127.00000,
+            'wrong' => 'unknown data!',
+        ]));
+        static::assertFalse($validator->validate([
+            "address" => 30,
+            "lat" => "lat!",
+            "lng" => "lng!",
+        ]));
     }
 
     public function provideComplexArrayRules()
@@ -160,6 +189,30 @@ class ValidatorTest extends TestCase
                 "people" => 50,
             ]);
         });
+
+        static::assertTrue($validator->validate([
+            "departure" => [
+                "name" => "busan",
+            ],
+            "arrival" => [
+                "name" => "seoul",
+            ],
+            "waypoints" => [],
+            "timeToGo" => 1496139000,
+            "timeToBack" => 1496139010,
+            "people" => 50,
+        ]));
+        static::assertFalse($validator->validate([]));
+        static::assertFalse($validator->validate([
+                "departure" => ["name" => "busan"],
+                "arrival" => ["name" => "seoul"],
+                "waypoints" => [
+                    ["name" => "seoul"], [], ["name" => "seoul"],
+                ],
+                "timeToGo" => 1496139000,
+                "timeToBack" => 1496138000,
+                "people" => 50,
+            ]));
     }
 
     public function testMultiDemension()
@@ -169,6 +222,8 @@ class ValidatorTest extends TestCase
                 'name' => 'string',
             ],
         ]);
+        
+        // assert
         $validator->assert([
             'users' => [
                 ['name' => 'wan2'],
@@ -176,11 +231,23 @@ class ValidatorTest extends TestCase
                 ['name' => 'wan4'],
             ]
         ]);
+        
+        // validate
+        static::assertTrue($validator->validate([
+            'users' => [
+                ['name' => 'wan2'],
+                ['name' => 'wan3'],
+                ['name' => 'wan4'],
+            ]
+        ]));
+        
         $validator = $this->validator->factory([
             'users[][]' => [
                 'name' => 'string',
             ],
         ]);
+
+        // assert
         /** @var \Wandu\Validator\Exception\InvalidValueException $exception */
         $exception = static::catchException(function () use ($validator) {
             $validator->assert([
@@ -192,5 +259,13 @@ class ValidatorTest extends TestCase
             ]);
         });
         static::assertEquals(['required@users[1][0].name', 'unknown@users[1][0].wrong'], $exception->getTypes());
+        // validate
+        static::assertFalse($validator->validate([
+            'users' => [
+                [['name' => 'wan2']],
+                [['wrong' => 'wan3']],
+                [['name' => 'wan4']],
+            ]
+        ]));
     }
 }
