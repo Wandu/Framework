@@ -6,5 +6,5 @@ interface Rule
     /**
      * @return array
      */
-    public function definition(): array;
+    public function rules(): array;
 }

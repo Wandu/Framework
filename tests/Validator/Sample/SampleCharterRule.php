@@ -5,7 +5,7 @@ use Wandu\Validator\Contracts\Rule;
 
 class SampleCharterRule implements Rule
 {
-    public function definition(): array
+    public function rules(): array
     {
         return [
             "departure" => new SamplePointRule(),

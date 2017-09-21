@@ -8,12 +8,13 @@ class ValidatorFactory
     /** @var \Wandu\Validator\TesterLoader */
     protected $loader;
     
-    public function __construct(TesterLoader $loader = null)
+    /** @var \Wandu\Validator\RuleNormalizer */
+    protected $normalizer;
+    
+    public function __construct(TesterLoader $loader = null, RuleNormalizer $normalizer = null)
     {
-        if (!$loader) {
-            $loader = new TesterLoader();
-        }
-        $this->loader = $loader;
+        $this->loader = $loader ?: new TesterLoader();
+        $this->normalizer = $normalizer ?: new RuleNormalizer();
     }
 
     /**
@@ -22,6 +23,6 @@ class ValidatorFactory
      */
     public function factory($rule): Validatable
     {
-        return new Validator($this->loader, $rule);
+        return new Validator($this->loader, $this->normalizer, $rule);
     }
 }

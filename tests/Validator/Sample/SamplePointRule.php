@@ -5,7 +5,7 @@ use Wandu\Validator\Contracts\Rule;
 
 class SamplePointRule implements Rule
 {
-    public function definition(): array
+    public function rules(): array
     {
         return [
             "name" => "string",

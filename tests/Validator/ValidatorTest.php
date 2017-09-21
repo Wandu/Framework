@@ -56,7 +56,29 @@ class ValidatorTest extends TestCase
         ]);
 
         static::assertException(new InvalidValueException(["required@name"]), function () use ($validator) {
+            $validator->assert('...');
+        });
+        static::assertException(new InvalidValueException(["required@name"]), function () use ($validator) {
             $validator->assert([]);
+        });
+        static::assertException(new InvalidValueException(["unknown@wrong"]), function () use ($validator) {
+            $validator->assert([
+                "name" => "wandu",
+                "address" => "seoul",
+                "lat" => 30.33333,
+                "lng" => 127.00000,
+                'wrong' => 'unknown data!',
+            ]);
+        });
+        static::assertException(new InvalidValueException(["unknown@wrong", "unknown@wrong2"]), function () use ($validator) {
+            $validator->assert([
+                "name" => "wandu",
+                "address" => "seoul",
+                "lat" => 30.33333,
+                "lng" => 127.00000,
+                'wrong' => 'unknown data!',
+                'wrong2' => 'unknown data!',
+            ]);
         });
         static::assertException(new InvalidValueException([
             "required@name", "string@address", "float@lat", "float@lng",
