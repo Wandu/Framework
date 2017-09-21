@@ -24,12 +24,4 @@ class PhpViewServiceProviderTest extends ServiceProviderTestCase
             RenderInterface::class,
         ];
     }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getAliases(): array
-    {
-        return [];
-    }
 }

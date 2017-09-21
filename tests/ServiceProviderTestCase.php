@@ -23,7 +23,6 @@ abstract class ServiceProviderTestCase extends TestCase
 
     abstract public function getServiceProvider(): ServiceProviderInterface;
     abstract public function getRegisterClasses(): array;
-    abstract public function getAliases(): array;
     
     public function setUp()
     {

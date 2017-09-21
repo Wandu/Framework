@@ -36,33 +36,3 @@ namespace Wandu\Foundation
         return container()->get(Config::class)->get($name, $default);
     }
 }
-
-namespace Wandu\Validator
-{
-    use Wandu\Validator\Contracts\Tester;
-    use Wandu\Validator\Contracts\Validator;
-    use function Wandu\DI\container;
-
-    /**
-     * @param string $tester
-     * @param array $arguments
-     * @return \Wandu\Validator\Contracts\Tester
-     */
-    function tester(string $tester, array $arguments = []): Tester
-    {
-        $factory = container()->get(TesterLoader::class);
-        if (count($arguments)) {
-            return $factory->create($tester, $arguments);
-        }
-        return $factory->load($tester);
-    }
-
-    /**
-     * @param string|\Wandu\Validator\Contracts\Rule $rule
-     * @return \Wandu\Validator\Contracts\Validator
-     */
-    function validator($rule): Validator
-    {
-        return container()->get(ValidatorFactory::class)->factory($rule);
-    }
-}

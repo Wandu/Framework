@@ -5,6 +5,9 @@ use Wandu\Validator\Contracts\Validatable;
 
 class ValidatorFactory
 {
+    /** @var \Wandu\Validator\ValidatorFactory */
+    public static $instance;
+    
     /** @var \Wandu\Validator\TesterLoader */
     protected $loader;
     

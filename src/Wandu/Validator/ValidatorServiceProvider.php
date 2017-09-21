@@ -15,5 +15,8 @@ class ValidatorServiceProvider extends ServiceProvider
     public function register(ContainerInterface $app)
     {
         $app->bind(TesterLoader::class)->assign('testers', ['value' => $this->testers]);
+        $app->bind(ValidatorFactory::class)->after(function (ValidatorFactory $factory) {
+            return ValidatorFactory::$instance = $factory;
+        });
     }
 }

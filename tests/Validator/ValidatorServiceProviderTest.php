@@ -21,15 +21,7 @@ class ValidatorServiceProviderTest extends ServiceProviderTestCase
     {
         return [
             TesterLoader::class,
-        ];
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getAliases(): array
-    {
-        return [
+            ValidatorFactory::class,
         ];
     }
 }
