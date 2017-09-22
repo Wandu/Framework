@@ -51,8 +51,8 @@ class Dispatcher
     {
         return new RouteCollection(
             $this->options['defined_prefix'],
-            $this->options['defined_middlewares'],
-            $this->options['defined_domains']
+            (array)($this->options['defined_middlewares']),
+            (array)($this->options['defined_domains'])
         );
     }
     

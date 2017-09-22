@@ -19,21 +19,25 @@ class RouteCollection implements Routable, IteratorAggregate, Dispatchable
     /** @var \Wandu\Router\Route[] */
     protected $routes = [];
 
+    /** @var string */
+    protected $prefix;
+    
     /** @var array */
-    protected $status;
+    protected $middlewares;
+    
+    /** @var array */
+    protected $domains;
 
     /**
      * @param string $prefix
      * @param array $middlewares
      * @param array $domains
      */
-    public function __construct($prefix = '', $middlewares = [], $domains = [])
+    public function __construct($prefix = '', array $middlewares = [], array $domains = [])
     {
-        $this->status = [
-            'prefix' => $prefix,
-            'middlewares' => $middlewares,
-            'domains' => $domains,
-        ];
+        $this->prefix = $prefix;
+        $this->middlewares = $middlewares;
+        $this->domains = $domains;
     }
 
     /**
@@ -43,7 +47,7 @@ class RouteCollection implements Routable, IteratorAggregate, Dispatchable
     {
         return iterator_to_array($this->getIterator());
     }
-    
+
     /**
      * {@inheritdoc}
      */
@@ -73,18 +77,18 @@ class RouteCollection implements Routable, IteratorAggregate, Dispatchable
      */
     public function group(array $attributes, callable $handler)
     {
-        $prefix = '';
+        $prefix = $this->prefix;
         if (isset($attributes['prefix'])) {
-            $prefix = "{$this->status['prefix']}/" . $attributes['prefix'];
+            $prefix .= "/" . $attributes['prefix'];
         }
-        $middlewares = $this->status['middlewares'];
+        $middlewares = $this->middlewares;
         if (isset($attributes['middleware'])) {
             $middlewares = array_merge($middlewares, array_filter((array)$attributes['middleware']));
         }
         if (isset($attributes['middlewares'])) {
             $middlewares = array_merge($middlewares, array_filter((array)$attributes['middlewares']));
         }
-        $domains = [];
+        $domains = $this->domains;
         if (isset($attributes['domain'])) {
             $domains = (array) $attributes['domain'];
         }
@@ -184,12 +188,12 @@ class RouteCollection implements Routable, IteratorAggregate, Dispatchable
      */
     public function createRoute(array $methods, string $path, string $className, string $methodName = 'index'): RouteFluent
     {
-        $path = trim("{$this->status['prefix']}/{$path}", '/');
+        $path = trim("{$this->prefix}/{$path}", '/');
         while(strpos($path, '//') !== false) {
             $path = str_replace('//', '/', $path);
         }
         $path = '/' . $path;
-        $route = new Route($className, $methodName, $this->status['middlewares'], $this->status['domains']);
+        $route = new Route($className, $methodName, $this->middlewares, $this->domains);
         $this->routes[] = [$methods, $path, $route];
         return $route;
     }
@@ -225,7 +229,9 @@ class RouteCollection implements Routable, IteratorAggregate, Dispatchable
         $routeMap = [];
 
         /** @var \FastRoute\DataGenerator\GroupCountBased[] $generators */
-        $generators = [];
+        $generators = [
+            '@' => new GCBGenerator(),
+        ];
 
         /**
          * @var array|string[] $methods
@@ -249,9 +255,6 @@ class RouteCollection implements Routable, IteratorAggregate, Dispatchable
                             $generators[$domain]->addRoute($method, $parsedPath, $handleId);
                         }
                     } else {
-                        if (!isset($generators['@'])) {
-                            $generators['@'] = new GCBGenerator();
-                        }
                         $generators['@']->addRoute($method, $parsedPath, $handleId);
                     }
                 }

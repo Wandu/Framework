@@ -6,9 +6,11 @@ use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Wandu\Assertions;
+use Wandu\Http\Psr\Request;
 use Wandu\Http\Psr\Response;
 use Wandu\Http\Psr\ServerRequest;
 use Wandu\Http\Psr\Stream\StringStream;
+use Wandu\Router\Contracts\Dispatchable;
 use Wandu\Router\Contracts\MiddlewareInterface;
 use Wandu\Router\Contracts\Routable;
 use Wandu\Router\Exception\HandlerNotFoundException;
@@ -276,6 +278,116 @@ class RouteCollectionTest extends TestCase
         static::assertEquals('[GET] show:300@UserController and middleware!', $response->getBody()->__toString());
     }
     
+    public function testGroupKeyPlural() {
+        $expected = new RouteCollection();
+        $expected->group([
+            'prefix' => '/admin',
+            'domain' => 'admin.wani.kr',
+            'middleware' => ['middleware1', 'middleware2']
+        ], function (Routable $routes) {
+            $routes->any('/', 'SomeController');
+        });
+
+        $routes1 = new RouteCollection();
+        $routes1->group([
+            'prefix' => '/admin',
+            'domains' => 'admin.wani.kr',
+            'middlewares' => ['middleware1', 'middleware2']
+        ], function (Routable $routes) {
+            $routes->any('/', 'SomeController');
+        });
+        
+        static::assertEquals($expected, $routes1);
+    }
+
+    public function testGroupValueArrayOrString() {
+        $expected = new RouteCollection();
+        $expected->group([
+            'prefix' => '/admin',
+            'domain' => 'admin.wani.kr',
+            'middleware' => 'middleware',
+        ], function (Routable $routes) {
+            $routes->any('/', 'SomeController');
+        });
+
+        $routes1 = new RouteCollection();
+        $routes1->group([
+            'prefix' => '/admin',
+            'domains' => ['admin.wani.kr'],
+            'middleware' => ['middleware'],
+        ], function (Routable $routes) {
+            $routes->any('/', 'SomeController');
+        });
+
+        static::assertEquals($expected, $routes1);
+    }
+    
+    public function testNestedGroup()
+    {
+        $routes = new RouteCollection();
+        $routes->group([
+            'prefix' => '/admin',
+            'domain' => 'admin.wani.kr',
+            'middleware' => [
+                RouteCollectionTestAuthMiddleware::class,
+                RouteCollectionTestAuthMiddleware::class,
+            ],
+        ], function (Routable $routes) {
+            $routes->get('/', RouteCollectionTestHomeController::class);
+            $routes->group([
+                'prefix' => '/users',
+            ], function (Routable $routes) {
+                $routes->group([
+                    'domain' => 'user.admin.wani.kr',
+                ], function (Routable $routes) {
+                    $routes->group([
+                        'middleware' => [
+                            RouteCollectionTestAuthMiddleware::class,
+                            RouteCollectionTestAuthMiddleware::class,
+                        ],
+                    ], function (Routable $routes) {
+                        $routes->get('/', RouteCollectionTestUserController::class);
+                    });
+                });
+            });
+        });
+
+        // testing /admin
+        $exception = static::catchException(function () use ($routes) {
+            $this->dispatch($routes, new ServerRequest('GET', '/admin'));
+        });
+        static::assertInstanceOf(RouteNotFoundException::class, $exception);
+        $exception = static::catchException(function () use ($routes) {
+            $this->dispatch($routes, new ServerRequest('GET', '/admin', null, ['host' => 'user.admin.wani.kr']));
+        });
+        static::assertInstanceOf(RouteNotFoundException::class, $exception);
+
+        // apply middleware 2
+        $response = $this->dispatch($routes, new ServerRequest('GET', '/admin', null, ['host' => 'admin.wani.kr']));
+        static::assertEquals(
+            "[GET] index@HomeController and middleware! and middleware!",
+            $response->getBody()->__toString()
+        );
+
+        
+        // testing /admin/users
+        $exception = static::catchException(function () use ($routes) {
+            $this->dispatch($routes, new ServerRequest('GET', '/admin/users'));
+        });
+        static::assertInstanceOf(RouteNotFoundException::class, $exception);
+        $exception = static::catchException(function () use ($routes) {
+            $this->dispatch($routes, new ServerRequest('GET', '/admin/users', null, ['host' => 'admin.wani.kr']));
+        });
+        static::assertInstanceOf(RouteNotFoundException::class, $exception);
+
+        // apply middleware 2 * 2
+        $response = $this->dispatch($routes, new ServerRequest('GET', '/admin/users', null, ['host' => 'user.admin.wani.kr']));
+        static::assertEquals(
+            "[GET] index@UserController and middleware! and middleware! and middleware! and middleware!",
+            $response->getBody()->__toString()
+        );
+    }
+    
     public function provideShortenMethodsTest()
     {
         return [
@@ -315,6 +427,11 @@ class RouteCollectionTest extends TestCase
                 );                
             });
         }
+    }
+    
+    protected function dispatch(Dispatchable $routes, ServerRequestInterface $request)
+    {
+        return $routes->dispatch(new SimpleLoader(), new NullResponsifier(), $request);
     }
 }
 
