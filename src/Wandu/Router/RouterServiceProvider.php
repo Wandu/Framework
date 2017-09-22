@@ -2,17 +2,23 @@
 namespace Wandu\Router;
 
 use Wandu\DI\ContainerInterface;
-use Wandu\DI\ServiceProviderInterface;
+use Wandu\DI\ServiceProvider;
 use Wandu\Router\Contracts\LoaderInterface;
 use Wandu\Router\Contracts\ResponsifierInterface;
 use Wandu\Router\Loader\PsrLoader;
 use Wandu\Router\Responsifier\PsrResponsifier;
 
-class RouterServiceProvider implements  ServiceProviderInterface
+class RouterServiceProvider extends ServiceProvider
 {
-    /** @var \Closure */
-    protected $routes;
-    
+    /** @var array */
+    protected $options = [
+        //'method_override_enabled' => true,
+        //'method_spoofing_enabled' => false,
+        //'defined_prefix' => '',
+        //'defined_middlewares' => [],
+        //'defined_domains' => [],
+    ];
+
     /**
      * {@inheritdoc}
      */
@@ -20,25 +26,6 @@ class RouterServiceProvider implements  ServiceProviderInterface
     {
         $app->bind(LoaderInterface::class, PsrLoader::class);
         $app->bind(ResponsifierInterface::class, PsrResponsifier::class);
-//        $app->closure(Configuration::class, function (Config $config) {
-//            return new Configuration([
-//                'middleware' => $config->get('router.middleware', [Parameterify::class, Sessionify::class]),
-//                'virtual_method_enabled' => true,
-//                'cache_disabled' => $config->get('router.cache_disabled', true),
-//                'cache_file' => $config->get('router.cache_file', null),
-//            ]);
-//        });
-        $app->bind(Dispatcher::class)->after(function (Dispatcher $dispatcher) {
-            if ($this->routes) {
-                $dispatcher->setHandler($this->routes);
-            }
-        });
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function boot(ContainerInterface $app)
-    {
+        $app->bind(Dispatcher::class)->assign('options', ['value' => $this->options]);
     }
 }
