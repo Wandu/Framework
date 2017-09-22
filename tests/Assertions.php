@@ -48,7 +48,13 @@ trait Assertions
         Assert::assertEquals($expected, $contents, $message);
         return $result;
     }
-    
+
+    /**
+     * @deprecated use catchException
+     * @param $expected
+     * @param \Closure $closure
+     * @param string $message
+     */
     public static function assertException($expected, Closure $closure, $message = '')
     {
         try {
@@ -72,7 +78,13 @@ trait Assertions
         }
         return null;
     }
-    
+
+    /**
+     * @deprecated use catchException
+     * @param $expected
+     * @param \Closure $closure
+     * @param string $message
+     */
     public static function assertExceptionInstanceOf($expected, Closure $closure, $message = '')
     {
         try {
@@ -87,6 +99,12 @@ trait Assertions
         Assert::fail($message);
     }
 
+    /**
+     * @deprecated use catchException
+     * @param $expected
+     * @param \Closure $closure
+     * @param string $message
+     */
     public static function assertExceptionMessageEquals($expected, Closure $closure, $message = '')
     {
         try {
