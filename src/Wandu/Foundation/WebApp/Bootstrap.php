@@ -7,7 +7,6 @@ use Wandu\Config\Contracts\Config;
 use Wandu\DI\ContainerInterface;
 use Wandu\Foundation\Contracts\Bootstrap as BootstrapContract;
 use Wandu\Foundation\WebApp\Contracts\HttpErrorHandler;
-use Wandu\Foundation\WebApp\DefaultHttpErrorHandler;
 use Wandu\Http\Factory\ServerRequestFactory;
 use Wandu\Http\HttpServiceProvider;
 use Wandu\Http\Sender\ResponseSender;
