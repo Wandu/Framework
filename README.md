@@ -10,6 +10,8 @@ Wandu Framework
 [![Code Coverage](https://scrutinizer-ci.com/g/Wandu/Framework/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/Wandu/Framework/?branch=master)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/Wandu/Framework/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/Wandu/Framework/?branch=master)
 
+> Wandu Framework is no longer maintained. Bug patches are scheduled to be released sometime, but there is no scheduled main update.
+
 Wandu is PHP Framework.
 
 ![Wandu](readme.png)
@@ -36,11 +38,3 @@ Wandu is PHP Framework.
 - [Wandu Restifier](src/Wandu/Restifier) (Git Repository : [Wandu/Restifier](https://github.com/Wandu/Restifier))
 - [Wandu Validator](src/Wandu/Validator) (Git Repository : [Wandu/Validator](https://github.com/Wandu/Validator))
 - [Wandu View](src/Wandu/View) (Git Repository : [Wandu/View](https://github.com/Wandu/View))
-
-## Contributing
-
-The contribution guide can be found in the [CONTRIBUTING.md](CONTRIBUTING.md).
-
-## Slack
-
-- Join [wandu-team.slack.com](https://join.slack.com/wandu-team/shared_invite/MjAzMzY5Mzc2Njc2LTE0OTg0NTU3ODItYzNhMzhhNGI0Mg) !
