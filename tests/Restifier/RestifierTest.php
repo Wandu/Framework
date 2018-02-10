@@ -4,6 +4,7 @@ namespace Wandu\Restifier;
 use PHPUnit\Framework\TestCase;
 use Wandu\Assertions;
 use Wandu\Restifier\Exception\NotFoundTransformerException;
+use Wandu\Restifier\Sample\SampleAuthInterface;
 use Wandu\Restifier\Sample\SampleCustomer;
 use Wandu\Restifier\Sample\SampleCustomerTransformer;
 use Wandu\Restifier\Sample\SampleUser;
@@ -140,6 +141,7 @@ class RestifierTest extends TestCase
 
     public function testTransformer()
     {
+        // section:testTransformer
         $restifier = new Restifier();
         $restifier->addTransformer(SampleUser::class, new SampleUserTransformer());
         $restifier->addTransformer(SampleCustomer::class, new SampleCustomerTransformer());
@@ -158,6 +160,7 @@ class RestifierTest extends TestCase
                 'address' => 'seoul blabla',
             ],
         ], $restifier->restify($user));
+        // endsection
     }
     
     public function testTransformerWithIncludes()
@@ -265,5 +268,27 @@ class RestifierTest extends TestCase
                 'paymentmethods' => [],
             ],
         ], $restifier->restify($user, ['profile', 'customer.paymentmethods']));
+    }
+
+    public function testTransformDetectByInterface()
+    {
+        $restifier = new Restifier();
+        $restifier->addTransformer(SampleAuthInterface::class, new SampleUserTransformer());
+        $restifier->addTransformer(SampleCustomer::class, new SampleCustomerTransformer());
+
+        $user = new SampleUser([
+            'username' => 'wan2land',
+            'customer' => new SampleCustomer([
+                'address' => 'seoul blabla',
+                'paymentmethods' => [], // critical data
+            ]),
+        ]);
+
+        static::assertEquals([
+            "username" => "wan2land",
+            'customer' => [
+                'address' => 'seoul blabla',
+            ],
+        ], $restifier->restify($user));
     }
 }

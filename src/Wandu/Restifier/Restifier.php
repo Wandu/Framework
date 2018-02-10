@@ -71,6 +71,11 @@ class Restifier implements Restifiable
             if (array_key_exists($className, $this->transformers)) {
                 return $this->transformers[$className];
             }
+            foreach ($this->transformers as $name => $transformer) {
+                if ($resource instanceof $name) {
+                    return $transformer;
+                }
+            }
         }
         if ($className) {
             throw new NotFoundTransformerException(

@@ -13,3 +13,27 @@ Transform Data to the RESTFul API Output.
 `composer require wandu/restifier`
 
 ## Documentation
+
+**Example**
+
+@code("../../../tests/Restifier/RestifierTest.php@testTransformer")
+
+**Restifier**
+
+```php
+class Restifier {
+    public function addTransformer(string $classNameOrInterfaceName, callable $transformer);
+    
+    public function restify($resource, array $includes = [], callable $transformer = null): array|null
+    
+    public function restifyMany($resource, array $includes = [], callable $transformer = null): array
+} 
+```
+
+### Transformer
+
+Transformer is callable. It is recommended to use the callable class that contain `__invoke` method.
+
+**Example**
+
+@code("../../../tests/Restifier/Sample/SampleUserTransformer.php")

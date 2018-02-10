@@ -5,7 +5,7 @@ namespace Wandu\Restifier\Sample;
  * @property-read $username
  * @property-read \Wandu\Restifier\Sample\SampleCustomer $customer
  */
-class SampleUser
+class SampleUser implements SampleAuthInterface
 {
     /** @var array */
     protected $attributes;
