@@ -38,7 +38,10 @@ split_parallel Sanitizer        Sanitizer        "master"     $TAG & PIDS+=($!)
 split_parallel Validator        Validator        "master 3.0" $TAG & PIDS+=($!)
 split_parallel View             View             "master 3.0" $TAG & PIDS+=($!)
 
-split_parallel Service/Eloquent ServiceEloquent  "master"     $TAG & PIDS+=($!)
+split_parallel Service/Eloquent     ServiceEloquent     "master"    $TAG & PIDS+=($!)
+split_parallel Service/GuzzleHttp   ServiceGuzzleHttp   "master"    $TAG & PIDS+=($!)
+split_parallel Service/Monolog      ServiceMonolog      "master"    $TAG & PIDS+=($!)
+split_parallel Service/NeomerxCors  ServiceNeomerxCors  "master"    $TAG & PIDS+=($!)
 
 for PID in "${PIDS[@]}"
 do
