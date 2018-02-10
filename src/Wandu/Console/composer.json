@@ -3,7 +3,7 @@
     "description": "Symfony Console Wrapper With DI Container.",
     "license": "MIT",
     "require": {
-        "php": ">=7.0",
+        "php": ">=7.1",
         "symfony/console": "~4.0"
     },
     "autoload": {

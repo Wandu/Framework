@@ -3,7 +3,7 @@
     "description": "Sanitizing Library.",
     "license": "MIT",
     "require": {
-        "php": ">=7.0",
+        "php": ">=7.1",
         "wandu/validator": "^4.0"
     },
     "autoload": {

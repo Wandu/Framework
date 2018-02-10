@@ -3,7 +3,7 @@
     "description": "Collection Library Like Java. Provides List, Map, and Set.",
     "license": "MIT",
     "require": {
-        "php": ">=7.0"
+        "php": ">=7.1"
     },
     "autoload": {
         "psr-4": {

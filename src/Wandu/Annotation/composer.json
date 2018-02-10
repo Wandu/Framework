@@ -2,7 +2,7 @@
     "name": "wandu/annotation",
     "license": "MIT",
     "require": {
-        "php": ">=7.0",
+        "php": ">=7.1",
         "psr/simple-cache": "^1",
         "doctrine/annotations": "~1.6",
         "wandu/collection": "^4.0"

@@ -3,7 +3,7 @@
     "description": "Simple Config Based On Dot Array.",
     "license": "MIT",
     "require": {
-        "php": ">=7.0"
+        "php": ">=7.1"
     },
     "autoload": {
         "psr-4": {

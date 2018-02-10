@@ -4,7 +4,7 @@
     "keywords": ["di", "ioc", "auto resolve", "auto wiring", "dependency injection", "wandu"],
     "license": "MIT",
     "require": {
-        "php": ">=7.0",
+        "php": ">=7.1",
         "psr/container": "^1",
         "psr/simple-cache": "^1",
         "wandu/config": "^4.0",

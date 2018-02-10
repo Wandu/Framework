@@ -2,7 +2,7 @@
     "name": "wandu/service-eloquent",
     "license": "MIT",
     "require": {
-        "php": ">=7.0",
+        "php": ">=7.1",
         "illuminate/database": "^5.6",
         "psr/container": "^1",
         "wandu/migrator": "^4.0"

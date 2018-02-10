@@ -2,7 +2,7 @@
     "name": "wandu/service-guzzlehttp",
     "license": "MIT",
     "require": {
-        "php": ">=7.0",
+        "php": ">=7.1",
         "guzzlehttp/guzzle": "^6"
     },
     "autoload": {
