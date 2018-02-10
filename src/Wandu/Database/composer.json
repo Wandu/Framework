@@ -4,7 +4,7 @@
     "license": "MIT",
     "require": {
         "php": ">=7.0",
-        "doctrine/annotations": "~1.4",
+        "doctrine/annotations": "~1.6",
         "wandu/caster": "^4.0",
         "wandu/collection": "^4.0",
         "wandu/di": "^4.0"
