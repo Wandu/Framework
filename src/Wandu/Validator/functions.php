@@ -4,7 +4,7 @@ namespace Wandu\Validator;
 use Wandu\Validator\Contracts\Validatable;
 
 /**
- * @param string|\Wandu\Validator\Contracts\Rule $rule
+ * @param string|array|\Wandu\Validator\Contracts\Rule $rule
  * @return \Wandu\Validator\Contracts\Validatable
  */
 function validator($rule): Validatable

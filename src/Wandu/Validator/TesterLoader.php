@@ -3,29 +3,7 @@ namespace Wandu\Validator;
 
 use Wandu\Validator\Contracts\Tester;
 use Wandu\Validator\Exception\TesterNotFoundException;
-use Wandu\Validator\Testers\AfterTester;
-use Wandu\Validator\Testers\EqualToTester;
-use Wandu\Validator\Testers\GreaterThanOrEqualTester;
-use Wandu\Validator\Testers\GreaterThanTester;
-use Wandu\Validator\Testers\AlwaysFalseTester;
-use Wandu\Validator\Testers\AlwaysTrueTester;
-use Wandu\Validator\Testers\BeforeTester;
-use Wandu\Validator\Testers\BooleanTester;
-use Wandu\Validator\Testers\EmailTester;
-use Wandu\Validator\Testers\FloatTester;
-use Wandu\Validator\Testers\IntegerableTester;
-use Wandu\Validator\Testers\IntegerTester;
-use Wandu\Validator\Testers\LengthMaxTester;
-use Wandu\Validator\Testers\LengthMinTester;
-use Wandu\Validator\Testers\LessThanOrEqualTester;
-use Wandu\Validator\Testers\LessThanTester;
-use Wandu\Validator\Testers\MaxTester;
-use Wandu\Validator\Testers\MinTester;
-use Wandu\Validator\Testers\NumericTester;
-use Wandu\Validator\Testers\PrintableTester;
-use Wandu\Validator\Testers\RegExpTester;
-use Wandu\Validator\Testers\StringableTester;
-use Wandu\Validator\Testers\StringTester;
+use Wandu\Validator\Testers as Testers;
 
 class TesterLoader
 {
@@ -38,37 +16,39 @@ class TesterLoader
     public function __construct(array $testers = [])
     {
         $this->testers = $testers + [
-                'after' => AfterTester::class,
-                'always_false' => AlwaysFalseTester::class,
-                'always_true' => AlwaysTrueTester::class,
-                'before' => BeforeTester::class,
-                'bool' => BooleanTester::class,
-                'boolean' => BooleanTester::class,
-                'email' => EmailTester::class,
-                'equal_to' => EqualToTester::class,
-                'eq' => EqualToTester::class,
-                'float' => FloatTester::class,
-                'floatable' => NumericTester::class,
-                'greater_than' => GreaterThanTester::class,
-                'greater_than_or_equal' => GreaterThanOrEqualTester::class,
-                'gt' => GreaterThanTester::class,
-                'gte' => GreaterThanOrEqualTester::class,
-                'integerable' => IntegerableTester::class,
-                'int' => IntegerTester::class,
-                'integer' => IntegerTester::class,
-                'length_max' => LengthMaxTester::class,
-                'length_min' => LengthMinTester::class,
-                'less_than' => LessThanTester::class,
-                'less_than_or_equal' => LessThanOrEqualTester::class,
-                'lt' => LessThanTester::class,
-                'lte' => LessThanOrEqualTester::class,
-                'max' => MaxTester::class,
-                'min' => MinTester::class,
-                'numeric' => NumericTester::class,
-                'printable' => PrintableTester::class,
-                'regexp' => RegExpTester::class,
-                'stringable' => StringableTester::class,
-                'string' => StringTester::class,
+                'after' => Testers\AfterTester::class,
+                'always_false' => Testers\AlwaysFalseTester::class,
+                'always_true' => Testers\AlwaysTrueTester::class,
+                'before' => Testers\BeforeTester::class,
+                'between' => Testers\BetweenTester::class,
+                'bool' => Testers\BooleanTester::class,
+                'boolean' => Testers\BooleanTester::class,
+                'email' => Testers\EmailTester::class,
+                'equal_to' => Testers\EqualToTester::class,
+                'eq' => Testers\EqualToTester::class,
+                'float' => Testers\FloatTester::class,
+                'floatable' => Testers\NumericTester::class,
+                'greater_than' => Testers\GreaterThanTester::class,
+                'greater_than_or_equal' => Testers\GreaterThanOrEqualTester::class,
+                'gt' => Testers\GreaterThanTester::class,
+                'gte' => Testers\GreaterThanOrEqualTester::class,
+                'integerable' => Testers\IntegerableTester::class,
+                'int' => Testers\IntegerTester::class,
+                'integer' => Testers\IntegerTester::class,
+                'length_between' => Testers\LengthBetweenTester::class,
+                'length_max' => Testers\LengthMaxTester::class,
+                'length_min' => Testers\LengthMinTester::class,
+                'less_than' => Testers\LessThanTester::class,
+                'less_than_or_equal' => Testers\LessThanOrEqualTester::class,
+                'lt' => Testers\LessThanTester::class,
+                'lte' => Testers\LessThanOrEqualTester::class,
+                'max' => Testers\MaxTester::class,
+                'min' => Testers\MinTester::class,
+                'numeric' => Testers\NumericTester::class,
+                'printable' => Testers\PrintableTester::class,
+                'regexp' => Testers\RegExpTester::class,
+                'stringable' => Testers\StringableTester::class,
+                'string' => Testers\StringTester::class,
             ];
     }
 
